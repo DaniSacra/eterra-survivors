@@ -17,6 +17,7 @@ export const ASSETS = {
   'enemy.skeleton': { kind: 'shape', shape: 'square', size: 22, color: 0xd8d0b8, stroke: 0x6a6250 },
   'enemy.spider': { kind: 'shape', shape: 'triangle', size: 26, color: 0x8a4ab8, stroke: 0x3a1a58 },
   'enemy.slime': { kind: 'shape', shape: 'hex', size: 36, color: 0x5aa040, stroke: 0x2e5418 },
+  'proj.elunLight': { kind: 'shape', shape: 'circle', size: 14, color: 0xfff2b0, stroke: 0xffd040 },
   'enemy.blackKnight': { kind: 'shape', shape: 'diamond', size: 76, color: 0x1a1a24, stroke: 0xc8323e },
 } satisfies Record<string, AssetDef>;
 

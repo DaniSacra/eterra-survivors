@@ -31,6 +31,19 @@ export const config = {
     knockbackDecay: 10, // per second
     hitFlash: 0.1,
   },
+  weapons: {
+    maxOwned: 6,
+    /** Homing shots look for targets within this distance. */
+    seekRange: 420,
+    /** Retry delay when a weapon had nothing to shoot at. */
+    idleRetry: 0.2,
+  },
+  effects: {
+    slashTtl: 0.18,
+    damageNumberTtl: 0.6,
+    damageNumberRise: 40, // px per second
+    maxDamageNumbers: 80,
+  },
   joystick: {
     radius: 56,
     deadZone: 0.12,

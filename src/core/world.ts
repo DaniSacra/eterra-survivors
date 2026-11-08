@@ -1,11 +1,22 @@
 import { config } from '../data/config';
+import { STARTING_WEAPON, type WeaponId } from '../data/weapons';
+import {
+  addDamageNumber,
+  createDamageNumber,
+  createSlash,
+  updateEffects,
+  type DamageNumber,
+  type Slash,
+} from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
 import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
+import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
 import { SpatialHash } from './spatialHash';
 import { Spawner } from './waves';
+import { updateWeapons, type OwnedWeapon } from './weapons';
 
 export type WorldState = 'playing' | 'levelup' | 'won' | 'lost';
 
@@ -18,6 +29,10 @@ export class World {
   readonly player: Player = createPlayer();
   readonly enemies = new Pool<Enemy>(createEnemy, 256);
   readonly enemyHash = new SpatialHash(64);
+  readonly projectiles = new Pool<Projectile>(createProjectile, 64);
+  readonly slashes = new Pool<Slash>(createSlash, 4);
+  readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
+  readonly weapons: OwnedWeapon[] = [];
   readonly spawner = new Spawner();
   boss: Enemy | null = null;
   /** Drained by the renderer each frame. */
@@ -26,9 +41,15 @@ export class World {
   readonly view = { w: 480, h: 800 };
   /** Reusable query buffer, so per-frame code never allocates. */
   readonly scratch: number[] = [];
+  readonly targetsScratch: number[] = [];
 
   constructor(seed?: number) {
     this.rng = new Rng(seed);
+    this.addWeapon(STARTING_WEAPON);
+  }
+
+  addWeapon(id: WeaponId): void {
+    this.weapons.push({ id, level: 1, timer: 0 });
   }
 
   setView(w: number, h: number): void {
@@ -43,13 +64,17 @@ export class World {
     updatePlayer(this.player, input, dt);
     this.spawner.update(this, dt);
     updateEnemies(this, dt);
+    updateWeapons(this, dt);
+    updateProjectiles(this, dt);
     sweepDeadEnemies(this);
+    updateEffects(this, dt);
 
     if (this.player.hp <= 0) this.end('lost');
   }
 
-  /** Hook for every hit (damage numbers come later). */
-  onEnemyDamaged(_e: Enemy, _amount: number): void {}
+  onEnemyDamaged(e: Enemy, amount: number): void {
+    addDamageNumber(this, e.x, e.y - e.def.radius, amount);
+  }
 
   onEnemyKilled(e: Enemy): void {
     this.kills++;

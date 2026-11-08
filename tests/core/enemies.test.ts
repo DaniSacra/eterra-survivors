@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, spawnEnemy, spawnRadius, updateEnemies } from '../../src/core/enemies';
 import { ENEMIES } from '../../src/data/enemies';
-import { quietWorld, still } from './helpers';
+import { bareWorld as quietWorld, still } from './helpers';
 
 describe('enemies', () => {
   it('walk straight towards the player', () => {
