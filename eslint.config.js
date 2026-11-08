@@ -9,6 +9,9 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   {
     languageOptions: { globals: globals.browser },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
   },
   {
     // The pure game logic must never depend on Phaser.

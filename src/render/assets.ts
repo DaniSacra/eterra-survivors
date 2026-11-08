@@ -13,7 +13,11 @@ export type AssetDef =
 
 export const ASSETS = {
   tile: { kind: 'tile', size: 128, color: 0x1a2030, speckle: 0x2c3548 },
-  player: { kind: 'shape', shape: 'circle', size: 26, color: 0x3a78c8, stroke: 0xe8e2d0 },
+  player: { kind: 'shape', shape: 'circle', size: 28, color: 0x3a78c8, stroke: 0xe8e2d0 },
+  'enemy.skeleton': { kind: 'shape', shape: 'square', size: 22, color: 0xd8d0b8, stroke: 0x6a6250 },
+  'enemy.spider': { kind: 'shape', shape: 'triangle', size: 26, color: 0x8a4ab8, stroke: 0x3a1a58 },
+  'enemy.slime': { kind: 'shape', shape: 'hex', size: 36, color: 0x5aa040, stroke: 0x2e5418 },
+  'enemy.blackKnight': { kind: 'shape', shape: 'diamond', size: 76, color: 0x1a1a24, stroke: 0xc8323e },
 } satisfies Record<string, AssetDef>;
 
 export type AssetKey = keyof typeof ASSETS;

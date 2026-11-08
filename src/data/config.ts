@@ -20,6 +20,17 @@ export const config = {
       regen: 0, // hp per second
     },
   },
+  enemies: {
+    maxActive: 700,
+    /** Extra distance beyond the screen corner where enemies appear. */
+    spawnMargin: 40,
+    /** Enemies farther than spawnRadius * this are moved back in front of the player. */
+    recycleFactor: 1.6,
+    /** How hard overlapping enemies push each other apart (0..1 of the overlap per step). */
+    separation: 0.5,
+    knockbackDecay: 10, // per second
+    hitFlash: 0.1,
+  },
   joystick: {
     radius: 56,
     deadZone: 0.12,

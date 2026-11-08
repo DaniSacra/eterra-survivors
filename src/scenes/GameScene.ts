@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
+import type { Enemy } from '../core/enemies';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { Controls } from '../render/controls';
+import { Mirror } from '../render/mirror';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
@@ -11,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   private controls!: Controls;
   private ground!: Phaser.GameObjects.TileSprite;
   private playerSprite!: Phaser.GameObjects.Image;
+  private enemyMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
 
   constructor() {
     super(SCENES.game);
@@ -20,6 +23,15 @@ export class GameScene extends Phaser.Scene {
     this.world = new World();
     this.ground = this.add.tileSprite(0, 0, 1, 1, 'tile').setOrigin(0);
     this.playerSprite = this.add.image(0, 0, 'player').setDepth(10);
+    this.enemyMirror = new Mirror(
+      () => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
+      (img, e) => {
+        if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
+        img.setPosition(e.x, e.y);
+        if (e.flash > 0) img.setTintFill(0xffffff);
+        else img.clearTint();
+      },
+    );
 
     this.scene.launch(SCENES.hud);
     const hud = this.scene.get(SCENES.hud) as HudScene;
@@ -48,6 +60,9 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.centerOn(w.player.x, w.player.y);
     this.playerSprite.setPosition(w.player.x, w.player.y);
+    this.playerSprite.setAlpha(w.player.iframes > 0 ? 0.5 : 1);
+    this.enemyMirror.sync(w.enemies.active);
+    w.events.length = 0; // reactions (shake, screens) arrive in later steps
 
     // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
     const v = cam.worldView;

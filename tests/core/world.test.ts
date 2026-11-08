@@ -9,6 +9,14 @@ describe('World', () => {
     expect(w.time).toBeCloseTo(config.maxDt);
   });
 
+  it('is lost when the player dies', () => {
+    const w = new World(1);
+    w.player.hp = 0;
+    w.step(0.016, { x: 0, y: 0 });
+    expect(w.state).toBe('lost');
+    expect(w.events).toContainEqual({ type: 'lost' });
+  });
+
   it('does not advance when not playing', () => {
     const w = new World(1);
     w.state = 'levelup';
