@@ -43,3 +43,13 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - XP gems merge into the nearest gem once `config.gems.maxActive` is reached.
 - Render mirrors pools by index (`render/mirror.ts`), reusing display objects.
 - F3 toggles the debug overlay (FPS + active entities); F4 (debug only) spawns 100 enemies for stress tests.
+
+## Tuning and verification notes
+
+- Balance lives in `src/data` (waves, enemies, weapons, upgrades, config). Measured on 2026-11-08: core
+  `World.step` costs ~0.5 ms with 700 enemies in Node; the browser held 60 FPS with 700 enemies at 4x CPU throttle.
+- A naive bot (circling, light avoidance, weapons-first picks) survives ~4–5 min, so the curve probably needs
+  playtesting before it feels fair to reach the boss.
+- Overlays bind keys through `bindKeys()` (render/ui.ts): the key that opens an overlay is still queued that
+  frame and would otherwise trigger it immediately.
+- `window.game` is exposed in dev builds only, for browser automation.
