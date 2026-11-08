@@ -1,0 +1,45 @@
+# Eterra Survivors
+
+Survivors-like spin-off of **Crônicas de Eterra** (repo `danisacra/cronicas-de-eterra`). The hero is **Aldo**;
+Valmor is his village in the frozen south of Imladrin (not a character). Final boss: **Cavaleiro Negro** at 10:00.
+Enemies come from the original cast (Esqueleto, Aranha Tumular, Gosma Verde). World, story and characters of
+Eterra belong to Daniel; check the original repo before inventing lore.
+
+Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deployed to GitHub Pages by
+`.github/workflows/deploy.yml` (Vite `base` is `/eterra-survivors/`).
+
+## Commands
+
+- `npm run dev` — dev server · `npm test` — unit tests · `npm run lint` · `npm run typecheck` · `npm run build`
+- Every step must end with `npm test`, `npm run lint` and `npm run build` green, and the game running.
+
+## Conventions
+
+- Code, identifiers, comments and commit messages in **English**.
+- Every player-facing string in **Portuguese (pt-BR)**, only in `src/i18n/pt-BR.ts`. Never hardcode UI text elsewhere.
+- DRY and KISS: reuse first, no premature abstractions.
+- Unit tests for all game logic (`tests/core/*.test.ts`).
+- Small Conventional Commits (`feat:`, `fix:`, `perf:`, `test:`, `docs:`, `chore:`, `refactor:`) at the end of each step.
+
+## Architecture
+
+- `src/core/` — pure game logic. **Must not import Phaser** (enforced by ESLint). Deterministic given a seed
+  (`Rng`), 100% testable. `World.step(dt, input)` advances everything; the render layer only reads state.
+- `src/data/` — data-driven content: `weapons.ts`, `enemies.ts`, `waves.ts`, `upgrades.ts`, `config.ts`.
+  A new weapon (of an existing `kind`) or enemy = new data entry + its name in `pt-BR.ts` + an asset key.
+  A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
+- `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture key is generated
+  from code today; swap an entry to an image URL to use real sprites.
+- `src/scenes/` — Boot, Menu, Game, Hud (overlay), LevelUp, Pause, End.
+- Communication core → render: `world.events` (drained by GameScene every frame).
+
+## Performance rules (target: 500+ enemies at 60 FPS on phones)
+
+- Never allocate in the per-frame loop (no closures/arrays/objects per entity per frame).
+- All entities live in `Pool<T>` (`core/pool.ts`): dense active array, O(1) swap-remove. Kills are deferred
+  (`dead` flag) and swept at the end of `step`, so indices stay valid during a step.
+- No Arcade physics per entity: movement is a manual vector to the player; collisions and separation use
+  `SpatialHash` (`core/spatialHash.ts`), rebuilt once per step.
+- XP gems merge into the nearest gem once `config.gems.maxActive` is reached.
+- Render mirrors pools by index (`render/mirror.ts`), reusing display objects.
+- F3 toggles the debug overlay (FPS + active entities); F4 (debug only) spawns 100 enemies for stress tests.
