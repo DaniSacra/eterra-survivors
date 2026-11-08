@@ -1,16 +1,17 @@
 import Phaser from 'phaser';
-import { t } from './i18n/pt-BR';
+import { BootScene } from './scenes/BootScene';
+import { GameScene } from './scenes/GameScene';
+import { HudScene } from './scenes/HudScene';
 
-class PlaceholderScene extends Phaser.Scene {
-  create(): void {
-    this.add.text(16, 16, t.title, { color: '#e8e2d0', fontSize: '24px' });
-  }
-}
-
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#0b0d14',
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
-  scene: [PlaceholderScene],
+  input: { activePointers: 2 },
+  fps: { target: 60 },
+  scene: [BootScene, GameScene, HudScene],
 });
+
+// Dev-only handle for browser automation and console debugging.
+if (import.meta.env.DEV) (window as unknown as { game: Phaser.Game }).game = game;
