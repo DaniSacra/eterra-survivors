@@ -68,7 +68,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
 
-    this.scene.launch(SCENES.hud);
+    this.scene.launch(SCENES.hud, { world: this.world });
     const hud = (this.hud = this.scene.get(SCENES.hud) as HudScene);
     hud.events.once(Phaser.Scenes.Events.CREATE, () => (this.controls = new Controls(this, hud.joystick)));
 
