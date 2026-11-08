@@ -37,8 +37,9 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   offered it (and so its Elo). Everything else is a shared pool; keep hero names off shared weapons.
 - Meta progression (`core/meta.ts`, pure) is persisted by `render/save.ts` (localStorage, always try/catch):
   banked gold, shop levels, bought heroes, cleared stages. `World` takes a `RunSetup` (hero, stage, shop bonuses).
-- `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture key is generated
-  from code today; swap an entry to an image URL to use real sprites.
+- `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture is drawn from
+  code in `render/art/` (cartoon vector, `Pen`); swap an entry to an image URL to use real sprites.
+  The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Game, Hud (overlay), LevelUp, Pause, End.
 - Communication core → render: `world.events` (drained by GameScene every frame).
 
