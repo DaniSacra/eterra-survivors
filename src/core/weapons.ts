@@ -26,6 +26,10 @@ export interface OwnedWeapon {
   /** 1-based. */
   level: number;
   timer: number;
+  /** Total damage dealt this run (kept through evolution). */
+  damage: number;
+  /** Match time when it was picked up. */
+  since: number;
 }
 
 export const maxLevel = (id: WeaponId): number => WEAPONS[id].levels.length;
@@ -78,6 +82,7 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   shot.y = p.y;
   shot.angle = angle;
   shot.sprite = PROJECTILE_SPRITE[w.id];
+  shot.source = w;
   shot.target = null;
   shot.targetUid = 0;
   shot.turnRate = 0;
@@ -86,7 +91,7 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   return shot;
 }
 
-function fireArc(world: World, s: ArcLevel): boolean {
+function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const range = s.range * p.stats.area;
   const facing = Math.atan2(p.facing.y, p.facing.x);
@@ -108,7 +113,7 @@ function fireArc(world: World, s: ArcLevel): boolean {
       if (d > range + e.def.radius) continue;
       // Inside the cone, or touching Aldo (so enemies hugging him don't slip through).
       if (d > e.def.radius && Math.abs(angleDiff(angle, Math.atan2(dy, dx))) > s.arc / 2) continue;
-      damageEnemy(world, e, dmg(world, s.damage), dx / (d || 1), dy / (d || 1), s.knockback);
+      damageEnemy(world, e, dmg(world, s.damage), dx / (d || 1), dy / (d || 1), s.knockback, w);
     }
   }
   return true;
@@ -156,7 +161,7 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   return true;
 }
 
-function fireOrbit(world: World, s: OrbitLevel): boolean {
+function fireOrbit(world: World, s: OrbitLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const list = world.enemies.active;
   const count = amount(world, s.count);
@@ -177,13 +182,13 @@ function fireOrbit(world: World, s: OrbitLevel): boolean {
       const ox = e.x - p.x;
       const oy = e.y - p.y;
       const d = Math.hypot(ox, oy) || 1;
-      damageEnemy(world, e, dmg(world, s.damage), ox / d, oy / d, s.knockback);
+      damageEnemy(world, e, dmg(world, s.damage), ox / d, oy / d, s.knockback, w);
     }
   }
   return true;
 }
 
-function fireZone(world: World, s: ZoneLevel): boolean {
+function fireZone(world: World, s: ZoneLevel, w: OwnedWeapon): boolean {
   const targets = world.targetsScratch;
   targets.length = 0;
   const count = amount(world, s.count);
@@ -192,12 +197,12 @@ function fireZone(world: World, s: ZoneLevel): boolean {
     const e = randomEnemyNear(world, viewReach(world), targets);
     if (!e) break;
     targets.push(e.uid);
-    addZone(world, e.x, e.y, radius, s.duration, dmg(world, s.damage));
+    addZone(world, e.x, e.y, radius, s.duration, dmg(world, s.damage), w);
   }
   return targets.length > 0;
 }
 
-function fireStrike(world: World, s: StrikeLevel): boolean {
+function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   const list = world.enemies.active;
   const targets = world.targetsScratch;
   targets.length = 0;
@@ -214,7 +219,8 @@ function fireStrike(world: World, s: StrikeLevel): boolean {
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;
       const r = radius + e.def.radius;
-      if (!e.dead && (e.x - x) ** 2 + (e.y - y) ** 2 <= r * r) damageEnemy(world, e, dmg(world, s.damage));
+      if (!e.dead && (e.x - x) ** 2 + (e.y - y) ** 2 <= r * r)
+        damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
     }
   }
   return targets.length > 0;
@@ -223,7 +229,7 @@ function fireStrike(world: World, s: StrikeLevel): boolean {
 /** Random-target weapons only pick enemies roughly on screen. */
 const viewReach = (world: World): number => Math.max(world.view.w, world.view.h) / 2;
 
-function fireAura(world: World, s: AuraLevel): boolean {
+function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const radius = s.radius * p.stats.area;
   const list = world.enemies.active;
@@ -234,7 +240,7 @@ function fireAura(world: World, s: AuraLevel): boolean {
     const r = radius + e.def.radius * 0.5;
     const dx = e.x - p.x;
     const dy = e.y - p.y;
-    if (dx * dx + dy * dy <= r * r) damageEnemy(world, e, dmg(world, s.damage));
+    if (dx * dx + dy * dy <= r * r) damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
   }
   return true;
 }

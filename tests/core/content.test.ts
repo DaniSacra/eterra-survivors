@@ -7,7 +7,7 @@ import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { STAGES, STAGE_IDS } from '../../src/data/stages';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
-import { describeUpgrade, formatStatDelta } from '../../src/render/describe';
+import { describeUpgrade, formatCompact, formatDecimal, formatStatDelta } from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
 
 /** Guards the data-driven contract: every content entry has its text and its asset. */
@@ -45,6 +45,15 @@ describe('content integrity', () => {
 });
 
 describe('upgrade descriptions', () => {
+  it('formats report numbers compactly, pt-BR style', () => {
+    expect(formatCompact(980.4)).toBe('980');
+    expect(formatCompact(19_240)).toBe('19,2k');
+    expect(formatCompact(25_000)).toBe('25k');
+    expect(formatCompact(1_260_000)).toBe('1,3M');
+    expect(formatDecimal(28.34)).toBe('28,3');
+    expect(formatDecimal(0)).toBe('0,0');
+  });
+
   it('formats stat deltas in Portuguese', () => {
     expect(formatStatDelta('maxHp', 20)).toBe('Vida máxima +20');
     expect(formatStatDelta('cooldown', -0.08)).toBe('Recarga −8%');

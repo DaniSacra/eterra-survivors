@@ -58,3 +58,13 @@ export function describeUpgrade(opt: UpgradeOption): { title: string; tag: strin
       return { title: t.levelUp.heal, tag: '', desc: t.levelUp.healDesc(config.xp.healAmount) };
   }
 }
+
+/** Short numbers for tables: 980, 19,2k, 1,3M. */
+export function formatCompact(v: number): string {
+  if (v < 1000) return String(Math.round(v));
+  if (v < 1e6) return `${num(Math.round(v / 100) / 10)}${t.end.thousand}`;
+  return `${num(Math.round(v / 1e5) / 10)}${t.end.million}`;
+}
+
+/** One decimal, pt-BR comma. */
+export const formatDecimal = (v: number): string => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');

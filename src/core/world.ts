@@ -105,7 +105,7 @@ export class World {
   }
 
   addWeapon(id: WeaponId): void {
-    this.weapons.push({ id, level: 1, timer: 0 });
+    this.weapons.push({ id, level: 1, timer: 0, damage: 0, since: this.time });
   }
 
   setView(w: number, h: number): void {

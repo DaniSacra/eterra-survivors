@@ -3,6 +3,7 @@ import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { damageEnemy, type Enemy } from './enemies';
 import { angleDiff } from './math';
 import type { Poolable } from './pool';
+import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 
 export interface Projectile extends Poolable {
@@ -19,6 +20,8 @@ export interface Projectile extends Poolable {
   ttl: number;
   /** Asset key (one per weapon). */
   sprite: string;
+  /** The weapon credited with its damage. */
+  source: OwnedWeapon | null;
   target: Enemy | null;
   targetUid: number;
   /** Uids already hit, so a piercing shot doesn't hit the same enemy twice. */
@@ -39,6 +42,7 @@ export const createProjectile = (): Projectile => ({
   pierce: 0,
   ttl: 0,
   sprite: '',
+  source: null,
   target: null,
   targetUid: 0,
   hits: [],
@@ -126,7 +130,7 @@ export function updateProjectiles(world: World, dt: number): void {
       const dx = e.x - p.x;
       const dy = e.y - p.y;
       if (dx * dx + dy * dy > r * r) continue;
-      damageEnemy(world, e, p.damage, cos, sin, p.knockback);
+      damageEnemy(world, e, p.damage, cos, sin, p.knockback, p.source);
       p.hits.push(e.uid);
       if (--p.pierce < 0) {
         p.dead = true;

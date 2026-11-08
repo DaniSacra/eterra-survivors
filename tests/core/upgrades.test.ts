@@ -41,7 +41,8 @@ describe('upgrades', () => {
   it('stops offering maxed things and falls back to a heal', () => {
     const w = quietWorld();
     w.weapons.length = 0;
-    for (const id of WEAPON_IDS) w.weapons.push({ id, level: WEAPONS[id].levels.length, timer: 0 });
+    for (const id of WEAPON_IDS)
+      w.weapons.push({ id, level: WEAPONS[id].levels.length, timer: 0, damage: 0, since: 0 });
     for (const id of PASSIVE_IDS) w.passives[id] = PASSIVES[id].maxLevel;
     expect(candidates(w)).toEqual([]);
     expect(rollUpgrades(w)).toEqual([{ kind: 'heal' }]);
@@ -50,7 +51,8 @@ describe('upgrades', () => {
   it('no new weapons once the slots are full', () => {
     const w = quietWorld();
     w.weapons.length = 0;
-    for (let i = 0; i < config.weapons.maxOwned; i++) w.weapons.push({ id: 'blade', level: 1, timer: 0 });
+    for (let i = 0; i < config.weapons.maxOwned; i++)
+      w.weapons.push({ id: 'blade', level: 1, timer: 0, damage: 0, since: 0 });
     expect(candidates(w).some((o) => o.kind === 'weapon' && o.level === 1)).toBe(false);
   });
 

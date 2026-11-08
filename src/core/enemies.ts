@@ -3,6 +3,7 @@ import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/
 import { TAU } from './math';
 import { hurtPlayer } from './player';
 import type { Poolable } from './pool';
+import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 
 export interface Enemy extends Poolable {
@@ -81,9 +82,21 @@ export function rebuildEnemyHash(world: World): void {
   }
 }
 
-/** Damages an enemy; death is deferred to `sweepDeadEnemies`. Knockback direction (kx, ky) is a unit-ish vector. */
-export function damageEnemy(world: World, e: Enemy, amount: number, kx = 0, ky = 0, knockback = 0): void {
+/**
+ * Damages an enemy; death is deferred to `sweepDeadEnemies`. Knockback direction (kx, ky) is a unit-ish vector.
+ * `source` is credited with the damage actually dealt (for the end-of-run report).
+ */
+export function damageEnemy(
+  world: World,
+  e: Enemy,
+  amount: number,
+  kx = 0,
+  ky = 0,
+  knockback = 0,
+  source: OwnedWeapon | null = null,
+): void {
   if (e.dead) return;
+  if (source) source.damage += Math.min(amount, e.hp);
   e.hp -= amount;
   e.flash = config.enemies.hitFlash;
   const kb = knockback * (1 - e.def.knockbackResist);

@@ -2,6 +2,7 @@ import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { expire, type Timed } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
+import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 
 /** A patch of frost on the ground: hurts every `config.zones.tick` and slows what stands in it. */
@@ -14,6 +15,7 @@ export interface Zone extends Timed {
   tick: number;
   /** Total lifetime, so the renderer can fade it. */
   duration: number;
+  source: OwnedWeapon | null;
 }
 
 export const createZone = (): Zone => ({
@@ -25,6 +27,7 @@ export const createZone = (): Zone => ({
   damage: 0,
   tick: 0,
   duration: 0,
+  source: null,
 });
 
 export function addZone(
@@ -34,6 +37,7 @@ export function addZone(
   radius: number,
   duration: number,
   damage: number,
+  source: OwnedWeapon | null = null,
 ): void {
   const z = world.zones.acquire();
   z.x = x;
@@ -42,6 +46,7 @@ export function addZone(
   z.damage = damage;
   z.ttl = z.duration = duration;
   z.tick = 0;
+  z.source = source;
 }
 
 export function updateZones(world: World, dt: number): void {
@@ -56,7 +61,7 @@ export function updateZones(world: World, dt: number): void {
       const e = list[ids[n] as number] as Enemy;
       const r = z.radius + e.def.radius * 0.5;
       if (e.dead || (e.x - z.x) ** 2 + (e.y - z.y) ** 2 > r * r) continue;
-      damageEnemy(world, e, z.damage);
+      damageEnemy(world, e, z.damage, 0, 0, 0, z.source);
       // Slowed until a little after the next tick, so standing in frost keeps it on.
       e.slow = tick * 1.5;
     }
