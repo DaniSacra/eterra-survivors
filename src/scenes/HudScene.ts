@@ -83,9 +83,13 @@ export class HudScene extends Phaser.Scene {
     this.debug.setPosition(PAD, height - PAD);
   }
 
-  /** Big centred message that fades out. */
-  announce(text: string): void {
-    this.banner.setText(text).setAlpha(1);
+  /** Big centred message that fades out. Red warns; pass `good` for rewards. */
+  announce(text: string, good = false): void {
+    this.banner
+      .setText(text)
+      .setColor(good ? '#ffd870' : '#ff8090')
+      .setAlpha(1);
+    this.tweens.killTweensOf(this.banner);
     this.tweens.add({ targets: this.banner, alpha: 0, delay: 2200, duration: 800 });
   }
 

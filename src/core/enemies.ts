@@ -17,6 +17,8 @@ export interface Enemy extends Poolable {
   kbx: number;
   kby: number;
   flash: number;
+  /** Seconds left slowed by frost. */
+  slow: number;
   dead: boolean;
 }
 
@@ -32,6 +34,7 @@ export const createEnemy = (): Enemy => ({
   kbx: 0,
   kby: 0,
   flash: 0,
+  slow: 0,
   dead: false,
 });
 
@@ -46,7 +49,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.x = x;
   e.y = y;
   e.maxHp = e.hp = def.hp * hpMult;
-  e.kbx = e.kby = e.flash = 0;
+  e.kbx = e.kby = e.flash = e.slow = 0;
   e.dead = false;
   return e;
 }
@@ -97,6 +100,8 @@ export function updateEnemies(world: World, dt: number): void {
   const recycleSq = (spawnRadius(world) * recycleFactor) ** 2;
   const near = world.scratch;
   const decay = Math.max(0, 1 - knockbackDecay * dt);
+  // Sopro de Geada: nobody moves or bites while the world is frozen (knockback still applies).
+  const frozen = world.freeze > 0;
 
   rebuildEnemyHash(world);
   for (let i = 0; i < list.length; i++) {
@@ -114,8 +119,13 @@ export function updateEnemies(world: World, dt: number): void {
       continue;
     }
     const dist = Math.sqrt(distSq) || 1;
-    let mx = (dx / dist) * e.def.speed * dt;
-    let my = (dy / dist) * e.def.speed * dt;
+    let speed = frozen ? 0 : e.def.speed * dt;
+    if (e.slow > 0) {
+      e.slow -= dt;
+      speed *= config.zones.slowFactor;
+    }
+    let mx = (dx / dist) * speed;
+    let my = (dy / dist) * speed;
 
     // Separation from overlapping neighbours, weighted by size so the big ones shove the small.
     const r = e.def.radius;
@@ -148,6 +158,7 @@ export function updateEnemies(world: World, dt: number): void {
   rebuildEnemyHash(world);
 
   // Contact damage (player i-frames make only one hit land at a time).
+  if (frozen) return;
   const reach = config.player.radius + MAX_ENEMY_RADIUS;
   world.enemyHash.query(p.x, p.y, reach, near);
   for (let n = 0; n < near.length; n++) {

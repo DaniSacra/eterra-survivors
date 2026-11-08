@@ -14,6 +14,10 @@ export const EVOLUTIONS: Partial<Record<WeaponId, Evolution>> = {
   fury: { from: 'blade', passive: 'might' },
   holyLight: { from: 'elunLight', passive: 'recovery' },
   yahFlame: { from: 'yahAura', passive: 'vigor' },
+  fan: { from: 'daggers', passive: 'amount' },
+  vigil: { from: 'paladinSwords', passive: 'armor' },
+  blizzard: { from: 'frost', passive: 'reach' },
+  storm: { from: 'lightning', passive: 'haste' },
 };
 
 export const EVOLVED_IDS = Object.keys(EVOLUTIONS) as WeaponId[];

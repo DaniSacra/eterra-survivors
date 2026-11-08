@@ -4,7 +4,7 @@ import { config } from '../../src/data/config';
 import { ENEMIES, ENEMY_IDS } from '../../src/data/enemies';
 import { PASSIVE_IDS } from '../../src/data/upgrades';
 import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
-import { WEAPON_IDS } from '../../src/data/weapons';
+import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
 import { describeUpgrade, formatStatDelta } from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
 
@@ -24,7 +24,9 @@ describe('content integrity', () => {
 
   it('every gem tier and projectile has an asset', () => {
     for (const tier of config.gems.tiers) expect(ASSETS).toHaveProperty(tier.sprite);
-    expect(ASSETS).toHaveProperty('proj.elunLight');
+    for (const id of WEAPON_IDS)
+      if (WEAPONS[id].kind === 'homing' || WEAPONS[id].kind === 'thrown')
+        expect(ASSETS).toHaveProperty(`proj.${id}`);
     for (const id of PICKUP_IDS) expect(ASSETS).toHaveProperty(PICKUPS[id].sprite);
   });
 });

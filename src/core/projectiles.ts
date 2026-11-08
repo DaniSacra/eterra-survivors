@@ -17,6 +17,8 @@ export interface Projectile extends Poolable {
   radius: number;
   pierce: number;
   ttl: number;
+  /** Asset key (one per weapon). */
+  sprite: string;
   target: Enemy | null;
   targetUid: number;
   /** Uids already hit, so a piercing shot doesn't hit the same enemy twice. */
@@ -36,6 +38,7 @@ export const createProjectile = (): Projectile => ({
   radius: 0,
   pierce: 0,
   ttl: 0,
+  sprite: '',
   target: null,
   targetUid: 0,
   hits: [],
@@ -71,6 +74,23 @@ export function nearestEnemy(
   return best;
 }
 
+/**
+ * A random living enemy within `range` of the player, not in `exclude`. A few random probes of the
+ * active list (no allocation, no full scan); null when none hit.
+ */
+export function randomEnemyNear(world: World, range: number, exclude: number[]): Enemy | null {
+  const list = world.enemies.active;
+  if (list.length === 0) return null;
+  const p = world.player;
+  const rangeSq = range * range;
+  for (let tries = 0; tries < 12; tries++) {
+    const e = list[world.rng.int(list.length)] as Enemy;
+    if (e.dead || exclude.includes(e.uid)) continue;
+    if ((e.x - p.x) ** 2 + (e.y - p.y) ** 2 <= rangeSq) return e;
+  }
+  return null;
+}
+
 export function updateProjectiles(world: World, dt: number): void {
   const list = world.projectiles.active;
   const enemies = world.enemies.active;
@@ -82,11 +102,12 @@ export function updateProjectiles(world: World, dt: number): void {
       p.dead = true;
       continue;
     }
-    if (!alive(p.target, p.targetUid)) {
+    // Only seeking shots look for a new target; thrown ones fly straight.
+    if (p.turnRate > 0 && !alive(p.target, p.targetUid)) {
       p.target = nearestEnemy(world, p.x, p.y, config.weapons.seekRange, p.hits);
       p.targetUid = p.target ? p.target.uid : 0;
     }
-    if (p.target) {
+    if (p.target && p.turnRate > 0) {
       const want = Math.atan2(p.target.y - p.y, p.target.x - p.x);
       const diff = angleDiff(p.angle, want);
       const maxTurn = p.turnRate * dt;

@@ -30,10 +30,10 @@ export function updatePlayer(p: Player, input: Vec2, dt: number): void {
   if (p.stats.regen > 0) p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.regen * dt);
 }
 
-/** Applies damage unless invulnerable. Returns true if the hit landed. */
+/** Applies damage (less armor, at least minDamage) unless invulnerable. Returns true if the hit landed. */
 export function hurtPlayer(p: Player, amount: number): boolean {
   if (p.iframes > 0 || p.hp <= 0) return false;
-  p.hp = Math.max(0, p.hp - amount);
+  p.hp = Math.max(0, p.hp - Math.max(config.player.minDamage, amount - p.stats.armor));
   p.iframes = config.player.iframes;
   return true;
 }

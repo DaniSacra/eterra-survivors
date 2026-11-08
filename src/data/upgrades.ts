@@ -2,7 +2,7 @@ import type { StatKey } from './config';
 
 /**
  * Passive upgrades: each level adds `perLevel` to one player stat (see config.player.stats).
- * Multiplier stats (might, cooldown, area) use fractions: 0.1 = +10%.
+ * Multiplier stats (might, cooldown, area, growth) use fractions: 0.1 = +10%.
  * Adding one = a new entry here + its name in i18n.
  */
 export interface PassiveDef {
@@ -19,6 +19,9 @@ export const PASSIVES = {
   reach: { stat: 'area', perLevel: 0.1, maxLevel: 5 },
   attraction: { stat: 'magnet', perLevel: 30, maxLevel: 5 },
   recovery: { stat: 'regen', perLevel: 0.3, maxLevel: 5 },
+  armor: { stat: 'armor', perLevel: 1, maxLevel: 5 },
+  amount: { stat: 'amount', perLevel: 1, maxLevel: 2 },
+  growth: { stat: 'growth', perLevel: 0.08, maxLevel: 5 },
 } satisfies Record<string, PassiveDef>;
 
 export type PassiveId = keyof typeof PASSIVES;

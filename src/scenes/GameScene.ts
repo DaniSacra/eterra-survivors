@@ -56,7 +56,10 @@ export class GameScene extends Phaser.Scene {
     this.playerSprite = this.add.image(0, 0, 'player').setDepth(10);
     this.projectileMirror = new Mirror(
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12),
-      (img, p) => img.setPosition(p.x, p.y),
+      (img, p) => {
+        if (img.texture.key !== p.sprite) img.setTexture(p.sprite);
+        img.setPosition(p.x, p.y).setRotation(p.angle);
+      },
     );
     this.damageMirror = new Mirror(
       () =>
@@ -77,6 +80,8 @@ export class GameScene extends Phaser.Scene {
         if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
         img.setPosition(e.x, e.y);
         if (e.flash > 0) img.setTint(0xff7070);
+        else if (this.world.freeze > 0) img.setTint(0x80c8ff);
+        else if (e.slow > 0) img.setTint(0xb8e0ff);
         else img.clearTint();
       },
     );
@@ -163,10 +168,21 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'chest': {
           const name = describeUpgrade(e.reward).title;
-          this.hud.announce(e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name));
+          this.hud.announce(
+            e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name),
+            true,
+          );
           this.cameras.main.flash(250, 255, 220, 140);
           break;
         }
+        case 'pickup':
+          if (e.id === 'chest') break;
+          this.hud.announce(t.pickups[e.id], true);
+          if (e.id === 'bomb') {
+            this.cameras.main.flash(200, 255, 240, 200);
+            this.cameras.main.shake(300, 0.012);
+          } else if (e.id === 'freeze') this.cameras.main.flash(300, 160, 220, 255);
+          break;
         case 'won':
         case 'lost':
           this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w }));

@@ -1,5 +1,6 @@
 import type { StatKey } from '../data/config';
 import type { EnemyId } from '../data/enemies';
+import type { PickupId } from '../data/pickups';
 import type { PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
 
@@ -38,6 +39,14 @@ export const t = {
     gained: (name: string) => `Baú: ${name}`,
   },
 
+  pickups: {
+    chest: 'Baú',
+    food: 'Pão da Berta',
+    magnet: 'Pedra-Ímã',
+    bomb: 'Badalada!',
+    freeze: 'Sopro de Geada!',
+  } satisfies Record<PickupId, string>,
+
   eliteWarning: 'Um inimigo poderoso se aproxima!',
 
   pause: {
@@ -72,9 +81,17 @@ export const t = {
     blade: { name: 'Lâmina de Valmor', desc: 'Golpe em arco à frente de Aldo.' },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
+    daggers: { name: 'Adagas de Andilla', desc: 'Facas lançadas em linha reta à frente.' },
+    paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta de Aldo.' },
+    frost: { name: 'Geada de Lyra', desc: 'Manchas de gelo que ferem e atrasam os inimigos.' },
+    lightning: { name: 'Raio de Lyra', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
     holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
     yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
+    fan: { name: 'Leque de Facas', desc: 'Facas para todos os lados, que atravessam fileiras.' },
+    vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta de Aldo.' },
+    blizzard: { name: 'Nevasca', desc: 'O inverno cobre o campo inteiro.' },
+    storm: { name: 'Tempestade', desc: 'O céu inteiro desaba sobre os mortos.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {
@@ -85,6 +102,9 @@ export const t = {
     reach: 'Alcance',
     attraction: 'Atração',
     recovery: 'Recuperação',
+    armor: 'Cota de Malha',
+    amount: 'Mãos Ligeiras',
+    growth: 'Sabedoria',
   } satisfies Record<PassiveId, string>,
 
   enemies: {
@@ -105,6 +125,9 @@ export const t = {
     cooldown: 'Recarga',
     area: 'Área',
     regen: 'Regeneração',
+    armor: 'Armadura',
+    amount: 'Quantidade',
+    growth: 'Experiência',
   } satisfies Record<StatKey, string>,
 
   /** Labels for weapon level stats (level-up card diffs). Unknown keys are not shown. */
@@ -114,7 +137,10 @@ export const t = {
     range: 'Alcance',
     arc: 'Largura',
     swings: 'Golpes',
-    count: 'Luzes',
+    count: 'Quantidade',
+    orbitRadius: 'Distância',
+    duration: 'Duração',
+    spin: 'Giro',
     pierce: 'Perfuração',
     speed: 'Velocidade',
     radius: 'Raio',

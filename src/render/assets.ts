@@ -4,7 +4,7 @@ import type Phaser from 'phaser';
  * The single asset map. Every visual is referenced by key; today they are generated from code.
  * To use real art, change an entry to `{ kind: 'image', url: 'sprites/foo.png' }` (files in /public).
  */
-type Shape = 'circle' | 'square' | 'triangle' | 'diamond' | 'hex' | 'ring';
+type Shape = 'circle' | 'square' | 'triangle' | 'diamond' | 'hex' | 'ring' | 'dart';
 
 export type AssetDef =
   | { kind: 'shape'; shape: Shape; size: number; color: number; stroke?: number }
@@ -18,6 +18,13 @@ export const ASSETS = {
   'enemy.spider': { kind: 'shape', shape: 'triangle', size: 26, color: 0x8a4ab8, stroke: 0x3a1a58 },
   'enemy.slime': { kind: 'shape', shape: 'hex', size: 36, color: 0x5aa040, stroke: 0x2e5418 },
   'proj.elunLight': { kind: 'shape', shape: 'circle', size: 14, color: 0xfff2b0, stroke: 0xffd040 },
+  'proj.holyLight': { kind: 'shape', shape: 'circle', size: 18, color: 0xffffff, stroke: 0xffe070 },
+  'proj.daggers': { kind: 'shape', shape: 'dart', size: 18, color: 0xd8dce8, stroke: 0x606878 },
+  'proj.fan': { kind: 'shape', shape: 'dart', size: 22, color: 0xffd8e0, stroke: 0xe05a5a },
+  'pickup.food': { kind: 'shape', shape: 'circle', size: 20, color: 0xd8a860, stroke: 0x7a5020 },
+  'pickup.magnet': { kind: 'shape', shape: 'ring', size: 22, color: 0xe04848 },
+  'pickup.bomb': { kind: 'shape', shape: 'hex', size: 22, color: 0xc89040, stroke: 0x5a3a10 },
+  'pickup.freeze': { kind: 'shape', shape: 'diamond', size: 22, color: 0xa0e8ff, stroke: 0xffffff },
   'gem.small': { kind: 'shape', shape: 'diamond', size: 12, color: 0x40c8e8, stroke: 0xd0f4ff },
   'gem.medium': { kind: 'shape', shape: 'diamond', size: 16, color: 0x40e870, stroke: 0xd8ffe0 },
   'gem.large': { kind: 'shape', shape: 'diamond', size: 22, color: 0xe84060, stroke: 0xffd8e0 },
@@ -86,6 +93,11 @@ function drawShape(
       break;
     case 'ring':
       g.lineStyle(Math.max(2, size / 16), color).strokeCircle(c, c, r);
+      break;
+    case 'dart':
+      // A thin blade pointing right (rotated to the shot's heading).
+      g.fillRect(1, c - size / 8, size - 2, size / 4);
+      if (stroke !== undefined) g.strokeRect(1, c - size / 8, size - 2, size / 4);
       break;
     case 'square':
       g.fillRect(2, 2, size - 4, size - 4);

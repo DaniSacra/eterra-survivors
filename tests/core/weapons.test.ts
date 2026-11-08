@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
 import { updateWeapons as rawUpdate } from '../../src/core/weapons';
 import type { World } from '../../src/core/world';
-import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
+import { WEAPONS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
 import { bareWorld, still } from './helpers';
 
 const blade = WEAPONS.blade.levels[0]!;
@@ -15,7 +15,7 @@ function updateWeapons(w: World, dt: number) {
   rawUpdate(w, dt);
 }
 
-function prepared(id: 'blade' | 'elunLight' | 'yahAura') {
+function prepared(id: WeaponId) {
   const w = bareWorld();
   w.addWeapon(id);
   return w;

@@ -48,6 +48,11 @@ export function addXp(world: World, amount: number): void {
   }
 }
 
+/** Pedra-Ímã: every gem on the ground starts flying to the player. */
+export function pullAllGems(world: World): void {
+  for (const g of world.gems.active) g.pulled = true;
+}
+
 export function updateGems(world: World, dt: number): void {
   const p = world.player;
   const magnetSq = p.stats.magnet * p.stats.magnet;
@@ -60,7 +65,7 @@ export function updateGems(world: World, dt: number): void {
     const dy = p.y - g.y;
     const dSq = dx * dx + dy * dy;
     if (dSq <= pickupSq) {
-      addXp(world, g.value);
+      addXp(world, g.value * p.stats.growth);
       world.gems.release(g);
       continue;
     }

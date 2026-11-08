@@ -18,7 +18,12 @@ export const config = {
       cooldown: 1, // cooldown multiplier (lower is faster)
       area: 1, // area multiplier
       regen: 0, // hp per second
+      armor: 0, // flat damage taken reduction per hit
+      amount: 0, // extra projectiles / blades / patches / bolts
+      growth: 1, // xp multiplier
     },
+    /** Hits never do less than this, whatever the armor. */
+    minDamage: 1,
   },
   enemies: {
     maxActive: 700,
@@ -53,6 +58,18 @@ export const config = {
   pickups: {
     /** Collision radius of things on the ground (chests, food...). */
     radius: 14,
+    /** Chance that a normal enemy drops a random floor item (data/pickups.ts weights). */
+    dropChance: 0.006,
+    maxActive: 24,
+    foodHeal: 30,
+    bombDamage: 250,
+    freezeTime: 6,
+  },
+  zones: {
+    /** Seconds between damage ticks of a frost patch. */
+    tick: 0.5,
+    /** Speed multiplier of an enemy inside frost. */
+    slowFactor: 0.45,
   },
   weapons: {
     maxOwned: 6,
@@ -63,6 +80,7 @@ export const config = {
   },
   effects: {
     slashTtl: 0.18,
+    boltTtl: 0.22,
     damageNumberTtl: 0.6,
     damageNumberRise: 40, // px per second
     maxDamageNumbers: 40,

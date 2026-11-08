@@ -3,16 +3,18 @@ import type { PassiveId } from '../data/upgrades';
 import { STARTING_WEAPON, type WeaponId } from '../data/weapons';
 import {
   addDamageNumber,
+  createBolt,
   createDamageNumber,
   createSlash,
   updateEffects,
+  type Bolt,
   type DamageNumber,
   type Slash,
 } from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
-import { createPickup, dropPickup, updatePickups, type Pickup } from './pickups';
+import { createPickup, dropPickup, maybeDropRandom, updatePickups, type Pickup } from './pickups';
 import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
@@ -20,6 +22,7 @@ import { SpatialHash } from './spatialHash';
 import { applyUpgrade, rollUpgrades, type UpgradeOption } from './upgrades';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
+import { createZone, updateZones, type Zone } from './zones';
 import { createGem, dropGem, updateGems, type Gem } from './xp';
 
 export type WorldState = 'playing' | 'levelup' | 'won' | 'lost';
@@ -43,6 +46,10 @@ export class World {
   readonly gems = new Pool<Gem>(createGem, 128);
   readonly pickups = new Pool<Pickup>(createPickup, 8);
   readonly slashes = new Pool<Slash>(createSlash, 4);
+  readonly bolts = new Pool<Bolt>(createBolt, 16);
+  readonly zones = new Pool<Zone>(createZone, 16);
+  /** Seconds left of Sopro de Geada (enemies frozen). */
+  freeze = 0;
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
   readonly weapons: OwnedWeapon[] = [];
   readonly spawner = new Spawner();
@@ -78,9 +85,11 @@ export class World {
     dt = Math.min(dt, config.maxDt);
     this.time += dt;
     updatePlayer(this.player, input, dt);
+    if (this.freeze > 0) this.freeze = Math.max(0, this.freeze - dt);
     this.spawner.update(this, dt);
     updateEnemies(this, dt);
     updateWeapons(this, dt);
+    updateZones(this, dt);
     updateProjectiles(this, dt);
     sweepDeadEnemies(this);
     updateGems(this, dt);
@@ -116,6 +125,7 @@ export class World {
     this.kills++;
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
     if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);
+    else if (!e.def.boss) maybeDropRandom(this, e.x, e.y);
     if (e === this.boss) {
       this.boss = null;
       this.end('won');

@@ -25,6 +25,22 @@ export interface Slash extends Timed {
 }
 export const createSlash = (): Slash => ({ poolIndex: -1, ttl: 0, angle: 0, arc: 0, range: 0 });
 
+/** A lightning bolt hitting the ground for a moment (purely visual). */
+export interface Bolt extends Timed {
+  x: number;
+  y: number;
+  radius: number;
+}
+export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0 });
+
+export function addBolt(world: World, x: number, y: number, radius: number): void {
+  const b = world.bolts.acquire();
+  b.x = x;
+  b.y = y;
+  b.radius = radius;
+  b.ttl = config.effects.boltTtl;
+}
+
 export interface DamageNumber extends Timed {
   x: number;
   y: number;
@@ -44,6 +60,7 @@ export function addDamageNumber(world: World, x: number, y: number, value: numbe
 
 export function updateEffects(world: World, dt: number): void {
   expire(world.slashes, dt);
+  expire(world.bolts, dt);
   const rise = config.effects.damageNumberRise * dt;
   for (const d of world.damageNumbers.active) d.y -= rise;
   expire(world.damageNumbers, dt);
