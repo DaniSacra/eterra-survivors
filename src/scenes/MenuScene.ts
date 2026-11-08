@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
 import { UI, button, keyNav, label, restartOnResize } from '../render/ui';
+import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
 export class MenuScene extends Phaser.Scene {
@@ -16,7 +17,7 @@ export class MenuScene extends Phaser.Scene {
     this.add
       .image(cx, height * 0.2, 'enemy.blackKnight')
       .setAlpha(0.35)
-      .setScale(1.6);
+      .setScale(ART_SCALE * 1.6);
     label(this, cx, height * 0.2, t.title, Math.min(44, width / 9), { bold: true, color: '#ffd870' });
     label(this, cx, height * 0.2 + 44, t.subtitle, 18, { color: UI.muted });
     label(this, cx, height * 0.42, t.menu.intro, 17, { wrap });

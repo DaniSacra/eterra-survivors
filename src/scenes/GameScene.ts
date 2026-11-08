@@ -18,6 +18,7 @@ import { t } from '../i18n/pt-BR';
 import { Controls } from '../render/controls';
 import { drawFx } from '../render/fx';
 import { Mirror } from '../render/mirror';
+import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
@@ -49,7 +50,7 @@ export class GameScene extends Phaser.Scene {
     this.banked = false;
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.gemMirror = new Mirror(
-      () => this.add.image(0, 0, 'gem.small').setDepth(3),
+      () => this.add.image(0, 0, 'gem.small').setDepth(3).setScale(ART_SCALE),
       (img, g) => {
         const key = (config.gems.tiers.find((tier) => g.value >= tier.min) ?? config.gems.tiers[0]).sprite;
         if (img.texture.key !== key) img.setTexture(key);
@@ -57,17 +58,21 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.pickupMirror = new Mirror(
-      () => this.add.image(0, 0, 'pickup.chest').setDepth(3),
+      () => this.add.image(0, 0, 'pickup.chest').setDepth(3).setScale(ART_SCALE),
       (img, it) => {
         const key = PICKUPS[it.type].sprite;
         if (img.texture.key !== key) img.setTexture(key);
-        img.setPosition(it.x, it.y);
+        // Items on the ground float a little.
+        img.setPosition(it.x, it.y - 2 + Math.sin(this.world.time * 4 + it.x) * 2);
       },
     );
     this.fx = this.add.graphics().setDepth(4);
-    this.playerSprite = this.add.image(0, 0, CHARACTERS[this.world.character].sprite).setDepth(10);
+    this.playerSprite = this.add
+      .image(0, 0, CHARACTERS[this.world.character].sprite)
+      .setDepth(10)
+      .setScale(ART_SCALE);
     this.projectileMirror = new Mirror(
-      () => this.add.image(0, 0, 'proj.elunLight').setDepth(12),
+      () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
         if (img.texture.key !== p.sprite) img.setTexture(p.sprite);
         img.setPosition(p.x, p.y).setRotation(p.angle);
@@ -89,8 +94,16 @@ export class GameScene extends Phaser.Scene {
     this.enemyMirror = new Mirror(
       () => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
       (img, e) => {
+        const w = this.world;
         if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
-        img.setPosition(e.x, e.y);
+        // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
+        // wobble when hit. Frozen enemies stand still.
+        const a = w.freeze > 0 ? 0 : Math.sin(w.time * 9 + e.uid * 1.7) * 0.06;
+        img
+          .setPosition(e.x, e.y)
+          .setScale(ART_SCALE * (1 + a), ART_SCALE * (1 - a))
+          .setFlipX(w.player.x < e.x)
+          .setRotation(e.flash > 0 ? Math.sin(w.time * 70) * 0.15 : 0);
         if (e.flash > 0) img.setTint(0xff7070);
         else if (this.world.freeze > 0) img.setTint(0x80c8ff);
         else if (e.slow > 0) img.setTint(0xb8e0ff);
@@ -133,8 +146,13 @@ export class GameScene extends Phaser.Scene {
 
     const cam = this.cameras.main;
     cam.centerOn(w.player.x, w.player.y);
-    this.playerSprite.setPosition(w.player.x, w.player.y);
-    this.playerSprite.setAlpha(w.player.iframes > 0 ? 0.5 : 1);
+    // The hero bounces while walking and turns to where it goes.
+    const step = w.player.moving ? Math.abs(Math.sin(w.time * 12)) : 0;
+    this.playerSprite
+      .setPosition(w.player.x, w.player.y - step * 2.5)
+      .setScale(ART_SCALE * (1 + step * 0.05), ART_SCALE * (1 - step * 0.05))
+      .setAlpha(w.player.iframes > 0 ? 0.5 : 1);
+    if (w.player.facing.x !== 0) this.playerSprite.setFlipX(w.player.facing.x < 0);
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
     this.enemyMirror.sync(w.enemies.active);

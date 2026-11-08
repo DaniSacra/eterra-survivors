@@ -1,61 +1,35 @@
 import type Phaser from 'phaser';
+import { ENEMY_ART } from './art/enemies';
+import { HERO_ART } from './art/heroes';
+import { ITEM_ART } from './art/items';
+import { ART_RES, Pen } from './art/pen';
+import { TILE_ART } from './art/tiles';
+import type { ArtDef } from './art/types';
 
 /**
- * The single asset map. Every visual is referenced by key; today they are generated from code.
- * To use real art, change an entry to `{ kind: 'image', url: 'sprites/foo.png' }` (files in /public).
+ * The single asset map. Every visual is referenced by key; today they are drawn from code in the cartoon
+ * vector style (render/art). To use real art, change an entry to `{ kind: 'image', url: 'sprites/foo.png' }`
+ * (files in /public), drawn at ART_RES times its world size like the generated ones.
  */
-type Shape = 'circle' | 'square' | 'triangle' | 'diamond' | 'hex' | 'ring' | 'dart';
-
 export type AssetDef =
-  | { kind: 'shape'; shape: Shape; size: number; color: number; stroke?: number }
-  | { kind: 'tile'; size: number; color: number; speckle: number }
-  | { kind: 'image'; url: string };
+  /** `res`: texture pixels per world pixel (sprites ART_RES for sharpness; tiles 1). */
+  { kind: 'art'; art: ArtDef; res: number } | { kind: 'image'; url: string };
 
-export const ASSETS = {
-  tile: { kind: 'tile', size: 128, color: 0x1a2030, speckle: 0x2c3548 },
-  'tile.crypt': { kind: 'tile', size: 128, color: 0x241c34, speckle: 0x3a5a5c },
-  'tile.road': { kind: 'tile', size: 128, color: 0x2a2e36, speckle: 0x5a6070 },
-  'player.aldo': { kind: 'shape', shape: 'circle', size: 28, color: 0xe0a040, stroke: 0xe8e2d0 },
-  'player.lyra': { kind: 'shape', shape: 'circle', size: 28, color: 0xd070e0, stroke: 0xe8e2d0 },
-  'player.teo': { kind: 'shape', shape: 'circle', size: 28, color: 0x60d0a0, stroke: 0xe8e2d0 },
-  'player.andilla': { kind: 'shape', shape: 'circle', size: 28, color: 0xe05a5a, stroke: 0xe8e2d0 },
-  'enemy.skeleton': { kind: 'shape', shape: 'square', size: 22, color: 0xd8d0b8, stroke: 0x6a6250 },
-  'enemy.spider': { kind: 'shape', shape: 'triangle', size: 26, color: 0x8a4ab8, stroke: 0x3a1a58 },
-  'enemy.slime': { kind: 'shape', shape: 'hex', size: 36, color: 0x5aa040, stroke: 0x2e5418 },
-  'proj.elunLight': { kind: 'shape', shape: 'circle', size: 14, color: 0xfff2b0, stroke: 0xffd040 },
-  'proj.holyLight': { kind: 'shape', shape: 'circle', size: 18, color: 0xffffff, stroke: 0xffe070 },
-  'proj.daggers': { kind: 'shape', shape: 'dart', size: 18, color: 0xd8dce8, stroke: 0x606878 },
-  'proj.fan': { kind: 'shape', shape: 'dart', size: 22, color: 0xffd8e0, stroke: 0xe05a5a },
-  'proj.hammer': { kind: 'shape', shape: 'square', size: 22, color: 0x8a8a96, stroke: 0x3a3a44 },
-  'proj.forgeFury': { kind: 'shape', shape: 'square', size: 30, color: 0xffa040, stroke: 0x7a3010 },
-  'proj.wisps': { kind: 'shape', shape: 'circle', size: 14, color: 0x80e8ff, stroke: 0x2a8aa8 },
-  'proj.soulProcession': { kind: 'shape', shape: 'circle', size: 18, color: 0xc8f8ff, stroke: 0x60c8ff },
-  'pickup.gold': { kind: 'shape', shape: 'circle', size: 14, color: 0xffd040, stroke: 0x8a6010 },
-  'pickup.food': { kind: 'shape', shape: 'circle', size: 20, color: 0xd8a860, stroke: 0x7a5020 },
-  'pickup.magnet': { kind: 'shape', shape: 'ring', size: 22, color: 0xe04848 },
-  'pickup.bomb': { kind: 'shape', shape: 'hex', size: 22, color: 0xc89040, stroke: 0x5a3a10 },
-  'pickup.freeze': { kind: 'shape', shape: 'diamond', size: 22, color: 0xa0e8ff, stroke: 0xffffff },
-  'gem.small': { kind: 'shape', shape: 'diamond', size: 12, color: 0x40c8e8, stroke: 0xd0f4ff },
-  'gem.medium': { kind: 'shape', shape: 'diamond', size: 16, color: 0x40e870, stroke: 0xd8ffe0 },
-  'gem.large': { kind: 'shape', shape: 'diamond', size: 22, color: 0xe84060, stroke: 0xffd8e0 },
-  'enemy.bones': { kind: 'shape', shape: 'square', size: 22, color: 0xb8b0a0, stroke: 0x4a4438 },
-  'enemy.bat': { kind: 'shape', shape: 'triangle', size: 20, color: 0x6a6a74, stroke: 0x26262e },
-  'enemy.ghost': { kind: 'shape', shape: 'hex', size: 32, color: 0x7fb0d0, stroke: 0xd8f0ff },
-  'enemy.hooded': { kind: 'shape', shape: 'square', size: 22, color: 0x7a5a3a, stroke: 0x2a1a10 },
-  'enemy.crow': { kind: 'shape', shape: 'triangle', size: 20, color: 0x34343e, stroke: 0x9090a0 },
-  'enemy.frostWolf': { kind: 'shape', shape: 'triangle', size: 34, color: 0xe8eff8, stroke: 0x7488b8 },
-  'enemy.goblin': { kind: 'shape', shape: 'triangle', size: 40, color: 0x6aa040, stroke: 0xffe040 },
-  'enemy.bellRinger': { kind: 'shape', shape: 'hex', size: 66, color: 0x8a6a30, stroke: 0xffd890 },
-  'enemy.oldWolf': { kind: 'shape', shape: 'triangle', size: 68, color: 0x8a8a96, stroke: 0xff4050 },
-  'enemy.golem': { kind: 'shape', shape: 'square', size: 52, color: 0x7a7266, stroke: 0xffa020 },
-  'pickup.chest': { kind: 'shape', shape: 'square', size: 24, color: 0xb07020, stroke: 0xffe080 },
-  'enemy.blackKnight': { kind: 'shape', shape: 'diamond', size: 76, color: 0x1a1a24, stroke: 0xc8323e },
-} satisfies Record<string, AssetDef>;
+/** Transparent margin (world px) around every sprite texture. */
+const PAD = 6;
 
-export type AssetKey = keyof typeof ASSETS;
+const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef> =>
+  Object.fromEntries(Object.entries(defs).map(([k, d]) => [k, { kind: 'art', art: d, res }]));
+
+export const ASSETS: Record<string, AssetDef> = {
+  ...art(TILE_ART, 1),
+  ...art(HERO_ART, ART_RES),
+  ...art(ENEMY_ART, ART_RES),
+  ...art(ITEM_ART, ART_RES),
+};
 
 export function preloadAssets(scene: Phaser.Scene): void {
-  for (const [key, def] of Object.entries(ASSETS) as [string, AssetDef][]) {
+  for (const [key, def] of Object.entries(ASSETS)) {
     if (def.kind === 'image') scene.load.image(key, def.url);
   }
 }
@@ -63,72 +37,21 @@ export function preloadAssets(scene: Phaser.Scene): void {
 /** Generates the code-drawn textures. Call in `create()` after `preloadAssets`. */
 export function generateAssets(scene: Phaser.Scene): void {
   const g = scene.make.graphics({}, false);
-  for (const [key, def] of Object.entries(ASSETS) as [string, AssetDef][]) {
+  for (const [key, def] of Object.entries(ASSETS)) {
     if (def.kind === 'image' || scene.textures.exists(key)) continue;
+    // Sprites get a margin so outlines, hats and ears never get cut; images stay centred on their box.
+    const pad = def.art === TILE_ART[key] ? 0 : PAD;
     g.clear();
-    if (def.kind === 'tile') drawTile(g, def.size, def.color, def.speckle);
-    else drawShape(g, def.shape, def.size, def.color, def.stroke);
-    g.generateTexture(key, def.size, def.size);
+    g.save();
+    g.scaleCanvas(def.res, def.res);
+    g.translateCanvas(pad, pad);
+    def.art.draw(new Pen(g));
+    g.restore();
+    g.generateTexture(
+      key,
+      Math.ceil((def.art.w + pad * 2) * def.res),
+      Math.ceil((def.art.h + pad * 2) * def.res),
+    );
   }
   g.destroy();
-}
-
-function drawTile(g: Phaser.GameObjects.Graphics, size: number, color: number, speckle: number): void {
-  g.fillStyle(color).fillRect(0, 0, size, size);
-  // Deterministic scatter: frost speckles and a few stones.
-  let s = 7;
-  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  g.fillStyle(speckle);
-  for (let i = 0; i < 40; i++) g.fillRect(Math.floor(rnd() * size), Math.floor(rnd() * size), 2, 2);
-  g.fillStyle(speckle, 0.6);
-  for (let i = 0; i < 4; i++) g.fillCircle(rnd() * size, rnd() * size, 3 + rnd() * 4);
-}
-
-function drawShape(
-  g: Phaser.GameObjects.Graphics,
-  shape: Shape,
-  size: number,
-  color: number,
-  stroke?: number,
-) {
-  const c = size / 2;
-  const r = c - 2;
-  g.fillStyle(color);
-  if (stroke !== undefined) g.lineStyle(2, stroke);
-  const poly = (sides: number, rot: number) => {
-    const pts: { x: number; y: number }[] = [];
-    for (let i = 0; i < sides; i++) {
-      const a = rot + (i / sides) * Math.PI * 2;
-      pts.push({ x: c + Math.cos(a) * r, y: c + Math.sin(a) * r });
-    }
-    g.fillPoints(pts, true);
-    if (stroke !== undefined) g.strokePoints(pts, true);
-  };
-  switch (shape) {
-    case 'circle':
-      g.fillCircle(c, c, r);
-      if (stroke !== undefined) g.strokeCircle(c, c, r);
-      break;
-    case 'ring':
-      g.lineStyle(Math.max(2, size / 16), color).strokeCircle(c, c, r);
-      break;
-    case 'dart':
-      // A thin blade pointing right (rotated to the shot's heading).
-      g.fillRect(1, c - size / 8, size - 2, size / 4);
-      if (stroke !== undefined) g.strokeRect(1, c - size / 8, size - 2, size / 4);
-      break;
-    case 'square':
-      g.fillRect(2, 2, size - 4, size - 4);
-      if (stroke !== undefined) g.strokeRect(2, 2, size - 4, size - 4);
-      break;
-    case 'triangle':
-      poly(3, -Math.PI / 2);
-      break;
-    case 'diamond':
-      poly(4, 0);
-      break;
-    case 'hex':
-      poly(6, 0);
-      break;
-  }
 }

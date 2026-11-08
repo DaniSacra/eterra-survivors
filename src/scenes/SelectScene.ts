@@ -6,6 +6,7 @@ import { STAGE_IDS, type StageId } from '../data/stages';
 import { t } from '../i18n/pt-BR';
 import { loadSave, writeSave } from '../render/save';
 import { UI, bindKeys, button, isConfirm, label, restartOnResize } from '../render/ui';
+import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
 /** The last choice, kept in the game registry so "play again" and the next visit remember it. */
@@ -114,7 +115,7 @@ export class SelectScene extends Phaser.Scene {
     const top = y - h / 2;
     this.add
       .image(x - w / 2 + 20, top + 20, CHARACTERS[id].sprite)
-      .setScale(0.8)
+      .setScale(ART_SCALE * 0.9)
       .setAlpha(owned ? 1 : 0.4);
     label(this, x - w / 2 + 38, top + 9, c.name, 16, { bold: true, align: 'left' });
     label(this, x - w / 2 + 38, top + 28, c.role, 12, { color: UI.muted, align: 'left' });

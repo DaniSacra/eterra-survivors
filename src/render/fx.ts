@@ -3,7 +3,15 @@ import type { World } from '../core/world';
 import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data/weapons';
 import { orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
+import type { CharacterId } from '../data/characters';
 
+/** Identity color of each hero, for the light under their feet (so the eye finds them in a crowd). */
+const HERO_COLOR: Record<CharacterId, number> = {
+  aldo: 0xe8b840,
+  lyra: 0xa84ad8,
+  teo: 0x4ad08a,
+  andilla: 0xe86a7a,
+};
 const SLASH_COLOR = 0xe8f0ff;
 const AURA_COLOR = 0xffc040;
 /** How each orbit weapon's pieces look: swords (a blade line) or bells (a heavy disc). */
@@ -19,6 +27,9 @@ const BOLT_COLOR = 0xfff6a0;
 export function drawFx(g: Phaser.GameObjects.Graphics, world: World): void {
   g.clear();
   const p = world.player;
+  const hero = HERO_COLOR[world.character];
+  g.fillStyle(hero, 0.22).fillEllipse(p.x, p.y + 15, 40, 14);
+  g.lineStyle(2, hero, 0.7).strokeEllipse(p.x, p.y + 15, 40, 14);
   for (const z of world.zones.active) {
     const a = Math.min(1, z.ttl / 0.4) * 0.3;
     g.fillStyle(FROST_COLOR, a).fillCircle(z.x, z.y, z.radius);
