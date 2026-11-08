@@ -15,15 +15,15 @@ export interface EnemyDef {
 }
 
 export const ENEMIES = {
-  skeleton: { sprite: 'enemy.skeleton', radius: 11, hp: 10, speed: 70, damage: 8, xp: 1, knockbackResist: 0 },
-  spider: { sprite: 'enemy.spider', radius: 9, hp: 5, speed: 125, damage: 5, xp: 1, knockbackResist: 0 },
-  slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 12, xp: 3, knockbackResist: 0.6 },
+  skeleton: { sprite: 'enemy.skeleton', radius: 11, hp: 10, speed: 70, damage: 5, xp: 1, knockbackResist: 0 },
+  spider: { sprite: 'enemy.spider', radius: 9, hp: 5, speed: 125, damage: 4, xp: 1, knockbackResist: 0 },
+  slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 8, xp: 3, knockbackResist: 0.6 },
   blackKnight: {
     sprite: 'enemy.blackKnight',
     radius: 34,
     hp: 4000,
     speed: 95,
-    damage: 30,
+    damage: 20,
     xp: 0,
     knockbackResist: 1,
     boss: true,

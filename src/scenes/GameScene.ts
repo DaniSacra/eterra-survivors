@@ -64,7 +64,7 @@ export class GameScene extends Phaser.Scene {
       (img, e) => {
         if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
         img.setPosition(e.x, e.y);
-        if (e.flash > 0) img.setTintFill(0xffffff);
+        if (e.flash > 0) img.setTint(0xff7070);
         else img.clearTint();
       },
     );

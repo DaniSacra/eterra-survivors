@@ -61,7 +61,7 @@ export const config = {
     slashTtl: 0.18,
     damageNumberTtl: 0.6,
     damageNumberRise: 40, // px per second
-    maxDamageNumbers: 80,
+    maxDamageNumbers: 40,
   },
   joystick: {
     radius: 56,

@@ -54,13 +54,13 @@ export const WEAPONS = {
   blade: {
     kind: 'arc',
     levels: levels<ArcLevel>(
-      { damage: 10, cooldown: 1.1, range: 72, arc: 2, knockback: 140, swings: 1 },
-      { damage: 13, range: 78 },
+      { damage: 10, cooldown: 0.9, range: 80, arc: 2.2, knockback: 140, swings: 1 },
+      { damage: 13, range: 84 },
       { swings: 2 },
-      { damage: 17, cooldown: 0.95, range: 86 },
-      { damage: 21, arc: 2.6 },
-      { damage: 25, cooldown: 0.85, range: 96 },
-      { damage: 32, range: 108, arc: 2.9 },
+      { damage: 17, cooldown: 0.8, range: 90 },
+      { damage: 21, arc: 2.7 },
+      { damage: 25, cooldown: 0.7, range: 100 },
+      { damage: 32, range: 112, arc: 3 },
     ),
   },
   /** Luz de Elun: seeking motes of holy light. */

@@ -12,11 +12,11 @@ export interface WaveSegment {
 }
 
 export const WAVES: WaveSegment[] = [
-  { from: 0, interval: 1.2, batch: 2, hpMult: 1, enemies: [{ id: 'skeleton', weight: 1 }] },
+  { from: 0, interval: 1.5, batch: 1, hpMult: 1, enemies: [{ id: 'skeleton', weight: 1 }] },
   {
     from: 30,
-    interval: 1,
-    batch: 3,
+    interval: 1.2,
+    batch: 2,
     hpMult: 1,
     enemies: [
       { id: 'skeleton', weight: 3 },
@@ -25,8 +25,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 60,
-    interval: 0.9,
-    batch: 4,
+    interval: 1,
+    batch: 2,
     hpMult: 1.1,
     enemies: [
       { id: 'skeleton', weight: 2 },
@@ -35,8 +35,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 120,
-    interval: 0.8,
-    batch: 5,
+    interval: 1,
+    batch: 3,
     hpMult: 1.3,
     enemies: [
       { id: 'skeleton', weight: 3 },
@@ -46,8 +46,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 180,
-    interval: 0.7,
-    batch: 6,
+    interval: 0.9,
+    batch: 4,
     hpMult: 1.6,
     enemies: [
       { id: 'skeleton', weight: 3 },
@@ -57,8 +57,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 240,
-    interval: 0.6,
-    batch: 7,
+    interval: 0.8,
+    batch: 5,
     hpMult: 2,
     enemies: [
       { id: 'spider', weight: 3 },
@@ -67,8 +67,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 300,
-    interval: 0.5,
-    batch: 8,
+    interval: 0.7,
+    batch: 6,
     hpMult: 2.4,
     enemies: [
       { id: 'skeleton', weight: 3 },
@@ -78,8 +78,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 390,
-    interval: 0.45,
-    batch: 10,
+    interval: 0.6,
+    batch: 7,
     hpMult: 3,
     enemies: [
       { id: 'skeleton', weight: 2 },
@@ -89,8 +89,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 480,
-    interval: 0.4,
-    batch: 12,
+    interval: 0.5,
+    batch: 8,
     hpMult: 3.8,
     enemies: [
       { id: 'skeleton', weight: 3 },
@@ -100,8 +100,8 @@ export const WAVES: WaveSegment[] = [
   },
   {
     from: 540,
-    interval: 0.35,
-    batch: 14,
+    interval: 0.45,
+    batch: 10,
     hpMult: 4.5,
     enemies: [
       { id: 'skeleton', weight: 2 },
@@ -110,7 +110,7 @@ export const WAVES: WaveSegment[] = [
     ],
   },
   // The boss fight: a trickle of escorts.
-  { from: 600, interval: 2, batch: 4, hpMult: 4.5, enemies: [{ id: 'skeleton', weight: 1 }] },
+  { from: 600, interval: 2, batch: 3, hpMult: 4.5, enemies: [{ id: 'skeleton', weight: 1 }] },
 ];
 
 export const BOSS: { id: EnemyId; at: number } = { id: 'blackKnight', at: 600 };
