@@ -29,7 +29,16 @@ export const t = {
     heal: 'Pão e sopa da Berta',
     healDesc: (n: number) => `Recupera ${n} de vida`,
     hint: 'Toque numa opção ou use 1, 2, 3',
+    evolution: 'Elo',
+    evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
   },
+
+  chest: {
+    evolved: (name: string) => `Elo: ${name}!`,
+    gained: (name: string) => `Baú: ${name}`,
+  },
+
+  eliteWarning: 'Um inimigo poderoso se aproxima!',
 
   pause: {
     title: 'Pausa',
@@ -63,6 +72,9 @@ export const t = {
     blade: { name: 'Lâmina de Valmor', desc: 'Golpe em arco à frente de Aldo.' },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
+    fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
+    holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
+    yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {
@@ -79,6 +91,8 @@ export const t = {
     skeleton: 'Esqueleto',
     spider: 'Aranha Tumular',
     slime: 'Gosma Verde',
+    oldWolf: 'Lobo Velho',
+    golem: 'Golem de Pedra',
     blackKnight: 'Cavaleiro Negro',
   } satisfies Record<EnemyId, string>,
 

@@ -1,4 +1,4 @@
-import { BOSS, WAVES, type WaveSegment } from '../data/waves';
+import { BOSS, ELITES, WAVES, type WaveSegment } from '../data/waves';
 import { config } from '../data/config';
 import { spawnOnRing } from './enemies';
 import type { World } from './world';
@@ -13,6 +13,7 @@ export function segmentAt(t: number, waves: readonly WaveSegment[] = WAVES): Wav
 /** Time-driven spawner: batches on an interval, more and tougher as time goes on, boss at the end. */
 export class Spawner {
   private timer = 0;
+  private nextElite = 0;
   bossSpawned = false;
 
   update(world: World, dt: number): void {
@@ -23,6 +24,12 @@ export class Spawner {
       for (let i = 0; i < seg.batch && world.enemies.size < config.enemies.maxActive; i++) {
         spawnOnRing(world, world.rng.weighted(seg.enemies).id, seg.hpMult);
       }
+    }
+    const elite = ELITES[this.nextElite];
+    if (elite && world.time >= elite.at) {
+      this.nextElite++;
+      spawnOnRing(world, elite.id, seg.hpMult);
+      world.events.push({ type: 'eliteSpawned' });
     }
     if (!this.bossSpawned && world.time >= BOSS.at) {
       this.bossSpawned = true;

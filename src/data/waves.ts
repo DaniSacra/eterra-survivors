@@ -114,3 +114,13 @@ export const WAVES: WaveSegment[] = [
 ];
 
 export const BOSS: { id: EnemyId; at: number } = { id: 'blackKnight', at: 600 };
+
+/** One elite at each of these times (seconds), with the HP multiplier of the segment then active. */
+export const ELITES: { id: EnemyId; at: number }[] = [
+  { id: 'oldWolf', at: 100 },
+  { id: 'golem', at: 220 },
+  { id: 'oldWolf', at: 330 },
+  { id: 'golem', at: 420 },
+  { id: 'oldWolf', at: 500 },
+  { id: 'golem', at: 570 },
+];

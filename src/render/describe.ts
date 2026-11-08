@@ -1,4 +1,5 @@
 import { config, type StatKey } from '../data/config';
+import { evolutionOf } from '../data/evolutions';
 import { PASSIVES } from '../data/upgrades';
 import { WEAPONS } from '../data/weapons';
 import { weaponLevelDiff, type UpgradeOption } from '../core/upgrades';
@@ -36,7 +37,14 @@ export function describeUpgrade(opt: UpgradeOption): { title: string; tag: strin
         .filter((d) => t.weaponStats[d.stat])
         .map((d) => `${t.weaponStats[d.stat]} ${weaponValue(d.stat, d.from)} → ${weaponValue(d.stat, d.to)}`)
         .join(' · ');
-      return { title: w.name, tag: `${t.levelUp.level(opt.level)}/${WEAPONS[opt.id].levels.length}`, desc };
+      const max = WEAPONS[opt.id].levels.length;
+      const evo = opt.level === max ? evolutionOf(opt.id) : null;
+      const hint = evo ? ` ${t.levelUp.evolvesWith(t.passives[evo.evo.passive])}` : '';
+      return { title: w.name, tag: `${t.levelUp.level(opt.level)}/${max}`, desc: desc + hint };
+    }
+    case 'evolution': {
+      const w = t.weapons[opt.id];
+      return { title: w.name, tag: t.levelUp.evolution, desc: w.desc };
     }
     case 'passive': {
       const def = PASSIVES[opt.id];

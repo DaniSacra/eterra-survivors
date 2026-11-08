@@ -3,6 +3,7 @@ import { ASSETS } from '../../src/render/assets';
 import { config } from '../../src/data/config';
 import { ENEMIES, ENEMY_IDS } from '../../src/data/enemies';
 import { PASSIVE_IDS } from '../../src/data/upgrades';
+import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
 import { WEAPON_IDS } from '../../src/data/weapons';
 import { describeUpgrade, formatStatDelta } from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
@@ -24,6 +25,7 @@ describe('content integrity', () => {
   it('every gem tier and projectile has an asset', () => {
     for (const tier of config.gems.tiers) expect(ASSETS).toHaveProperty(tier.sprite);
     expect(ASSETS).toHaveProperty('proj.elunLight');
+    for (const id of PICKUP_IDS) expect(ASSETS).toHaveProperty(PICKUPS[id].sprite);
   });
 });
 
@@ -40,5 +42,7 @@ describe('upgrade descriptions', () => {
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 3 }).desc).toBe('Golpes 1 → 2');
     expect(describeUpgrade({ kind: 'passive', id: 'might', level: 2 }).desc).toBe('Dano +10%');
     expect(describeUpgrade({ kind: 'heal' }).title).toBe(t.levelUp.heal);
+    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).desc).toContain('Força');
+    expect(describeUpgrade({ kind: 'evolution', id: 'fury', from: 'blade' }).tag).toBe(t.levelUp.evolution);
   });
 });

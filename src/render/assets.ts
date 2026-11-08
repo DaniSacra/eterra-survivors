@@ -21,6 +21,9 @@ export const ASSETS = {
   'gem.small': { kind: 'shape', shape: 'diamond', size: 12, color: 0x40c8e8, stroke: 0xd0f4ff },
   'gem.medium': { kind: 'shape', shape: 'diamond', size: 16, color: 0x40e870, stroke: 0xd8ffe0 },
   'gem.large': { kind: 'shape', shape: 'diamond', size: 22, color: 0xe84060, stroke: 0xffd8e0 },
+  'enemy.oldWolf': { kind: 'shape', shape: 'triangle', size: 44, color: 0x8a8a96, stroke: 0xffd040 },
+  'enemy.golem': { kind: 'shape', shape: 'square', size: 52, color: 0x7a7266, stroke: 0xffa020 },
+  'pickup.chest': { kind: 'shape', shape: 'square', size: 24, color: 0xb07020, stroke: 0xffe080 },
   'enemy.blackKnight': { kind: 'shape', shape: 'diamond', size: 76, color: 0x1a1a24, stroke: 0xc8323e },
 } satisfies Record<string, AssetDef>;
 

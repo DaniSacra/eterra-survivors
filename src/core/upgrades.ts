@@ -1,4 +1,5 @@
 import { config } from '../data/config';
+import { EVOLUTIONS, EVOLVED_IDS, evolutionOf } from '../data/evolutions';
 import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { maxLevel } from './weapons';
@@ -8,20 +9,28 @@ import type { World } from './world';
 export type UpgradeOption =
   | { kind: 'weapon'; id: WeaponId; level: number }
   | { kind: 'passive'; id: PassiveId; level: number }
+  /** Only from chests: `from` turns into `id`. */
+  | { kind: 'evolution'; id: WeaponId; from: WeaponId }
   | { kind: 'heal' };
 
-/** Every option currently available. */
-export function candidates(world: World): UpgradeOption[] {
+const isEvolved = (id: WeaponId): boolean => EVOLUTIONS[id] !== undefined;
+
+/** Every option currently available. Evolved weapons never appear, nor bases already evolved. */
+export function candidates(world: World, newThings = true): UpgradeOption[] {
   const out: UpgradeOption[] = [];
-  const canAddWeapon = world.weapons.length < config.weapons.maxOwned;
+  const canAddWeapon = newThings && world.weapons.length < config.weapons.maxOwned;
   for (const id of WEAPON_IDS) {
+    if (isEvolved(id)) continue;
     const owned = world.weapons.find((w) => w.id === id);
+    const evolved = evolutionOf(id);
     if (owned && owned.level < maxLevel(id)) out.push({ kind: 'weapon', id, level: owned.level + 1 });
-    else if (!owned && canAddWeapon) out.push({ kind: 'weapon', id, level: 1 });
+    else if (!owned && canAddWeapon && !(evolved && world.hasWeapon(evolved.id)))
+      out.push({ kind: 'weapon', id, level: 1 });
   }
   for (const id of PASSIVE_IDS) {
     const level = world.passives[id] ?? 0;
-    if (level < PASSIVES[id].maxLevel) out.push({ kind: 'passive', id, level: level + 1 });
+    if (level < PASSIVES[id].maxLevel && (newThings || level > 0))
+      out.push({ kind: 'passive', id, level: level + 1 });
   }
   return out;
 }
@@ -32,6 +41,23 @@ export function rollUpgrades(world: World, n = config.xp.choices): UpgradeOption
   return pool.length > 0 ? pool.slice(0, n) : [{ kind: 'heal' }];
 }
 
+/** The first evolution whose recipe is complete: base weapon at max level + its passive owned. */
+export function readyEvolution(world: World): UpgradeOption | null {
+  for (const id of EVOLVED_IDS) {
+    const evo = EVOLUTIONS[id];
+    if (!evo || world.hasWeapon(id)) continue;
+    const base = world.weapons.find((w) => w.id === evo.from);
+    if (base && base.level >= maxLevel(base.id) && (world.passives[evo.passive] ?? 0) > 0)
+      return { kind: 'evolution', id, from: evo.from };
+  }
+  return null;
+}
+
+/** What a chest gives: an evolution if one is ready, else a level of something already owned, else a heal. */
+export function chestReward(world: World): UpgradeOption {
+  return readyEvolution(world) ?? world.rng.pick(candidates(world, false)) ?? { kind: 'heal' };
+}
+
 export function applyUpgrade(world: World, opt: UpgradeOption): void {
   const p = world.player;
   switch (opt.kind) {
@@ -39,6 +65,15 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
       const owned = world.weapons.find((w) => w.id === opt.id);
       if (owned) owned.level = opt.level;
       else world.addWeapon(opt.id);
+      break;
+    }
+    case 'evolution': {
+      const owned = world.weapons.find((w) => w.id === opt.from);
+      if (owned) {
+        owned.id = opt.id;
+        owned.level = 1;
+        owned.timer = 0;
+      }
       break;
     }
     case 'passive': {

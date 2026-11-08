@@ -12,6 +12,7 @@ import {
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
+import { createPickup, dropPickup, updatePickups, type Pickup } from './pickups';
 import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
@@ -40,6 +41,7 @@ export class World {
   readonly enemyHash = new SpatialHash(64);
   readonly projectiles = new Pool<Projectile>(createProjectile, 64);
   readonly gems = new Pool<Gem>(createGem, 128);
+  readonly pickups = new Pool<Pickup>(createPickup, 8);
   readonly slashes = new Pool<Slash>(createSlash, 4);
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
   readonly weapons: OwnedWeapon[] = [];
@@ -56,6 +58,10 @@ export class World {
   constructor(seed?: number) {
     this.rng = new Rng(seed);
     this.addWeapon(STARTING_WEAPON);
+  }
+
+  hasWeapon(id: WeaponId): boolean {
+    return this.weapons.some((w) => w.id === id);
   }
 
   addWeapon(id: WeaponId): void {
@@ -78,6 +84,7 @@ export class World {
     updateProjectiles(this, dt);
     sweepDeadEnemies(this);
     updateGems(this, dt);
+    updatePickups(this);
     updateEffects(this, dt);
 
     if (this.player.hp <= 0) this.end('lost');
@@ -108,6 +115,7 @@ export class World {
   onEnemyKilled(e: Enemy): void {
     this.kills++;
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
+    if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);
     if (e === this.boss) {
       this.boss = null;
       this.end('won');

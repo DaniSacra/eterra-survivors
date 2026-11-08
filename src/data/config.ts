@@ -50,6 +50,10 @@ export const config = {
       { min: 0, sprite: 'gem.small' },
     ],
   },
+  pickups: {
+    /** Collision radius of things on the ground (chests, food...). */
+    radius: 14,
+  },
   weapons: {
     maxOwned: 6,
     /** Homing shots look for targets within this distance. */

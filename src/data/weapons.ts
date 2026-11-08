@@ -99,6 +99,36 @@ export const WEAPONS = {
       { damage: 11, cooldown: 0.35 },
     ),
   },
+
+  // Evolved forms (see data/evolutions.ts): one level, never offered on level-up, only from a chest.
+
+  /** Fúria: Aldo spins the blade against everything around him. */
+  fury: {
+    kind: 'arc',
+    levels: [{ damage: 40, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
+  },
+  /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
+  holyLight: {
+    kind: 'homing',
+    levels: [
+      {
+        damage: 24,
+        cooldown: 0.75,
+        speed: 340,
+        count: 6,
+        pierce: 4,
+        lifetime: 3,
+        radius: 8,
+        turnRate: 9,
+        knockback: 60,
+      },
+    ],
+  },
+  /** Chama de Yah: the halo becomes a wide pyre. */
+  yahFlame: {
+    kind: 'aura',
+    levels: [{ damage: 15, cooldown: 0.3, radius: 125 }],
+  },
 } satisfies Record<string, WeaponDef>;
 
 export type WeaponId = keyof typeof WEAPONS;

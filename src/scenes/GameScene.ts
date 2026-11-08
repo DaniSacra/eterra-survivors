@@ -3,6 +3,9 @@ import type { DamageNumber } from '../core/effects';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
+import type { Pickup } from '../core/pickups';
+import { PICKUPS } from '../data/pickups';
+import { describeUpgrade } from '../render/describe';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -23,6 +26,7 @@ export class GameScene extends Phaser.Scene {
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
   private damageMirror!: Mirror<DamageNumber, Phaser.GameObjects.Text>;
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
+  private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
 
   constructor() {
@@ -38,6 +42,14 @@ export class GameScene extends Phaser.Scene {
         const key = (config.gems.tiers.find((tier) => g.value >= tier.min) ?? config.gems.tiers[0]).sprite;
         if (img.texture.key !== key) img.setTexture(key);
         img.setPosition(g.x, g.y);
+      },
+    );
+    this.pickupMirror = new Mirror(
+      () => this.add.image(0, 0, 'pickup.chest').setDepth(3),
+      (img, it) => {
+        const key = PICKUPS[it.type].sprite;
+        if (img.texture.key !== key) img.setTexture(key);
+        img.setPosition(it.x, it.y);
       },
     );
     this.fx = this.add.graphics().setDepth(4);
@@ -106,6 +118,7 @@ export class GameScene extends Phaser.Scene {
     this.playerSprite.setPosition(w.player.x, w.player.y);
     this.playerSprite.setAlpha(w.player.iframes > 0 ? 0.5 : 1);
     this.gemMirror.sync(w.gems.active);
+    this.pickupMirror.sync(w.pickups.active);
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(w.damageNumbers.active);
@@ -145,6 +158,15 @@ export class GameScene extends Phaser.Scene {
           this.hud.announce(t.bossWarning);
           this.cameras.main.shake(400, 0.01);
           break;
+        case 'eliteSpawned':
+          this.hud.announce(t.eliteWarning);
+          break;
+        case 'chest': {
+          const name = describeUpgrade(e.reward).title;
+          this.hud.announce(e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name));
+          this.cameras.main.flash(250, 255, 220, 140);
+          break;
+        }
         case 'won':
         case 'lost':
           this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w }));

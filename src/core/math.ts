@@ -70,6 +70,11 @@ export class Rng {
     return items[items.length - 1] as T;
   }
 
+  /** A random element, or undefined for an empty array. */
+  pick<T>(arr: readonly T[]): T | undefined {
+    return arr.length > 0 ? arr[this.int(arr.length)] : undefined;
+  }
+
   /** Fisher-Yates shuffle, in place. */
   shuffle<T>(arr: T[]): T[] {
     for (let i = arr.length - 1; i > 0; i--) {
