@@ -46,9 +46,20 @@ export function button(
     .rectangle(x, y, w, h, UI.panel)
     .setStrokeStyle(2, UI.border)
     .setInteractive({ useHandCursor: true });
+  // Only a press that starts on the button counts: a finger still held on the joystick when an overlay
+  // opens (death, level-up) must not trigger whatever button it is lifted over.
+  let armed = false;
   bg.on('pointerover', () => bg.setFillStyle(UI.panelHover));
-  bg.on('pointerout', () => bg.setFillStyle(UI.panel));
-  bg.on('pointerup', onClick);
+  bg.on('pointerout', () => {
+    armed = false;
+    bg.setFillStyle(UI.panel);
+  });
+  bg.on('pointerdown', () => (armed = true));
+  bg.on('pointerup', () => {
+    if (!armed) return;
+    armed = false;
+    onClick();
+  });
   if (text) label(scene, x, y, text, Math.min(22, h * 0.4), { bold: true });
   return bg;
 }
