@@ -26,7 +26,12 @@ describe('characters', () => {
 });
 
 describe('unlocks', () => {
-  it('free heroes are open; the others are bought once with gold', () => {
+  it('playtest switch opens every hero', () => {
+    if (!config.unlockAllHeroes) return;
+    for (const id of CHARACTER_IDS) expect(heroUnlocked(newSave(), id)).toBe(true);
+  });
+
+  it.skipIf(config.unlockAllHeroes)('free heroes are open; the others are bought once with gold', () => {
     const save = newSave();
     expect(heroUnlocked(save, 'aldo')).toBe(true);
     expect(heroUnlocked(save, 'lyra')).toBe(false);

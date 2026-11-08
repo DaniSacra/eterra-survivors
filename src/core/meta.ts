@@ -43,7 +43,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
 }
 
 export const heroUnlocked = (save: MetaSave, id: CharacterId): boolean =>
-  CHARACTERS[id].cost === 0 || save.heroes.includes(id);
+  config.unlockAllHeroes || CHARACTERS[id].cost === 0 || save.heroes.includes(id);
 
 /** Buys a hero if affordable. Returns true on success. */
 export function unlockHero(save: MetaSave, id: CharacterId): boolean {
