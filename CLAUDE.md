@@ -32,7 +32,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   A new weapon (of an existing `kind`) or enemy = new data entry + its name in `pt-BR.ts` + an asset key.
   A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
   Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike. An evolution = an evolved weapon entry (one level)
-  + an `EVOLUTIONS` entry (base at max level + passive owned + chest). Elites drop chests.
+  - an `EVOLUTIONS` entry (base at max level + passive owned + chest). Elites drop chests.
 - Meta progression (`core/meta.ts`, pure) is persisted by `render/save.ts` (localStorage, always try/catch):
   banked gold, shop levels, bought heroes, cleared stages. `World` takes a `RunSetup` (hero, stage, shop bonuses).
 - `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture key is generated
