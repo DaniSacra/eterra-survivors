@@ -39,7 +39,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - All entities live in `Pool<T>` (`core/pool.ts`): dense active array, O(1) swap-remove. Kills are deferred
   (`dead` flag) and swept at the end of `step`, so indices stay valid during a step.
 - No Arcade physics per entity: movement is a manual vector to the player; collisions and separation use
-  `SpatialHash` (`core/spatialHash.ts`), rebuilt once per step.
+  `SpatialHash` (`core/spatialHash.ts`), rebuilt before and after enemy movement each step.
 - XP gems merge into the nearest gem once `config.gems.maxActive` is reached.
 - Render mirrors pools by index (`render/mirror.ts`), reusing display objects.
 - F3 toggles the debug overlay (FPS + active entities); F4 (debug only) spawns 100 enemies for stress tests.
