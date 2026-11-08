@@ -15,6 +15,11 @@ export type UpgradeOption =
 
 const isEvolved = (id: WeaponId): boolean => EVOLUTIONS[id] !== undefined;
 
+/** Identifies a weapon or passive for banishing (null for things that can't be banished). */
+export function banishKey(opt: UpgradeOption): string | null {
+  return opt.kind === 'weapon' || opt.kind === 'passive' ? `${opt.kind}:${opt.id}` : null;
+}
+
 /** Every option currently available. Evolved weapons never appear, nor bases already evolved. */
 export function candidates(world: World, newThings = true): UpgradeOption[] {
   const out: UpgradeOption[] = [];
@@ -32,7 +37,7 @@ export function candidates(world: World, newThings = true): UpgradeOption[] {
     if (level < PASSIVES[id].maxLevel && (newThings || level > 0))
       out.push({ kind: 'passive', id, level: level + 1 });
   }
-  return out;
+  return world.banished.size > 0 ? out.filter((o) => !world.banished.has(banishKey(o) as string)) : out;
 }
 
 /** Up to `n` distinct random options; a heal when everything is maxed. */

@@ -14,12 +14,13 @@ import {
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
+import type { Charges, RunBonuses } from './meta';
 import { createPickup, dropPickup, maybeDropRandom, updatePickups, type Pickup } from './pickups';
 import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
 import { SpatialHash } from './spatialHash';
-import { applyUpgrade, rollUpgrades, type UpgradeOption } from './upgrades';
+import { applyUpgrade, banishKey, rollUpgrades, type UpgradeOption } from './upgrades';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
 import { createZone, updateZones, type Zone } from './zones';
@@ -37,6 +38,12 @@ export class World {
   /** The choices on screen while `state === 'levelup'`. */
   upgradeOptions: UpgradeOption[] = [];
   readonly passives: Partial<Record<PassiveId, number>> = {};
+  /** Gold picked up this run (banked into the save when the run ends). */
+  gold = 0;
+  /** Uses left of the level-up helpers. */
+  readonly charges: Charges = { ...config.charges };
+  /** Upgrades removed from this run's level-up pool, as `banishKey`s. */
+  readonly banished = new Set<string>();
   state: WorldState = 'playing';
   readonly rng: Rng;
   readonly player: Player = createPlayer();
@@ -62,8 +69,14 @@ export class World {
   readonly scratch: number[] = [];
   readonly targetsScratch: number[] = [];
 
-  constructor(seed?: number) {
+  constructor(seed?: number, bonuses?: RunBonuses) {
     this.rng = new Rng(seed);
+    if (bonuses) {
+      const st = this.player.stats;
+      for (const k of Object.keys(bonuses.stats) as (keyof typeof st)[]) st[k] += bonuses.stats[k] ?? 0;
+      this.player.hp = st.maxHp;
+      Object.assign(this.charges, bonuses.charges);
+    }
     this.addWeapon(STARTING_WEAPON);
   }
 
@@ -105,6 +118,35 @@ export class World {
     const opt = this.upgradeOptions[index];
     if (this.state !== 'levelup' || !opt) return;
     applyUpgrade(this, opt);
+    this.finishLevelUp();
+  }
+
+  /** Trocar: new options for the same level-up. */
+  reroll(): void {
+    if (this.state !== 'levelup' || this.charges.reroll <= 0) return;
+    this.charges.reroll--;
+    this.upgradeOptions = rollUpgrades(this);
+  }
+
+  /** Pular: gives up this level-up's choice. */
+  skipLevelUp(): void {
+    if (this.state !== 'levelup' || this.charges.skip <= 0) return;
+    this.charges.skip--;
+    this.finishLevelUp();
+  }
+
+  /** Banir: the option never shows up again this run; the choice is rolled again without it. */
+  banish(index: number): void {
+    const opt = this.upgradeOptions[index];
+    if (this.state !== 'levelup' || this.charges.banish <= 0 || !opt) return;
+    const key = banishKey(opt);
+    if (!key) return;
+    this.charges.banish--;
+    this.banished.add(key);
+    this.upgradeOptions = rollUpgrades(this);
+  }
+
+  private finishLevelUp(): void {
     this.pendingLevelUps--;
     this.state = 'playing';
     if (this.pendingLevelUps > 0) this.openLevelUp();

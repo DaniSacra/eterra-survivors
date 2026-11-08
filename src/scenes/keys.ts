@@ -7,4 +7,5 @@ export const SCENES = {
   levelUp: 'levelUp',
   pause: 'pause',
   end: 'end',
+  shop: 'shop',
 } as const;

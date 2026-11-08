@@ -21,6 +21,7 @@ export const config = {
       armor: 0, // flat damage taken reduction per hit
       amount: 0, // extra projectiles / blades / patches / bolts
       growth: 1, // xp multiplier
+      greed: 1, // gold multiplier
     },
     /** Hits never do less than this, whatever the armor. */
     minDamage: 1,
@@ -60,11 +61,20 @@ export const config = {
     radius: 14,
     /** Chance that a normal enemy drops a random floor item (data/pickups.ts weights). */
     dropChance: 0.006,
-    maxActive: 24,
+    maxActive: 40,
     foodHeal: 30,
     bombDamage: 250,
     freezeTime: 6,
   },
+  gold: {
+    /** Chance that a normal enemy drops a coin, and what it is worth (times greed). */
+    dropChance: 0.03,
+    coin: 3,
+    /** Extra gold in every chest. */
+    chest: 30,
+  },
+  /** Level-up helpers every run starts with (the shop adds more). */
+  charges: { reroll: 1, skip: 1, banish: 0 },
   zones: {
     /** Seconds between damage ticks of a frost patch. */
     tick: 0.5,

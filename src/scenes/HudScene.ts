@@ -22,13 +22,14 @@ export class HudScene extends Phaser.Scene {
   private timer!: Phaser.GameObjects.Text;
   private level!: Phaser.GameObjects.Text;
   private kills!: Phaser.GameObjects.Text;
+  private gold!: Phaser.GameObjects.Text;
   private bossName!: Phaser.GameObjects.Text;
   private debug!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
   private pauseBtn!: Phaser.GameObjects.Rectangle;
   private pauseIcon!: Phaser.GameObjects.Text;
   private debugOn = false;
-  private shown = { time: -1, level: -1, kills: -1 };
+  private shown = { time: -1, level: -1, kills: -1, gold: -1 };
 
   constructor() {
     super(SCENES.hud);
@@ -36,7 +37,7 @@ export class HudScene extends Phaser.Scene {
 
   init(data: { world: World }): void {
     this.world = data.world;
-    this.shown = { time: -1, level: -1, kills: -1 };
+    this.shown = { time: -1, level: -1, kills: -1, gold: -1 };
   }
 
   create(): void {
@@ -44,6 +45,7 @@ export class HudScene extends Phaser.Scene {
     this.timer = label(this, 0, 0, '', 26, { bold: true });
     this.level = label(this, 0, 0, '', 15, { bold: true }).setOrigin(1, 0);
     this.kills = label(this, 0, 0, '', 15).setOrigin(1, 0);
+    this.gold = label(this, 0, 0, '', 15, { color: '#ffd870' }).setOrigin(0, 0);
     this.bossName = label(this, 0, 0, t.hud.boss, 14, { bold: true, color: '#ff8090' }).setVisible(false);
     this.debug = this.add
       .text(PAD, 0, '', {
@@ -76,6 +78,7 @@ export class HudScene extends Phaser.Scene {
     this.timer.setPosition(width / 2, XP_H + PAD + 18);
     this.level.setPosition(width - PAD, XP_H + 6);
     this.kills.setPosition(width - PAD, XP_H + 26);
+    this.gold.setPosition(PAD, XP_H + PAD + HP_H + 6);
     this.bossName.setPosition(width / 2, height - 46);
     this.banner.setPosition(width / 2, height * 0.3);
     this.pauseBtn.setPosition(width - PAD - 20, XP_H + 70);
@@ -133,6 +136,7 @@ export class HudScene extends Phaser.Scene {
     const sec = Math.floor(w.time);
     if (sec !== this.shown.time) this.timer.setText(formatTime((this.shown.time = sec)));
     if (w.level !== this.shown.level) this.level.setText(t.hud.level((this.shown.level = w.level)));
+    if (w.gold !== this.shown.gold) this.gold.setText(t.hud.gold((this.shown.gold = w.gold)));
     if (w.kills !== this.shown.kills) this.kills.setText(t.hud.kills((this.shown.kills = w.kills)));
 
     if (this.debugOn) {

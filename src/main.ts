@@ -6,6 +6,7 @@ import { EndScene } from './scenes/EndScene';
 import { LevelUpScene } from './scenes/LevelUpScene';
 import { MenuScene } from './scenes/MenuScene';
 import { PauseScene } from './scenes/PauseScene';
+import { ShopScene } from './scenes/ShopScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -14,7 +15,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
   input: { activePointers: 2 },
   fps: { target: 60 },
-  scene: [BootScene, MenuScene, GameScene, HudScene, LevelUpScene, PauseScene, EndScene],
+  scene: [BootScene, MenuScene, GameScene, HudScene, LevelUpScene, PauseScene, EndScene, ShopScene],
 });
 
 // Dev-only handle for browser automation and console debugging.

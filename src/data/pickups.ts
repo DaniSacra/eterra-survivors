@@ -9,6 +9,8 @@ export interface PickupDef {
 export const PICKUPS = {
   /** Dropped by elites: an evolution, or a level of something owned. */
   chest: { sprite: 'pickup.chest', weight: 0 },
+  /** A coin (its own drop chance: config.gold). */
+  gold: { sprite: 'pickup.gold', weight: 0 },
   /** Pão da Berta: heals. */
   food: { sprite: 'pickup.food', weight: 5 },
   /** Pedra-Ímã: every gem on the ground flies to Aldo. */

@@ -35,14 +35,15 @@ export class EndScene extends Phaser.Scene {
       [t.end.time, formatTime(w.time)],
       [t.end.kills, String(w.kills)],
       [t.end.level, String(w.level)],
+      [t.end.gold, String(w.gold)],
     ];
     rows.forEach(([k, v], i) => {
       const y = height * 0.44 + i * 30;
       label(this, cx - 10, y, k, 18, { color: UI.muted }).setOrigin(1, 0.5);
       label(this, cx + 10, y, v, 18, { bold: true }).setOrigin(0, 0.5);
     });
-    button(this, cx, height * 0.68, bw, 52, () => this.scene.start(SCENES.game), t.end.again);
-    button(this, cx, height * 0.68 + 68, bw, 52, () => this.toMenu(), t.end.menu);
+    button(this, cx, height * 0.7, bw, 52, () => this.scene.start(SCENES.game), t.end.again);
+    button(this, cx, height * 0.7 + 64, bw, 52, () => this.toMenu(), t.end.menu);
 
     bindKeys(this, (kb) => {
       kb.once('keydown-ENTER', () => this.scene.start(SCENES.game));

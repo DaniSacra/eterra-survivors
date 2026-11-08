@@ -6,6 +6,8 @@ import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
 import { describeUpgrade } from '../render/describe';
+import { shopBonuses } from '../core/meta';
+import { bankGold, loadSave } from '../render/save';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -28,13 +30,15 @@ export class GameScene extends Phaser.Scene {
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
+  private banked = false;
 
   constructor() {
     super(SCENES.game);
   }
 
   create(): void {
-    this.world = new World();
+    this.world = new World(undefined, shopBonuses(loadSave()));
+    this.banked = false;
     this.ground = this.add.tileSprite(0, 0, 1, 1, 'tile').setOrigin(0);
     this.gemMirror = new Mirror(
       () => this.add.image(0, 0, 'gem.small').setDepth(3),
@@ -97,6 +101,7 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, this.pauseGame, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.bank();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
       this.game.events.off(Phaser.Core.Events.BLUR, this.pauseGame, this);
       for (const k of [SCENES.hud, SCENES.levelUp, SCENES.pause, SCENES.end]) this.scene.stop(k);
@@ -139,6 +144,13 @@ export class GameScene extends Phaser.Scene {
     this.handleEvents();
   }
 
+  /** Puts the run's gold in the save, once (on death, victory or quitting). */
+  private bank(): void {
+    if (this.banked) return;
+    this.banked = true;
+    bankGold(this.world.gold);
+  }
+
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
@@ -176,7 +188,7 @@ export class GameScene extends Phaser.Scene {
           break;
         }
         case 'pickup':
-          if (e.id === 'chest') break;
+          if (e.id === 'chest' || e.id === 'gold') break;
           this.hud.announce(t.pickups[e.id], true);
           if (e.id === 'bomb') {
             this.cameras.main.flash(200, 255, 240, 200);
@@ -185,6 +197,7 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'won':
         case 'lost':
+          this.bank();
           this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w }));
           break;
       }

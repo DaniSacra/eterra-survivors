@@ -1,6 +1,7 @@
 import type { StatKey } from '../data/config';
 import type { EnemyId } from '../data/enemies';
 import type { PickupId } from '../data/pickups';
+import type { ChargeKey, ShopId } from '../data/shop';
 import type { PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
 
@@ -13,6 +14,7 @@ export const t = {
   menu: {
     intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Aldo precisa resistir até o amanhecer.',
     start: 'Começar',
+    shop: 'Loja do Gaspar',
     controlsDesktop: 'WASD ou setas para andar · Esc pausa · F3 depuração',
     controlsTouch: 'Toque e arraste em qualquer lugar para andar',
   },
@@ -20,6 +22,7 @@ export const t = {
   hud: {
     level: (n: number) => `Nv ${n}`,
     kills: (n: number) => `${n} abates`,
+    gold: (n: number) => `${n} ouro`,
     boss: 'Cavaleiro Negro',
   },
 
@@ -30,6 +33,13 @@ export const t = {
     heal: 'Pão e sopa da Berta',
     healDesc: (n: number) => `Recupera ${n} de vida`,
     hint: 'Toque numa opção ou use 1, 2, 3',
+    banishHint: 'Escolha o que banir desta partida',
+    charges: {
+      reroll: (n: number) => `Trocar (${n})`,
+      skip: (n: number) => `Pular (${n})`,
+      banish: (n: number) => `Banir (${n})`,
+    } satisfies Record<ChargeKey, (n: number) => string>,
+    chargeKeys: 'R troca · X pula · B bane',
     evolution: 'Elo',
     evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
   },
@@ -41,6 +51,7 @@ export const t = {
 
   pickups: {
     chest: 'Baú',
+    gold: 'Moeda',
     food: 'Pão da Berta',
     magnet: 'Pedra-Ímã',
     bomb: 'Badalada!',
@@ -63,8 +74,40 @@ export const t = {
     time: 'Tempo',
     kills: 'Abates',
     level: 'Nível',
+    gold: 'Ouro',
     again: 'Jogar de novo',
     menu: 'Menu',
+  },
+
+  shop: {
+    title: 'Loja do Gaspar',
+    intro: 'O ferreiro de Valmor troca ouro por preparo. As compras valem para todas as partidas.',
+    gold: (n: number) => `Ouro: ${n}`,
+    level: (lv: number, max: number) => `${lv}/${max}`,
+    cost: (n: number) => `${n} ouro`,
+    maxed: 'Completo',
+    back: 'Voltar',
+    items: {
+      might: 'Pedra de Amolar',
+      maxHp: 'Sopa Quente',
+      armor: 'Gibão Acolchoado',
+      regen: 'Erva de Cura',
+      moveSpeed: 'Botas de Couro',
+      cooldown: 'Treino com Gaspar',
+      area: 'Cabo Longo',
+      magnet: 'Bolsa Funda',
+      growth: 'Livros de Lyra',
+      greed: 'Dados da Andilla',
+      amount: 'Segunda Bainha',
+      reroll: 'Conselho do Ancião',
+      skip: 'Paciência',
+      banish: 'Bênção do Templo',
+    } satisfies Record<ShopId, string>,
+    charges: {
+      reroll: 'Trocar +1 por partida',
+      skip: 'Pular +1 por partida',
+      banish: 'Banir +1 por partida',
+    } satisfies Record<ChargeKey, string>,
   },
 
   bossWarning: 'O Cavaleiro Negro chegou!',
@@ -128,6 +171,7 @@ export const t = {
     armor: 'Armadura',
     amount: 'Quantidade',
     growth: 'Experiência',
+    greed: 'Ouro',
   } satisfies Record<StatKey, string>,
 
   /** Labels for weapon level stats (level-up card diffs). Unknown keys are not shown. */

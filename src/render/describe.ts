@@ -6,7 +6,7 @@ import { weaponLevelDiff, type UpgradeOption } from '../core/upgrades';
 import { t } from '../i18n/pt-BR';
 
 /** Stats that are multipliers show as percentages. */
-const PERCENT_STATS: StatKey[] = ['might', 'cooldown', 'area', 'growth'];
+const PERCENT_STATS: StatKey[] = ['might', 'cooldown', 'area', 'growth', 'greed'];
 
 const num = (v: number): string => String(Math.round(v * 100) / 100).replace('.', ',');
 

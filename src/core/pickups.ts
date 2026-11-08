@@ -27,14 +27,23 @@ export function dropPickup(world: World, type: PickupId, x: number, y: number): 
 export function maybeDropRandom(world: World, x: number, y: number): void {
   if (world.rng.next() < config.pickups.dropChance)
     dropPickup(world, world.rng.weighted(RANDOM_DROPS).id, x, y);
+  else if (world.rng.next() < config.gold.dropChance) dropPickup(world, 'gold', x, y);
 }
+
+const addGold = (world: World, amount: number): void => {
+  world.gold += Math.round(amount * world.player.stats.greed);
+};
 
 /** What each pickup does when collected. */
 const COLLECT: Record<PickupId, (world: World) => void> = {
   chest(world) {
     const reward = chestReward(world);
     applyUpgrade(world, reward);
+    addGold(world, config.gold.chest);
     world.events.push({ type: 'chest', reward });
+  },
+  gold(world) {
+    addGold(world, config.gold.coin);
   },
   food(world) {
     const p = world.player;
