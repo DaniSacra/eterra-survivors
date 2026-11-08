@@ -4,6 +4,8 @@ import { config } from '../../src/data/config';
 import { ENEMIES, ENEMY_IDS } from '../../src/data/enemies';
 import { PASSIVE_IDS } from '../../src/data/upgrades';
 import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
+import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
+import { STAGES, STAGE_IDS } from '../../src/data/stages';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
 import { describeUpgrade, formatStatDelta } from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
@@ -20,6 +22,17 @@ describe('content integrity', () => {
   it('every weapon and passive has a name', () => {
     for (const id of WEAPON_IDS) expect(t.weapons[id].name).toBeTruthy();
     for (const id of PASSIVE_IDS) expect(t.passives[id]).toBeTruthy();
+  });
+
+  it('every hero and stage has its texts and assets', () => {
+    for (const id of CHARACTER_IDS) {
+      expect(t.characters[id].name).toBeTruthy();
+      expect(ASSETS).toHaveProperty(CHARACTERS[id].sprite);
+    }
+    for (const id of STAGE_IDS) {
+      expect(t.stages[id].name).toBeTruthy();
+      expect(ASSETS).toHaveProperty(STAGES[id].tile);
+    }
   });
 
   it('every gem tier and projectile has an asset', () => {

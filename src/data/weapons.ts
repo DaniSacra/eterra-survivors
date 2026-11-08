@@ -268,4 +268,3 @@ export const WEAPONS = {
 
 export type WeaponId = keyof typeof WEAPONS;
 export const WEAPON_IDS = Object.keys(WEAPONS) as WeaponId[];
-export const STARTING_WEAPON: WeaponId = 'blade';

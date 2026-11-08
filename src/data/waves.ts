@@ -11,116 +11,40 @@ export interface WaveSegment {
   enemies: { id: EnemyId; weight: number }[];
 }
 
-export const WAVES: WaveSegment[] = [
-  { from: 0, interval: 1.5, batch: 1, hpMult: 1, enemies: [{ id: 'skeleton', weight: 1 }] },
-  {
-    from: 30,
-    interval: 1.2,
-    batch: 2,
-    hpMult: 1,
-    enemies: [
-      { id: 'skeleton', weight: 3 },
-      { id: 'spider', weight: 1 },
-    ],
-  },
-  {
-    from: 60,
-    interval: 1,
-    batch: 2,
-    hpMult: 1.1,
-    enemies: [
-      { id: 'skeleton', weight: 2 },
-      { id: 'spider', weight: 2 },
-    ],
-  },
-  {
-    from: 120,
-    interval: 1,
-    batch: 3,
-    hpMult: 1.3,
-    enemies: [
-      { id: 'skeleton', weight: 3 },
-      { id: 'spider', weight: 2 },
-      { id: 'slime', weight: 1 },
-    ],
-  },
-  {
-    from: 180,
-    interval: 0.9,
-    batch: 4,
-    hpMult: 1.6,
-    enemies: [
-      { id: 'skeleton', weight: 3 },
-      { id: 'spider', weight: 3 },
-      { id: 'slime', weight: 1 },
-    ],
-  },
-  {
-    from: 240,
-    interval: 0.8,
-    batch: 5,
-    hpMult: 2,
-    enemies: [
-      { id: 'spider', weight: 3 },
-      { id: 'slime', weight: 2 },
-    ],
-  },
-  {
-    from: 300,
-    interval: 0.7,
-    batch: 6,
-    hpMult: 2.4,
-    enemies: [
-      { id: 'skeleton', weight: 3 },
-      { id: 'spider', weight: 2 },
-      { id: 'slime', weight: 2 },
-    ],
-  },
-  {
-    from: 390,
-    interval: 0.6,
-    batch: 7,
-    hpMult: 3,
-    enemies: [
-      { id: 'skeleton', weight: 2 },
-      { id: 'spider', weight: 3 },
-      { id: 'slime', weight: 2 },
-    ],
-  },
-  {
-    from: 480,
-    interval: 0.5,
-    batch: 8,
-    hpMult: 3.8,
-    enemies: [
-      { id: 'skeleton', weight: 3 },
-      { id: 'spider', weight: 2 },
-      { id: 'slime', weight: 3 },
-    ],
-  },
-  {
-    from: 540,
-    interval: 0.45,
-    batch: 10,
-    hpMult: 4.5,
-    enemies: [
-      { id: 'skeleton', weight: 2 },
-      { id: 'spider', weight: 3 },
-      { id: 'slime', weight: 3 },
-    ],
-  },
+/** Each stage fills three roles with its own cast. */
+export interface Roles {
+  /** The common walker. */
+  basic: EnemyId;
+  /** Quick and fragile. */
+  fast: EnemyId;
+  /** Slow and tough. */
+  tank: EnemyId;
+}
+type Role = keyof Roles;
+
+/** The 10-minute curve shared by every stage, by role: [from, interval, batch, hpMult, weights]. */
+const CURVE: [number, number, number, number, Partial<Record<Role, number>>][] = [
+  [0, 1.5, 1, 1, { basic: 1 }],
+  [30, 1.2, 2, 1, { basic: 3, fast: 1 }],
+  [60, 1, 2, 1.1, { basic: 2, fast: 2 }],
+  [120, 1, 3, 1.3, { basic: 3, fast: 2, tank: 1 }],
+  [180, 0.9, 4, 1.6, { basic: 3, fast: 3, tank: 1 }],
+  [240, 0.8, 5, 2, { fast: 3, tank: 2 }],
+  [300, 0.7, 6, 2.4, { basic: 3, fast: 2, tank: 2 }],
+  [390, 0.6, 7, 3, { basic: 2, fast: 3, tank: 2 }],
+  [480, 0.5, 8, 3.8, { basic: 3, fast: 2, tank: 3 }],
+  [540, 0.45, 10, 4.5, { basic: 2, fast: 3, tank: 3 }],
   // The boss fight: a trickle of escorts.
-  { from: 600, interval: 2, batch: 3, hpMult: 4.5, enemies: [{ id: 'skeleton', weight: 1 }] },
+  [600, 2, 3, 4.5, { basic: 1 }],
 ];
 
-export const BOSS: { id: EnemyId; at: number } = { id: 'blackKnight', at: 600 };
-
-/** One elite at each of these times (seconds), with the HP multiplier of the segment then active. */
-export const ELITES: { id: EnemyId; at: number }[] = [
-  { id: 'oldWolf', at: 100 },
-  { id: 'golem', at: 220 },
-  { id: 'oldWolf', at: 330 },
-  { id: 'golem', at: 420 },
-  { id: 'oldWolf', at: 500 },
-  { id: 'golem', at: 570 },
-];
+/** The wave list of a stage: the shared curve with the stage's cast in each role. */
+export function buildWaves(roles: Roles): WaveSegment[] {
+  return CURVE.map(([from, interval, batch, hpMult, weights]) => ({
+    from,
+    interval,
+    batch,
+    hpMult,
+    enemies: (Object.keys(weights) as Role[]).map((r) => ({ id: roles[r], weight: weights[r] as number })),
+  }));
+}

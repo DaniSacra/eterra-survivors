@@ -3,6 +3,7 @@ import { buy, newSave, sanitizeSave, shopBonuses, shopCost } from '../../src/cor
 import { dropPickup } from '../../src/core/pickups';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
+import { CHARACTERS } from '../../src/data/characters';
 import { SHOP } from '../../src/data/shop';
 import { quietWorld, still } from './helpers';
 
@@ -27,8 +28,8 @@ describe('shop', () => {
     expect(b.stats.maxHp).toBe(20);
     expect(b.stats.cooldown).toBeCloseTo(-0.03);
     expect(b.charges.reroll).toBe(config.charges.reroll + 3);
-    const w = new World(1, b);
-    expect(w.player.stats.maxHp).toBe(config.player.stats.maxHp + 20);
+    const w = new World(1, { bonuses: b });
+    expect(w.player.stats.maxHp).toBe(config.player.stats.maxHp + CHARACTERS.aldo.stats.maxHp + 20);
     expect(w.player.hp).toBe(w.player.stats.maxHp);
     expect(w.charges.reroll).toBe(config.charges.reroll + 3);
   });
@@ -36,10 +37,16 @@ describe('shop', () => {
   it('repairs broken or tampered saves', () => {
     expect(sanitizeSave(null)).toEqual(newSave());
     expect(sanitizeSave('x')).toEqual(newSave());
-    expect(sanitizeSave({ gold: 12.7, shop: { maxHp: 99, nope: 3, might: -1 } })).toEqual({
-      gold: 12,
-      shop: { maxHp: SHOP.maxHp.maxLevel },
-    });
+    expect(
+      sanitizeSave({
+        gold: 12.7,
+        shop: { maxHp: 99, nope: 3, might: -1 },
+        heroes: ['lyra', 'ghost'],
+        cleared: 'valmor',
+      }),
+    ).toEqual({ gold: 12, shop: { maxHp: SHOP.maxHp.maxLevel }, heroes: ['lyra'], cleared: [] });
+    // Saves from before heroes and stages still load.
+    expect(sanitizeSave({ gold: 5, shop: {} })).toEqual({ ...newSave(), gold: 5 });
   });
 });
 

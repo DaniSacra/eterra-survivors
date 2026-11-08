@@ -6,8 +6,11 @@ import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
 import { describeUpgrade } from '../render/describe';
-import { shopBonuses } from '../core/meta';
-import { bankGold, loadSave } from '../render/save';
+import { shopBonuses, stageUnlocked } from '../core/meta';
+import { CHARACTERS } from '../data/characters';
+import { STAGE_IDS, type StageId } from '../data/stages';
+import { loadSave, recordRun } from '../render/save';
+import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -31,15 +34,20 @@ export class GameScene extends Phaser.Scene {
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
   private banked = false;
+  private choice!: RunChoice;
 
   constructor() {
     super(SCENES.game);
   }
 
+  init(data: Partial<RunChoice>): void {
+    this.choice = { ...lastChoice(this.registry), ...data };
+  }
+
   create(): void {
-    this.world = new World(undefined, shopBonuses(loadSave()));
+    this.world = new World(undefined, { ...this.choice, bonuses: shopBonuses(loadSave()) });
     this.banked = false;
-    this.ground = this.add.tileSprite(0, 0, 1, 1, 'tile').setOrigin(0);
+    this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.gemMirror = new Mirror(
       () => this.add.image(0, 0, 'gem.small').setDepth(3),
       (img, g) => {
@@ -57,7 +65,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.fx = this.add.graphics().setDepth(4);
-    this.playerSprite = this.add.image(0, 0, 'player').setDepth(10);
+    this.playerSprite = this.add.image(0, 0, CHARACTERS[this.world.character].sprite).setDepth(10);
     this.projectileMirror = new Mirror(
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12),
       (img, p) => {
@@ -144,11 +152,19 @@ export class GameScene extends Phaser.Scene {
     this.handleEvents();
   }
 
-  /** Puts the run's gold in the save, once (on death, victory or quitting). */
-  private bank(): void {
-    if (this.banked) return;
+  /**
+   * Records the run in the save, once (on death, victory or quitting): its gold, and the stage if won.
+   * Returns the stage this victory just unlocked, if any.
+   */
+  private bank(): StageId | null {
+    if (this.banked) return null;
     this.banked = true;
-    bankGold(this.world.gold);
+    const w = this.world;
+    const won = w.state === 'won';
+    const next = STAGE_IDS[STAGE_IDS.indexOf(w.stageId) + 1];
+    const opens = won && next !== undefined && !stageUnlocked(loadSave(), next) ? next : null;
+    recordRun(w.gold, won ? w.stageId : null);
+    return opens;
   }
 
   /** Only a running match can be paused (not during level-up or after the end). */
@@ -172,7 +188,7 @@ export class GameScene extends Phaser.Scene {
           this.time.delayedCall(90, () => this.playerSprite.clearTint());
           break;
         case 'bossSpawned':
-          this.hud.announce(t.bossWarning);
+          this.hud.announce(t.bossWarning(t.enemies[w.stage.boss.id]));
           this.cameras.main.shake(400, 0.01);
           break;
         case 'eliteSpawned':
@@ -196,10 +212,11 @@ export class GameScene extends Phaser.Scene {
           } else if (e.id === 'freeze') this.cameras.main.flash(300, 160, 220, 255);
           break;
         case 'won':
-        case 'lost':
-          this.bank();
-          this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w }));
+        case 'lost': {
+          const unlocked = this.bank();
+          this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w, unlocked }));
           break;
+        }
       }
     }
     w.events.length = 0;

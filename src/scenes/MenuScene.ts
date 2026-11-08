@@ -44,6 +44,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private start(): void {
-    this.scene.start(SCENES.game);
+    this.scene.start(SCENES.select);
   }
 }

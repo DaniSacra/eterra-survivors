@@ -1,6 +1,8 @@
-import { config } from '../data/config';
+import { config, type StatKey, type Stats } from '../data/config';
 import type { PassiveId } from '../data/upgrades';
-import { STARTING_WEAPON, type WeaponId } from '../data/weapons';
+import { CHARACTERS, type CharacterId } from '../data/characters';
+import { STAGES, type StageDef, type StageId } from '../data/stages';
+import type { WeaponId } from '../data/weapons';
 import {
   addDamageNumber,
   createBolt,
@@ -27,6 +29,13 @@ import { createZone, updateZones, type Zone } from './zones';
 import { createGem, dropGem, updateGems, type Gem } from './xp';
 
 export type WorldState = 'playing' | 'levelup' | 'won' | 'lost';
+
+/** How a run starts: who, where, and what the shop gives. */
+export interface RunSetup {
+  character?: CharacterId;
+  stage?: StageId;
+  bonuses?: RunBonuses;
+}
 
 /** The whole match state. Pure logic: the render layer reads it, never writes it. */
 export class World {
@@ -60,6 +69,9 @@ export class World {
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
   readonly weapons: OwnedWeapon[] = [];
   readonly spawner = new Spawner();
+  readonly character: CharacterId;
+  readonly stageId: StageId;
+  readonly stage: StageDef;
   boss: Enemy | null = null;
   /** Drained by the renderer each frame. */
   readonly events: GameEvent[] = [];
@@ -69,15 +81,23 @@ export class World {
   readonly scratch: number[] = [];
   readonly targetsScratch: number[] = [];
 
-  constructor(seed?: number, bonuses?: RunBonuses) {
+  constructor(seed?: number, setup: RunSetup = {}) {
     this.rng = new Rng(seed);
-    if (bonuses) {
-      const st = this.player.stats;
-      for (const k of Object.keys(bonuses.stats) as (keyof typeof st)[]) st[k] += bonuses.stats[k] ?? 0;
-      this.player.hp = st.maxHp;
-      Object.assign(this.charges, bonuses.charges);
+    this.character = setup.character ?? 'aldo';
+    this.stageId = setup.stage ?? 'valmor';
+    this.stage = STAGES[this.stageId];
+    const hero = CHARACTERS[this.character];
+    const st = this.player.stats;
+    const add = (stats: Partial<Stats>) => {
+      for (const k of Object.keys(stats) as StatKey[]) st[k] += stats[k] ?? 0;
+    };
+    add(hero.stats);
+    if (setup.bonuses) {
+      add(setup.bonuses.stats);
+      Object.assign(this.charges, setup.bonuses.charges);
     }
-    this.addWeapon(STARTING_WEAPON);
+    this.player.hp = st.maxHp;
+    this.addWeapon(hero.weapon);
   }
 
   hasWeapon(id: WeaponId): boolean {

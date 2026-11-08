@@ -2,21 +2,36 @@ import { describe, expect, it } from 'vitest';
 import { segmentAt } from '../../src/core/waves';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
-import { ENEMIES } from '../../src/data/enemies';
-import { BOSS, WAVES } from '../../src/data/waves';
+import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
+import { STAGES, STAGE_IDS } from '../../src/data/stages';
 
-describe('waves', () => {
-  it('data is sorted, starts at 0 and references known enemies', () => {
-    expect(WAVES[0]!.from).toBe(0);
-    for (let i = 1; i < WAVES.length; i++) expect(WAVES[i]!.from).toBeGreaterThan(WAVES[i - 1]!.from);
-    for (const w of WAVES) for (const e of w.enemies) expect(ENEMIES[e.id]).toBeDefined();
-    expect(BOSS.at).toBe(config.matchDuration);
+const WAVES = STAGES.valmor.waves;
+
+describe('stages', () => {
+  it.each(STAGE_IDS)('%s: waves sorted from 0, known enemies, elites and a boss at the end', (id) => {
+    const s = STAGES[id];
+    expect(s.waves[0]!.from).toBe(0);
+    for (let i = 1; i < s.waves.length; i++) expect(s.waves[i]!.from).toBeGreaterThan(s.waves[i - 1]!.from);
+    for (const w of s.waves)
+      for (const e of w.enemies) {
+        const def: EnemyDef = ENEMIES[e.id];
+        expect(def.boss || def.elite).toBeFalsy();
+      }
+    for (const el of s.elites) expect((ENEMIES[el.id] as EnemyDef).elite).toBe(true);
+    expect((ENEMIES[s.boss.id] as EnemyDef).boss).toBe(true);
+    expect(s.boss.at).toBe(config.matchDuration);
   });
 
+  it('Valmor keeps the Cavaleiro Negro as its boss', () => {
+    expect(STAGES.valmor.boss.id).toBe('blackKnight');
+  });
+});
+
+describe('waves', () => {
   it('picks the segment that has started', () => {
-    expect(segmentAt(0)).toBe(WAVES[0]);
-    expect(segmentAt(WAVES[1]!.from + 0.1)).toBe(WAVES[1]);
-    expect(segmentAt(99999)).toBe(WAVES[WAVES.length - 1]);
+    expect(segmentAt(0, WAVES)).toBe(WAVES[0]);
+    expect(segmentAt(WAVES[1]!.from + 0.1, WAVES)).toBe(WAVES[1]);
+    expect(segmentAt(99999, WAVES)).toBe(WAVES[WAVES.length - 1]);
   });
 
   it('spawns more enemies over time', () => {
@@ -37,13 +52,15 @@ describe('waves', () => {
     expect(w.enemies.size).toBeLessThanOrEqual(config.enemies.maxActive + 1);
   });
 
-  it('spawns the boss once at the end and killing it wins', () => {
-    const w = new World(1);
-    w.time = BOSS.at;
+  it.each(STAGE_IDS)('%s: spawns its own cast and boss, and killing the boss wins', (id) => {
+    const w = new World(1, { stage: id });
+    w.time = STAGES[id].boss.at - 30;
     w.player.stats.maxHp = w.player.hp = 1e9;
-    w.step(1 / 60, { x: 0, y: 0 });
-    w.step(1 / 60, { x: 0, y: 0 });
-    expect(w.enemies.active.filter((e) => e.def.boss)).toHaveLength(1);
+    w.weapons.length = 0;
+    for (let i = 0; i < 60 * 31; i++) w.step(1 / 60, { x: 0, y: 0 });
+    const cast = new Set(STAGES[id].waves.flatMap((s) => s.enemies.map((e) => e.id)));
+    for (const e of w.enemies.active) if (!e.def.boss && !e.def.elite) expect(cast.has(e.type)).toBe(true);
+    expect(w.boss?.type).toBe(STAGES[id].boss.id);
     expect(w.events).toContainEqual({ type: 'bossSpawned' });
     w.boss!.dead = true;
     w.step(1 / 60, { x: 0, y: 0 });

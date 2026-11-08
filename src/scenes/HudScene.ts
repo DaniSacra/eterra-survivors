@@ -46,7 +46,10 @@ export class HudScene extends Phaser.Scene {
     this.level = label(this, 0, 0, '', 15, { bold: true }).setOrigin(1, 0);
     this.kills = label(this, 0, 0, '', 15).setOrigin(1, 0);
     this.gold = label(this, 0, 0, '', 15, { color: '#ffd870' }).setOrigin(0, 0);
-    this.bossName = label(this, 0, 0, t.hud.boss, 14, { bold: true, color: '#ff8090' }).setVisible(false);
+    this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 14, {
+      bold: true,
+      color: '#ff8090',
+    }).setVisible(false);
     this.debug = this.add
       .text(PAD, 0, '', {
         fontFamily: 'monospace',
@@ -98,7 +101,7 @@ export class HudScene extends Phaser.Scene {
 
   /** Debug only: 100 more enemies to measure performance. */
   private stress(): void {
-    const seg = segmentAt(this.world.time);
+    const seg = segmentAt(this.world.time, this.world.stage.waves);
     for (let i = 0; i < 100; i++)
       spawnOnRing(this.world, this.world.rng.weighted(seg.enemies).id, seg.hpMult);
   }

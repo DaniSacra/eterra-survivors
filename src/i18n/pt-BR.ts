@@ -1,5 +1,7 @@
 import type { StatKey } from '../data/config';
+import type { CharacterId } from '../data/characters';
 import type { EnemyId } from '../data/enemies';
+import type { StageId } from '../data/stages';
 import type { PickupId } from '../data/pickups';
 import type { ChargeKey, ShopId } from '../data/shop';
 import type { PassiveId } from '../data/upgrades';
@@ -9,10 +11,9 @@ import type { WeaponId } from '../data/weapons';
 export const t = {
   title: 'Eterra Survivors',
   subtitle: 'Crônicas de Eterra',
-  hero: 'Aldo',
 
   menu: {
-    intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Aldo precisa resistir até o amanhecer.',
+    intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Alguém precisa resistir até o amanhecer.',
     start: 'Começar',
     shop: 'Loja do Gaspar',
     controlsDesktop: 'WASD ou setas para andar · Esc pausa · F3 depuração',
@@ -23,7 +24,6 @@ export const t = {
     level: (n: number) => `Nv ${n}`,
     kills: (n: number) => `${n} abates`,
     gold: (n: number) => `${n} ouro`,
-    boss: 'Cavaleiro Negro',
   },
 
   levelUp: {
@@ -68,9 +68,9 @@ export const t = {
 
   end: {
     won: 'Vitória!',
-    wonText: 'O Cavaleiro Negro caiu. Os mortos de Valmor voltam a dormir.',
     lost: 'Fim de jogo',
-    lostText: 'Aldo tombou na neve. Valmor ainda espera por um herói.',
+    lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
+    unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
     time: 'Tempo',
     kills: 'Abates',
     level: 'Nível',
@@ -110,7 +110,44 @@ export const t = {
     } satisfies Record<ChargeKey, string>,
   },
 
-  bossWarning: 'O Cavaleiro Negro chegou!',
+  bossWarning: (boss: string) => `${boss} chegou!`,
+
+  select: {
+    title: 'Preparação',
+    hero: 'Herói',
+    stage: 'Fase',
+    go: 'Partir',
+    back: 'Voltar',
+    gold: (n: number) => `Ouro: ${n}`,
+    unlock: (n: number) => `Liberar: ${n} ouro`,
+    locked: 'Vença a fase anterior',
+    startsWith: (weapon: string) => `Começa com ${weapon}`,
+  },
+
+  characters: {
+    aldo: { name: 'Aldo', role: 'Guerreiro', desc: 'Resistente. Vida e armadura a mais.' },
+    lyra: { name: 'Lyra', role: 'Maga', desc: 'Magias largas, mas pouca vida.' },
+    teo: { name: 'Teo', role: 'Clérigo', desc: 'As feridas se fecham sozinhas.' },
+    andilla: { name: 'Andilla', role: 'Ladina', desc: 'Pés ligeiros e sorte com o ouro.' },
+  } satisfies Record<CharacterId, { name: string; role: string; desc: string }>,
+
+  stages: {
+    valmor: {
+      name: 'Arredores de Valmor',
+      desc: 'O cemitério da vila, na neve do sul.',
+      won: 'O Cavaleiro Negro caiu. Os mortos de Valmor voltam a dormir.',
+    },
+    crypt: {
+      name: 'Cripta da Igreja Velha',
+      desc: 'Pedra azul, limo e um sino que não devia tocar.',
+      won: 'O Sineiro se calou. O sino não toca mais.',
+    },
+    southRoad: {
+      name: 'Estrada do Sul',
+      desc: 'Gelo, encapuzados e a matilha do Lobo Velho.',
+      won: 'O Lobo Velho caiu. A estrada para Erukh está aberta.',
+    },
+  } satisfies Record<StageId, { name: string; desc: string; won: string }>,
 
   debug: {
     fps: 'FPS',
@@ -154,8 +191,16 @@ export const t = {
     skeleton: 'Esqueleto',
     spider: 'Aranha Tumular',
     slime: 'Gosma Verde',
-    oldWolf: 'Lobo Velho',
+    bones: 'Ossada',
+    bat: 'Morcego',
+    ghost: 'Espectro',
+    hooded: 'Encapuzado',
+    crow: 'Corvo',
+    frostWolf: 'Lobo da Geada',
+    goblin: 'Goblin Lanceiro',
     golem: 'Golem de Pedra',
+    bellRinger: 'O Sineiro',
+    oldWolf: 'Lobo Velho',
     blackKnight: 'Cavaleiro Negro',
   } satisfies Record<EnemyId, string>,
 

@@ -8,4 +8,5 @@ export const SCENES = {
   pause: 'pause',
   end: 'end',
   shop: 'shop',
+  select: 'select',
 } as const;
