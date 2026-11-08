@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { World } from '../core/world';
 import { t } from '../i18n/pt-BR';
 import { describeUpgrade } from '../render/describe';
-import { UI, button, dim, label, restartOnResize } from '../render/ui';
+import { UI, button, dim, label, restartOnResize, bindKeys } from '../render/ui';
 import { SCENES } from './keys';
 
 /** Overlay with the upgrade choices. The world is frozen (state 'levelup') while it is open. */
@@ -45,8 +45,7 @@ export class LevelUpScene extends Phaser.Scene {
     label(this, width / 2, top + opts.length * (cardH + 12) + 20, t.levelUp.hint, 14, { color: UI.muted });
     this.highlight();
 
-    const kb = this.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin;
-    kb.on('keydown', this.onKey, this);
+    bindKeys(this, (kb) => kb.on('keydown', this.onKey, this));
     restartOnResize(this);
   }
 

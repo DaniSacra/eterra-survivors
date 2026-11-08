@@ -4,9 +4,10 @@ import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
 import { t } from '../i18n/pt-BR';
 import { Joystick } from '../render/joystick';
-import { UI, label } from '../render/ui';
+import { UI, button, label } from '../render/ui';
 import { spawnOnRing } from '../core/enemies';
 import { segmentAt } from '../core/waves';
+import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 
 const PAD = 10;
@@ -23,6 +24,9 @@ export class HudScene extends Phaser.Scene {
   private kills!: Phaser.GameObjects.Text;
   private bossName!: Phaser.GameObjects.Text;
   private debug!: Phaser.GameObjects.Text;
+  private banner!: Phaser.GameObjects.Text;
+  private pauseBtn!: Phaser.GameObjects.Rectangle;
+  private pauseIcon!: Phaser.GameObjects.Text;
   private debugOn = false;
   private shown = { time: -1, level: -1, kills: -1 };
 
@@ -50,6 +54,10 @@ export class HudScene extends Phaser.Scene {
       })
       .setOrigin(0, 1)
       .setVisible(false);
+    this.banner = label(this, 0, 0, '', 24, { bold: true, color: '#ff8090' }).setAlpha(0);
+    const game = this.scene.get(SCENES.game) as GameScene;
+    this.pauseBtn = button(this, 0, 0, 40, 40, () => game.pauseGame()).setAlpha(0.8);
+    this.pauseIcon = label(this, 0, 0, 'II', 18, { bold: true });
     this.joystick = new Joystick(this);
     this.layout();
 
@@ -69,7 +77,16 @@ export class HudScene extends Phaser.Scene {
     this.level.setPosition(width - PAD, XP_H + 6);
     this.kills.setPosition(width - PAD, XP_H + 26);
     this.bossName.setPosition(width / 2, height - 46);
+    this.banner.setPosition(width / 2, height * 0.3);
+    this.pauseBtn.setPosition(width - PAD - 20, XP_H + 70);
+    this.pauseIcon.setPosition(width - PAD - 20, XP_H + 70);
     this.debug.setPosition(PAD, height - PAD);
+  }
+
+  /** Big centred message that fades out. */
+  announce(text: string): void {
+    this.banner.setText(text).setAlpha(1);
+    this.tweens.add({ targets: this.banner, alpha: 0, delay: 2200, duration: 800 });
   }
 
   /** Debug only: 100 more enemies to measure performance. */

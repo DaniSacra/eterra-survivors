@@ -65,3 +65,14 @@ export function restartOnResize(scene: Phaser.Scene): void {
   scene.scale.on('resize', handler);
   scene.events.once('shutdown', () => scene.scale.off('resize', handler));
 }
+
+/**
+ * Binds keyboard handlers shortly after an overlay opens, so the key press that opened it
+ * (still queued this frame) doesn't also trigger it.
+ */
+export function bindKeys(
+  scene: Phaser.Scene,
+  bind: (kb: Phaser.Input.Keyboard.KeyboardPlugin) => void,
+): void {
+  scene.time.delayedCall(100, () => bind(scene.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin));
+}

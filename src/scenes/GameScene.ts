@@ -6,6 +6,7 @@ import type { Gem } from '../core/xp';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
+import { t } from '../i18n/pt-BR';
 import { Controls } from '../render/controls';
 import { drawFx } from '../render/fx';
 import { Mirror } from '../render/mirror';
@@ -72,10 +73,17 @@ export class GameScene extends Phaser.Scene {
     const hud = (this.hud = this.scene.get(SCENES.hud) as HudScene);
     hud.events.once(Phaser.Scenes.Events.CREATE, () => (this.controls = new Controls(this, hud.joystick)));
 
+    const kb = this.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin;
+    kb.on('keydown-ESC', this.pauseGame, this);
+    kb.on('keydown-P', this.pauseGame, this);
+    // Phones: switching apps or locking the screen pauses the run.
+    this.game.events.on(Phaser.Core.Events.BLUR, this.pauseGame, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
-      this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this),
-    );
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
+      this.game.events.off(Phaser.Core.Events.BLUR, this.pauseGame, this);
+      for (const k of [SCENES.hud, SCENES.levelUp, SCENES.pause, SCENES.end]) this.scene.stop(k);
+    });
     this.fitCamera();
   }
 
@@ -113,10 +121,35 @@ export class GameScene extends Phaser.Scene {
     this.handleEvents();
   }
 
+  /** Only a running match can be paused (not during level-up or after the end). */
+  pauseGame(): void {
+    if (this.world.state !== 'playing' || !this.scene.isActive()) return;
+    this.hud.joystick.setEnabled(false);
+    this.scene.pause();
+    this.scene.launch(SCENES.pause);
+  }
+
   private handleEvents(): void {
     const w = this.world;
     for (const e of w.events) {
-      if (e.type === 'levelUp') this.scene.launch(SCENES.levelUp, { world: w });
+      switch (e.type) {
+        case 'levelUp':
+          this.scene.launch(SCENES.levelUp, { world: w });
+          break;
+        case 'playerHit':
+          this.cameras.main.shake(120, 0.006);
+          this.playerSprite.setTintFill(0xff4050);
+          this.time.delayedCall(90, () => this.playerSprite.clearTint());
+          break;
+        case 'bossSpawned':
+          this.hud.announce(t.bossWarning);
+          this.cameras.main.shake(400, 0.01);
+          break;
+        case 'won':
+        case 'lost':
+          this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w }));
+          break;
+      }
     }
     w.events.length = 0;
   }
