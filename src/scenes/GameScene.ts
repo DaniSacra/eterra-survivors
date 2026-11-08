@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { DamageNumber } from '../core/effects';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
+import type { Gem } from '../core/xp';
 import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -14,11 +15,13 @@ import { SCENES } from './keys';
 export class GameScene extends Phaser.Scene {
   world!: World;
   private controls!: Controls;
+  private hud!: HudScene;
   private ground!: Phaser.GameObjects.TileSprite;
   private playerSprite!: Phaser.GameObjects.Image;
   private enemyMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
   private damageMirror!: Mirror<DamageNumber, Phaser.GameObjects.Text>;
+  private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
 
   constructor() {
@@ -28,6 +31,14 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.world = new World();
     this.ground = this.add.tileSprite(0, 0, 1, 1, 'tile').setOrigin(0);
+    this.gemMirror = new Mirror(
+      () => this.add.image(0, 0, 'gem.small').setDepth(3),
+      (img, g) => {
+        const key = (config.gems.tiers.find((tier) => g.value >= tier.min) ?? config.gems.tiers[0]).sprite;
+        if (img.texture.key !== key) img.setTexture(key);
+        img.setPosition(g.x, g.y);
+      },
+    );
     this.fx = this.add.graphics().setDepth(4);
     this.playerSprite = this.add.image(0, 0, 'player').setDepth(10);
     this.projectileMirror = new Mirror(
@@ -58,7 +69,7 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.scene.launch(SCENES.hud);
-    const hud = this.scene.get(SCENES.hud) as HudScene;
+    const hud = (this.hud = this.scene.get(SCENES.hud) as HudScene);
     hud.events.once(Phaser.Scenes.Events.CREATE, () => (this.controls = new Controls(this, hud.joystick)));
 
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
@@ -79,21 +90,34 @@ export class GameScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     if (!this.controls) return;
     const w = this.world;
+    this.hud.joystick.setEnabled(w.state === 'playing');
     w.step(delta / 1000, this.controls.read());
 
     const cam = this.cameras.main;
     cam.centerOn(w.player.x, w.player.y);
     this.playerSprite.setPosition(w.player.x, w.player.y);
     this.playerSprite.setAlpha(w.player.iframes > 0 ? 0.5 : 1);
+    this.gemMirror.sync(w.gems.active);
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(w.damageNumbers.active);
     drawFx(this.fx, w);
-    w.events.length = 0; // reactions (shake, screens) arrive in later steps
-
     // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
-    const v = cam.worldView;
-    this.ground.setPosition(v.x, v.y).setSize(v.width + 2, v.height + 2);
-    this.ground.setTilePosition(v.x, v.y);
+    // (computed from the player, since cam.worldView only updates at render time)
+    const vw = cam.width / cam.zoom;
+    const vh = cam.height / cam.zoom;
+    const vx = w.player.x - vw / 2 - 2;
+    const vy = w.player.y - vh / 2 - 2;
+    this.ground.setPosition(vx, vy).setSize(vw + 4, vh + 4);
+    this.ground.setTilePosition(vx, vy);
+    this.handleEvents();
+  }
+
+  private handleEvents(): void {
+    const w = this.world;
+    for (const e of w.events) {
+      if (e.type === 'levelUp') this.scene.launch(SCENES.levelUp, { world: w });
+    }
+    w.events.length = 0;
   }
 }

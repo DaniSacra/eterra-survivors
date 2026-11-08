@@ -31,6 +31,25 @@ export const config = {
     knockbackDecay: 10, // per second
     hitFlash: 0.1,
   },
+  xp: {
+    /** XP to go from level L to L+1 = base + step * (L - 1). */
+    base: 5,
+    step: 9,
+    choices: 3,
+    /** Fallback option when everything is maxed. */
+    healAmount: 30,
+  },
+  gems: {
+    /** Above this many gems on the ground, new drops merge into the nearest gem. */
+    maxActive: 250,
+    pullSpeed: 380,
+    /** Visual tiers by value (asset keys in render/assets.ts), highest first. */
+    tiers: [
+      { min: 20, sprite: 'gem.large' },
+      { min: 5, sprite: 'gem.medium' },
+      { min: 0, sprite: 'gem.small' },
+    ],
+  },
   weapons: {
     maxOwned: 6,
     /** Homing shots look for targets within this distance. */

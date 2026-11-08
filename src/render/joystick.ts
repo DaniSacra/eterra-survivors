@@ -6,6 +6,8 @@ import type { Vec2 } from '../core/math';
 /** Floating virtual joystick: appears wherever the finger touches down. Screen-space (HUD scene). */
 export class Joystick {
   readonly vector: Vec2 = { x: 0, y: 0 };
+  /** When false (menus/overlays open), touches are ignored and the stick resets. */
+  private enabled = true;
   private pointerId = -1;
   private baseX = 0;
   private baseY = 0;
@@ -24,7 +26,7 @@ export class Joystick {
 
   /** Touch only: on desktop the mouse should not steer. */
   private onDown(p: Phaser.Input.Pointer, over: unknown[]): void {
-    if (this.pointerId !== -1 || !p.wasTouch || over.length > 0) return;
+    if (!this.enabled || this.pointerId !== -1 || !p.wasTouch || over.length > 0) return;
     this.pointerId = p.id;
     this.baseX = p.x;
     this.baseY = p.y;
@@ -41,6 +43,12 @@ export class Joystick {
 
   private onUp(p: Phaser.Input.Pointer): void {
     if (p.id === this.pointerId) this.reset();
+  }
+
+  setEnabled(enabled: boolean): void {
+    if (enabled === this.enabled) return;
+    this.enabled = enabled;
+    if (!enabled) this.reset();
   }
 
   reset(): void {

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { GameScene } from './scenes/GameScene';
 import { HudScene } from './scenes/HudScene';
+import { LevelUpScene } from './scenes/LevelUpScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -10,7 +11,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
   input: { activePointers: 2 },
   fps: { target: 60 },
-  scene: [BootScene, GameScene, HudScene],
+  scene: [BootScene, GameScene, HudScene, LevelUpScene],
 });
 
 // Dev-only handle for browser automation and console debugging.
