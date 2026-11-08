@@ -4,7 +4,7 @@ import { SHOP, SHOP_IDS, type ShopDef, type ShopId } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
-import { UI, bindKeys, button, label, restartOnResize } from '../render/ui';
+import { UI, bindKeys, button, keyNav, label, restartOnResize } from '../render/ui';
 import { SCENES } from './keys';
 
 /** Permanent upgrades, bought with banked gold. */
@@ -13,8 +13,16 @@ export class ShopScene extends Phaser.Scene {
     super(SCENES.shop);
   }
 
+  /** Keyboard focus, kept when the scene rebuilds after a purchase. */
+  private focus = 0;
+
+  init(data: { focus?: number }): void {
+    this.focus = data.focus ?? 0;
+  }
+
   create(): void {
     const { width, height } = this.scale;
+    const cards: Phaser.GameObjects.Rectangle[] = [];
     const cx = width / 2;
     const save = loadSave();
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
@@ -35,7 +43,8 @@ export class ShopScene extends Phaser.Scene {
       const x = left + (i % cols) * (cardW + gap) + cardW / 2;
       const y = top + Math.floor(i / cols) * (cardH + gap) + cardH / 2;
       const cost = shopCost(save, id);
-      const card = button(this, x, y, cardW, cardH, () => this.buy(id));
+      const card = button(this, x, y, cardW, cardH, () => this.buy(id, i));
+      cards.push(card);
       if (cost === null || cost > save.gold) card.setAlpha(0.55);
       const lx = x - cardW / 2 + 10;
       const small = cardH < 50;
@@ -54,17 +63,18 @@ export class ShopScene extends Phaser.Scene {
         color: '#ffd870',
       }).setOrigin(1, 0.5);
     });
-    button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back);
+    cards.push(button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back));
+    keyNav(this, cards, cols, this.focus);
 
     bindKeys(this, (kb) => kb.once('keydown-ESC', () => this.back()));
     restartOnResize(this);
   }
 
-  private buy(id: ShopId): void {
+  private buy(id: ShopId, index: number): void {
     const save = loadSave();
     if (!buy(save, id)) return;
     writeSave(save);
-    this.scene.restart();
+    this.scene.restart({ focus: index });
   }
 
   private back(): void {

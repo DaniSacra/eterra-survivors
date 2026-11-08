@@ -3,7 +3,7 @@ import { formatTime } from '../core/format';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import { t } from '../i18n/pt-BR';
-import { UI, button, dim, label, restartOnResize, bindKeys } from '../render/ui';
+import { UI, button, dim, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { SCENES } from './keys';
 
 /** Game over or victory, over the frozen battlefield. */
@@ -64,11 +64,12 @@ export class EndScene extends Phaser.Scene {
           color: '#ffd870',
         },
       );
-    button(this, cx, height * 0.7, bw, 52, () => this.again(), t.end.again);
-    button(this, cx, height * 0.7 + 64, bw, 52, () => this.toMenu(), t.end.menu);
+    keyNav(this, [
+      button(this, cx, height * 0.7, bw, 52, () => this.again(), t.end.again),
+      button(this, cx, height * 0.7 + 64, bw, 52, () => this.toMenu(), t.end.menu),
+    ]);
 
     bindKeys(this, (kb) => {
-      kb.once('keydown-ENTER', () => this.again());
       kb.once('keydown-ESC', () => this.toMenu());
     });
     restartOnResize(this);

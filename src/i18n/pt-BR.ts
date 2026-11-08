@@ -121,6 +121,7 @@ export const t = {
     gold: (n: number) => `Ouro: ${n}`,
     unlock: (n: number) => `Liberar: ${n} ouro`,
     locked: 'Vença a fase anterior',
+    keys: '←→ herói · ↑↓ fase · Enter parte',
     startsWith: (weapon: string) => `Começa com ${weapon}`,
   },
 

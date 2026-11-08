@@ -72,6 +72,7 @@ export class LevelUpScene extends Phaser.Scene {
   }
 
   private onKey(e: KeyboardEvent): void {
+    if (e.repeat) return; // a movement key still held when the overlay opened
     const n = this.cards.length;
     const k = e.key.toLowerCase();
     if (e.key >= '1' && e.key <= String(n)) this.choose(Number(e.key) - 1);

@@ -54,6 +54,7 @@ export function button(
     armed = false;
     bg.setFillStyle(UI.panel);
   });
+  bg.setData('action', onClick);
   bg.on('pointerdown', () => (armed = true));
   bg.on('pointerup', () => {
     if (!armed) return;
@@ -86,4 +87,59 @@ export function bindKeys(
   bind: (kb: Phaser.Input.Keyboard.KeyboardPlugin) => void,
 ): void {
   scene.time.delayedCall(100, () => bind(scene.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin));
+}
+
+/** Direction of a navigation key (arrows or WASD), or 0. Held keys (auto-repeat) are ignored. */
+export function navStep(e: KeyboardEvent, cols = 1): number {
+  if (e.repeat) return 0;
+  switch (e.key.toLowerCase()) {
+    case 'arrowup':
+    case 'w':
+      return -cols;
+    case 'arrowdown':
+    case 's':
+      return cols;
+    case 'arrowleft':
+    case 'a':
+      return -1;
+    case 'arrowright':
+    case 'd':
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+export const isConfirm = (e: KeyboardEvent): boolean => !e.repeat && (e.key === 'Enter' || e.key === ' ');
+
+/**
+ * Keyboard navigation over `button`s: arrows/WASD move the focus (by `cols` vertically in a grid),
+ * Enter/Space presses the focused one. Disabled buttons are skipped. Returns nothing; the focus is drawn
+ * as the hover look plus an accent border.
+ */
+export function keyNav(
+  scene: Phaser.Scene,
+  buttons: Phaser.GameObjects.Rectangle[],
+  cols = 1,
+  start = 0,
+): void {
+  const usable = buttons.filter((b) => b.input?.enabled);
+  if (usable.length === 0) return;
+  let i = Math.min(start, usable.length - 1);
+  const show = () =>
+    usable.forEach((b, k) =>
+      b
+        .setFillStyle(k === i ? UI.panelHover : UI.panel)
+        .setStrokeStyle(k === i ? 3 : 2, k === i ? UI.accent : UI.border),
+    );
+  show();
+  bindKeys(scene, (kb) =>
+    kb.on('keydown', (e: KeyboardEvent) => {
+      const step = navStep(e, cols);
+      if (step !== 0) {
+        i = (i + step + usable.length) % usable.length;
+        show();
+      } else if (isConfirm(e)) (usable[i]?.getData('action') as () => void)();
+    }),
+  );
 }
