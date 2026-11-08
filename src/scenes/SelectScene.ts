@@ -118,13 +118,26 @@ export class SelectScene extends Phaser.Scene {
       .setAlpha(owned ? 1 : 0.4);
     label(this, x - w / 2 + 38, top + 9, c.name, 16, { bold: true, align: 'left' });
     label(this, x - w / 2 + 38, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
+    if (h < 70) return;
     const desc = owned ? c.desc : t.select.unlock(CHARACTERS[id].cost);
-    if (h >= 70)
-      label(this, x - w / 2 + 10, top + 48, desc, 12, {
-        color: owned ? UI.text : '#ffd870',
-        align: 'left',
-        wrap: w - 20,
-      });
+    const d = label(this, x - w / 2 + 10, top + 46, desc, 12, {
+      color: owned ? UI.text : '#ffd870',
+      align: 'left',
+      wrap: w - 20,
+    });
+    // The signature weapon, if it fits under the description.
+    if (top + 46 + d.height + 16 <= y + h / 2)
+      label(
+        this,
+        x - w / 2 + 10,
+        y + h / 2 - 8,
+        t.select.signature(t.weapons[CHARACTERS[id].weapon].name),
+        11,
+        {
+          color: '#ffd870',
+          wrap: w - 20,
+        },
+      ).setOrigin(0, 1);
   }
 
   private stageCard(

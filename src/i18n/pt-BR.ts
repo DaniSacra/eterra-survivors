@@ -132,7 +132,7 @@ export const t = {
     unlock: (n: number) => `Liberar: ${n} ouro`,
     locked: 'Vença a fase anterior',
     keys: '←→ herói · ↑↓ fase · Enter parte',
-    startsWith: (weapon: string) => `Começa com ${weapon}`,
+    signature: (weapon: string) => `Arma própria: ${weapon}`,
   },
 
   characters: {
@@ -173,16 +173,25 @@ export const t = {
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
     daggers: { name: 'Adagas de Andilla', desc: 'Facas lançadas em linha reta à frente.' },
-    paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta de Aldo.' },
-    frost: { name: 'Geada de Lyra', desc: 'Manchas de gelo que ferem e atrasam os inimigos.' },
+    paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta do herói.' },
+    frost: { name: 'Geada de Valmor', desc: 'Manchas de gelo que ferem e atrasam os inimigos.' },
+    hammer: {
+      name: 'Martelo do Gaspar',
+      desc: 'Um martelo pesado lançado à frente, que atravessa e empurra longe.',
+    },
+    wisps: { name: 'Fogos-Fátuos', desc: 'Luzes lentas que perseguem os mortos por muito tempo.' },
+    bells: { name: 'Sinos de Bronze', desc: 'Sinos pesados girando largo em volta do herói.' },
     lightning: { name: 'Raio de Lyra', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
     holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
     yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
     fan: { name: 'Leque de Facas', desc: 'Facas para todos os lados, que atravessam fileiras.' },
-    vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta de Aldo.' },
+    vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta do herói.' },
     blizzard: { name: 'Nevasca', desc: 'O inverno cobre o campo inteiro.' },
     storm: { name: 'Tempestade', desc: 'O céu inteiro desaba sobre os mortos.' },
+    forgeFury: { name: 'Fúria da Forja', desc: 'Martelos que não param, atravessando tudo.' },
+    soulProcession: { name: 'Procissão das Almas', desc: 'Uma fila longa de luzes caminha pelo campo.' },
+    funeralToll: { name: 'Dobre Fúnebre', desc: 'Os sinos dobram por tudo o que chega perto.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {

@@ -1,12 +1,17 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
-import { WEAPONS, type AuraLevel, type OrbitLevel } from '../data/weapons';
+import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data/weapons';
 import { orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
 
 const SLASH_COLOR = 0xe8f0ff;
 const AURA_COLOR = 0xffc040;
-const ORBIT_COLOR = 0xd8e4ff;
+/** How each orbit weapon's pieces look: swords (a blade line) or bells (a heavy disc). */
+const ORBIT_STYLE: Partial<Record<WeaponId, { color: number; blade: boolean }>> = {
+  bells: { color: 0xc89040, blade: false },
+  funeralToll: { color: 0xe8b860, blade: false },
+};
+const SWORDS = { color: 0xd8e4ff, blade: true };
 const FROST_COLOR = 0x9ad8ff;
 const BOLT_COLOR = 0xfff6a0;
 
@@ -31,13 +36,21 @@ export function drawFx(g: Phaser.GameObjects.Graphics, world: World): void {
       const count = s.count + p.stats.amount;
       const orbitR = s.orbitRadius * p.stats.area;
       const r = s.radius * p.stats.area;
-      g.fillStyle(ORBIT_COLOR, 0.9).lineStyle(2, 0x4a5268, 1);
+      const style = ORBIT_STYLE[w.id] ?? SWORDS;
+      g.fillStyle(style.color, 0.9).lineStyle(2, 0x4a5268, 1);
       for (let i = 0; i < count; i++) {
         const a = orbitAngle(world.time, s.spin, i, count);
         const x = p.x + Math.cos(a) * orbitR;
         const y = p.y + Math.sin(a) * orbitR;
-        g.fillCircle(x, y, r * 0.6).strokeCircle(x, y, r * 0.6);
-        g.lineBetween(x, y, x + Math.cos(a + Math.PI / 2) * r * 1.4, y + Math.sin(a + Math.PI / 2) * r * 1.4);
+        const size = style.blade ? r * 0.6 : r;
+        g.fillCircle(x, y, size).strokeCircle(x, y, size);
+        if (style.blade)
+          g.lineBetween(
+            x,
+            y,
+            x + Math.cos(a + Math.PI / 2) * r * 1.4,
+            y + Math.sin(a + Math.PI / 2) * r * 1.4,
+          );
       }
     }
   }

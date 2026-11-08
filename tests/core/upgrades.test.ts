@@ -14,7 +14,7 @@ describe('upgrades', () => {
     expect(new Set(opts.map((o) => JSON.stringify(o))).size).toBe(opts.length);
     const all = candidates(w);
     expect(all).toContainEqual({ kind: 'weapon', id: 'blade', level: 2 });
-    expect(all).toContainEqual({ kind: 'weapon', id: 'elunLight', level: 1 });
+    expect(all).toContainEqual({ kind: 'weapon', id: 'yahAura', level: 1 });
     expect(all.filter((o) => o.kind === 'passive')).toHaveLength(PASSIVE_IDS.length);
   });
 

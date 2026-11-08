@@ -174,7 +174,7 @@ export const WEAPONS = {
       { damage: 15, spin: 4 },
     ),
   },
-  /** Geada de Lyra: patches of frost that hurt and slow. */
+  /** Geada de Valmor: patches of frost that hurt and slow. */
   frost: {
     kind: 'zone',
     levels: levels<ZoneLevel>(
@@ -198,6 +198,65 @@ export const WEAPONS = {
       { radius: 32 },
       { count: 4, damage: 30 },
       { damage: 38, cooldown: 1.7 },
+    ),
+  },
+  /** Martelo do Gaspar: the smith's heavy hammer, thrown ahead; it ploughs through rows. */
+  hammer: {
+    kind: 'thrown',
+    levels: levels<ThrownLevel>(
+      {
+        damage: 22,
+        cooldown: 2.2,
+        speed: 260,
+        count: 1,
+        pierce: 3,
+        lifetime: 1.6,
+        radius: 12,
+        spread: 0.3,
+        knockback: 260,
+      },
+      { damage: 28 },
+      { count: 2 },
+      { pierce: 5 },
+      { damage: 36, cooldown: 1.9 },
+      { count: 3 },
+      { damage: 48, radius: 15 },
+    ),
+  },
+  /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
+  wisps: {
+    kind: 'homing',
+    levels: levels<HomingLevel>(
+      {
+        damage: 6,
+        cooldown: 1.6,
+        speed: 170,
+        count: 2,
+        pierce: 2,
+        lifetime: 4,
+        radius: 7,
+        turnRate: 4,
+        knockback: 10,
+      },
+      { count: 3 },
+      { damage: 8 },
+      { pierce: 3, lifetime: 5 },
+      { count: 4 },
+      { damage: 11 },
+      { count: 5, cooldown: 1.3 },
+    ),
+  },
+  /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
+  bells: {
+    kind: 'orbit',
+    levels: levels<OrbitLevel>(
+      { damage: 14, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
+      { damage: 18 },
+      { count: 2 },
+      { orbitRadius: 125, radius: 20 },
+      { damage: 24, cooldown: 0.7 },
+      { count: 3 },
+      { damage: 32, spin: 2 },
     ),
   },
 
@@ -263,6 +322,47 @@ export const WEAPONS = {
   storm: {
     kind: 'strike',
     levels: [{ damage: 50, cooldown: 1, count: 8, radius: 44 }],
+  },
+  /** Fúria da Forja: hammers that never stop. */
+  forgeFury: {
+    kind: 'thrown',
+    levels: [
+      {
+        damage: 70,
+        cooldown: 1.3,
+        speed: 300,
+        count: 3,
+        pierce: 999,
+        lifetime: 1.8,
+        radius: 18,
+        spread: 0.35,
+        knockback: 400,
+      },
+    ],
+  },
+  /** Procissão das Almas: a long line of lights walking the field. */
+  soulProcession: {
+    kind: 'homing',
+    levels: [
+      {
+        damage: 18,
+        cooldown: 1,
+        speed: 210,
+        count: 8,
+        pierce: 6,
+        lifetime: 6,
+        radius: 10,
+        turnRate: 5,
+        knockback: 20,
+      },
+    ],
+  },
+  /** Dobre Fúnebre: the bells toll for everything around Aldo. */
+  funeralToll: {
+    kind: 'orbit',
+    levels: [
+      { damage: 45, cooldown: 0.6, count: 5, orbitRadius: 140, radius: 24, spin: 2.2, knockback: 320 },
+    ],
   },
 } satisfies Record<string, WeaponDef>;
 
