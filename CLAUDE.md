@@ -23,6 +23,10 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - DRY and KISS: reuse first, no premature abstractions.
 - Unit tests for all game logic (`tests/core/*.test.ts`).
 - Small Conventional Commits (`feat:`, `fix:`, `perf:`, `test:`, `docs:`, `chore:`, `refactor:`) at the end of each step.
+- Daniel prefers autonomous progress: once a plan is approved, keep going through all of it, committing **and
+  pushing** as each step/phase finishes, and tell him when there is something new to test. Don't stop to ask between
+  approved steps.
+- The backlog lives in `docs/design/backlog.md`; mark items done there as they land.
 
 ## Architecture
 
