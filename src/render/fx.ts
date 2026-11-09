@@ -56,7 +56,7 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   fireSword: { color: 0xff5a2a, core: 0xffe080, width: 7, fire: true },
 };
 const PUFF_COLOR = 0xe8eef8;
-const GEM_GLINT = 0x9be35a;
+const GEM_GLINT = 0x8adcff;
 const ITEM_GLINT = 0xffd870;
 const HP_OK = 0x7cd860;
 const HP_LOW = 0xd83a4a;

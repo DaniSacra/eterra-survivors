@@ -63,9 +63,9 @@ const wisp = (core: number, halo: number, s: number): ArtDef => ({
   },
 });
 
-/** XP gems: one green that stands out on snow, blue stone and road alike; size tells the value. */
-const GEM_BODY = 0x5cc040;
-const GEM_LIGHT = 0xc8f890;
+/** XP gems: one bright light blue that stands out on the dark ground of every stage; size tells the value. */
+const GEM_BODY = 0x5ccbff;
+const GEM_LIGHT = 0xd4f2ff;
 const gem = (s: number): ArtDef => ({
   w: Math.round(12 * s),
   h: Math.round(14 * s),
