@@ -146,7 +146,7 @@ export const WEAPONS = {
   blade: {
     kind: 'arc',
     category: 'aimed',
-    thrust: { every: 3, range: 1.6, arc: 0.45, damage: 2.2 },
+    thrust: { every: 2, range: 1.6, arc: 0.25, damage: 3.5 },
     levels: levels<ArcLevel>(
       { damage: 13, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
       { damage: 17, range: 98 },
@@ -204,7 +204,7 @@ export const WEAPONS = {
     crit: { chance: 0.2, mult: 2 },
     levels: levels<ThrownLevel>(
       {
-        damage: 18,
+        damage: 17,
         cooldown: 0.5,
         speed: 520,
         count: 1,
@@ -215,11 +215,11 @@ export const WEAPONS = {
         knockback: 25,
       },
       { count: 2 },
-      { damage: 22 },
+      { damage: 21 },
       { cooldown: 0.42 },
       { count: 3 },
-      { damage: 28 },
-      { count: 4, damage: 33, cooldown: 0.36 },
+      { damage: 27 },
+      { count: 4, damage: 32, cooldown: 0.36 },
     ),
   },
 

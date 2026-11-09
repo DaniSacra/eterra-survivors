@@ -17,7 +17,7 @@ export const CHARACTERS = {
   /** Guerreiro: tough, starts with his village blade. */
   aldo: { sprite: 'player.aldo', weapon: 'blade', stats: { maxHp: 60, armor: 4 }, cost: 0 },
   /** Maga, Aldo's younger sister: her staff, wide spells, frail. */
-  lyra: { sprite: 'player.lyra', weapon: 'staff', stats: { area: 0.1, maxHp: -10 }, cost: 800 },
+  lyra: { sprite: 'player.lyra', weapon: 'staff', stats: { area: 0.05, maxHp: -10 }, cost: 800 },
   /** Clérigo: a mace that shakes the ground, and wounds that close by themselves. */
   teo: { sprite: 'player.teo', weapon: 'mace', stats: { regen: 0.4 }, cost: 800 },
   /** Ladina: knives, quick feet and luck with gold. */

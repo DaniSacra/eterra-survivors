@@ -98,13 +98,13 @@ describe('Maça de Ferro (slam: fissure, tremor, stun)', () => {
 describe('Lâmina de Valmor: the thrust', () => {
   const blade = WEAPONS.blade;
 
-  it('every third blow is a long, narrow thrust that hits harder', () => {
+  it('every few blows (thrust.every) is a long, narrow thrust that hits harder', () => {
     const w = prepared('blade');
     w.player.facing.x = 1;
     const l = blade.levels[0]!;
     const far = spawnEnemy(w, 'blackKnight', l.range * blade.thrust.range - 20, 0);
     far.hp = far.maxHp = 1e6;
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < blade.thrust.every - 1; i++) {
       w.weapons[0]!.timer = 0;
       updateWeapons(w, 1 / 60);
     }

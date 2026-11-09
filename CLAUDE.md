@@ -21,9 +21,11 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 
 - `npm run dev` — dev server · `npm test` — unit tests · `npm run lint` · `npm run typecheck` · `npm run build`
 - `npm run lab` — weapon DPS table (solo and crowd, L1/Lmax/Elo) from `tests/lab/weapons.test.ts`
-- `npm run sim` — 48 full runs (4 heroes x 3 stages x 4 seeds) with the bot in `tests/lab/bot.ts`; `SIM_HERO`,
-  `SIM_STAGE`, `SIM_SEEDS` narrow it; `SIM_SHOP=full` plays the veteran, `SIM_VIGIL=1` goes on into the Noite Sem
-  Fim. It prints real DPS **per level** (`levelDps`: only while at that level), each Elo against its base at max
+- `npm run sim` — full runs (4 heroes x 3 stages x 8 seeds) with the bot in `tests/lab/bot.ts`; `SIM_HERO`,
+  `SIM_STAGE`, `SIM_SEEDS` narrow it; `SIM_SHOP=none|half|full|all` picks the Loja profile (`all` = the three,
+  for the `TARGETS` table: wins and median death per stage x profile, gold per run, heroes more than 20 points off
+  the stage marked `!`), `SIM_RUNS=1` prints each run, `SIM_VIGIL=1` goes on into the Noite Sem Fim. The `LOJA`
+  line gives the whole Loja in average runs (goal 40–60). It prints real DPS **per level** (`levelDps`: only while at that level), each Elo against its base at max
   level in the same runs (`ELO X`, goal >= 2.5x) and the level where the card pool runs short (`POOL`). Both are
   skipped by `npm test`; results go in `docs/balance-baseline.md`
 - Every step must end with `npm test`, `npm run lint` and `npm run build` green, and the game running.
@@ -50,19 +52,34 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   role), `stages.ts`, `characters.ts`, `upgrades.ts` (passives), `pickups.ts`, `shop.ts`, `config.ts`.
   A new weapon (of an existing `kind`) or enemy = new data entry + its name in `pt-BR.ts` + an asset key.
   A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
-  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike. Arc weapons can be aimed (`aim: 'nearest'`, they
-  wait for someone in reach), send a `shock` wave from the tip of the reach and strike twice in the same direction
-  (`combo`, Maça de Ferro and Quebra-Junta). An evolution (Elo) is an evolved weapon entry
+  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike, slam. Arc weapons swing around the hero (the blade
+  adds a `thrust` every few swings); thrown weapons can fly where the hero faces (`aim: 'facing'`), burst on the
+  first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) open a fissure ahead, shake the
+  ground after `combo` seconds and stun (bosses only `config.weapons.bossStun`).
+  Every weapon has a **category** (`aimed` / `auto` / `area`, an Elo inherits its base's) and must sit in its band
+  of crowd DPS at max level, relative to the best `aimed` weapon (`CATEGORY_BANDS` in `data/weapons.ts`: aimed
+  85–100%, auto 50–65%, area 40–55%; Elos against the best aimed Elo). `tests/core/bands.test.ts` enforces it and
+  `npm run lab` shows it.
+  An evolution (Elo) is an evolved weapon entry
   (one level) plus an `EVOLUTIONS` entry: base at max level, passive owned, then a chest. Elites drop chests.
   The Elo moments: `eloReady` event (HUD notice, one-time tip, arrows to off-screen elites) and the `EloScene`
   celebration when the chest forms it; the pause lists each weapon's `eloStatus`.
   When weapons and passives run short, `data/rewards.ts` cards (Bolsa de Ouro, Banquete, Bênção de Yah) keep the
   level-up at 3 cards; `canBanish` never lets Banir leave fewer.
-  Each hero's starting weapon (`characters.ts` `weapon`) is a **signature weapon**: only that hero is ever
-  offered it (and so its Elo). Everything else is a shared pool; keep hero names off shared weapons.
+  Each hero's starting weapon (`characters.ts` `weapon`) is only where they start: every weapon and Elo is offered
+  to every hero.
+- Stages (`data/stages.ts`) have a `layout` and a `mult`. Layouts (`core/terrain.ts`, pure, no storage): `open`
+  (Valmor), `obstacles` (Cripta: one obstacle per cell by a hash of the run seed, clear around the start; they block
+  hero and enemies, not shots) and `corridor` (Estrada do Sul: a road between forests, enemies come from both ends
+  and some out of the sides). `mult` scales enemy HP, contact and ability damage, speed, spawn density and gold;
+  the Noite Sem Fim inherits it. The shared wave curve (`data/waves.ts`) also ramps contact damage per segment
+  (`damage`, applied through `world.enemyDamage`).
 - Meta progression (`core/meta.ts`, pure) is persisted by `render/save.ts` (localStorage, always try/catch):
   banked gold, shop levels, bought heroes, cleared stages. `World` takes a `RunSetup` (hero, stage, shop bonuses).
-  The Loja buys in two steps (`ShopCart`: select, then `confirmPurchase`), in sections (`SHOP_SECTIONS`).
+  The Loja buys in two steps (`ShopCart`: select, then `confirmPurchase`), in sections (`SHOP_SECTIONS`); items
+  raise a stat, add level-up charges or, Segunda Chance, a revive (`RunBonuses.revives`, `config.revive`).
+  Bot targets per stage x Loja profile (none / half / full wins): Valmor 0–15% (death at 6–8 min) / 40–60% / 85%+,
+  Cripta 0% / 15–35% / 70–85%, Estrada 0% / 0–10% / 35–55%. Tune stage `mult` and waves first, then weapons.
 - **Noite Sem Fim**: after a victory the end screen offers "Continuar a vigília" (`world.continueVigil()`); the
   spawner then grows the stage's last full wave (`config.vigil`: HP, contact damage, batch, an elite a minute).
   The victory is banked when the boss falls; `recordVigil` adds only what the vigil brought, and each hero keeps
@@ -106,8 +123,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - Balance lives in `src/data` (waves, enemies, weapons, upgrades, config); the `balance-tester` agent audits it.
 - Orbit weapons test contact every frame; their `cooldown` is the re-hit delay per enemy (`Enemy.orbitReady`). Measured on 2026-11-08: core
   `World.step` costs ~0.5 ms with 700 enemies in Node; the browser held 60 FPS with 700 enemies at 4x CPU throttle.
-- A naive bot (circling, light avoidance, weapons-first picks) survives ~4–5 min, so the curve probably needs
-  playtesting before it feels fair to reach the boss.
+- The sim bot is no human: read its numbers as relative. The curve was calibrated to its targets on 2026-11-09
+  (Etapa 6 in `docs/balance-baseline.md`) and still needs playtesting.
 - Overlays bind keys through `bindKeys()` (render/ui.ts): the key that opens an overlay is still queued that
   frame and would otherwise trigger it immediately.
 - `window.game` is exposed in dev builds only, for browser automation.

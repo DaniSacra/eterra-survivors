@@ -77,7 +77,7 @@ const DEFS = {
   // Dano (weapon hits only: a bomb is no build)
   hit80: { group: 'damage', metric: 'bestHit', goal: 80, gold: 50 },
   // Calibrated with the sim (docs/balance-baseline.md, CC-04): about half of the veteran bot's victories.
-  hit120: { group: 'damage', metric: 'bestHit', goal: 200, gold: 100 },
+  hit120: { group: 'damage', metric: 'bestHit', goal: 250, gold: 100 },
   damageRun: { group: 'damage', metric: 'runDamage', goal: 750_000, gold: 100 },
   damageTotal: { group: 'damage', metric: 'totalDamage', goal: 5_000_000, gold: 150 },
   // Sobrevivência
