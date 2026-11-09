@@ -654,3 +654,35 @@ ELO X    fury 1.5x · holyLight 3.2x · yahFlame 7.8x · fan 2.8x · vigil 8.2x 
 157/288 (antes 266). A curva por fase já aparece: Cripta sem loja 13% (morte em 3,6 min) e Estrada sem loja 0% (1,7
 min), enquanto Valmor quase não muda. Valmor sem loja segue alto (75%, alvo 0–15%) e a Estrada com loja inteira
 fica perto do alvo (69%, alvo 35–55%). Isso fica para a Etapa 6.
+
+## Etapa 5 · Loja que decide a vitória
+
+Mudanças: tetos novos (Pedra de Amolar e Sopa Quente 10 níveis; Gibão, Treino com Gaspar e Cabo Longo 5; Erva de
+Cura 5 níveis de +0,2; Segunda Bainha 2 níveis), item **Segunda Chance** (2000 ouro: levanta uma vez por partida com
+metade da vida e 2 s intocável), preços de base reduzidos para a Loja inteira custar 40.300 de ouro. Gaspar ganha
+retrato e bigorna no cabeçalho e a fala na primeira visita (`settings.gasparMet`). O perfil `half` da sim compra
+metade dos níveis (Segunda Chance fica de fora, 1 nível); `full` compra tudo.
+
+### Vitórias por fase e perfil de loja (depois)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  24/32 75%        10.2 min       565  aldo 88% · lyra 75% · teo 75% · andilla 63%
+         valmor    half  32/32 100%              -       716  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         valmor    full  31/32 97%        15.0 min       884  aldo 100% · lyra 100% · teo 88% · andilla 100%
+         crypt     none  4/32 13%          3.6 min       269  aldo 0% · lyra 25% · teo 25% · andilla 0%
+         crypt     half  28/32 88%        10.3 min      1080  aldo 88% · lyra 88% · teo 88% · andilla 88%
+         crypt     full  31/32 97%        15.0 min      1381  aldo 100% · lyra 100% · teo 88% · andilla 100%
+         southRoad none  0/32 0%           1.7 min        95  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         southRoad half  14/32 44%         8.6 min      1214  aldo 38% · lyra 38% · teo 50% · andilla 50%
+         southRoad full  32/32 100%              -      1981  aldo 100% · lyra 100% · teo 100% · andilla 100%
+
+
+REAL DPS blade:max 128 (98) · elunLight:max 547 (79) · yahAura:max 25 (78) · daggers:max 428 (104) · staff:max 441 (102) · paladinSwords:max 44 (70) · frost:max 311 (67) · lightning:max 546 (62) · hammer:max 235 (75) · wisps:max 583 (75) · shields:max 32 (76) · mace:max 110 (96) · fire:max 354 (70) · fury 188 (66) · holyLight 1748 (43) · yahFlame 151 (48) · fan 1158 (67) · vigil 178 (39) · blizzard 524 (39) · storm 799 (35) · jointBreaker 357 (33) · fireSword 740 (21) · forgeFury 723 (25) · soulProcession 1300 (32) · valmorWall 179 (22) · lyraStar 760 (35)
+ELO X    fury 1.6x · holyLight 3.1x · yahFlame 9.2x · fan 2.9x · vigil 7.5x · blizzard 1.6x · storm 1.5x · jointBreaker 3.3x · fireSword 1.9x · forgeFury 4.3x · soulProcession 2.6x · valmorWall 5.1x · lyraStar 2.5x
+LOJA     everything costs 40300 gold = 44 average runs (909 gold/run)
+```
+
+196/288 (antes 157). A Loja agora separa os perfis: a Estrada vai de 6% para 44% com meia loja e de 69% para 100% com a
+loja inteira, e a Cripta com meia loja vai de 56% para 88%. Loja inteira = **44 partidas médias** (alvo 40–60); vai
+subir quando a Etapa 6 apertar as fases (menos ouro por partida).
