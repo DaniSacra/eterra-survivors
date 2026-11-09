@@ -17,6 +17,10 @@ import {
 } from '../render/ui';
 import { SCENES } from './keys';
 
+/** Size of the recipe's icons and the room for the "+" and "=" between them, px. */
+const ICON = 22;
+const SYMBOL = 14;
+
 /** Livro de Elos: every Elo, with its recipe revealed once it has been formed in a run. */
 export class EloBookScene extends Phaser.Scene {
   constructor() {
@@ -44,10 +48,10 @@ export class EloBookScene extends Phaser.Scene {
     const gap = 8;
     const top = short ? 74 : 100;
     const avail = height - top - (short ? 12 : 76);
-    const cols = gridCols(EVOLVED_IDS.length, width, avail, 56, gap, 2);
+    const cols = gridCols(EVOLVED_IDS.length, width, avail, 74, gap, 2);
     const rows = Math.ceil(EVOLVED_IDS.length / cols);
     const cardW = Math.min(300, (width - 24 - gap * (cols - 1)) / cols);
-    const cardH = Math.max(56, Math.min(92, avail / rows - gap));
+    const cardH = Math.max(74, Math.min(92, avail / rows - gap));
     const left = cx - (cols * cardW + (cols - 1) * gap) / 2;
     EVOLVED_IDS.forEach((id, i) => {
       const x = left + (i % cols) * (cardW + gap) + cardW / 2;
@@ -57,30 +61,48 @@ export class EloBookScene extends Phaser.Scene {
       this.add
         .rectangle(x, y, cardW, cardH, seen ? UI.panel : UI.panelOff)
         .setStrokeStyle(2, seen ? UI.accent : UI.borderOff);
-      const icon = this.add.image(x - cardW / 2 + 26, y, `icon.${id}`).setScale(ART_SCALE * 1.3);
-      if (!seen) icon.setTintFill(UI.borderOff);
-      const tx = x - cardW / 2 + 50;
+      const lx = x - cardW / 2 + 10;
       const small = cardW < 220;
-      label(this, tx, y - cardH / 2 + 7, seen ? t.weapons[id].name : t.elos.unknown, small ? 14 : 16, {
+      const cardTop = y - cardH / 2;
+      label(this, lx, cardTop + 6, seen ? t.weapons[id].name : t.elos.unknown, small ? 14 : 16, {
         bold: true,
         align: 'left',
         color: seen ? UI.text : UI.textOff,
       });
-      // Known: the full recipe. Unknown: only the weapon it grows from (a hint, as in the original game).
+      // The recipe as icons: base weapon + passive = Elo. Unknown: the base shows (where it grows from), the
+      // passive stays a "?" and the Elo a silhouette, so the mystery has a shape.
+      const rowY = cardTop + (small ? 27 : 30) + ICON / 2;
+      const step = ICON + SYMBOL;
+      this.add.image(lx + ICON / 2, rowY, `icon.${evo.from}`).setScale((ART_SCALE * ICON) / 28);
+      label(this, lx + ICON + SYMBOL / 2, rowY, t.elos.plus, 16, { bold: true, color: UI.muted });
+      if (seen)
+        this.add.image(lx + step + ICON / 2, rowY, `icon.${evo.passive}`).setScale((ART_SCALE * ICON) / 28);
+      else {
+        this.add
+          .circle(lx + step + ICON / 2, rowY, ICON / 2 - 1, UI.panel)
+          .setStrokeStyle(1.5, UI.border);
+        label(this, lx + step + ICON / 2, rowY, t.elos.mystery, 15, { bold: true, color: UI.gold });
+      }
+      label(this, lx + step + ICON + SYMBOL / 2, rowY, t.elos.equals, 16, { bold: true, color: UI.muted });
+      const elo = this.add
+        .image(lx + 2 * step + ICON / 2, rowY, `icon.${id}`)
+        .setScale((ART_SCALE * ICON) / 28);
+      // A shadow of the Elo: its shape shows, its colors stay hidden.
+      if (!seen) elo.setTint(UI.border);
       const owner = SIGNATURE_OWNER[evo.from];
+      if (owner)
+        label(this, x + cardW / 2 - 10, rowY, t.elos.owner(t.characters[owner].name), 12, {
+          color: UI.muted,
+        }).setOrigin(1, 0.5);
+      // Known: the recipe's names. Unknown: only the weapon it grows from (a hint, as in the original game).
       const recipe = seen
         ? t.elos.recipe(t.weapons[evo.from].name, t.passives[evo.passive])
         : t.elos.hint(t.weapons[evo.from].name);
-      const r = label(this, tx, y - cardH / 2 + (small ? 26 : 29), recipe, small ? 12 : 13, {
+      label(this, lx, rowY + ICON / 2 + 4, recipe, 12, {
         color: seen ? UI.gold : UI.muted,
         align: 'left',
-        wrap: cardW - 58,
+        wrap: cardW - 20,
       });
-      if (owner && r.y + r.height + 14 <= y + cardH / 2 - 4)
-        label(this, tx, y + cardH / 2 - 6, t.elos.owner(t.characters[owner].name), 12, {
-          color: UI.muted,
-          align: 'left',
-        }).setOrigin(0, 1);
     });
 
     const back = backButton(this, t.shop.back, () => this.back());

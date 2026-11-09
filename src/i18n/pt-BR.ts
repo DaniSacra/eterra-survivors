@@ -115,6 +115,10 @@ export const t = {
     recipe: (weapon: string, passive: string) => `${weapon} + ${passive}`,
     hint: (weapon: string) => `Nasce de ${weapon}`,
     owner: (hero: string) => `Só ${hero}`,
+    /** The recipe drawn as icons: weapon + passive = Elo, the passive a mystery until discovered. */
+    plus: '+',
+    equals: '=',
+    mystery: '?',
   },
 
   options: {

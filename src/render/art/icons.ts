@@ -195,7 +195,7 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.yahAura': weapon(ring(0xffc040)),
   'icon.daggers': weapon(knife(0xe8eff8, 2)),
   'icon.paladinSwords': weapon(twoSwords(0xcbd8ec)),
-  'icon.frost': weapon(flake(0x9ad8ff)),
+  'icon.frost': weapon(flake(0xd8d2f0)), // white-lilac, like its frost patches
   'icon.lightning': weapon(bolt(0xfff6a0)),
   'icon.hammer': weapon(hammer(0x8a8a96)),
   'icon.wisps': weapon(wisp(0x40e0d8, 2)),

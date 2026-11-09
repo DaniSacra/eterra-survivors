@@ -1068,13 +1068,18 @@ da Estrada), descritos nos próprios itens.
   apagado com borda e texto em `UI.textOff`), usado por `optionButtons` (Opções e Pausa) com rótulo à esquerda;
   textos `t.options.on/off`; título das Opções em `UI.gold`.
 
-**RA-05 · Livro de Elos com silhueta e base visível** · visual · P · aprovado
+**RA-05 · Livro de Elos com silhueta e base visível** · visual · P · ✅ feito
 
 - Por quê: 04-visual #16 e 05-ui #11: `setTintFill(UI.borderOff)` apaga o ícone e sobram sete discos iguais; o mistério
   precisa de forma para dar vontade de descobrir.
 - O quê: Elo desconhecido com o ícone da arma base colorido, "+ ?" para a passiva, "=" e a silhueta do Elo em
   `UI.border`; descoberto, os três coloridos. Sem revelar a passiva antes da descoberta.
 - Aceite: captura em 420x820 e 1000x680: cada card desconhecido mostra de qual arma o Elo nasce.
+- Feito: cada card desenha a receita em ícones, arma + passiva = Elo. Desconhecido: arma colorida, "?" dourado num
+  disco no lugar da passiva e o Elo como sombra (`setTint(UI.border)`: a forma aparece, as cores não; o
+  `setTintFill` virava um disco liso porque todo ícone é um distintivo redondo). "Só herói" à direita da receita;
+  nomes da receita (ou "Nasce de") embaixo. Card com 74 px no mínimo (vira 3 colunas em 820x420). De carona: ícone
+  da Geada em branco-lilás, como as zonas (A-05).
 
 **RA-06 · Preparação: botão principal à esquerda, herói maior, fase vencida** · visual · P · aprovado
 
