@@ -115,6 +115,13 @@ export class EndScene extends Phaser.Scene {
       bold: true,
       color: UI.gold,
     }).setOrigin(0.5, 0);
+    // The title the player wears (chosen in the Coleção), under the hero's name.
+    const worn = loadSave().title;
+    const title = worn ? t.achievements.titles[worn] : undefined;
+    if (title) {
+      label(this, cx, y + 21, title, 13, { italic: true, color: UI.muted }).setOrigin(0.5, 0);
+      y += 19;
+    }
     return y + 28;
   }
 

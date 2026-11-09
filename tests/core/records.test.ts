@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, spawnEnemy } from '../../src/core/enemies';
 import { dropPickup } from '../../src/core/pickups';
-import { newRunSummary, summarizeRun } from '../../src/core/records';
+import { favoriteWeapon, newRunSummary, possibleElos, summarizeRun } from '../../src/core/records';
+import { newHeroRecord } from '../../src/core/meta';
+import { EVOLVED_IDS } from '../../src/data/evolutions';
 import { maxLevel } from '../../src/core/weapons';
 import { World } from '../../src/core/world';
 import { bareWorld, quietWorld, still } from './helpers';
@@ -86,5 +88,25 @@ describe('summarizeRun', () => {
     expect(out.weapons).toEqual(['blade']);
     expect([out.weapons, out.elos, out.seen, out.killsBy]).toEqual(lists);
     expect(out.weapons).toBe(lists[0]);
+  });
+});
+
+describe('hero records (Coleção, Heróis)', () => {
+  it('favourite weapon: most runs, ties by weapon order, none before any run', () => {
+    const rec = newHeroRecord();
+    expect(favoriteWeapon(rec)).toBeNull();
+    rec.weaponRuns = { hammer: 3, blade: 3, frost: 1 };
+    expect(favoriteWeapon(rec)).toBe('blade');
+    rec.weaponRuns.frost = 5;
+    expect(favoriteWeapon(rec)).toBe('frost');
+  });
+
+  it("possible Elos: the shared ones plus the hero's own", () => {
+    const aldo = possibleElos('aldo');
+    expect(aldo).toContain('fury');
+    expect(aldo).not.toContain('holyLight');
+    expect(possibleElos('teo')).toContain('holyLight');
+    // Four signature Elos, one each: every hero can form all but three.
+    expect(aldo.length).toBe(EVOLVED_IDS.length - 3);
   });
 });

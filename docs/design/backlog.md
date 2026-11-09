@@ -1206,11 +1206,15 @@ implementação abaixo; cada item é um commit.
   as novas piscam uma vez e o chip do grupo mostra o ponto durante a visita. Tocar numa conquista com título
   destrancada veste o título (tocar de novo tira). Ícone novo `icon.trophy`.
 
-**CC-08 · Aba Heróis** · impl + ui · M · aprovado
+**CC-08 · Aba Heróis** · impl + ui · M · ✅ feito
 
 - O quê: cartão por herói (partidas, marcas de vitória por fase, melhor tempo, vitória mais rápida, nível, abates,
   maior golpe, arma favorita, Elos) e totais globais; título na tela final.
 - Aceite: os registros batem com uma partida jogada de ponta a ponta.
+- Feito: `favoriteWeapon` e `possibleElos` em `core/records.ts` (testados); cartões 2 x 2 em pé e 4 lado a lado
+  deitado/largo, com retrato na luz do herói, três marcas de fase (douradas quando vencida), oito registros e os
+  totais no pé. Herói não comprado: silhueta e preço. O título vestido aparece no topo da aba e, em itálico, embaixo
+  de "fase · herói" na tela final.
 
 **CC-09 · Aviso de conquista na partida** · impl + vfx · P · aprovado
 

@@ -126,6 +126,33 @@ export const t = {
     /** The title an achievement gives, after its reward. */
     titleOf: (name: string) => `Título: ${name}`,
     useTitle: 'Usar título',
+    /** The Heróis tab: one card per hero, then the totals of every run. */
+    heroes: {
+      runs: 'Partidas',
+      bestTime: 'Melhor tempo',
+      fastestWin: 'Vitória mais rápida',
+      bestLevel: 'Nível máximo',
+      bestKills: 'Mais abates',
+      bestHit: 'Maior golpe',
+      favorite: 'Arma favorita',
+      elos: 'Elos',
+      /** No record yet. */
+      none: '-',
+      elosOf: (n: number, total: number) => `${n} de ${total}`,
+    },
+    totals: {
+      runs: 'Partidas',
+      wins: 'Vitórias',
+      kills: 'Abates',
+      damage: 'Dano',
+      gold: 'Ouro',
+      time: 'Tempo',
+    },
+    /** A total's label and value ("Abates 13.574"). */
+    total: (name: string, value: string) => `${name} ${value}`,
+    /** Time played: "2h05" (or "45 min" under an hour). */
+    hours: (h: number, m: number) => `${h}h${String(m).padStart(2, '0')}`,
+    minutes: (m: number) => `${m} min`,
     inUse: 'Em uso',
   },
 

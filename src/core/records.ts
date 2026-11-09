@@ -1,9 +1,10 @@
-import type { CharacterId } from '../data/characters';
+import { SIGNATURE_OWNER, type CharacterId } from '../data/characters';
 import { ENEMY_IDS, type EnemyId } from '../data/enemies';
-import { EVOLUTIONS } from '../data/evolutions';
+import { EVOLUTIONS, EVOLVED_IDS } from '../data/evolutions';
 import type { StageId } from '../data/stages';
-import type { WeaponId } from '../data/weapons';
+import { WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { isElo, maxLevel } from './weapons';
+import type { HeroRecord } from './meta';
 import type { World } from './world';
 
 /** Everything the save needs from one finished (or live) run. Built from World, no per-frame cost. */
@@ -86,3 +87,24 @@ export function summarizeRun(world: World, out: RunSummary = newRunSummary()): R
   }
   return out;
 }
+
+/** A hero's favourite weapon: the one held in most runs (ties by `WEAPON_IDS` order); null before any run. */
+export function favoriteWeapon(rec: HeroRecord): WeaponId | null {
+  let best: WeaponId | null = null;
+  let most = 0;
+  for (const id of WEAPON_IDS) {
+    const n = rec.weaponRuns[id] ?? 0;
+    if (n > most) {
+      most = n;
+      best = id;
+    }
+  }
+  return best;
+}
+
+/** The Elos a hero can ever form: the shared ones and the hero's own signature Elo. */
+export const possibleElos = (hero: CharacterId): WeaponId[] =>
+  EVOLVED_IDS.filter((id) => {
+    const owner = SIGNATURE_OWNER[EVOLUTIONS[id]?.from as WeaponId];
+    return !owner || owner === hero;
+  });

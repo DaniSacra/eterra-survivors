@@ -16,6 +16,7 @@ import {
 import { drawBestiary } from './collection/bestiary';
 import { drawAchievements, forgetSession } from './collection/achievements';
 import { drawElos } from './collection/elos';
+import { drawHeroes } from './collection/heroes';
 import { TABS, type TabArea, type TabContent, type TabId } from './collection/tab';
 import { SCENES } from './keys';
 
@@ -26,7 +27,7 @@ const DRAW: Record<TabId, (a: TabArea) => TabContent> = {
   bestiary: drawBestiary,
   elos: drawElos,
   achievements: drawAchievements,
-  heroes: () => ({ buttons: [] }),
+  heroes: drawHeroes,
 };
 
 /** Coleção: Bestiário, Livro de Elos, Conquistas and Heróis, one tab at a time. */
