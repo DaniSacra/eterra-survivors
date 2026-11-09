@@ -734,13 +734,16 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 `z.tick`, `slash.ttl`, `bolt.ttl`, `world.freeze`, `act`/`aimX`/`aimY`, `p.angle`). Nada novo no core além do opcional
 `Enemy.hitKind`. Captura antes e depois de cada item em 420x820.
 
-**RF-01 · Aviso do chefe em coral listrado** · vfx · P · aprovado
+**RF-01 · Aviso do chefe em coral listrado** · vfx · P · ✅ feito
 
 - Por quê: 06-vfx #9: `WARN_COLOR 0xff8a4a` é quase o laranja do Fogo (`0xff8a3a`) e da Chama (`0xff6a3a`); com fogo
   na build, o aviso do chefe se confunde com o ataque do próprio jogador.
 - O quê: perigo de inimigo em rosa-coral (o `UI.danger`) com listras e borda branca tracejada; fogo do jogador fica
   laranja-dourado.
 - Aceite: captura do Corte Brutal com Espada de Fogo ativa: aviso e fogo distintos à primeira vista.
+- Feito: perigo de chefe em rosa-coral (`UI.dangerHex`) com listras que rolam (arcos no Corte Brutal, setas na Mordida
+  Funda) e borda branca tracejada que marcha mais rápido conforme o golpe chega; Fogo, Espada de Fogo e Chama passaram
+  para laranja-dourado (`fx.ts`).
 
 **RF-02 · Acerto em flash branco; herói ferido com rosto visível** · vfx + impl · P · aprovado
 

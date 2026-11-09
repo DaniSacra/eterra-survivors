@@ -6,6 +6,7 @@ import { config } from '../data/config';
 import { BossAct } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
 import { INK } from './art/pen';
+import { UI } from './ui';
 import type { CharacterId } from '../data/characters';
 
 /** Identity color of each hero, for the light under their feet (so the eye finds them in a crowd). */
@@ -26,7 +27,7 @@ const SLASH_STYLE: Partial<Record<WeaponId, readonly [number, number]>> = {
 };
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
-const FLAME_COLOR = 0xff6a3a;
+const FLAME_COLOR = 0xff9a30;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or hanging bells. */
 interface OrbitStyle {
   color: number;
@@ -52,8 +53,8 @@ interface BoltStyle {
 const BOLT_PLAIN: BoltStyle = { color: 0xfff6a0, core: 0xffffff, width: 5, fire: false };
 const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false },
-  fire: { color: 0xff8a3a, core: 0xffd060, width: 5, fire: true },
-  fireSword: { color: 0xff5a2a, core: 0xffe080, width: 7, fire: true },
+  fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true },
+  fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true },
 };
 const PUFF_COLOR = 0xe8eef8;
 const GEM_GLINT = 0x8adcff;
@@ -78,9 +79,14 @@ const BOLT_LAYERS: readonly [number, number, number][] = [
   [1, -1, 1],
   [0.35, 0xffffff, 1],
 ];
-/** Boss attack markers: a warm, friendly warning (not a dark one) that fills up as the hit comes. */
-const WARN_COLOR = 0xff8a4a;
-const WARN_EDGE = 0xffe0a0;
+/**
+ * Enemy danger (boss attacks): coral pink with stripes and a marching white dashed edge, so it never reads as the
+ * player's own fire (orange-gold). Same hue as the UI's danger color.
+ */
+const WARN_COLOR = UI.dangerHex;
+const WARN_EDGE = 0xffffff;
+/** Length of a dash and of the gap after it on danger edges, world px. */
+const DASH = 9;
 
 /**
  * Redraws the transient shapes each frame: on the ground (under everyone) the hero light, frost and auras;
@@ -101,7 +107,7 @@ export function drawFx(
   g.fillStyle(hero, 0.35).fillEllipse(p.x, p.y + 15, 44, 16);
   g.lineStyle(3, hero, 1).strokeEllipse(p.x, p.y + 15, 44, 16);
   g.lineStyle(2, 0xffffff, 0.35).strokeEllipse(p.x, p.y + 15, 52 * pulse, 20 * pulse);
-  if (world.boss) drawBossWarning(g, top, world.boss);
+  if (world.boss) drawBossWarning(g, top, world.boss, world.time);
   for (const z of world.zones.active) {
     const a = Math.min(1, z.ttl / 0.4);
     const elo = !!z.source && isElo(z.source.id);
@@ -234,7 +240,12 @@ export function drawFx(
 }
 
 /** The telegraph of a boss ability: where it will hit, filling up during the windup. */
-function drawBossWarning(g: Phaser.GameObjects.Graphics, top: Phaser.GameObjects.Graphics, e: Enemy): void {
+function drawBossWarning(
+  g: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  e: Enemy,
+  time: number,
+): void {
   const ab = e.def.ability;
   if (!ab || e.act === BossAct.Idle) return;
   const aim = Math.atan2(e.aimY, e.aimX);
@@ -250,18 +261,30 @@ function drawBossWarning(g: Phaser.GameObjects.Graphics, top: Phaser.GameObjects
     return;
   }
   const k = 1 - Math.max(0, e.actT) / ab.windup; // 0 -> 1 as the hit comes
-  const fill = 0.12 + 0.28 * k;
-  g.lineStyle(3, WARN_EDGE, 0.5 + 0.5 * k).fillStyle(WARN_COLOR, fill);
+  const fill = 0.1 + 0.16 * k;
+  // The dashes march along the edge, faster as the hit comes.
+  const march = (time * (30 + 50 * k)) % (DASH * 2);
+  const edgeA = 0.6 + 0.4 * k;
   switch (ab.kind) {
     case 'cleave': {
       const half = (ab.arc ?? 1) / 2;
-      g.slice(e.x, e.y, ab.range, aim - half, aim + half, false)
-        .fillPath()
-        .strokePath();
+      const a0 = aim - half;
+      const a1 = aim + half;
+      g.fillStyle(WARN_COLOR, fill).slice(e.x, e.y, ab.range, a0, a1, false).fillPath();
+      // Stripes: bands rolling out toward the edge.
+      g.lineStyle(5, WARN_COLOR, 0.3);
+      for (let i = 0; i < 4; i++) {
+        const r = ab.range * (((i + time * 1.5) % 4) / 4);
+        if (r > 8) g.beginPath().arc(e.x, e.y, r, a0, a1).strokePath();
+      }
       // An inner slice grows to the edge: when it touches, the sword falls.
-      g.fillStyle(WARN_COLOR, 0.35)
-        .slice(e.x, e.y, ab.range * k, aim - half, aim + half, false)
+      g.fillStyle(WARN_COLOR, 0.32)
+        .slice(e.x, e.y, ab.range * k, a0, a1, false)
         .fillPath();
+      g.lineStyle(2.5, WARN_EDGE, edgeA);
+      dashedArc(g, e.x, e.y, ab.range, a0, a1, march);
+      dashedLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range, march);
+      dashedLine(g, e.x, e.y, e.x + Math.cos(a1) * ab.range, e.y + Math.sin(a1) * ab.range, march);
       break;
     }
     case 'lunge': {
@@ -273,26 +296,91 @@ function drawBossWarning(g: Phaser.GameObjects.Graphics, top: Phaser.GameObjects
       const vy = (ux * w) / 2;
       const ex = e.x + ux * len;
       const ey = e.y + uy * len;
+      g.fillStyle(WARN_COLOR, fill);
       g.beginPath();
       g.moveTo(e.x + vx, e.y + vy);
       g.lineTo(ex + vx, ey + vy);
       g.lineTo(ex - vx, ey - vy);
       g.lineTo(e.x - vx, e.y - vy);
       g.closePath();
-      g.fillPath().strokePath();
-      g.fillStyle(WARN_COLOR, 0.35).fillCircle(e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
+      g.fillPath();
+      // Stripes as chevrons pointing the way it will run, rolling forward.
+      g.lineStyle(5, WARN_COLOR, 0.35);
+      const step = w * 0.9;
+      const n = Math.floor(len / step);
+      const roll = ((time * 2) % 1) * step;
+      for (let i = 0; i < n; i++) {
+        const d = i * step + roll + w * 0.4;
+        if (d > len - w * 0.2) continue;
+        const cx = e.x + ux * d;
+        const cy = e.y + uy * d;
+        const bx = cx - ux * w * 0.35;
+        const by = cy - uy * w * 0.35;
+        g.lineBetween(bx + vx * 0.7, by + vy * 0.7, cx, cy);
+        g.lineBetween(bx - vx * 0.7, by - vy * 0.7, cx, cy);
+      }
+      g.lineStyle(2.5, WARN_EDGE, edgeA);
+      dashedLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, march);
+      dashedLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, march);
+      dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
+      g.fillStyle(WARN_COLOR, 0.45).fillCircle(e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
       break;
     }
     case 'toll': {
       // Rings ripple out from the bell; small marks show where the dead will rise.
-      g.strokeCircle(e.x, e.y, ab.range * (0.4 + 0.6 * k));
+      const r = ab.range * (0.4 + 0.6 * k);
+      g.fillStyle(WARN_COLOR, fill * 0.6).fillCircle(e.x, e.y, r);
+      g.lineStyle(2.5, WARN_EDGE, edgeA);
+      dashedArc(g, e.x, e.y, r, 0, Math.PI * 2, march);
       const n = ab.count ?? 6;
       for (let i = 0; i < n; i++) {
         const a = (i * Math.PI * 2) / n;
-        g.fillCircle(e.x + Math.cos(a) * ab.range, e.y + Math.sin(a) * ab.range, 6 + 6 * k);
+        const mx = e.x + Math.cos(a) * ab.range;
+        const my = e.y + Math.sin(a) * ab.range;
+        const mr = 6 + 6 * k;
+        g.fillStyle(WARN_COLOR, 0.25 + 0.3 * k).fillCircle(mx, my, mr);
+        g.lineStyle(2, WARN_EDGE, edgeA).strokeCircle(mx, my, mr);
       }
       break;
     }
+  }
+}
+
+/** A dashed arc (current line style), its dashes shifted `offset` px along it. */
+function dashedArc(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  r: number,
+  a0: number,
+  a1: number,
+  offset: number,
+): void {
+  const da = DASH / r;
+  for (let a = a0 + offset / r - 2 * da; a < a1; a += 2 * da) {
+    const s = Math.max(a0, a);
+    const t = Math.min(a1, a + da);
+    if (t > s) g.beginPath().arc(x, y, r, s, t).strokePath();
+  }
+}
+
+/** A dashed line (current line style), its dashes shifted `offset` px along it. */
+function dashedLine(
+  g: Phaser.GameObjects.Graphics,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  offset: number,
+): void {
+  const len = Math.hypot(x1 - x0, y1 - y0);
+  if (len < 1) return;
+  const ux = (x1 - x0) / len;
+  const uy = (y1 - y0) / len;
+  for (let d = offset - 2 * DASH; d < len; d += 2 * DASH) {
+    const s = Math.max(0, d);
+    const t = Math.min(len, d + DASH);
+    if (t > s) g.lineBetween(x0 + ux * s, y0 + uy * s, x0 + ux * t, y0 + uy * t);
   }
 }
 
