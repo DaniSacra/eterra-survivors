@@ -44,6 +44,16 @@ export const SOUNDS = {
     vol: 0.1,
     notes: [0, 7, 12, 16, 19],
   },
+  /** An Elo forged: hammer on the anvil, three ringing blows. */
+  forge: {
+    kind: 'synth',
+    wave: 'square',
+    from: 1320,
+    to: 880,
+    dur: 0.09,
+    vol: 0.09,
+    notes: [0, 0, 7],
+  },
   /** An achievement met in the run (the HUD notice). */
   achievement: {
     kind: 'synth',

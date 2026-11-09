@@ -10,7 +10,6 @@ import { SelectScene } from './scenes/SelectScene';
 import { ShopScene } from './scenes/ShopScene';
 import { OptionsScene } from './scenes/OptionsScene';
 import { CollectionScene } from './scenes/CollectionScene';
-import { EloScene } from './scenes/EloScene';
 import { sound } from './render/sound';
 import { DEV_MODE } from './render/dev';
 import { playtest } from './core/meta';
@@ -36,7 +35,6 @@ const game = new Phaser.Game({
     SelectScene,
     OptionsScene,
     CollectionScene,
-    EloScene,
   ],
 });
 

@@ -6,7 +6,7 @@ import { t } from '../i18n/pt-BR';
 import { BuildSlots } from '../render/buildPanel';
 import { Joystick } from '../render/joystick';
 import { ART_SCALE } from '../render/art/pen';
-import { SHORT_SCREEN, UI, button, label, safeArea } from '../render/ui';
+import { ELEMENT_COLOR, SHORT_SCREEN, UI, button, label, safeArea } from '../render/ui';
 import { spawnOnRing } from '../core/enemies';
 import { segmentAt } from '../core/waves';
 import type { AchievementId } from '../data/achievements';
@@ -14,6 +14,16 @@ import { describeAchievement } from '../render/describe';
 import { sound } from '../render/sound';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
+import { EVOLUTIONS, type Evolution } from '../data/evolutions';
+import type { WeaponId } from '../data/weapons';
+
+/** One in-run notice: its text, its badge and the colour of its rim (achievements gold, Elos their element). */
+interface Toast {
+  text: string;
+  icon: string;
+  rim: number;
+  sound: 'achievement' | null;
+}
 
 const PAD = 10;
 const XP_H = 16;
@@ -55,7 +65,7 @@ export class HudScene extends Phaser.Scene {
   private toastBox!: Phaser.GameObjects.Container;
   private toastBg!: Phaser.GameObjects.Rectangle;
   private toastText!: Phaser.GameObjects.Text;
-  private toastQueue: AchievementId[] = [];
+  private toastQueue: Toast[] = [];
   /** A short tip under the banner (the first Elo ready explains what an Elo is). */
   private hintBox!: Phaser.GameObjects.Container;
   private hintBg!: Phaser.GameObjects.Rectangle;
@@ -188,20 +198,34 @@ export class HudScene extends Phaser.Scene {
 
   /** Queues the in-run notice of an achievement just met. */
   toast(id: AchievementId): void {
-    this.toastQueue.push(id);
+    this.toastQueue.push({
+      text: `${t.achievements.toast} ${describeAchievement(id).name}`,
+      icon: 'icon.trophy',
+      rim: UI.accent,
+      sound: 'achievement',
+    });
+  }
+
+  /** An Elo just forged: its notice (rimmed in its element's colour) and the chain forming in the build strip. */
+  forged(elo: WeaponId): void {
+    const evo = EVOLUTIONS[elo] as Evolution;
+    const text = t.elo.forged(t.weapons[elo].name, t.weapons[evo.from].name, t.passives[evo.passive]);
+    this.toastQueue.unshift({ text, icon: `icon.${elo}`, rim: ELEMENT_COLOR[evo.element], sound: null });
+    this.build.forge(this.world, elo);
   }
 
   /** Shows the next notice: 2.5 s under the timer (under the boss bar once it shows), never mid-screen. */
   private nextToast(): void {
-    const id = this.toastQueue.shift();
-    if (!id) return;
+    const next = this.toastQueue.shift();
+    if (!next) return;
     this.toastOn = true;
-    this.toastText.setText(`${t.achievements.toast} ${describeAchievement(id).name}`);
+    this.toastText.setText(next.text);
     const w = this.toastText.width + 54;
-    this.toastBg.setSize(w, 34).setPosition(0, 0);
+    this.toastBg.setSize(w, 34).setPosition(0, 0).setStrokeStyle(2, next.rim);
     this.toastBg.setOrigin(0.5);
-    const trophy = this.toastBox.list[1] as Phaser.GameObjects.Image;
-    trophy.setPosition(-w / 2 + 18, 0);
+    const badge = this.toastBox.list[1] as Phaser.GameObjects.Image;
+    badge.setTexture(next.icon).setScale(next.icon === 'icon.trophy' ? ART_SCALE * 1.1 : ART_SCALE * 0.9);
+    badge.setPosition(-w / 2 + 18, 0);
     this.toastText.setPosition(-w / 2 + 34, 0);
     // Standing: centred under the whole top block (the build strip reaches the middle on phones), or under the
     // boss bar. Lying down there is no height to spare: top right, under the gold and kills, clear of the hero.
@@ -210,7 +234,7 @@ export class HudScene extends Phaser.Scene {
     const x = side ? width - this.inset.right - PAD - w / 2 : width / 2;
     const y = side ? this.countersBottom + 24 : this.world.boss ? this.bossY + 34 : this.bottom + 26;
     this.toastBox.setPosition(x, y - 8).setAlpha(0);
-    sound.play('achievement');
+    if (next.sound) sound.play(next.sound);
     this.tweens.add({ targets: this.toastBox, alpha: 1, y, duration: 200, ease: 'Back.easeOut' });
     this.tweens.add({
       targets: this.toastBox,

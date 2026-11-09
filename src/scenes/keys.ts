@@ -11,5 +11,4 @@ export const SCENES = {
   select: 'select',
   options: 'options',
   collection: 'collection',
-  elo: 'elo',
 } as const;

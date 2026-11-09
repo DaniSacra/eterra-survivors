@@ -89,15 +89,14 @@ export const t = {
     preview: (from: string, to: string) => `${from} → ${to}`,
   },
 
-  /** The Elo moments in a run: ready (notice, tip, arrows) and formed (the celebration screen). */
+  /** The Elo moments in a run: the recipe progress and the forge notice. */
   elo: {
+    /** The in-run notice when an Elo forms. */
+    forged: (elo: string, weapon: string, passive: string) => `Elo forjado: ${elo} · ${weapon} + ${passive}`,
     /** A recipe's progress, after the choice on a level-up card and live on the pause screen. */
     progress: (elo: string, weapon: string, passive: string, passiveLevel: string) =>
       `Elo ${elo}: arma ${weapon}${' · '}${passive} ${passiveLevel}`,
-    formed: 'Elo formado!',
-    power: (from: string, to: string) => `Dano por segundo: ${from} → ${to}`,
-    close: 'Toque, Espaço ou Enter para continuar',
-    /** One line per Elo on the celebration screen (written for the Survivors, no new lore facts). */
+    /** One line per Elo (the Livro de Elos; written for the Survivors, no new lore facts). */
     lines: {
       fury: 'A Lâmina de Valmor não escolhe mais um lado: corta tudo em volta.',
       holyLight: 'A luz de Elun se multiplica e atravessa a escuridão.',

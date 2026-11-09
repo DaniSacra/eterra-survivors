@@ -22,7 +22,8 @@ import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
-import { UI } from '../render/ui';
+import { ELEMENT_COLOR, UI } from '../render/ui';
+import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../data/evolutions';
 import { Controls } from '../render/controls';
 import {
   BOSS_PUFF,
@@ -61,6 +62,13 @@ const DUST = 0xc8bca8;
 
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
+/** Each Elo's projectile sprite, tinted with its element's colour. */
+const PROJECTILE_TINT: Record<string, number> = Object.fromEntries(
+  EVOLVED_IDS.map((id) => [`proj.${id}`, ELEMENT_COLOR[(EVOLUTIONS[id] as Evolution).element]]),
+);
+/** The Elo forge's slow motion: how long (real ms) and how slow. */
+const FORGE_SLOW_MS = 500;
+const FORGE_SLOW = 0.25;
 const FORGE = 'proj.forgeFury';
 
 /** Sparks a swing throws when it starts: [color, size, count]. */
@@ -136,6 +144,8 @@ export class GameScene extends Phaser.Scene {
   private choice!: RunChoice;
   /** The calm-screen option, read once per frame. */
   private calm = false;
+  /** Real time (ms) until which the Elo forge's slow motion lasts. */
+  private slowUntil = 0;
   /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
   private moments = newMoments();
   private rewardIcon!: Phaser.GameObjects.Image;
@@ -228,7 +238,13 @@ export class GameScene extends Phaser.Scene {
     this.projectileMirror = new Mirror(
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
-        if (img.texture.key !== p.sprite) img.setTexture(p.sprite);
+        if (img.texture.key !== p.sprite) {
+          img.setTexture(p.sprite);
+          // An Elo's projectiles take its element's colour.
+          const tint = PROJECTILE_TINT[p.sprite];
+          if (tint === undefined) img.clearTint();
+          else img.setTint(tint);
+        }
         // Hammers spin end over end as they fly.
         img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
         // Fúria da Forja drops embers behind it.
@@ -385,7 +401,9 @@ export class GameScene extends Phaser.Scene {
     const w = this.world;
     this.calm = settings().calm;
     this.hud.joystick.setEnabled(w.state === 'playing');
-    w.step(delta / 1000, this.controls.read());
+    // The Elo forge runs the world slower for a moment (real time; the sparks keep their own pace).
+    const slow = this.time.now < this.slowUntil ? FORGE_SLOW : 1;
+    w.step((delta / 1000) * slow, this.controls.read());
     this.stepDt = w.time - this.lastTime;
     this.lastTime = w.time;
     this.sparks.frame(this.calm);
@@ -592,6 +610,41 @@ export class GameScene extends Phaser.Scene {
     this.sparks.add(b.x, b.y + b.def.radius * 0.6, 0, 0, 0.4, b.def.radius * 1.6, DUST, SPARK.ring, true);
   }
 
+  /**
+   * The Elo forge: half a second of slow motion, the anvil sound, sparks of the element's colour bursting from the
+   * hero, the Elo's icon rising over the hero, and the HUD notice with the chain forming in the build strip.
+   */
+  private forgeMoment(elo: WeaponId): void {
+    const w = this.world;
+    const p = w.player;
+    const color = ELEMENT_COLOR[(EVOLUTIONS[elo] as Evolution).element];
+    this.slowUntil = this.time.now + FORGE_SLOW_MS;
+    sound.play('forge');
+    this.moments.chest = w.time;
+    this.moments.elo = true;
+    this.rewardIcon.setTexture(`icon.${elo}`);
+    const sp = this.sparks;
+    sp.add(p.x, p.y, 0, 0, 0.6, 70, color, SPARK.ring, true);
+    sp.add(p.x, p.y, 0, 0, 0.8, 110, 0xffffff, SPARK.ring, true);
+    for (let k = 0; k < 18; k++) {
+      const a = (k / 18) * Math.PI * 2 + sp.rand() * 0.3;
+      const v = 160 + sp.rand() * 160;
+      sp.add(
+        p.x,
+        p.y - 8,
+        Math.cos(a) * v,
+        Math.sin(a) * v - 60,
+        0.5 + sp.rand() * 0.3,
+        7,
+        color,
+        SPARK.star,
+        true,
+      );
+    }
+    if (!this.calm) this.shake(160, 0.006);
+    this.hud.forged(elo);
+  }
+
   /** The chest's reward icon pops out of the hero and floats up, then fades. */
   private showReward(): void {
     const age = this.world.time - this.moments.chest;
@@ -710,13 +763,7 @@ export class GameScene extends Phaser.Scene {
           break;
         }
         case 'eloForged':
-          // The Elo moment: the game waits on the celebration screen.
-          this.moments.chest = w.time;
-          this.moments.elo = true;
-          this.rewardIcon.setTexture(`icon.${e.elo}`);
-          this.hud.joystick.setEnabled(false);
-          this.scene.launch(SCENES.elo, { elo: e.elo });
-          this.scene.pause();
+          this.forgeMoment(e.elo);
           break;
         case 'pickup':
           if (e.id === 'gold') sound.play('pickup', 1.5);

@@ -63,7 +63,10 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   An evolution (Elo) is an evolved weapon entry (one level) plus an `EVOLUTIONS` entry. It forms on the spot
   (`forgeElos`, `eloForged` event) when the base weapon and its recipe passive are both at max level; level-up
   cards that move an owned recipe are `config.xp.recipeWeight` times likelier and show its progress
-  ("Elo Fúria: arma 6/7 · Força 5/5"); the pause lists each weapon's `eloStatus`. Elites drop chests: gold, a
+  ("Elo Fúria: arma 6/7 · Força 5/5"); the pause lists each weapon's `eloStatus`. Each Elo has an `element`
+  (`ELEMENTS`) whose colour (`ELEMENT_COLOR` in `render/ui.ts`, one each) tints its effects and projectiles. The
+  forge moment (`GameScene.forgeMoment`): 0.5 s of slow motion, the `forge` sound, element sparks, the HUD notice
+  and a braided chain between the Elo and its passive in the build strip (`BuildSlots`), kept all run. Elites drop chests: gold, a
   level of something owned and a heal (`CHEST` in `data/pickups.ts`).
   When weapons and passives run short, `data/rewards.ts` cards (Bolsa de Ouro, Banquete, Bênção de Yah) keep the
   level-up at 3 cards; `canBanish` never lets Banir leave fewer.
@@ -93,7 +96,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   Effects (weapons, Elos, hits, statuses, telegraphs) belong to the `vfx-director` agent: each effect must show
   what its mechanic does.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Collection, Options, Game, Hud (overlay), LevelUp,
-  Pause, Elo (the Elo celebration), End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
+  Pause, End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
   Conquistas, Heróis): each tab draws in a `TabArea` and returns its focusable buttons; the scene owns the tab row,
   Back and keys (free-layout `keyNav` with `cols = 0`, Q/E switch tabs, Esc back).
 - Collection and achievements: `core/records.ts` (`summarizeRun`, favourite weapon, possible Elos),

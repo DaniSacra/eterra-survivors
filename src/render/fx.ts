@@ -17,7 +17,7 @@ import type { Bolt, Slash } from '../core/effects';
 import type { Projectile } from '../core/projectiles';
 import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
-import { UI } from './ui';
+import { ELEMENT_COLOR, UI } from './ui';
 import { star } from './sparks';
 import { arcLine, band, disc, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
@@ -43,7 +43,7 @@ interface SwingStyle {
 const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fillAlpha: 0.4, mark: 'none' };
 const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
   blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none' },
-  fury: { fill: 0xfff0b0, edge: 0xffa040, band: 0.62, fillAlpha: 0.45, mark: 'none' },
+  fury: { fill: 0xffe4dc, edge: ELEMENT_COLOR.fury, band: 0.62, fillAlpha: 0.45, mark: 'none' },
 };
 /** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
 const CLEAVE_STYLE: SwingStyle = {
@@ -57,7 +57,7 @@ const CLEAVE_STYLE: SwingStyle = {
 const SWEEP = 0.55;
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
-const FLAME_COLOR = 0xff9a30;
+const FLAME_COLOR = ELEMENT_COLOR.holy;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
 interface OrbitStyle {
   color: number;
@@ -66,13 +66,13 @@ interface OrbitStyle {
 }
 const ORBIT_STYLE: Partial<Record<WeaponId, OrbitStyle>> = {
   shields: { color: 0x8aa8c8, dark: 0x8a5a24, blade: false },
-  valmorWall: { color: 0xe8c860, dark: 0xa87a30, blade: false },
-  vigil: { color: 0xf0f6ff, dark: 0xe8b840, blade: true },
+  valmorWall: { color: ELEMENT_COLOR.steel, dark: 0x5a6478, blade: false },
+  vigil: { color: 0xfff6e0, dark: ELEMENT_COLOR.holy, blade: true },
 };
 const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
 /** Frost patches in the ice family (white-lilac), never the gems' cyan; Nevasca keeps a strong blue edge. */
 const FROST_COLOR = 0xd8d2f0;
-const BLIZZARD_COLOR = 0xf4f2ff;
+const BLIZZARD_COLOR = ELEMENT_COLOR.ice;
 const BLIZZARD_EDGE = 0x4a8ad8;
 /** How long a frost patch takes to land (ring opening, shards flying), and to break up at the end, seconds. */
 const ZONE_LAND = 0.15;
@@ -100,12 +100,12 @@ const BOLT_PLAIN: BoltStyle = {
   branches: 0,
 };
 const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
-  storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false, sword: false, branches: 2 },
+  storm: { color: ELEMENT_COLOR.storm, core: 0xffffff, width: 7, fire: false, sword: false, branches: 2 },
   fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true, sword: false, branches: 0 },
-  fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
+  fireSword: { color: ELEMENT_COLOR.fire, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
   staff: { color: 0xb070f0, core: 0xf4e8ff, width: 3, fire: false, sword: false, branches: 0, burst: true },
   lyraStar: {
-    color: 0xd8a0ff,
+    color: ELEMENT_COLOR.arcane,
     core: 0xfff6c0,
     width: 4,
     fire: false,
@@ -117,7 +117,7 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
 /** Slam fissures: the crack's dark, the dust thrown along it, and the Elo's glow inside the crack. */
 const CRACK = 0x2a1e1a;
 const DUST_LIGHT = 0xe8dcc8;
-const CRACK_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: 0xff9a40 };
+const CRACK_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
 /** Reused corners of a fissure's strip (no allocation per frame). */
 const QUAD = [
   { x: 0, y: 0 },
@@ -393,13 +393,13 @@ interface Trail {
 }
 const TRAIL: Partial<Record<WeaponId, Trail>> = {
   elunLight: { color: 0xb8e070, core: 0xfff6c0, width: 5, len: 0.06, dots: false, star: false },
-  holyLight: { color: 0xffe070, core: 0xffffff, width: 6, len: 0.07, dots: false, star: true },
+  holyLight: { color: ELEMENT_COLOR.holy, core: 0xffffff, width: 6, len: 0.07, dots: false, star: true },
   daggers: { color: HERO_COLOR.andilla, core: 0xffffff, width: 3, len: 0.05, dots: false, star: false },
-  fan: { color: 0xa8323e, core: 0xffd8e0, width: 3, len: 0.05, dots: false, star: false },
+  fan: { color: ELEMENT_COLOR.shadow, core: 0xe0ffe8, width: 3, len: 0.05, dots: false, star: false },
   hammer: { color: 0xcbd8ec, core: 0xffffff, width: 10, len: 0.12, dots: false, star: false },
-  forgeFury: { color: 0xffa040, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
+  forgeFury: { color: ELEMENT_COLOR.forge, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
   wisps: { color: 0x40e0d8, core: 0xe8ffff, width: 4, len: 0.12, dots: true, star: false },
-  soulProcession: { color: 0x8ac0f0, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
+  soulProcession: { color: ELEMENT_COLOR.soul, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
 };
 
 function drawTrail(g: Phaser.GameObjects.Graphics, pr: Projectile, tr: Trail, time: number): void {
