@@ -58,7 +58,14 @@ const FIRE: { [K in WeaponKind]: Fire<K> } = {
 };
 
 export function updateWeapons(world: World, dt: number): void {
-  for (const w of world.weapons) {
+  const list = world.weapons;
+  for (let slot = 0; slot < list.length; slot++) {
+    const w = list[slot] as OwnedWeapon;
+    // Orbit blades are always out: they test contact every frame, and the cooldown is the re-hit delay.
+    if (WEAPONS[w.id].kind === 'orbit') {
+      sweepOrbit(world, weaponStats(w) as OrbitLevel, w, slot);
+      continue;
+    }
     w.timer -= dt;
     if (w.timer > 0) continue;
     const s = weaponStats(w);
@@ -161,12 +168,18 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   return true;
 }
 
-function fireOrbit(world: World, s: OrbitLevel, w: OwnedWeapon): boolean {
+/** Never called through the cooldown loop: see `sweepOrbit`. */
+function fireOrbit(): boolean {
+  return true;
+}
+
+function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): void {
   const p = world.player;
   const list = world.enemies.active;
   const count = amount(world, s.count);
   const orbitR = s.orbitRadius * p.stats.area;
   const hitR = s.radius * p.stats.area;
+  const rehit = s.cooldown * p.stats.cooldown;
   for (let i = 0; i < count; i++) {
     const a = orbitAngle(world.time, s.spin, i, count);
     const bx = p.x + Math.cos(a) * orbitR;
@@ -174,7 +187,7 @@ function fireOrbit(world: World, s: OrbitLevel, w: OwnedWeapon): boolean {
     const ids = world.enemyHash.query(bx, by, hitR + MAX_ENEMY_RADIUS, world.scratch);
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;
-      if (e.dead) continue;
+      if (e.dead || (e.orbitReady[slot] as number) > world.time) continue;
       const r = hitR + e.def.radius;
       const dx = e.x - bx;
       const dy = e.y - by;
@@ -182,10 +195,10 @@ function fireOrbit(world: World, s: OrbitLevel, w: OwnedWeapon): boolean {
       const ox = e.x - p.x;
       const oy = e.y - p.y;
       const d = Math.hypot(ox, oy) || 1;
+      e.orbitReady[slot] = world.time + rehit;
       damageEnemy(world, e, dmg(world, s.damage), ox / d, oy / d, s.knockback, w);
     }
   }
-  return true;
 }
 
 function fireZone(world: World, s: ZoneLevel, w: OwnedWeapon): boolean {

@@ -20,6 +20,8 @@ export interface Enemy extends Poolable {
   flash: number;
   /** Seconds left slowed by frost. */
   slow: number;
+  /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
+  orbitReady: number[];
   dead: boolean;
 }
 
@@ -36,6 +38,7 @@ export const createEnemy = (): Enemy => ({
   kby: 0,
   flash: 0,
   slow: 0,
+  orbitReady: new Array<number>(config.weapons.maxOwned).fill(0),
   dead: false,
 });
 
@@ -51,6 +54,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.y = y;
   e.maxHp = e.hp = def.hp * hpMult;
   e.kbx = e.kby = e.flash = e.slow = 0;
+  e.orbitReady.fill(0);
   e.dead = false;
   return e;
 }

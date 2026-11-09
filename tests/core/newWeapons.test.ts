@@ -52,6 +52,24 @@ describe('Espadas dos Paladinos (orbit)', () => {
     expect(hit.maxHp - hit.hp).toBe(s.damage);
     expect(away.hp).toBe(away.maxHp);
   });
+
+  it('sweeps the whole circle between cooldowns, re-hitting each enemy only after its cooldown', () => {
+    const w = prepared('paladinSwords');
+    const s = WEAPONS.paladinSwords.levels[0]!;
+    const ring = [0, 1, 2, 3].map((k) =>
+      spawnEnemy(w, 'blackKnight', Math.cos(k * 1.57) * s.orbitRadius, Math.sin(k * 1.57) * s.orbitRadius),
+    );
+    for (const e of ring) e.def = { ...e.def, speed: 0 };
+    const turn = (2 * Math.PI) / s.spin;
+    for (let t = 0; t < turn; t += 1 / 60) {
+      updateWeapons(w, 1 / 60);
+      w.time += 1 / 60;
+    }
+    for (const e of ring) expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(s.damage);
+    const before = ring[0]!.hp;
+    updateWeapons(w, 0);
+    expect(ring[0]!.hp).toBe(before);
+  });
 });
 
 describe('Geada de Lyra (zone)', () => {
