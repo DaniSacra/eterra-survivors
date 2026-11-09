@@ -1218,8 +1218,8 @@ implementação abaixo; cada item é um commit.
 
 1. Frases para os seis inimigos sem texto no original (Esqueleto, Aranha Tumular, Gosma Verde, Espectro, Golem de
    Pedra, Cavaleiro Negro)?
-2. Ligar as três recompensas opcionais (+1 Trocar, +1 Pular, +1 Banir por partida) ou ficar só no ouro?
-3. Tudo bem usar as citações do original nos nomes (falas de vitória dos heróis, Seu Joaquim, "Ninguém mais desce")?
+2. ~~Ligar as três recompensas opcionais?~~ Respondida em 2026-11-09: ligadas.
+3. ~~Usar as citações do original nos nomes?~~ Respondida em 2026-11-09: sim, pode usar.
 
 ## Decisões já tomadas pelo plano do Daniel
 

@@ -416,9 +416,8 @@ Cada passo termina com `npm test`, `npm run lint`, `npm run build` verdes e o jo
 
 1. Seis inimigos sem frase no original (Esqueleto, Aranha Tumular, Gosma Verde, Espectro, Golem de Pedra,
    Cavaleiro Negro): quer escrever uma linha para cada?
-2. As três recompensas opcionais (+1 Trocar, +1 Pular, +1 Banir por partida): ligar ou deixar só ouro?
-3. Os nomes que citam o original (Seu Joaquim, as falas de vitória dos heróis, "Os paladinos que fecharam a cripta
-   eram quatro", "Ninguém mais desce"): tudo bem usar assim?
+2. ~~As três recompensas opcionais: ligar ou deixar só ouro?~~ Daniel, 2026-11-09: ligadas.
+3. ~~Os nomes que citam o original: tudo bem usar assim?~~ Daniel, 2026-11-09: sim.
 
 ## Fontes da pesquisa
 
