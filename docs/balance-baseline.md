@@ -406,3 +406,18 @@ Vitórias: 112/144 → 122/144. Aldo 27→29/36, Lyra 27→31, Teo 25→29, Andi
 O sim registra o nível em que o pool (armas + passivas) fica com menos de 3 cartas: só 1 em 144 partidas de 10
 minutos chega lá, no nível 58. O problema aparece em partidas longas e na Noite Sem Fim; agora as cartas de
 recompensa (Bolsa de Ouro, Banquete, Bênção de Yah) completam a escolha.
+
+### Fechamento da rodada (2026-11-09, `SIM_SEEDS=12`)
+
+```
+ELO X    fury 4.2x · holyLight 2.6x · yahFlame 5.8x · fan 2.6x · vigil 5.8x · blizzard 2.8x · storm 2.8x · jointBreaker 3.1x · fireSword 3.2x · forgeFury 2.7x · soulProcession 2.7x · funeralToll 3.0x
+POOL     ran short of 3 cards in 1/144 runs, at level 58.0 on average
+ACHIEVE  wins 126/144 · run damage median 251616 (>=260000: 32%) · best hit median 112 (>=100: 60%) · boss time median 28s (<=40s: 73%)
+```
+
+Vitórias por herói (36 partidas cada): Aldo 27→29, Lyra 27→32, Teo 25→29, Andilla 33→**36**. Maça nível 7: 206 de
+DPS real no nível (Martelo 198, Geada 191); Quebra-Junta 528 (3,1× a Maça).
+
+Noite Sem Fim (`SIM_VIGIL=1 SIM_SEEDS=4`, `config.vigil` HP +200%/min, dano de contato +150%/min): o bot aguenta
+em média 11:30 de vigília e 68% das vitórias passam dos 5:00 (Até o Amanhecer). Curvas mais suaves testadas: +50%
+de HP sem dano → 31 min (todas), +80%/+40% → 24 min, +150%/+100% → 15:40.

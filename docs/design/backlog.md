@@ -1294,3 +1294,20 @@ Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Danie
   Tempestade escurecendo a tela.
 - **Menu e Loja usando o espaço que sobra** (04-visual #18).
 - **Tamanho do bundle** (00-checks: 1,30 MB num chunk, 357 kB gzip): medir o tempo até o menu em 4G antes de mexer.
+
+## Rodada UI e features (2026-11-09)
+
+Feito, cada etapa com commit e push: **1** Maça de Ferro e Quebra-Junta (mira, onda de choque, pancada dupla,
+visual pesado); **2** Elos (≥ 2,5× a base no sim, receita no Livro, "Elo: + passiva" na carta, aviso de Elo pronto,
+dica única, setas para elites, tela de celebração); **3** cartas de recompensa (Bolsa de Ouro, Banquete, Bênção de
+Yah); **4** Loja em seções, com detalhe e compra confirmada; **5** menu, pausa com a build e status dos Elos, HUD só
+com slots preenchidos e vida/nível maiores; **6** Noite Sem Fim. Extra: o jogo instala no celular (PWA, offline).
+
+Para o Daniel decidir ou revisar:
+
+- Andilla venceu 36/36 no sim depois dos Elos mais fortes (antes 33/36). Vale um ajuste nela ou nos Elos dela?
+- Com os Elos mais fortes o chefe cai em 28 s (mediana): `bossFast` (40 s) sai em 73% e `hit120` (100) em 60% das
+  vitórias; a meta era cerca de metade. Subir para 30 s e 130?
+- As 12 frases da tela de Elo (`t.elo.lines`) foram escritas para o Survivors, sem fatos novos de lore: revisar.
+- Nome da conquista da vigília: "Até o Amanhecer" (do texto do menu), título "Vigia da Noite".
+- "Dano por segundo" na celebração é o valor de tabela da arma (dano × golpes ÷ recarga), não o medido na partida.
