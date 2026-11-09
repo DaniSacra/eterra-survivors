@@ -623,7 +623,7 @@ sementes depois de cada lote e registrar.
 - Feito (lote 1, sim de 12 sementes): mortes entre 6 e 8 min 14 para **12** de 144 (o lote 2 continua o trabalho, ver
   a tabela final da R2); snapshots acima de 650 vivos 15 para 7, máximo 700 (nenhum acima do que já havia).
 
-**RE-03 · Elos corpo a corpo e de aura na altura dos outros** · impl + bal · P · aprovado
+**RE-03 · Elos corpo a corpo e de aura na altura dos outros** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D4: DPS real no sim (144 corridas): Chama de Yah 34, Fúria 59, Quebra-Junta 59, Vigília 73
   contra Luz Sagrada 171, Nevasca 166, Tempestade 163, Espada de Fogo 155; Maça L7 rende 37, a pior base no máximo.
@@ -631,6 +631,13 @@ sementes depois de cada lote e registrar.
   3.0; `mace` `range` L1 78 para 88, L5 88 para 100, L7 96 para 110 (níveis intermediários interpolados). A Chama a
   150 px pede o disco grande com alfa baixo (RF-06).
 - Aceite: no relatório de armas do sim, nenhum Elo abaixo de 90 de DPS real e Maça L7 acima de 55.
+- Feito (lote 2): números como no O quê. Lab multidão: Chama de Yah 2195 para 3046, Quebra-Junta 3150 para 4650, Maça
+  L1 72 para 120 e Lmax 1136 para 1486 (no chefe: Fúria 93, Vigília 91, Quebra-Junta e Maça sem perda). Aceite do sim
+  **não cumprido** e deixado assim de propósito: DPS real no sim (média de quem tem a arma no fim) Chama 33 para 37,
+  Quebra-Junta 31 para 49, Vigília 55 para 48, Fúria 86 para 83, Maça L7 21 para 30. O robô do sim foge de tudo a
+  menos de 200 px, então aura e golpe corpo a corpo quase nunca têm alvo; subir mais o dano para chegar a 90 no sim
+  deixaria essas armas muito acima das outras na multidão do lab (já são as maiores). Conferir jogando (o humano entra
+  na multidão).
 
 **RE-04 · Leque de Facas melhor que as Adagas contra um alvo** · impl + bal · P · aprovado
 

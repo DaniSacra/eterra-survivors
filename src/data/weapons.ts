@@ -271,13 +271,13 @@ export const WEAPONS = {
   mace: {
     kind: 'arc',
     levels: levels<ArcLevel>(
-      { damage: 16, cooldown: 1.4, range: 78, arc: 2.1, knockback: 230, swings: 1 },
+      { damage: 16, cooldown: 1.4, range: 88, arc: 2.1, knockback: 230, swings: 1 },
       { damage: 21 },
       { swings: 2 },
       { damage: 27, cooldown: 1.25 },
-      { range: 88, arc: 2.4 },
+      { range: 100, arc: 2.4 },
       { damage: 35 },
-      { damage: 46, cooldown: 1.1, range: 96 },
+      { damage: 46, cooldown: 1.1, range: 110 },
     ),
   },
   /** Fogo: flames falling on enemies, fewer than lightning but burning a wider patch. */
@@ -321,7 +321,7 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    levels: [{ damage: 14, cooldown: 0.3, radius: 125 }],
+    levels: [{ damage: 14, cooldown: 0.3, radius: 150 }],
   },
   /** Leque de Facas: Andilla's fan of knives in every direction. */
   fan: {
@@ -361,7 +361,7 @@ export const WEAPONS = {
   /** Quebra-Junta: the mace aims at the joints, front and back, with a huge blow. */
   jointBreaker: {
     kind: 'arc',
-    levels: [{ damage: 75, cooldown: 1, range: 120, arc: 2.6, knockback: 320, swings: 2 }],
+    levels: [{ damage: 75, cooldown: 1, range: 145, arc: 3, knockback: 320, swings: 2 }],
   },
   /** Espada de Fogo: a rain of burning swords over the field. */
   fireSword: {
