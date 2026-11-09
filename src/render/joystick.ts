@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { config } from '../data/config';
-import { joystickVector } from '../core/input';
+import { joystickRadius, joystickVector } from '../core/input';
 import type { Vec2 } from '../core/math';
 
 /** Floating virtual joystick: appears wherever the finger touches down. Screen-space (HUD scene). */
@@ -11,11 +11,13 @@ export class Joystick {
   private pointerId = -1;
   private baseX = 0;
   private baseY = 0;
+  /** Sized to the screen on every touch (the window may have been resized or turned). */
+  private radius: number = config.joystick.minRadius;
   private readonly base: Phaser.GameObjects.Arc;
   private readonly knob: Phaser.GameObjects.Arc;
 
   constructor(private readonly scene: Phaser.Scene) {
-    const r = config.joystick.radius;
+    const r = this.radius;
     this.base = scene.add.circle(0, 0, r, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.25).setVisible(false);
     this.knob = scene.add.circle(0, 0, r * 0.45, 0xffffff, 0.3).setVisible(false);
     scene.input.on('pointerdown', this.onDown, this);
@@ -28,6 +30,14 @@ export class Joystick {
   private onDown(p: Phaser.Input.Pointer, over: unknown[]): void {
     if (!this.enabled || this.pointerId !== -1 || !p.wasTouch || over.length > 0) return;
     this.pointerId = p.id;
+    const { radiusShare, minRadius, maxRadius } = config.joystick;
+    const { width, height } = this.scene.scale;
+    const r = joystickRadius(width, height, radiusShare, minRadius, maxRadius);
+    if (r !== this.radius) {
+      this.radius = r;
+      this.base.setRadius(r);
+      this.knob.setRadius(r * 0.45);
+    }
     this.baseX = p.x;
     this.baseY = p.y;
     this.base.setPosition(p.x, p.y).setVisible(true);
@@ -36,8 +46,8 @@ export class Joystick {
 
   private onMove(p: Phaser.Input.Pointer): void {
     if (p.id !== this.pointerId) return;
-    const { radius, deadZone } = config.joystick;
-    joystickVector(this.vector, p.x - this.baseX, p.y - this.baseY, radius, deadZone);
+    const radius = this.radius;
+    joystickVector(this.vector, p.x - this.baseX, p.y - this.baseY, radius, config.joystick.deadZone);
     this.knob.setPosition(this.baseX + this.vector.x * radius, this.baseY + this.vector.y * radius);
   }
 

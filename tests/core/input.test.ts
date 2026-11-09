@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { joystickVector, keysVector } from '../../src/core/input';
+import { joystickRadius, joystickVector, keysVector } from '../../src/core/input';
 
 describe('input', () => {
   const v = { x: 0, y: 0 };
@@ -22,5 +22,12 @@ describe('input', () => {
     expect(v.x).toBeGreaterThan(0);
     expect(v.y).toBeLessThan(0);
     expect(keysVector(v, true, true, false, false)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('sizes the joystick to the screen: 13% of the shorter side, between 48 and 64 px', () => {
+    expect(joystickRadius(360, 640, 0.13, 48, 64)).toBe(48);
+    expect(joystickRadius(420, 820, 0.13, 48, 64)).toBeCloseTo(54.6);
+    expect(joystickRadius(820, 1180, 0.13, 48, 64)).toBe(64);
+    expect(joystickRadius(820, 420, 0.13, 48, 64)).toBeCloseTo(54.6);
   });
 });

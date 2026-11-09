@@ -24,3 +24,14 @@ export function keysVector(out: Vec2, left: boolean, right: boolean, up: boolean
   out.y = y * inv;
   return out;
 }
+
+/** The virtual joystick's radius for a screen: a share of its shorter side, clamped (bigger on tablets). */
+export function joystickRadius(
+  width: number,
+  height: number,
+  share: number,
+  min: number,
+  max: number,
+): number {
+  return Math.min(max, Math.max(min, Math.min(width, height) * share));
+}

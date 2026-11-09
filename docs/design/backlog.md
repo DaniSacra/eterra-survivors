@@ -1000,7 +1000,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   aberta; senão o padrão), com teste.
 - Aceite: escolher Lyra na Cripta, recarregar: a Preparação abre em Lyra e Cripta; save antigo continua válido.
 
-**RU-08 · Joystick do tamanho da tela** · impl · P · aprovado
+**RU-08 · Joystick do tamanho da tela** · impl · P · ✅ feito
 
 - Por quê: 05-ui #13: `config.joystick.radius` 56 fixo é ~16% da largura em 360 px e pequeno em tablet.
 - O quê: raio `min(64, max(48, menorLado * 0.13))`.

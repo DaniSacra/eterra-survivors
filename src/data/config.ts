@@ -108,7 +108,10 @@ export const config = {
     pickupPuffs: 10,
   },
   joystick: {
-    radius: 56,
+    /** Radius in CSS px: this share of the screen's shorter side, kept between min and max. */
+    radiusShare: 0.13,
+    minRadius: 48,
+    maxRadius: 64,
     deadZone: 0.12,
   },
 } as const;
