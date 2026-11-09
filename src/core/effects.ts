@@ -22,22 +22,27 @@ export interface Slash extends Timed {
   angle: number;
   arc: number;
   range: number;
+  /** From an Elo (drawn in its own colors). */
+  elo: boolean;
 }
-export const createSlash = (): Slash => ({ poolIndex: -1, ttl: 0, angle: 0, arc: 0, range: 0 });
+export const createSlash = (): Slash => ({ poolIndex: -1, ttl: 0, angle: 0, arc: 0, range: 0, elo: false });
 
 /** A lightning bolt hitting the ground for a moment (purely visual). */
 export interface Bolt extends Timed {
   x: number;
   y: number;
   radius: number;
+  /** From an Elo (drawn in its own colors). */
+  elo: boolean;
 }
-export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0 });
+export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0, elo: false });
 
-export function addBolt(world: World, x: number, y: number, radius: number): void {
+export function addBolt(world: World, x: number, y: number, radius: number, elo = false): void {
   const b = world.bolts.acquire();
   b.x = x;
   b.y = y;
   b.radius = radius;
+  b.elo = elo;
   b.ttl = config.effects.boltTtl;
 }
 
@@ -45,20 +50,65 @@ export interface DamageNumber extends Timed {
   x: number;
   y: number;
   value: number;
+  /** The enemy it belongs to: hits on it within `damageMergeTime` add up here instead of stacking. */
+  uid: number;
+  /** A big hit (value >= config.effects.strongHit), drawn larger and in gold. */
+  strong: boolean;
 }
-export const createDamageNumber = (): DamageNumber => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, value: 0 });
+export const createDamageNumber = (): DamageNumber => ({
+  poolIndex: -1,
+  ttl: 0,
+  x: 0,
+  y: 0,
+  value: 0,
+  uid: 0,
+  strong: false,
+});
 
-export function addDamageNumber(world: World, x: number, y: number, value: number): void {
+/** Shows a hit on enemy `uid` at (x, y), adding it to that enemy's fresh number if there is one. */
+export function addDamageNumber(world: World, uid: number, x: number, y: number, value: number): void {
   const fx = config.effects;
+  const list = world.damageNumbers.active;
+  const fresh = fx.damageNumberTtl - fx.damageMergeTime;
+  for (let i = 0; i < list.length; i++) {
+    const d = list[i] as DamageNumber;
+    if (d.uid !== uid || d.ttl < fresh) continue;
+    d.value += value;
+    d.strong = d.value >= fx.strongHit;
+    return;
+  }
   if (world.damageNumbers.size >= fx.maxDamageNumbers) return;
   const d = world.damageNumbers.acquire();
   d.x = x + (world.rng.next() - 0.5) * 10;
   d.y = y;
   d.value = value;
+  d.uid = uid;
+  d.strong = value >= fx.strongHit;
   d.ttl = fx.damageNumberTtl;
 }
 
+/** A short puff where something vanished: an enemy dying, or a gem or item being picked up (purely visual). */
+export interface Puff extends Timed {
+  x: number;
+  y: number;
+  /** Size, world px. */
+  r: number;
+  kind: 'death' | 'gem' | 'item';
+}
+export const createPuff = (): Puff => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, r: 0, kind: 'death' });
+
+export function addPuff(world: World, x: number, y: number, r: number, kind: Puff['kind']): void {
+  if (world.puffs.size >= config.effects.maxPuffs) return;
+  const p = world.puffs.acquire();
+  p.x = x;
+  p.y = y;
+  p.r = r;
+  p.kind = kind;
+  p.ttl = config.effects.puffTtl;
+}
+
 export function updateEffects(world: World, dt: number): void {
+  expire(world.puffs, dt);
   expire(world.slashes, dt);
   expire(world.bolts, dt);
   const rise = config.effects.damageNumberRise * dt;

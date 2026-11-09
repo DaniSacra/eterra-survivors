@@ -26,9 +26,9 @@ export class ShopScene extends Phaser.Scene {
     const cx = width / 2;
     const save = loadSave();
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
-    label(this, cx, 34, t.shop.title, 28, { bold: true, color: '#ffd870' });
+    label(this, cx, 34, t.shop.title, 28, { bold: true, color: UI.gold });
     label(this, cx, 66, t.shop.intro, 14, { color: UI.muted, wrap: Math.min(520, width - 32) });
-    label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: '#ffd870' });
+    label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
 
     let focus = 0;
     const gap = 8;
@@ -80,7 +80,7 @@ export class ShopScene extends Phaser.Scene {
       } else
         label(this, rx, y + cardH / 2 - 12, t.shop.cost(cost), 13, {
           bold: true,
-          color: affordable ? '#ffd870' : '#c07070',
+          color: affordable ? UI.gold : UI.danger,
         }).setOrigin(1, 0.5);
     });
     cards.push(button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back));

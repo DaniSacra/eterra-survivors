@@ -1,9 +1,10 @@
 import type Phaser from 'phaser';
 import { ENEMY_ART } from './art/enemies';
 import { HERO_ART } from './art/heroes';
+import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
 import { ART_RES, Pen } from './art/pen';
-import { TILE_ART } from './art/tiles';
+import { DECAL_ART, TILE_ART } from './art/tiles';
 import type { ArtDef } from './art/types';
 
 /**
@@ -26,6 +27,8 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(HERO_ART, ART_RES),
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
+  ...art(DECAL_ART, ART_RES),
+  ...art(ICON_ART, ART_RES),
 };
 
 export function preloadAssets(scene: Phaser.Scene): void {

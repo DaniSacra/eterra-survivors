@@ -90,15 +90,15 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.shadow(15, 21, 22, 5);
       const leg = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) => {
         p.line(x1, y1, x2, y2, 4.5, INK).line(x2, y2, x3, y3, 4.5, INK);
-        p.line(x1, y1, x2, y2, 2, 0x72308e).line(x2, y2, x3, y3, 2, 0x72308e);
+        p.line(x1, y1, x2, y2, 2, 0x6e4a32).line(x2, y2, x3, y3, 2, 0x6e4a32);
       };
       leg(12, 14, 5, 8, 2, 20);
       leg(13, 15, 8, 10, 6, 21);
       leg(18, 15, 23, 10, 25, 21);
       leg(19, 14, 26, 8, 29, 20);
-      p.ellipse(12, 13, 15, 12, 0x72308e).circle(21, 13, 5.5, 0x8a4ab8);
+      p.ellipse(12, 13, 15, 12, 0x6e4a32).circle(21, 13, 5.5, 0x8a5e3e);
       p.ink();
-      p.fill(0xa84ad8).fillEllipse(10, 12, 6, 4);
+      p.fill(0xa87a52).fillEllipse(10, 12, 6, 4);
       p.glow(22, 11.5, 1, 0xe86a7a).glow(24.5, 12.5, 0.9, 0xe86a7a).glow(20.5, 14, 0.7, 0xe86a7a);
     },
   },
@@ -122,7 +122,7 @@ export const ENEMY_ART: Record<string, ArtDef> = {
 
   // ---- Cripta da Igreja Velha ----
   'enemy.bones': skeleton(0xa4b8da, 0xe86a7a),
-  'enemy.bat': winged(0x7a5a9a, 0x55406e, 'bat'),
+  'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
   'enemy.ghost': {
     w: 30,
     h: 34,
@@ -215,13 +215,13 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     draw(p) {
       p.outline = 3;
       p.shadow(40, 81, 56, 12);
-      p.poly([18, 30, 62, 30, 70, 78, 10, 78], 0x7a1a24); // cape
+      p.poly([18, 30, 62, 30, 70, 78, 10, 78], 0x8a2430); // cape
       p.poly([60, 10, 64, 8, 68, 66, 63, 67], 0xcbd8ec); // greatsword blade
       p.rrect(55, 44, 18, 5, 2, 0x55555e); // guard
-      p.rrect(26, 58, 11, 20, 4, 0x2a2a36).rrect(43, 58, 11, 20, 4, 0x2a2a36); // legs
-      p.rrect(20, 30, 40, 32, 9, 0x3a3a4a); // breastplate
-      p.circle(20, 34, 8, 0x4a4a5a).circle(60, 34, 8, 0x4a4a5a); // pauldrons
-      p.rrect(27, 6, 26, 26, 9, 0x3a3a4a); // helm
+      p.rrect(26, 58, 11, 20, 4, 0x34343f).rrect(43, 58, 11, 20, 4, 0x34343f); // legs
+      p.rrect(20, 30, 40, 32, 9, 0x44465a); // breastplate
+      p.circle(20, 34, 8, 0x55586c).circle(60, 34, 8, 0x55586c); // pauldrons
+      p.rrect(27, 6, 26, 26, 9, 0x44465a); // helm
       p.poly([40, 6, 44, -2, 47, 7], 0xa8323e); // plume
       p.ink();
       p.outline = 2;
@@ -230,6 +230,10 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.fill(0x80809a, 0.7).fillEllipse(32, 38, 12, 5).fillEllipse(33, 12, 8, 4);
       p.line(40, 32, 40, 58, 1.5, 0x141418);
       p.fill(0xa8323e, 0.6).fillCircle(40, 45, 4);
+      // Boss lighting: moonlight on the top edges and a warm glow from below, so he never melts into the night.
+      p.fill(0xcbd8ec, 0.55).fillEllipse(40, 8.5, 20, 3).fillEllipse(19, 28, 9, 3).fillEllipse(61, 28, 9, 3);
+      p.fill(0xff9a5a, 0.35).fillEllipse(40, 60, 34, 6).fillEllipse(31, 76, 10, 3).fillEllipse(49, 76, 10, 3);
+      p.fill(0xff9a5a, 0.25).fillEllipse(40, 77, 56, 5);
     },
   },
   'enemy.bellRinger': {
@@ -254,5 +258,37 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.line(36, 40, 36, 72, 1.5, 0x2a1e14);
     },
   },
-  'enemy.oldWolf': wolf(0x8a8a96, 0xa2a2ac, 0xff4050, 2, true),
+  /** Lobo Velho: the old pack leader, hunched, shaggy mane, white muzzle, a scar over one eye. */
+  'enemy.oldWolf': {
+    w: 78,
+    h: 62,
+    draw(p) {
+      p.outline = 3;
+      p.shadow(38, 58, 60, 10);
+      p.poly([10, 26, 0, 14, 3, 10, 9, 15, 16, 22], 0x6e6e7a); // bushy tail
+      p.rrect(16, 38, 8, 18, 4, 0x6e6e7a)
+        .rrect(26, 40, 8, 16, 4, 0x6e6e7a)
+        .rrect(44, 40, 8, 16, 4, 0x7a7a86)
+        .rrect(54, 38, 8, 18, 4, 0x7a7a86); // legs
+      p.ellipse(36, 32, 50, 26, 0x7a7a86); // body
+      // Shaggy mane over the shoulders.
+      p.poly([44, 14, 48, 8, 52, 14, 56, 9, 58, 16, 62, 13, 62, 26, 46, 34, 40, 24], 0x5e5e6a);
+      p.circle(60, 22, 12, 0x8a8a96); // head
+      p.poly([64, 18, 78, 24, 76, 30, 63, 30], 0x8a8a96); // snout
+      p.poly([52, 12, 53, 1, 59, 10], 0x7a7a86).poly([59, 10, 64, 2, 66, 12], 0x7a7a86); // ears
+      p.ink();
+      p.outline = 2;
+      p.fill(0xe8e0d0).fillEllipse(70, 27, 14, 6); // white old muzzle
+      p.fill(0xa2a2ac).fillEllipse(36, 38, 34, 8); // belly
+      p.fill(INK).fillCircle(77, 24.5, 2);
+      p.fill(0xffffff).fillTriangle(66, 30, 68, 30, 67, 33.5).fillTriangle(71, 30, 73, 30, 72, 33); // fangs
+      p.fill(0x4a4a56).fillTriangle(61, 2.5, 63, 4, 62, 7); // torn ear notch
+      p.glow(64, 19.5, 1.8, 0xff6040); // the good eye
+      p.line(57, 15, 61, 22, 1.5, INK); // the closed eye under the scar
+      p.line(55, 12, 63, 25, 2, 0xe86a7a); // the scar
+      p.shine(30, 24, 18, 5, 0.25);
+      // Boss lighting: a warm glow from below.
+      p.fill(0xff9a5a, 0.3).fillEllipse(36, 45, 40, 6);
+    },
+  },
 };

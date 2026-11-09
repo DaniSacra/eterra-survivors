@@ -4,7 +4,7 @@ import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
 import { t } from '../i18n/pt-BR';
 import { Joystick } from '../render/joystick';
-import { UI, button, label } from '../render/ui';
+import { UI, button, label, safeArea } from '../render/ui';
 import { spawnOnRing } from '../core/enemies';
 import { segmentAt } from '../core/waves';
 import type { GameScene } from './GameScene';
@@ -28,8 +28,11 @@ export class HudScene extends Phaser.Scene {
   private banner!: Phaser.GameObjects.Text;
   private pauseBtn!: Phaser.GameObjects.Rectangle;
   private pauseIcon!: Phaser.GameObjects.Text;
+  private hpText!: Phaser.GameObjects.Text;
   private debugOn = false;
-  private shown = { time: -1, level: -1, kills: -1, gold: -1 };
+  private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
+  /** Safe-area insets, refreshed on layout. */
+  private inset = { top: 0, right: 0, bottom: 0, left: 0 };
 
   constructor() {
     super(SCENES.hud);
@@ -37,29 +40,31 @@ export class HudScene extends Phaser.Scene {
 
   init(data: { world: World }): void {
     this.world = data.world;
-    this.shown = { time: -1, level: -1, kills: -1, gold: -1 };
+    this.shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
   }
 
   create(): void {
     this.bars = this.add.graphics();
-    this.timer = label(this, 0, 0, '', 26, { bold: true });
-    this.level = label(this, 0, 0, '', 15, { bold: true }).setOrigin(1, 0);
-    this.kills = label(this, 0, 0, '', 15).setOrigin(1, 0);
-    this.gold = label(this, 0, 0, '', 15, { color: '#ffd870' }).setOrigin(0, 0);
-    this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 14, {
+    this.timer = label(this, 0, 0, '', 26, { bold: true, stroke: true });
+    this.level = label(this, 0, 0, '', 15, { bold: true, stroke: true }).setOrigin(1, 0);
+    this.kills = label(this, 0, 0, '', 15, { stroke: true }).setOrigin(1, 0);
+    this.gold = label(this, 0, 0, '', 15, { color: UI.gold, stroke: true }).setOrigin(0, 0);
+    this.hpText = label(this, 0, 0, '', 12, { bold: true, stroke: true });
+    this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 15, {
       bold: true,
-      color: '#ff8090',
+      color: UI.danger,
+      stroke: true,
     }).setVisible(false);
     this.debug = this.add
       .text(PAD, 0, '', {
         fontFamily: 'monospace',
         fontSize: '12px',
-        color: '#9fffa0',
-        backgroundColor: '#000000aa',
+        color: UI.debug,
+        backgroundColor: UI.debugBg,
       })
       .setOrigin(0, 1)
       .setVisible(false);
-    this.banner = label(this, 0, 0, '', 24, { bold: true, color: '#ff8090' }).setAlpha(0);
+    this.banner = label(this, 0, 0, '', 24, { bold: true, color: UI.danger, stroke: true }).setAlpha(0);
     const game = this.scene.get(SCENES.game) as GameScene;
     this.pauseBtn = button(this, 0, 0, 40, 40, () => game.pauseGame()).setAlpha(0.8);
     this.pauseIcon = label(this, 0, 0, 'II', 18, { bold: true });
@@ -78,22 +83,31 @@ export class HudScene extends Phaser.Scene {
 
   private layout(): void {
     const { width, height } = this.scale;
-    this.timer.setPosition(width / 2, XP_H + PAD + 18);
-    this.level.setPosition(width - PAD, XP_H + 6);
-    this.kills.setPosition(width - PAD, XP_H + 26);
-    this.gold.setPosition(PAD, XP_H + PAD + HP_H + 6);
-    this.bossName.setPosition(width / 2, height - 46);
+    const s = (this.inset = safeArea());
+    const top = s.top + XP_H;
+    const left = s.left + PAD;
+    const right = width - s.right - PAD;
+    this.timer.setPosition(width / 2, top + PAD + 18);
+    this.level.setPosition(right, top + 6);
+    this.kills.setPosition(right, top + 26);
+    this.hpText.setPosition(left + this.hpWidth() / 2, top + PAD + HP_H / 2);
+    this.gold.setPosition(left, top + PAD + HP_H + 6);
+    this.bossName.setPosition(width / 2, height - s.bottom - 58);
     this.banner.setPosition(width / 2, height * 0.3);
-    this.pauseBtn.setPosition(width - PAD - 20, XP_H + 70);
-    this.pauseIcon.setPosition(width - PAD - 20, XP_H + 70);
-    this.debug.setPosition(PAD, height - PAD);
+    this.pauseBtn.setPosition(right - 20, top + 70);
+    this.pauseIcon.setPosition(right - 20, top + 70);
+    this.debug.setPosition(left, height - s.bottom - PAD);
+  }
+
+  private hpWidth(): number {
+    return Math.min(180, this.scale.width * 0.38);
   }
 
   /** Big centred message that fades out. Red warns; pass `good` for rewards. */
   announce(text: string, good = false): void {
     this.banner
       .setText(text)
-      .setColor(good ? '#ffd870' : '#ff8090')
+      .setColor(good ? UI.gold : UI.danger)
       .setAlpha(1);
     this.tweens.killTweensOf(this.banner);
     this.tweens.add({ targets: this.banner, alpha: 0, delay: 2200, duration: 800 });
@@ -112,16 +126,21 @@ export class HudScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const g = this.bars.clear();
 
-    // XP bar across the top edge.
-    g.fillStyle(0x000000, 0.6).fillRect(0, 0, width, XP_H);
-    g.fillStyle(0x40c8e8).fillRect(0, 0, (width * w.xp) / xpToNext(w.level), XP_H);
+    const s = this.inset;
+    // XP bar across the top edge (under the notch, the strip above it stays dark).
+    g.fillStyle(UI.dim, 0.6).fillRect(0, 0, width, s.top + XP_H);
+    g.fillStyle(UI.xp).fillRect(0, s.top, (width * w.xp) / xpToNext(w.level), XP_H);
 
-    // HP bar, top-left.
-    const hpW = Math.min(180, width * 0.38);
-    const hpY = XP_H + PAD;
-    g.fillStyle(0x000000, 0.6).fillRect(PAD, hpY, hpW, HP_H);
-    g.fillStyle(0xd83a4a).fillRect(PAD, hpY, (hpW * p.hp) / p.stats.maxHp, HP_H);
-    g.lineStyle(1, UI.border).strokeRect(PAD, hpY, hpW, HP_H);
+    // HP bar, top-left, with the number on it.
+    const hpW = this.hpWidth();
+    const hpX = s.left + PAD;
+    const hpY = s.top + XP_H + PAD;
+    g.fillStyle(UI.dim, 0.6).fillRect(hpX, hpY, hpW, HP_H);
+    g.fillStyle(UI.hp).fillRect(hpX, hpY, (hpW * p.hp) / p.stats.maxHp, HP_H);
+    g.lineStyle(1, UI.border).strokeRect(hpX, hpY, hpW, HP_H);
+    const hp = Math.ceil(p.hp);
+    if (hp !== this.shown.hp || p.stats.maxHp !== this.shown.maxHp)
+      this.hpText.setText(t.hud.hp((this.shown.hp = hp), (this.shown.maxHp = p.stats.maxHp)));
 
     // Boss bar, bottom.
     const boss = w.boss;
@@ -129,10 +148,10 @@ export class HudScene extends Phaser.Scene {
     if (boss) {
       const bw = Math.min(420, width - PAD * 4);
       const bx = (width - bw) / 2;
-      const by = height - 34;
-      g.fillStyle(0x000000, 0.7).fillRect(bx, by, bw, 14);
-      g.fillStyle(0xc8323e).fillRect(bx, by, (bw * Math.max(0, boss.hp)) / boss.maxHp, 14);
-      g.lineStyle(1, 0xff8090).strokeRect(bx, by, bw, 14);
+      const by = height - s.bottom - 40;
+      g.fillStyle(UI.dim, 0.7).fillRect(bx, by, bw, 14);
+      g.fillStyle(UI.hp).fillRect(bx, by, (bw * Math.max(0, boss.hp)) / boss.maxHp, 14);
+      g.lineStyle(1, UI.dangerHex).strokeRect(bx, by, bw, 14);
     }
 
     // Texts only change when their value does (setText re-renders a texture).

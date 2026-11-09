@@ -16,19 +16,28 @@ import { World } from '../core/world';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
+import { UI } from '../render/ui';
 import { Controls } from '../render/controls';
-import { drawFx } from '../render/fx';
+import { DAMAGE_TEXT, HERO_COLOR, TINT, drawFx } from '../render/fx';
+import { settings } from '../render/settings';
+import { Decals } from '../render/decals';
 import { Mirror } from '../render/mirror';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
+
+/** Shown instead of the damage numbers when they are turned off. */
+const NONE: readonly DamageNumber[] = [];
 
 export class GameScene extends Phaser.Scene {
   world!: World;
   private controls!: Controls;
   private hud!: HudScene;
   private ground!: Phaser.GameObjects.TileSprite;
+  private decals!: Decals;
   private playerSprite!: Phaser.GameObjects.Image;
+  /** A light silhouette behind the hero: a permanent outline that reads over any crowd. */
+  private playerOutline!: Phaser.GameObjects.Image;
   private enemyMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
   private damageMirror!: Mirror<DamageNumber, Phaser.GameObjects.Text>;
@@ -51,6 +60,7 @@ export class GameScene extends Phaser.Scene {
     this.world = new World(undefined, { ...this.choice, bonuses: shopBonuses(loadSave()) });
     this.banked = false;
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
+    this.decals = new Decals(this, this.world.stageId);
     this.gemMirror = new Mirror(
       () => this.add.image(0, 0, 'gem.small').setDepth(3).setScale(ART_SCALE),
       (img, g) => {
@@ -70,10 +80,13 @@ export class GameScene extends Phaser.Scene {
     );
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
-    this.playerSprite = this.add
-      .image(0, 0, CHARACTERS[this.world.character].sprite)
-      .setDepth(10)
-      .setScale(ART_SCALE);
+    const heroSprite = CHARACTERS[this.world.character].sprite;
+    // Above enemies and effects, with a thick outline in the hero's own color.
+    this.playerOutline = this.add
+      .image(0, 0, heroSprite)
+      .setDepth(13)
+      .setTintFill(HERO_COLOR[this.world.character]);
+    this.playerSprite = this.add.image(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
     this.projectileMirror = new Mirror(
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
@@ -84,14 +97,24 @@ export class GameScene extends Phaser.Scene {
     this.damageMirror = new Mirror(
       () =>
         this.add
-          .text(0, 0, '', { fontFamily: 'sans-serif', fontSize: '16px', fontStyle: 'bold', color: '#ffffff' })
-          .setStroke('#000000', 3)
+          .text(0, 0, '', {
+            fontFamily: UI.font,
+            fontSize: '13px',
+            fontStyle: 'bold',
+            color: DAMAGE_TEXT.color,
+          })
+          .setStroke(DAMAGE_TEXT.stroke, 3)
           .setOrigin(0.5)
-          .setDepth(20),
+          .setDepth(12.5), // under the hero (13), over everything else
       (txt, d) => {
         const v = String(Math.round(d.value));
         if (txt.text !== v) txt.setText(v);
-        txt.setPosition(d.x, d.y).setAlpha(Math.min(1, d.ttl * 4));
+        const color = d.strong ? DAMAGE_TEXT.strong : DAMAGE_TEXT.color;
+        if (txt.style.color !== color) txt.setColor(color);
+        txt
+          .setPosition(d.x, d.y)
+          .setScale(d.strong ? 1.35 : 1)
+          .setAlpha(Math.min(1, d.ttl * 4));
       },
     );
     this.enemyMirror = new Mirror(
@@ -113,9 +136,9 @@ export class GameScene extends Phaser.Scene {
                 ? Math.sin(w.time * 70) * 0.15
                 : 0,
           );
-        if (e.flash > 0) img.setTint(0xff7070);
-        else if (this.world.freeze > 0) img.setTint(0x80c8ff);
-        else if (e.slow > 0) img.setTint(0xb8e0ff);
+        if (e.flash > 0) img.setTint(TINT.hit);
+        else if (this.world.freeze > 0) img.setTint(TINT.frozen);
+        else if (e.slow > 0) img.setTint(TINT.slowed);
         else img.clearTint();
       },
     );
@@ -139,6 +162,16 @@ export class GameScene extends Phaser.Scene {
       for (const k of [SCENES.hud, SCENES.levelUp, SCENES.pause, SCENES.end]) this.scene.stop(k);
     });
     this.fitCamera();
+    this.cameras.main.fadeIn(150);
+  }
+
+  /** Camera shake and flash, both skipped with the calm-screen option. */
+  private shake(ms: number, intensity: number): void {
+    if (!settings().calm) this.cameras.main.shake(ms, intensity);
+  }
+
+  private flash(ms: number, r: number, g: number, b: number): void {
+    if (!settings().calm) this.cameras.main.flash(ms, r, g, b);
   }
 
   /** Zoom so the shortest screen side always shows `minWorldSide` world pixels (portrait-friendly). */
@@ -159,16 +192,24 @@ export class GameScene extends Phaser.Scene {
     cam.centerOn(w.player.x, w.player.y);
     // The hero bounces while walking and turns to where it goes.
     const step = w.player.moving ? Math.abs(Math.sin(w.time * 12)) : 0;
-    this.playerSprite
-      .setPosition(w.player.x, w.player.y - step * 2.5)
-      .setScale(ART_SCALE * (1 + step * 0.05), ART_SCALE * (1 - step * 0.05))
-      .setAlpha(w.player.iframes > 0 ? 0.5 : 1);
-    if (w.player.facing.x !== 0) this.playerSprite.setFlipX(w.player.facing.x < 0);
+    const sx = ART_SCALE * (1 + step * 0.05);
+    const sy = ART_SCALE * (1 - step * 0.05);
+    this.playerSprite.setPosition(w.player.x, w.player.y - step * 2.5).setScale(sx, sy);
+    // Hurt (invulnerable): the outline blinks white instead of the hero fading into the crowd.
+    const blink = w.player.iframes > 0 && Math.sin(w.time * 40) > 0;
+    this.playerOutline
+      .setPosition(w.player.x, w.player.y - step * 2.5 + 1)
+      .setScale(sx * 1.22, sy * 1.16)
+      .setTintFill(blink ? TINT.blink : HERO_COLOR[w.character]);
+    if (w.player.facing.x !== 0) {
+      this.playerSprite.setFlipX(w.player.facing.x < 0);
+      this.playerOutline.setFlipX(w.player.facing.x < 0);
+    }
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
-    this.damageMirror.sync(w.damageNumbers.active);
+    this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
     drawFx(this.fx, this.fxTop, w);
     // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
     // (computed from the player, since cam.worldView only updates at render time)
@@ -178,7 +219,22 @@ export class GameScene extends Phaser.Scene {
     const vy = w.player.y - vh / 2 - 2;
     this.ground.setPosition(vx, vy).setSize(vw + 4, vh + 4);
     this.ground.setTilePosition(vx, vy);
+    this.decals.update(vx, vy, vw, vh);
     this.handleEvents();
+  }
+
+  /** A golden ring that bursts from the hero when a level is gained. */
+  private levelUpPulse(): void {
+    const p = this.world.player;
+    const ring = this.add.circle(p.x, p.y, 20).setStrokeStyle(4, UI.goldHex).setDepth(11);
+    this.tweens.add({
+      targets: ring,
+      scale: 4,
+      alpha: 0,
+      duration: 450,
+      ease: 'Cubic.easeOut',
+      onComplete: () => ring.destroy(),
+    });
   }
 
   /**
@@ -209,16 +265,17 @@ export class GameScene extends Phaser.Scene {
     for (const e of w.events) {
       switch (e.type) {
         case 'levelUp':
+          this.levelUpPulse();
           this.scene.launch(SCENES.levelUp, { world: w });
           break;
         case 'playerHit':
-          this.cameras.main.shake(120, 0.006);
-          this.playerSprite.setTintFill(0xff4050);
+          this.shake(120, 0.006);
+          this.playerSprite.setTintFill(TINT.heroHurt);
           this.time.delayedCall(90, () => this.playerSprite.clearTint());
           break;
         case 'bossSpawned':
           this.hud.announce(t.bossWarning(t.enemies[w.stage.boss.id]));
-          this.cameras.main.shake(400, 0.01);
+          this.shake(400, 0.01);
           break;
         case 'eliteSpawned':
           this.hud.announce(t.eliteWarning);
@@ -229,16 +286,16 @@ export class GameScene extends Phaser.Scene {
             e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name),
             true,
           );
-          this.cameras.main.flash(250, 255, 220, 140);
+          this.flash(250, 255, 220, 140);
           break;
         }
         case 'pickup':
           if (e.id === 'chest' || e.id === 'gold') break;
           this.hud.announce(t.pickups[e.id], true);
           if (e.id === 'bomb') {
-            this.cameras.main.flash(200, 255, 240, 200);
-            this.cameras.main.shake(300, 0.012);
-          } else if (e.id === 'freeze') this.cameras.main.flash(300, 160, 220, 255);
+            this.flash(200, 255, 240, 200);
+            this.shake(300, 0.012);
+          } else if (e.id === 'freeze') this.flash(300, 160, 220, 255);
           break;
         case 'won':
         case 'lost': {

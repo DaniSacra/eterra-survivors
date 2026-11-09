@@ -6,6 +6,20 @@ export const UI = {
   text: '#e8e2d0',
   muted: '#a8a090',
   accent: 0xd8a040,
+  /** Titles, rewards, highlights, costs. */
+  gold: '#ffd870',
+  goldHex: 0xffd870,
+  /** Danger, defeat, warnings. */
+  danger: '#ff8090',
+  dangerHex: 0xff8090,
+  dangerDark: 0x8a3a48,
+  /** Bars: life (hero and boss) and experience (same green as the gems). */
+  hp: 0xd83a4a,
+  xp: 0x9be35a,
+  /** Dark outline around HUD text so it reads over any ground. */
+  stroke: '#0b0d14',
+  debug: '#9fffa0',
+  debugBg: '#000000aa',
   panel: 0x161a26,
   panelHover: 0x232a3c,
   border: 0x4a5268,
@@ -25,7 +39,7 @@ export function label(
   y: number,
   text: string,
   size: number,
-  opts: { color?: string; bold?: boolean; wrap?: number; align?: 'left' | 'center' } = {},
+  opts: { color?: string; bold?: boolean; wrap?: number; align?: 'left' | 'center'; stroke?: boolean } = {},
 ): Phaser.GameObjects.Text {
   return scene.add
     .text(x, y, text, {
@@ -35,6 +49,8 @@ export function label(
       color: opts.color ?? UI.text,
       align: opts.align ?? 'center',
       wordWrap: opts.wrap ? { width: opts.wrap } : undefined,
+      stroke: opts.stroke ? UI.stroke : undefined,
+      strokeThickness: opts.stroke ? Math.max(3, Math.round(size / 5)) : 0,
     })
     .setOrigin(opts.align === 'left' ? 0 : 0.5, opts.align === 'left' ? 0 : 0.5);
 }
@@ -83,6 +99,23 @@ export function disable(bg: Phaser.GameObjects.Rectangle): Phaser.GameObjects.Re
 export function dim(scene: Phaser.Scene, alpha = 0.7): Phaser.GameObjects.Rectangle {
   const { width, height } = scene.scale;
   return scene.add.rectangle(0, 0, width, height, UI.dim, alpha).setOrigin(0).setInteractive();
+}
+
+/** Screen insets (notch, rounded corners, home bar) in CSS px, read from the #safe-area probe in index.html. */
+export function safeArea(): { top: number; right: number; bottom: number; left: number } {
+  try {
+    const probe = document.getElementById('safe-area');
+    if (!probe) throw new Error('no probe');
+    const css = getComputedStyle(probe);
+    return {
+      top: parseFloat(css.paddingTop) || 0,
+      right: parseFloat(css.paddingRight) || 0,
+      bottom: parseFloat(css.paddingBottom) || 0,
+      left: parseFloat(css.paddingLeft) || 0,
+    };
+  } catch {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
 }
 
 /** Static overlays simply rebuild themselves when the window resizes. */

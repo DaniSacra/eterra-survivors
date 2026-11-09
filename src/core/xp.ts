@@ -1,4 +1,5 @@
 import { config } from '../data/config';
+import { addPuff } from './effects';
 import type { Poolable } from './pool';
 import type { World } from './world';
 
@@ -65,6 +66,7 @@ export function updateGems(world: World, dt: number): void {
     const dy = p.y - g.y;
     const dSq = dx * dx + dy * dy;
     if (dSq <= pickupSq) {
+      addPuff(world, p.x, p.y, 6, 'gem');
       addXp(world, g.value * p.stats.growth);
       world.gems.release(g);
       continue;

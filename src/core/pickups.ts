@@ -1,5 +1,6 @@
 import { config } from '../data/config';
 import { RANDOM_DROPS, type PickupId } from '../data/pickups';
+import { addPuff } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import type { Poolable } from './pool';
 import { applyUpgrade, chestReward } from './upgrades';
@@ -77,6 +78,7 @@ export function updatePickups(world: World): void {
     const it = list[i] as Pickup;
     if ((it.x - p.x) ** 2 + (it.y - p.y) ** 2 > reachSq) continue;
     COLLECT[it.type](world);
+    addPuff(world, it.x, it.y, 16, 'item');
     world.events.push(PICKED[it.type]);
     world.pickups.release(it);
   }

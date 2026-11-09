@@ -96,6 +96,12 @@ export const config = {
     damageNumberTtl: 0.6,
     damageNumberRise: 40, // px per second
     maxDamageNumbers: 40,
+    /** Hits on the same enemy within this many seconds add up into one number. */
+    damageMergeTime: 0.25,
+    /** From this much damage (after merging) a number is a strong hit. */
+    strongHit: 40,
+    puffTtl: 0.3,
+    maxPuffs: 60,
   },
   joystick: {
     radius: 56,

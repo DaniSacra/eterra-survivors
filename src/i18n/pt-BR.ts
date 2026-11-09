@@ -26,6 +26,7 @@ export const t = {
     level: (n: number) => `Nv ${n}`,
     kills: (n: number) => `${n} abates`,
     gold: (n: number) => `${n} ouro`,
+    hp: (hp: number, max: number) => `${hp}/${max}`,
   },
 
   levelUp: {
@@ -44,6 +45,8 @@ export const t = {
     chargeKeys: 'R troca · X pula · B bane',
     evolution: 'Elo',
     evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
+    recipe: (passive: string) => `Forma Elo com ${passive}`,
+    recipeFor: (weapon: string) => `Forma o Elo de ${weapon}`,
   },
 
   chest: {
@@ -66,6 +69,12 @@ export const t = {
     title: 'Pausa',
     resume: 'Continuar',
     quit: 'Desistir',
+  },
+
+  options: {
+    damageNumbers: (on: boolean) => `Números de dano: ${on ? 'sim' : 'não'}`,
+    calm: (on: boolean) => `Tela calma (sem tremor): ${on ? 'sim' : 'não'}`,
+    muted: (on: boolean) => `Som: ${on ? 'desligado' : 'ligado'}`,
   },
 
   end: {

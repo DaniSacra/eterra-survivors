@@ -2,7 +2,10 @@ import Phaser from 'phaser';
 import { heroUnlocked, stageUnlocked, unlockHero } from '../core/meta';
 import type { RunSetup } from '../core/world';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
-import { STAGE_IDS, type StageId } from '../data/stages';
+import { STAGES, STAGE_IDS, type StageId } from '../data/stages';
+import type { StatKey } from '../data/config';
+import { formatStatDelta } from '../render/describe';
+import { HERO_COLOR } from '../render/fx';
 import { t } from '../i18n/pt-BR';
 import { loadSave, writeSave } from '../render/save';
 import { UI, bindKeys, button, disable, isConfirm, label, restartOnResize } from '../render/ui';
@@ -36,8 +39,8 @@ export class SelectScene extends Phaser.Scene {
     const wrapW = Math.min(640, width - 24);
 
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
-    label(this, cx, 30, t.select.title, 26, { bold: true, color: '#ffd870' });
-    label(this, cx, 60, t.select.gold(save.gold), 16, { bold: true, color: '#ffd870' });
+    label(this, cx, 30, t.select.title, 26, { bold: true, color: UI.gold });
+    label(this, cx, 60, t.select.gold(save.gold), 16, { bold: true, color: UI.gold });
 
     // Heroes: 4 in a row when wide, 2 x 2 on phones.
     const hcols = width >= 600 ? 4 : 2;
@@ -60,6 +63,11 @@ export class SelectScene extends Phaser.Scene {
       const yy = y + i * (sh + gap) + sh / 2;
       this.stageCard(id, cx, yy, wrapW, sh, id === choice.stage, stageUnlocked(save, id));
     });
+    y += STAGE_IDS.length * (sh + gap) + 8;
+
+    // The chosen hero, big, with what makes them different, in the space left above the buttons.
+    const room = height - 36 - 23 - 30 - y;
+    if (room >= 78) this.heroDetail(choice.character, cx, y, wrapW, Math.min(170, room));
 
     const owned = heroUnlocked(save, choice.character);
     const cost = CHARACTERS[choice.character].cost;
@@ -122,7 +130,7 @@ export class SelectScene extends Phaser.Scene {
     if (h < 70) return;
     const desc = owned ? c.desc : t.select.unlock(CHARACTERS[id].cost);
     const d = label(this, x - w / 2 + 10, top + 46, desc, 12, {
-      color: owned ? UI.text : '#ffd870',
+      color: owned ? UI.text : UI.gold,
       align: 'left',
       wrap: w - 20,
     });
@@ -134,12 +142,41 @@ export class SelectScene extends Phaser.Scene {
       t.select.signature(t.weapons[CHARACTERS[id].weapon].name),
       12,
       {
-        color: '#ffd870',
+        color: UI.gold,
         align: 'left',
         wrap: w - 20,
       },
     );
     if (sig.y + sig.height > y + h / 2 - 4) sig.destroy();
+  }
+
+  private heroDetail(id: CharacterId, cx: number, top: number, w: number, h: number): void {
+    const def = CHARACTERS[id];
+    const c = t.characters[id];
+    this.add.rectangle(cx, top, w, h, UI.panel, 0.85).setOrigin(0.5, 0).setStrokeStyle(2, HERO_COLOR[id]);
+    const big = Math.min(2.6, (h - 34) / 46);
+    const left = cx - w / 2;
+    this.add.ellipse(left + 52, top + h - 18, 70, 18, HERO_COLOR[id], 0.3);
+    this.add
+      .image(left + 52, top + h - 16, def.sprite)
+      .setOrigin(0.5, 1)
+      .setScale(ART_SCALE * big);
+    const x = left + 108;
+    // Short panels (wide screens) drop the role line, which the hero card already shows.
+    const compact = h < 120;
+    label(this, x, top + (compact ? 8 : 12), c.name, compact ? 19 : 22, { bold: true, align: 'left' });
+    if (!compact) label(this, x, top + 40, c.role, 14, { color: UI.muted, align: 'left' });
+    const stats = (Object.keys(def.stats) as StatKey[])
+      .map((k) => formatStatDelta(k, (def.stats as Partial<Record<StatKey, number>>)[k] as number))
+      .join(' · ');
+    const st = label(this, x, top + (compact ? 34 : 62), stats, 14, { align: 'left', wrap: w - 120 });
+    const iy = compact ? top + h - 18 : Math.min(top + h - 26, st.y + st.height + 22);
+    this.add.image(x + 14, iy, `icon.${def.weapon}`).setScale(ART_SCALE * 1.1);
+    label(this, x + 34, iy, t.weapons[def.weapon].name, 14, {
+      color: UI.gold,
+      bold: true,
+      align: 'left',
+    }).setOrigin(0, 0.5);
   }
 
   private stageCard(
@@ -155,13 +192,23 @@ export class SelectScene extends Phaser.Scene {
     const card = button(this, x, y, w, h, () => open && this.pick({ stage: id }));
     card.setStrokeStyle(on ? 3 : 2, on ? UI.accent : UI.border);
     if (!open) disable(card);
-    label(this, x - w / 2 + 12, y - h / 2 + 8, s.name, 16, {
+    // A window onto the stage's ground; a padlock while it is closed.
+    const th = h - 12;
+    const tx = x - w / 2 + 6 + th / 2;
+    this.add
+      .tileSprite(tx, y, th, th, STAGES[id].tile)
+      .setAlpha(open ? 1 : 0.4)
+      .setTilePosition(20, 20);
+    this.add.rectangle(tx, y, th, th).setStrokeStyle(1.5, open ? UI.border : UI.borderOff);
+    if (!open) this.add.image(tx, y, 'icon.lock').setScale(ART_SCALE * Math.min(1.6, th / 26));
+    const tl = x - w / 2 + 14 + th;
+    label(this, tl, y - h / 2 + 8, s.name, 16, {
       bold: true,
       align: 'left',
       color: open ? UI.text : UI.textOff,
     });
     if (h >= 44)
-      label(this, x - w / 2 + 12, y - h / 2 + 29, open ? s.desc : t.select.locked, 12, {
+      label(this, tl, y - h / 2 + 29, open ? s.desc : t.select.locked, 12, {
         color: open ? UI.muted : UI.textOff,
         align: 'left',
       });

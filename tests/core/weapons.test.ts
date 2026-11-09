@@ -118,14 +118,36 @@ describe('Aura de Yah (area)', () => {
 
 describe('damage numbers', () => {
   it('appear on hit, rise and fade', () => {
-    const w = prepared('yahAura');
-    spawnEnemy(w, 'blackKnight', 10, 0);
+    const w = prepared('blade');
+    spawnEnemy(w, 'blackKnight', 30, 0);
     w.step(1 / 60, still);
     expect(w.damageNumbers.size).toBe(1);
     const y = w.damageNumbers.active[0]!.y;
     w.step(0.05, still);
     expect(w.damageNumbers.active[0]!.y).toBeLessThan(y);
     for (let i = 0; i < 60; i++) w.step(1 / 60, still);
-    expect(w.damageNumbers.size).toBeLessThanOrEqual(2);
+    expect(w.damageNumbers.size).toBeLessThanOrEqual(1);
+  });
+
+  it('hits on one enemy close together add up into one number, marked strong when big', () => {
+    const w = bareWorld();
+    const e = spawnEnemy(w, 'blackKnight', 30, 0);
+    w.onEnemyDamaged(e, 25, null);
+    w.onEnemyDamaged(e, 25, null);
+    expect(w.damageNumbers.size).toBe(1);
+    expect(w.damageNumbers.active[0]!.value).toBe(50);
+    expect(w.damageNumbers.active[0]!.strong).toBe(true);
+    for (let i = 0; i < 20; i++) w.step(1 / 60, still); // past the merge window
+    w.onEnemyDamaged(e, 5, null);
+    expect(w.damageNumbers.size).toBe(2);
+  });
+
+  it('auras and orbits show no numbers', () => {
+    for (const id of ['yahAura', 'paladinSwords'] as const) {
+      const w = prepared(id);
+      const e = spawnEnemy(w, 'blackKnight', 10, 0);
+      w.onEnemyDamaged(e, 5, w.weapons[0]!);
+      expect(w.damageNumbers.size).toBe(0);
+    }
   });
 });

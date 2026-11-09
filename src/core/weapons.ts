@@ -1,4 +1,5 @@
 import { config } from '../data/config';
+import { EVOLUTIONS } from '../data/evolutions';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import {
   WEAPONS,
@@ -34,6 +35,9 @@ export interface OwnedWeapon {
 }
 
 export const maxLevel = (id: WeaponId): number => WEAPONS[id].levels.length;
+
+/** Evolved weapons (Elos), which the renderer draws in their own colors. */
+export const isElo = (id: WeaponId): boolean => EVOLUTIONS[id] !== undefined;
 
 export function weaponStats(w: OwnedWeapon): LevelsByKind[WeaponKind] {
   return WEAPONS[w.id].levels[w.level - 1] as LevelsByKind[WeaponKind];
@@ -111,6 +115,7 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
     slash.angle = angle;
     slash.arc = s.arc;
     slash.range = range;
+    slash.elo = isElo(w.id);
     slash.ttl = config.effects.slashTtl;
     for (let i = 0; i < ids.length; i++) {
       const e = list[ids[i] as number] as Enemy;
@@ -240,7 +245,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
     targets.push(t.uid);
     const x = t.x;
     const y = t.y;
-    addBolt(world, x, y, radius);
+    addBolt(world, x, y, radius, isElo(w.id));
     const ids = world.enemyHash.query(x, y, radius + MAX_ENEMY_RADIUS, world.scratch);
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;

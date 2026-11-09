@@ -180,13 +180,13 @@ depois e registra em `docs/balance-baseline.md`.
 
 ## Etapa 3: Legibilidade e arte (dono principal: visual-director)
 
-**A-01 · Tokens de cor únicos** · visual + impl · P
+**A-01 · Tokens de cor únicos** · visual + impl · P · ✅ feito
 - Por quê: visual-director: `#ffd870` e `#ff8090` repetidos em ~12 lugares, `UI.accent` é outro dourado, o HUD
   inventa cores (XP ciano, dois vermelhos).
 - O quê: `UI.gold`, `UI.danger` (e o que faltar) em `render/ui.ts`, trocando todos os hexadecimais soltos.
 - Aceite: `grep` não encontra cor hexadecimal de UI fora dos tokens nas cenas.
 
-**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M
+**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito
 - Por quê: plano do Daniel (o herói some na multidão do chefe) e visual-director (Lyra some na Cripta: roxo igual a
   morcegos e aranhas; chão da cripta com contraste alto, `tiles.ts`).
 - O quê: contorno claro permanente e anel mais forte sob o herói. O roxo da Lyra é canônico no original
@@ -195,75 +195,75 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: captura com 500 inimigos e chefe em 390x844: o herói é achado em menos de 1 s, nas três fases, com os
   quatro heróis.
 
-**A-03 · HUD legível no celular** · visual + impl · P
+**A-03 · HUD legível no celular** · visual + impl · P · ✅ feito
 - Por quê: plano do Daniel (barrinha de vida abaixo do herói) e visual-director (HP sem número, textos sem
   contorno, nome do chefe colado à barra, sem safe-area para notch).
 - O quê: barrinha de vida sob o herói; número de HP na barra do HUD; contorno nos textos; respiro no nome do chefe;
   margens com `env(safe-area-inset-*)`.
 - Aceite: em 390x844 e em paisagem, nenhum texto do HUD cortado pelo notch; vida legível sem olhar para o canto.
 
-**A-04 · Números de dano que não poluem** · impl + visual · M
+**A-04 · Números de dano que não poluem** · impl + visual · M · ✅ feito
 - Por quê: plano do Daniel e visual-director: sans-serif, todos brancos e iguais, empilham sobre a multidão.
 - O quê: menores, somados por inimigo num intervalo curto (~0.25 s), cor própria para golpe forte, ocultos para
   aura e órbita. Opção na Pausa para desligar (localStorage com try/catch). Sem alocação: pool atual de números.
 - Aceite: com 500 inimigos, no máximo `maxDamageNumbers` na tela e nenhum bloco ilegível; a opção sobrevive ao
   recarregar a página.
 
-**A-05 · Gemas que contrastam com os três chãos** · visual · P
+**A-05 · Gemas que contrastam com os três chãos** · visual · P · ✅ feito
 - Por quê: plano do Daniel; visual-director: gemas dominam a tela no limite de 250.
 - O quê: cor única (verde ou dourado com brilho) que contraste com neve, pedra azul e estrada; três tamanhos claros;
   avaliar `gems.maxActive` 250 para 150 com o sim (a fusão já existe).
 - Aceite: captura nas três fases: gemas visíveis e sem cobrir inimigos.
 
-**A-06 · Golpes e zonas com acabamento** · visual · M
+**A-06 · Golpes e zonas com acabamento** · visual · M · ✅ feito
 - Por quê: plano do Daniel; visual-director: slash é uma fatia branca, raio é uma linha de 4 px, sem contorno.
 - O quê: arco da Lâmina com rastro e gradiente; Geada com borda e cristais; raio com contorno e brilho.
 - Aceite: revisão do visual-director aprova as capturas; FPS no stress test (F4) igual ao anterior.
 
-**A-07 · Elos com visual próprio** · visual · M
+**A-07 · Elos com visual próprio** · visual · M · ✅ feito
 - Por quê: visual-director: Vigília, Dobre Fúnebre e Nevasca quase iguais à base. O Elo é a recompensa máxima da
   partida e precisa parecer um.
 - O quê: cada Elo com cor, tamanho ou forma que o diferencie da base (10 entradas em `render/assets.ts`).
 - Aceite: num teste cego de capturas, dá para dizer base ou Elo em todos os 10 pares.
 
-**A-08 · Arte dos chefes** · visual · M
+**A-08 · Arte dos chefes** · visual · M · ✅ feito
 - Por quê: visual-director: Cavaleiro Negro sem luz de baixo, some no chão; Lobo Velho é recolor 2x do Lobo da Geada
   com contorno de 4 px.
 - O quê: luz de recorte no Cavaleiro (contraste, não tom sombrio); Lobo Velho com desenho próprio (pelagem velha,
   cicatriz), contorno no padrão. Junto com os avisos de E-07.
 - Aceite: os três chefes se destacam do chão e da escolta em 390x844.
 
-**A-09 · Itens do chão distintos** · visual · P
+**A-09 · Itens do chão distintos** · visual · P · ✅ feito
 - Por quê: visual-director: a Badalada (bomba) é um sino igual aos Sinos de Bronze, o ímã parece bomba, o freeze
   está sem `ink()`.
 - O quê: silhuetas diferentes para Badalada, Pedra-Ímã e Sopro de Geada; todas com tinta.
 - Aceite: os seis itens do chão são distintos em miniatura (32 px).
 
-**A-10 · Chãos com decalques** · visual · M
+**A-10 · Chãos com decalques** · visual · M · ✅ feito
 - Por quê: plano do Daniel: repetição visível do tile.
 - O quê: decalques determinísticos por posição: Valmor com lápides fofas, montinhos de neve, galhos, flores de gelo;
   Cripta e Estrada com elementos próprios. Sem custo por frame (desenhados por tile).
 - Aceite: nenhuma repetição óbvia numa tela; FPS inalterado no stress test.
 
-**A-11 · Subida de nível com ícone e receita de Elo** · visual + impl · M
+**A-11 · Subida de nível com ícone e receita de Elo** · visual + impl · M · ✅ feito
 - Por quê: plano do Daniel; visual-director: cards de 84 px meio vazios, sem ícone, e a tela cobre as barras do HUD.
 - O quê: ícone da arma ou passiva em cada carta; dica curta de receita ("Forma Elo com Força"), reaproveitando
   `t.levelUp.evolvesWith`; layout que não cobre HP e XP.
 - Aceite: em 390x844, as três cartas com ícone e a barra de HP visível durante a escolha.
 
-**A-12 · Preparação com herói em destaque** · visual + impl · M
+**A-12 · Preparação com herói em destaque** · visual + impl · M · ✅ feito
 - Por quê: plano do Daniel; visual-director: faixa vazia de ~150 px, heróis pequenos, fases sem arte nem cadeado.
 - O quê: metade inferior mostra o herói selecionado grande, atributos e o ícone da arma própria; fases com
   miniatura do chão e cadeado quando trancadas.
 - Aceite: nada sobreposto em desktop e 390x844; dá para ver qual fase está trancada sem ler.
 
-**A-13 · Menu com ilustração intencional** · visual · P
+**A-13 · Menu com ilustração intencional** · visual · P · ✅ feito
 - Por quê: plano do Daniel (o Cavaleiro semitransparente parece erro) e visual-director (marca d'água atrapalha o
   título; sempre o chão de Valmor).
 - O quê: tirar a marca d'água; ilustração do grupo dos quatro heróis no espaço vazio.
 - Aceite: título limpo; revisão do visual-director aprova em desktop e celular.
 
-**A-14 · Juice de combate e transições** · impl + visual · M
+**A-14 · Juice de combate e transições** · impl + visual · M · ✅ feito
 - Por quê: visual-director: morte de inimigo sem efeito, coleta sem retorno, level-up sem animação, cortes secos
   entre cenas.
 - O quê: puff de morte em `Pool` (sem alocar), brilho curto na coleta de gema e item, pulso no level-up, fade de

@@ -8,8 +8,6 @@ import { formatCompact, formatDecimal } from '../render/describe';
 import { UI, button, dim, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { SCENES } from './keys';
 
-const GOLD = '#ffd870';
-
 /** Game over or victory: the run report (summary, damage per weapon, passives) over the frozen battlefield. */
 export class EndScene extends Phaser.Scene {
   private world!: World;
@@ -40,12 +38,12 @@ export class EndScene extends Phaser.Scene {
     const panel = this.add
       .rectangle(cx, 0, pw, 10, UI.panel, 0.92)
       .setOrigin(0.5, 0)
-      .setStrokeStyle(2, won ? UI.accent : 0x8a3a48);
+      .setStrokeStyle(2, won ? UI.accent : UI.dangerDark);
 
     let y = 14;
     label(this, cx, y + 18, won ? t.end.won : t.end.lost, small ? 30 : 36, {
       bold: true,
-      color: won ? GOLD : '#ff8090',
+      color: won ? UI.gold : UI.danger,
     });
     y += 46;
     const flavor = won ? t.stages[w.stageId].won : t.end.lostText(t.characters[w.character].name);
@@ -53,7 +51,7 @@ export class EndScene extends Phaser.Scene {
     y += text.height + 8;
     label(this, cx, y, t.end.run(t.stages[w.stageId].name, t.characters[w.character].name), 15, {
       bold: true,
-      color: GOLD,
+      color: UI.gold,
     }).setOrigin(0.5, 0);
     y += 30;
 
@@ -85,15 +83,15 @@ export class EndScene extends Phaser.Scene {
     const xDamage = right - colW * 2;
     const xTime = right - colW;
     const header = (txt: string, x: number) =>
-      label(this, x, y, txt, fs, { bold: true, color: GOLD }).setOrigin(1, 0);
-    label(this, left, y, t.end.weapon, fs, { bold: true, color: GOLD, align: 'left' });
+      label(this, x, y, txt, fs, { bold: true, color: UI.gold }).setOrigin(1, 0);
+    label(this, left, y, t.end.weapon, fs, { bold: true, color: UI.gold, align: 'left' });
     header(t.end.weaponLevel, xLevel);
     header(t.end.damage, xDamage);
     header(t.end.owned, xTime);
     header(t.end.dps, right);
     y += 22;
     for (const r of rows) {
-      const color = r.dps === best && best > 0 ? GOLD : UI.text;
+      const color = r.dps === best && best > 0 ? UI.gold : UI.text;
       label(this, left, y, t.weapons[r.id].name, fs, { align: 'left', color });
       const cell = (txt: string, x: number) => label(this, x, y, txt, fs, { color }).setOrigin(1, 0);
       cell(String(r.level), xLevel);
@@ -119,7 +117,7 @@ export class EndScene extends Phaser.Scene {
     if (this.unlocked) {
       label(this, cx, y, t.end.unlocked(t.stages[this.unlocked].name), 16, {
         bold: true,
-        color: GOLD,
+        color: UI.gold,
       }).setOrigin(0.5, 0);
       y += 28;
     }

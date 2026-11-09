@@ -3,10 +3,13 @@ import type { World } from '../core/world';
 import type { ChargeKey } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { describeUpgrade } from '../render/describe';
-import { UI, bindKeys, button, dim, disable, label, restartOnResize } from '../render/ui';
+import { ART_SCALE } from '../render/art/pen';
+import { UI, bindKeys, button, disable, label, restartOnResize, safeArea } from '../render/ui';
 import { SCENES } from './keys';
 
 const CHARGES: ChargeKey[] = ['reroll', 'skip', 'banish'];
+/** Height of the HUD's XP and life bars, left uncovered (HudScene layout). */
+const HUD_BARS = 44;
 
 /** Overlay with the upgrade choices. The world is frozen (state 'levelup') while it is open. */
 export class LevelUpScene extends Phaser.Scene {
@@ -30,29 +33,41 @@ export class LevelUpScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const w = this.world;
     const opts = w.upgradeOptions;
-    const cardW = Math.min(420, width - 32);
-    const cardH = Math.min(84, (height - 260) / opts.length - 12);
-    const top = height / 2 - ((cardH + 12) * opts.length) / 2 - 20;
+    const cardW = Math.min(440, width - 24);
+    // The HUD bars (XP and life) stay visible above the dimmed area.
+    const keep = safeArea().top + HUD_BARS;
+    const cardH = Math.max(76, Math.min(100, (height - keep - 250) / opts.length - 12));
+    const top = Math.max(keep + 80, height / 2 - ((cardH + 12) * opts.length) / 2 - 10);
 
-    dim(this);
-    label(this, width / 2, top - 56, t.levelUp.title, 30, { bold: true, color: '#ffd870' });
+    this.add
+      .rectangle(0, keep, width, height - keep, UI.dim, 0.72)
+      .setOrigin(0)
+      .setInteractive();
+    label(this, width / 2, top - 44, t.levelUp.title, 30, { bold: true, color: UI.gold, stroke: true });
+    const owned = w.weapons.map((o) => o.id);
     this.cards = opts.map((opt, i) => {
       const y = top + i * (cardH + 12) + cardH / 2;
       const card = button(this, width / 2, y, cardW, cardH, () => this.choose(i));
-      const d = describeUpgrade(opt);
-      const left = width / 2 - cardW / 2 + 14;
-      label(this, left, y - cardH / 2 + 10, `${i + 1}. ${d.title}`, 19, { bold: true, align: 'left' });
-      label(this, width / 2 + cardW / 2 - 14, y - cardH / 2 + 20, d.tag, 14, { color: '#ffd870' }).setOrigin(
-        1,
-        0.5,
-      );
-      label(this, left, y - cardH / 2 + 38, d.desc, 15, { color: UI.muted, align: 'left', wrap: cardW - 28 });
+      const d = describeUpgrade(opt, owned);
+      const x0 = width / 2 - cardW / 2;
+      this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
+      const left = x0 + 62;
+      const textW = cardW - 62 - 12;
+      label(this, left, y - cardH / 2 + 9, `${i + 1}. ${d.title}`, 18, { bold: true, align: 'left' });
+      label(this, x0 + cardW - 12, y - cardH / 2 + 19, d.tag, 13, { color: UI.gold }).setOrigin(1, 0.5);
+      const desc = label(this, left, y - cardH / 2 + 33, d.desc, 14, {
+        color: UI.muted,
+        align: 'left',
+        wrap: textW,
+      });
+      if (d.recipe && desc.y + desc.height + 16 <= y + cardH / 2)
+        label(this, left, y + cardH / 2 - 7, d.recipe, 12, { color: UI.gold, align: 'left' }).setOrigin(0, 1);
       return card;
     });
 
     const bottom = top + opts.length * (cardH + 12);
     const hint = this.banishing ? t.levelUp.banishHint : t.levelUp.hint;
-    label(this, width / 2, bottom + 14, hint, 14, { color: this.banishing ? '#ff8090' : UI.muted });
+    label(this, width / 2, bottom + 14, hint, 14, { color: this.banishing ? UI.danger : UI.muted });
 
     // Trocar · Pular · Banir
     const bw = Math.min(130, (cardW - 16) / 3);
@@ -61,7 +76,7 @@ export class LevelUpScene extends Phaser.Scene {
       const x = width / 2 + (i - 1) * (bw + 8);
       const b = button(this, x, bottom + 54, bw, 40, () => this.useCharge(key), t.levelUp.charges[key](n));
       if (n <= 0) disable(b);
-      if (key === 'banish' && this.banishing) b.setStrokeStyle(3, 0xff8090);
+      if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
     if (!this.sys.game.device.input.touch)
       label(this, width / 2, bottom + 90, t.levelUp.chargeKeys, 12, { color: UI.muted });
@@ -91,7 +106,7 @@ export class LevelUpScene extends Phaser.Scene {
   }
 
   private highlight(): void {
-    const on = this.banishing ? 0xff8090 : UI.accent;
+    const on = this.banishing ? UI.dangerHex : UI.accent;
     this.cards.forEach((c, i) =>
       c.setStrokeStyle(i === this.selected ? 3 : 2, i === this.selected ? on : UI.border),
     );

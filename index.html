@@ -24,9 +24,18 @@
       canvas {
         display: block;
       }
+      /* Probe read by render/ui.ts safeArea(): notches and rounded corners on phones. */
+      #safe-area {
+        position: fixed;
+        visibility: hidden;
+        pointer-events: none;
+        padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+          env(safe-area-inset-left, 0px);
+      }
     </style>
   </head>
   <body>
+    <div id="safe-area"></div>
     <div id="game"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

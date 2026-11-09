@@ -66,7 +66,16 @@ describe('upgrade descriptions', () => {
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 3 }).desc).toBe('Golpes 1 → 2');
     expect(describeUpgrade({ kind: 'passive', id: 'might', level: 2 }).desc).toBe('Dano +10%');
     expect(describeUpgrade({ kind: 'heal' }).title).toBe(t.levelUp.heal);
-    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).desc).toContain('Força');
+    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).recipe).toContain('Força');
+    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).icon).toBe('icon.blade');
+    expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['blade']).recipe).toContain('Lâmina');
+    expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['frost']).recipe).toBe('');
     expect(describeUpgrade({ kind: 'evolution', id: 'fury', from: 'blade' }).tag).toBe(t.levelUp.evolution);
+  });
+});
+
+describe('icons', () => {
+  it('every weapon, Elo and passive has a level-up icon', () => {
+    for (const id of [...WEAPON_IDS, ...PASSIVE_IDS]) expect(ASSETS[`icon.${id}`], id).toBeDefined();
   });
 });

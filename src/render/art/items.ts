@@ -63,12 +63,18 @@ const wisp = (core: number, halo: number, s: number): ArtDef => ({
   },
 });
 
-const gem = (body: number, light: number, s: number): ArtDef => ({
+/** XP gems: one green that stands out on snow, blue stone and road alike; size tells the value. */
+const GEM_BODY = 0x5cc040;
+const GEM_LIGHT = 0xc8f890;
+const gem = (s: number): ArtDef => ({
   w: Math.round(12 * s),
   h: Math.round(14 * s),
   draw(p) {
+    const body = GEM_BODY;
+    const light = GEM_LIGHT;
     p.g.save();
     p.g.scaleCanvas(s, s);
+    p.fill(light, 0.22).fillCircle(6, 7, 6.5); // soft glow
     p.outline = 1.5;
     p.poly([6, 1, 11, 6, 6, 13, 1, 6], body);
     p.ink();
@@ -90,9 +96,9 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.soulProcession': wisp(0xffffff, 0x8ac0f0, 1.3),
 
   // ---- XP gems ----
-  'gem.small': gem(0x3a78c8, 0x8ac0f0, 1),
-  'gem.medium': gem(0x3a9a6a, 0x90e0b0, 1.25),
-  'gem.large': gem(0xa8323e, 0xe86a7a, 1.6),
+  'gem.small': gem(0.9),
+  'gem.medium': gem(1.35),
+  'gem.large': gem(1.9),
 
   // ---- On the ground ----
   'pickup.chest': {
@@ -136,20 +142,16 @@ export const ITEM_ART: Record<string, ArtDef> = {
     },
   },
   'pickup.magnet': {
+    // Pedra-Ímã: a horseshoe magnet (red with silver tips), the shape everyone reads as "pull".
     w: 24,
-    h: 24,
+    h: 26,
     draw(p) {
-      p.shadow(12, 21.5, 16, 4);
-      p.ellipse(12, 11, 18, 17, 0x55555e); // the lodestone
+      p.shadow(12, 23.5, 16, 4);
+      p.poly([3, 4, 9, 4, 9, 13, 12, 16, 15, 13, 15, 4, 21, 4, 21, 14, 12, 22, 3, 14], 0xd84a4a);
+      p.rrect(3, 2, 6, 5, 1, 0xd8e0ec).rrect(15, 2, 6, 5, 1, 0xd8e0ec);
       p.ink();
-      p.fill(0x7a7a82).fillEllipse(10, 9, 11, 9);
-      // Blue sparks that pull.
-      p.fill(0x8ac0f0)
-        .fillCircle(5, 6, 1.6)
-        .fillCircle(18, 5, 1.3)
-        .fillCircle(19, 16, 1.6)
-        .fillCircle(6, 17, 1.2);
-      p.fill(0xffffff, 0.8).fillCircle(8.5, 7, 1.6);
+      p.fill(0xffffff, 0.45).fillRect(4.5, 8, 2, 5);
+      p.fill(0x8ac0f0).fillCircle(6, 0.5, 1.2).fillCircle(18, 0.5, 1.2);
     },
   },
   'pickup.bomb': {
@@ -157,6 +159,14 @@ export const ITEM_ART: Record<string, ArtDef> = {
     h: 26,
     draw(p) {
       p.shadow(12, 23.5, 18, 4);
+      // Badalada: the ring of a toll, a bright burst behind a small bell (unlike the Sinos de Bronze).
+      const burst: { x: number; y: number }[] = [];
+      for (let k = 0; k < 16; k++) {
+        const a = (k * Math.PI) / 8;
+        const r = k % 2 ? 6 : 12;
+        burst.push({ x: 12 + Math.cos(a) * r, y: 12 + Math.sin(a) * r });
+      }
+      p.fill(0xff8a4a, 0.85).fillPoints(burst, true);
       p.poly([4, 21, 6, 8, 12, 3, 18, 8, 20, 21], 0xc89c38); // the bell
       p.rrect(2, 19, 20, 4, 2, 0x8a5418);
       p.circle(12, 23, 2.5, 0x8a5418); // clapper
@@ -174,7 +184,7 @@ export const ITEM_ART: Record<string, ArtDef> = {
         const a = (k * Math.PI) / 3;
         const dx = Math.cos(a) * 9;
         const dy = Math.sin(a) * 9;
-        p.line(12 - dx, 12 - dy, 12 + dx, 12 + dy, 4.5, 0x2c3c80).line(
+        p.line(12 - dx, 12 - dy, 12 + dx, 12 + dy, 5, INK).line(
           12 - dx,
           12 - dy,
           12 + dx,

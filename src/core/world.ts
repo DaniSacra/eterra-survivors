@@ -2,15 +2,18 @@ import { config, type StatKey, type Stats } from '../data/config';
 import type { PassiveId } from '../data/upgrades';
 import { CHARACTERS, type CharacterId } from '../data/characters';
 import { STAGES, type StageDef, type StageId } from '../data/stages';
-import type { WeaponId } from '../data/weapons';
+import { WEAPONS, type WeaponId } from '../data/weapons';
 import {
   addDamageNumber,
   createBolt,
+  addPuff,
   createDamageNumber,
+  createPuff,
   createSlash,
   updateEffects,
   type Bolt,
   type DamageNumber,
+  type Puff,
   type Slash,
 } from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
@@ -64,6 +67,7 @@ export class World {
   readonly slashes = new Pool<Slash>(createSlash, 4);
   readonly bolts = new Pool<Bolt>(createBolt, 16);
   readonly zones = new Pool<Zone>(createZone, 16);
+  readonly puffs = new Pool<Puff>(createPuff, 32);
   /** Seconds left of Sopro de Geada (enemies frozen). */
   freeze = 0;
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
@@ -179,12 +183,16 @@ export class World {
     this.events.push({ type: 'levelUp' });
   }
 
-  onEnemyDamaged(e: Enemy, amount: number): void {
-    addDamageNumber(this, e.x, e.y - e.def.radius, amount);
+  onEnemyDamaged(e: Enemy, amount: number, source: OwnedWeapon | null): void {
+    // Auras and orbiting pieces hit constantly: their numbers would only bury the screen.
+    const kind = source ? WEAPONS[source.id].kind : null;
+    if (kind === 'aura' || kind === 'orbit') return;
+    addDamageNumber(this, e.uid, e.x, e.y - e.def.radius, amount);
   }
 
   onEnemyKilled(e: Enemy): void {
     this.kills++;
+    addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
     if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);
     else if (!e.def.boss) maybeDropRandom(this, e.x, e.y);

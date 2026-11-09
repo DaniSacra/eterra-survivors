@@ -120,7 +120,7 @@ export function damageEnemy(
   const kb = knockback * (1 - e.def.knockbackResist);
   e.kbx += kx * kb;
   e.kby += ky * kb;
-  world.onEnemyDamaged(e, amount);
+  world.onEnemyDamaged(e, amount, source);
   if (e.hp <= 0) e.dead = true;
 }
 
