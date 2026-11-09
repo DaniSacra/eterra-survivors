@@ -105,18 +105,29 @@ export function nearestEnemy(
 
 /**
  * A random living enemy inside the rectangle of half-size (hw, hh) around the player (the visible area), not
- * in `exclude`. A few random probes of the active list (no allocation, no full scan); null when none hit.
+ * in `exclude`. A few random probes of the active list first; when they all miss (most of the crowd off screen),
+ * one pass over the list from a random start. No allocation; null only when no enemy qualifies.
  */
 export function randomEnemyNear(world: World, hw: number, hh: number, exclude: number[]): Enemy | null {
   const list = world.enemies.active;
-  if (list.length === 0) return null;
+  const n = list.length;
+  if (n === 0) return null;
   const p = world.player;
   for (let tries = 0; tries < 12; tries++) {
-    const e = list[world.rng.int(list.length)] as Enemy;
-    if (e.dead || isFaded(e) || exclude.includes(e.uid)) continue;
-    if (Math.abs(e.x - p.x) <= hw && Math.abs(e.y - p.y) <= hh) return e;
+    const e = list[world.rng.int(n)] as Enemy;
+    if (fitsNear(e, p.x, p.y, hw, hh, exclude)) return e;
+  }
+  const start = world.rng.int(n);
+  for (let k = 0; k < n; k++) {
+    const e = list[(start + k) % n] as Enemy;
+    if (fitsNear(e, p.x, p.y, hw, hh, exclude)) return e;
   }
   return null;
+}
+
+function fitsNear(e: Enemy, x: number, y: number, hw: number, hh: number, exclude: number[]): boolean {
+  if (e.dead || isFaded(e) || exclude.includes(e.uid)) return false;
+  return Math.abs(e.x - x) <= hw && Math.abs(e.y - y) <= hh;
 }
 
 export function updateProjectiles(world: World, dt: number): void {

@@ -389,3 +389,16 @@ describe('random-target weapons and the boss (RE-06)', () => {
     expect(boss.hp).toBe(boss.maxHp);
   });
 });
+
+describe('random volleys with most of the crowd off screen', () => {
+  for (const id of ['fireSword', 'blizzard'] as const)
+    it(`${id} still lands its whole volley`, () => {
+      const w = prepared(id);
+      for (let i = 0; i < 300; i++) spawnEnemy(w, 'skeleton', 3000 + i * 5, 3000);
+      for (let i = 0; i < 20; i++) spawnEnemy(w, 'skeleton', -150 + i * 15, 60);
+      w.weapons[0]!.timer = 0;
+      updateWeapons(w, 1 / 60);
+      const count = (WEAPONS[id].levels[0] as { count: number }).count;
+      expect(w.targetsScratch.length).toBe(count);
+    });
+});
