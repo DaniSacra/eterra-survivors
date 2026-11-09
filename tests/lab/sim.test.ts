@@ -192,5 +192,14 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
   let runs = 0;
   while (bank < cheapest && runs < 20) bank += simulate('aldo', 'valmor', 100 + runs++).gold;
   out.push(`UNLOCK   second hero (${cheapest} gold) after ${runs} runs of Aldo in Valmor`);
+  // The whole Loja in average runs (the mean gold of every run simulated here).
+  const shopTotal = SHOP_IDS.reduce(
+    (n, id) => n + (SHOP[id].baseCost * SHOP[id].maxLevel * (SHOP[id].maxLevel + 1)) / 2,
+    0,
+  );
+  const meanGold = results.reduce((a, r) => a + r.gold, 0) / results.length;
+  out.push(
+    `LOJA     everything costs ${shopTotal} gold = ${(shopTotal / meanGold).toFixed(0)} average runs (${Math.round(meanGold)} gold/run)`,
+  );
   console.log('\nSIM\n' + out.join('\n'));
 });

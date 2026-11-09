@@ -12,5 +12,7 @@ export type GameEvent =
   /** A weapon's Elo recipe just became complete (once per weapon per run): the next chest forms it. */
   | { type: 'eloReady'; weapon: WeaponId }
   | { type: 'pickup'; id: PickupId }
+  /** Segunda Chance: the hero fell and got up again. */
+  | { type: 'revived' }
   | { type: 'won' }
   | { type: 'lost' };

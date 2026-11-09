@@ -100,6 +100,8 @@ export type Charges = Record<ChargeKey, number>;
 export interface RunBonuses {
   stats: Partial<Stats>;
   charges: Charges;
+  /** Times the hero gets up again this run (Segunda Chance). */
+  revives: number;
 }
 
 export const newSave = (): MetaSave => ({
@@ -507,14 +509,15 @@ export function biggestGoal(save: MetaSave): { id: ShopId; cost: number } | null
 }
 
 export function shopBonuses(save: MetaSave): RunBonuses {
-  const out: RunBonuses = { stats: {}, charges: { ...config.charges } };
+  const out: RunBonuses = { stats: {}, charges: { ...config.charges }, revives: 0 };
   for (const id of SHOP_IDS) {
     const lv = shopLevel(save, id);
     if (lv === 0) continue;
     const def: ShopDef = SHOP[id];
     const add = def.perLevel * lv;
     if ('stat' in def) out.stats[def.stat] = (out.stats[def.stat] ?? 0) + add;
-    else out.charges[def.charge] += add;
+    else if ('charge' in def) out.charges[def.charge] += add;
+    else out.revives += add;
   }
   if (config.achievementCharges)
     for (const id of save.achievements) {

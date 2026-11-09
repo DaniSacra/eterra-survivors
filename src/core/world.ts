@@ -77,6 +77,8 @@ export class World {
   vigilStart = 0;
   /** Multiplies enemy contact damage (grows during the Noite Sem Fim). */
   enemyDamage = 1;
+  /** Segunda Chance: times the hero can still get up this run. */
+  revives = 0;
   /** Bênçãos de Yah taken (reward cards, +might each). */
   blessings = 0;
   /** Match time when the level-up pool (weapons and passives) first ran short of a full choice; -1 = never. */
@@ -136,6 +138,7 @@ export class World {
     if (setup.bonuses) {
       add(setup.bonuses.stats);
       Object.assign(this.charges, setup.bonuses.charges);
+      this.revives = setup.bonuses.revives;
     }
     this.player.hp = st.maxHp;
     this.addWeapon(hero.weapon);
@@ -188,7 +191,10 @@ export class World {
 
     // The boss may have fallen this step: victory wins over a simultaneous death.
     if (this.state !== 'playing') return;
-    if (this.player.hp <= 0) this.end('lost');
+    if (this.player.hp <= 0) {
+      if (this.revives > 0) this.revive();
+      else this.end('lost');
+    }
     else if (this.pendingLevelUps > 0) this.openLevelUp();
   }
 
@@ -276,6 +282,14 @@ export class World {
     this.vigilStart = this.time;
     this.boss = null;
     this.state = 'playing';
+  }
+
+  /** Segunda Chance: back on their feet with part of their life, briefly untouchable. */
+  private revive(): void {
+    this.revives--;
+    this.player.hp = this.player.stats.maxHp * config.revive.hp;
+    this.player.iframes = config.revive.iframes;
+    this.events.push({ type: 'revived' });
   }
 
   private end(state: 'won' | 'lost'): void {

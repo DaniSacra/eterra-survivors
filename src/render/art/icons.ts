@@ -340,6 +340,37 @@ export const ICON_ART: Record<string, ArtDef> = {
     p.poly([13, 7, 16, 7, 22, C, 16, 21, 13, 21, 19, C], 0xe8e2d0);
     p.ink();
   }),
+  /** Segunda Chance: a heart with an arrow rising out of it (getting up again). */
+  'icon.revive': passive(0x5a2a3a, (p) => {
+    p.outline = 1.2;
+    p.poly([C, 22, 6.5, 14, 6.5, 10, 9.5, 7.5, C, 10, 18.5, 7.5, 21.5, 10, 21.5, 14], 0xe04a5a);
+    p.ink();
+    p.fill(0xffffff, 0.55).fillEllipse(10, 11, 3, 2.5);
+    p.fill(0xfff6c0)
+      .fillTriangle(C - 4, 12, C + 4, 12, C, 4.5)
+      .fillRect(C - 1.5, 11, 3, 7);
+  }),
+  /** Loja header: Gaspar's anvil. */
+  'icon.anvil': passive(0x4a3a2a, (p) => {
+    p.outline = 1.2;
+    p.poly([5, 9, 20, 9, 23, 11, 20, 13, 17, 13, 16, 16, 12, 16, 11, 13, 7, 13], 0x8a94a8);
+    p.rrect(9, 16, 10, 2.5, 1, 0x6a7488);
+    p.rrect(7, 18.5, 14, 3, 1, 0x6a7488);
+    p.ink();
+    p.fill(0xffffff, 0.5).fillRect(7, 9.8, 12, 1.2);
+    p.fill(0xffc060).fillCircle(20, 6, 1).fillCircle(17, 5, 0.8);
+  }),
+  /** Gaspar, the smith of Valmor: generic (the canon gives no looks), bearded, leather apron. */
+  'icon.gaspar': passive(0x5a4030, (p) => {
+    p.outline = 1.2;
+    p.rrect(7, 19, 14, 7, 3, 0x7a5030); // apron over the shoulders
+    p.circle(C, 12.5, 6, 0xe0b090); // face
+    p.poly([8.5, 13, 19.5, 13, 18, 19, C, 21.5, 10, 19], 0x8a5a38); // beard
+    p.ink();
+    p.fill(0x8a5a38).fillEllipse(C, 7.5, 11, 4); // hair
+    p.fill(INK).fillCircle(11.8, 11.8, 0.9).fillCircle(16.2, 11.8, 0.9);
+    p.fill(0xc08068).fillEllipse(C, 14, 3, 2); // nose
+  }),
   /** Banir: a red "no" sign. */
   'icon.banish': passive(0x5a2a2a, (p) => {
     p.g.lineStyle(3, 0xff8090, 1).strokeCircle(C, C, 7.5);

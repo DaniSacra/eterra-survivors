@@ -13,6 +13,7 @@ import { ART_SCALE } from '../render/art/pen';
 import { STAT_ICON } from '../render/buildPanel';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
+import { setSetting, settings } from '../render/settings';
 import {
   UI,
   backButton,
@@ -43,16 +44,16 @@ const SECTIONS = Object.keys(SHOP_SECTIONS) as ShopSection[];
 /** Icon of a Loja item: the passive that raises the same stat, or the helper's own icon. */
 function itemIcon(id: ShopId): string {
   const def = SHOP[id];
-  return 'stat' in def ? (STAT_ICON[def.stat] ?? `icon.${id}`) : `icon.${def.charge}`;
+  if ('stat' in def) return STAT_ICON[def.stat] ?? `icon.${id}`;
+  return 'charge' in def ? `icon.${def.charge}` : `icon.${id}`;
 }
 
 /** What an item gives at `level` (0 = nothing yet). */
 function effectAt(id: ShopId, level: number): string {
   if (level <= 0) return t.shop.none;
   const def = SHOP[id];
-  return 'stat' in def
-    ? formatStatDelta(def.stat, def.perLevel * level)
-    : t.shop.chargeTotal[def.charge](level);
+  if ('stat' in def) return formatStatDelta(def.stat, def.perLevel * level);
+  return 'charge' in def ? t.shop.chargeTotal[def.charge](level) : t.shop.reviveTotal(level);
 }
 
 /**
@@ -87,16 +88,31 @@ export class ShopScene extends Phaser.Scene {
     const save = (this.save = loadSave());
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
     const short = isShort(this);
+    // Gaspar greets the player on the first visit only (the scene rebuilds after each purchase).
+    const greet = !settings().gasparMet;
+    if (greet) setSetting('gasparMet', true);
+    /** The title with Gaspar's anvil before it. */
+    const title = (y: number, size: number): void => {
+      const text = label(this, cx + size * 0.6, y, t.shop.title, size, { bold: true, color: UI.gold });
+      this.add
+        .image(text.x - text.width / 2 - size * 0.7, y, 'icon.anvil')
+        .setScale((ART_SCALE * size) / BADGE);
+    };
     if (short) {
-      // Phone lying down: title, gold and Back share the top row.
-      label(this, cx, 28, t.shop.title, 24, { bold: true, color: UI.gold });
+      // Phone lying down: title, gold and Back share the top row; the greeting fades in and out over the list.
+      title(28, 24);
       label(this, width - s.right - 16, 28, t.shop.gold(save.gold), 16, {
         bold: true,
         color: UI.gold,
       }).setOrigin(1, 0.5);
+      if (greet) this.greetingBanner(cx, 60);
     } else {
-      label(this, cx, 30, t.shop.title, 28, { bold: true, color: UI.gold });
-      label(this, cx, 60, t.shop.intro, 13, { color: UI.muted, wrap: Math.min(520, width - 32) });
+      title(30, 28);
+      const intro = label(this, cx + 14, 60, greet ? t.shop.greeting : t.shop.intro, 13, {
+        color: greet ? UI.text : UI.muted,
+        wrap: Math.min(500, width - 64),
+      });
+      this.add.image(intro.x - intro.width / 2 - 16, 60, 'icon.gaspar').setScale((ART_SCALE * 26) / BADGE);
       label(this, cx, 94, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
     }
 
@@ -152,6 +168,26 @@ export class ShopScene extends Phaser.Scene {
   }
 
   /** One item: icon, name, level and price (red when it can't be paid), or the Completo seal. */
+  /** Short layout: Gaspar's first-visit line as a banner that fades out by itself. */
+  private greetingBanner(cx: number, y: number): void {
+    const text = label(this, cx + 14, y, t.shop.greeting, 14, { wrap: this.scale.width - 96 });
+    const w = text.width + 64;
+    const h = Math.max(36, text.height + 14);
+    const bg = this.add.rectangle(cx, y, w, h, UI.panel, 0.96).setStrokeStyle(2, UI.goldHex);
+    const face = this.add
+      .image(text.x - text.width / 2 - 16, y, 'icon.gaspar')
+      .setScale((ART_SCALE * 26) / BADGE);
+    const parts = [bg, face, text];
+    parts.forEach((o, i) => o.setDepth(20 + i)); // the panel was made after the text it measures
+    this.tweens.add({
+      targets: parts,
+      alpha: 0,
+      delay: 3500,
+      duration: 600,
+      onComplete: () => parts.forEach((o) => o.destroy()),
+    });
+  }
+
   private card(
     id: ShopId,
     x: number,

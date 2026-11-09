@@ -47,6 +47,25 @@ describe('shop', () => {
     expect(w.charges.reroll).toBe(config.charges.reroll + 3);
   });
 
+  it('Segunda Chance: the hero gets up once with half their life, briefly untouchable', () => {
+    const save = newSave();
+    expect(shopBonuses(save).revives).toBe(0);
+    save.shop = { revive: 1 };
+    const w = new World(1, { bonuses: shopBonuses(save) });
+    w.spawner.update = () => {};
+    expect(w.revives).toBe(1);
+    w.player.hp = -5;
+    w.step(1 / 60, still);
+    expect(w.state).toBe('playing');
+    expect(w.player.hp).toBeCloseTo(w.player.stats.maxHp * config.revive.hp);
+    expect(w.player.iframes).toBeGreaterThan(config.revive.iframes - 0.1);
+    expect(w.events.some((e) => e.type === 'revived')).toBe(true);
+    // Only once: the next fall ends the run.
+    w.player.hp = -5;
+    w.step(1 / 60, still);
+    expect(w.state).toBe('lost');
+  });
+
   it('repairs broken or tampered saves', () => {
     expect(sanitizeSave(null)).toEqual(newSave());
     expect(sanitizeSave('x')).toEqual(newSave());

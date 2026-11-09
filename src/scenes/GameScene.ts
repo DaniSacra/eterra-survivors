@@ -749,6 +749,12 @@ export class GameScene extends Phaser.Scene {
             this.shake(300, 0.012);
           } else if (e.id === 'freeze') this.moments.frost = w.time;
           break;
+        case 'revived':
+          sound.play('levelUp');
+          this.hud.announce(t.revived, true);
+          if (!this.calm) this.cameras.main.flash(400, 255, 240, 200);
+          this.levelUpPulse();
+          break;
         case 'won':
         case 'lost': {
           sound.play(e.type);

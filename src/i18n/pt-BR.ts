@@ -422,6 +422,8 @@ export const t = {
   shop: {
     title: 'Loja do Gaspar',
     intro: 'O ferreiro de Valmor troca ouro por preparo. As compras valem para todas as partidas.',
+    /** Gaspar's line on the first visit. */
+    greeting: 'Gaspar, o ferreiro de Valmor. Aço simples, mas é o melhor da rua.',
     gold: (n: number) => `Ouro: ${n}`,
     level: (lv: number, max: number) => `${lv}/${max}`,
     cost: (n: number) => `${n} ouro`,
@@ -443,6 +445,9 @@ export const t = {
       skip: (n: number) => `Pular +${n} por partida`,
       banish: (n: number) => `Banir +${n} por partida`,
     },
+    /** Segunda Chance's effect: how many times the hero gets up per run. */
+    reviveTotal: (n: number) =>
+      n === 1 ? 'Levanta 1 vez com metade da vida' : `Levanta ${n} vezes com metade da vida`,
     items: {
       might: 'Pedra de Amolar',
       maxHp: 'Sopa Quente',
@@ -458,6 +463,7 @@ export const t = {
       reroll: 'Conselho do Ancião',
       skip: 'Paciência',
       banish: 'Bênção do Templo',
+      revive: 'Segunda Chance',
     } satisfies Record<ShopId, string>,
     charges: {
       reroll: 'Trocar +1 por partida',
@@ -467,6 +473,8 @@ export const t = {
   },
 
   bossWarning: (boss: string) => `${boss} chegou!`,
+  /** Segunda Chance used: the hero got up again. */
+  revived: 'Segunda Chance! De pé outra vez.',
 
   select: {
     title: 'Preparação',

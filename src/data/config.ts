@@ -97,6 +97,8 @@ export const config = {
   achievementCharges: true,
   /** Level-up helpers every run starts with (the shop adds more). */
   charges: { reroll: 1, skip: 1, banish: 0 },
+  /** Segunda Chance: the life the hero gets up with (a fraction of max), and the seconds nothing can hurt them. */
+  revive: { hp: 0.5, iframes: 2 },
   /** Gold for giving up a level-up's choice (Pular). */
   skipGold: 15,
   zones: {
