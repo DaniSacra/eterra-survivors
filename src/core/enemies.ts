@@ -77,6 +77,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.aimX = 1;
   e.aimY = 0;
   e.dead = false;
+  world.seen[type] = true;
   return e;
 }
 
@@ -121,7 +122,10 @@ export function damageEnemy(
   source: OwnedWeapon | null = null,
 ): void {
   if (e.dead || isFaded(e)) return;
-  if (source) source.damage += Math.min(amount, e.hp);
+  if (source) {
+    source.damage += Math.min(amount, e.hp);
+    if (amount > world.bestHit) world.bestHit = amount;
+  }
   world.tally.hits++;
   e.hp -= amount;
   e.flash = config.enemies.hitFlash;

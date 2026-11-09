@@ -9,12 +9,14 @@ export interface Player {
   facing: Vec2;
   moving: boolean;
   iframes: number;
+  /** Hits taken this run (for the "untouched" record). */
+  hitsTaken: number;
   stats: Stats;
 }
 
 export function createPlayer(): Player {
   const stats = { ...config.player.stats };
-  return { x: 0, y: 0, hp: stats.maxHp, facing: { x: 1, y: 0 }, moving: false, iframes: 0, stats };
+  return { x: 0, y: 0, hp: stats.maxHp, facing: { x: 1, y: 0 }, moving: false, iframes: 0, hitsTaken: 0, stats };
 }
 
 export function updatePlayer(p: Player, input: Vec2, dt: number): void {
@@ -35,5 +37,6 @@ export function hurtPlayer(p: Player, amount: number): boolean {
   if (p.iframes > 0 || p.hp <= 0) return false;
   p.hp = Math.max(0, p.hp - Math.max(config.player.minDamage, amount - p.stats.armor));
   p.iframes = config.player.iframes;
+  p.hitsTaken++;
   return true;
 }

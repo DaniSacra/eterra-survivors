@@ -1,6 +1,7 @@
 import { config, type StatKey, type Stats } from '../data/config';
 import type { PassiveId } from '../data/upgrades';
 import { CHARACTERS, type CharacterId } from '../data/characters';
+import type { EnemyId } from '../data/enemies';
 import { STAGES, type StageDef, type StageId } from '../data/stages';
 import { WEAPONS, type WeaponId } from '../data/weapons';
 import {
@@ -44,6 +45,14 @@ export interface RunSetup {
 export class World {
   time = 0;
   kills = 0;
+  /** Kills by enemy type this run (bestiary and achievements). */
+  readonly killsBy: Partial<Record<EnemyId, number>> = {};
+  /** Enemy types that appeared this run, even if never killed. */
+  readonly seen: Partial<Record<EnemyId, true>> = {};
+  /** Biggest single weapon hit this run (bombs don't count). */
+  bestHit = 0;
+  /** Match time of the first hit taken (-1 until then). */
+  firstHitAt = -1;
   /** Next enemy uid: per world, so a seed always plays out the same. */
   nextUid = 1;
   level = 1;
@@ -146,6 +155,7 @@ export class World {
     updateGems(this, dt);
     updatePickups(this);
     updateEffects(this, dt);
+    if (this.firstHitAt < 0 && this.player.hitsTaken > 0) this.firstHitAt = this.time;
 
     // The boss may have fallen this step: victory wins over a simultaneous death.
     if (this.state !== 'playing') return;
@@ -208,6 +218,7 @@ export class World {
 
   onEnemyKilled(e: Enemy): void {
     this.kills++;
+    this.killsBy[e.type] = (this.killsBy[e.type] ?? 0) + 1;
     this.tally.kills++;
     addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);

@@ -1146,11 +1146,12 @@ Pedido do Daniel: Bestiário, conquistas e registros por herói, para dar motivo
 pesquisa do gênero, lista das 35 conquistas, schema do save e telas em `docs/design/conquistas.md`. Ordem de
 implementação abaixo; cada item é um commit.
 
-**CC-01 · Contadores da partida** · impl · P · aprovado
+**CC-01 · Contadores da partida** · impl · P · ✅ feito
 
 - O quê: `world.killsBy`, `world.seen`, `world.bestHit`, `player.hitsTaken` + `world.firstHitAt`; `core/records.ts`
   com `summarizeRun(world, out?)`.
 - Aceite: testes em `tests/core/records.test.ts`; F4 com 700 inimigos sem perda de FPS.
+- Feito: `World.step` com 700 inimigos no Node 0,34 ms antes e 0,35 ms depois (ruído); F4 no navegador a 60 FPS.
 
 **CC-02 · Save v2 (registros, Bestiário, totais)** · impl · M · aprovado
 
