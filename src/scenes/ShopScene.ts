@@ -42,6 +42,9 @@ const CARD_MIN_H = 40;
 /** Section tabs, when the whole list doesn't fit. */
 const TAB_H = 40;
 
+/** Test mode's own "Gaspar already greeted" (this session only; the real option is the player's). */
+let devGasparMet = false;
+
 /** The section an item belongs to. */
 function sectionOf(id: ShopId): ShopSection {
   return (Object.keys(SHOP_SECTIONS) as ShopSection[]).find((k) => SHOP_SECTIONS[k].includes(id)) ?? 'stats';
@@ -101,8 +104,10 @@ export class ShopScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
     const short = isShort(this);
     // Gaspar greets the player on the first visit only (the scene rebuilds after each purchase).
-    const greet = !settings().gasparMet;
-    if (greet) setSetting('gasparMet', true);
+    // Test mode greets once a session and never spends the real player's first greeting.
+    const greet = DEV_MODE ? !devGasparMet : !settings().gasparMet;
+    if (greet && DEV_MODE) devGasparMet = true;
+    else if (greet) setSetting('gasparMet', true);
     /** The title with Gaspar's anvil before it. */
     const title = (y: number, size: number): void => {
       const text = label(this, cx + size * 0.6, y, t.shop.title, size, { bold: true, color: UI.gold });
