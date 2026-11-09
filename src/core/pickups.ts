@@ -35,7 +35,7 @@ export function maybeDropRandom(world: World, x: number, y: number): void {
 
 /** Gold collected in the run, scaled by greed. */
 export function addGold(world: World, amount: number): void {
-  world.gold += Math.round(amount * world.player.stats.greed);
+  world.gold += Math.round(amount * world.player.stats.greed * world.stage.mult.gold);
 }
 
 /** What each pickup does when collected. */

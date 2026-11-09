@@ -79,6 +79,104 @@ export const TILE_ART: Record<string, ArtDef> = {
         p.fill(0xe8eff8, 0.2 + r() * 0.3).fillCircle(r() * SIZE, r() * SIZE, 0.8 + r());
     },
   },
+  /**
+   * The frozen forest flanking the Estrada do Sul: dark pines under snow, tight together. Darker than the road, so
+   * the walkable strip reads at a glance.
+   */
+  'tile.forest': {
+    w: SIZE,
+    h: SIZE,
+    draw(p) {
+      const r = rng(41);
+      p.fill(0x1c2236).fillRect(0, 0, SIZE, SIZE);
+      // Pines in rows with an offset, each a stack of three snowy triangles; the ones below cover the ones above.
+      for (let row = 0; row < 4; row++)
+        for (let col = 0; col < 3; col++) {
+          const x = col * 44 + (row % 2 ? 22 : 0) + r() * 8;
+          const y = row * 34 + r() * 6;
+          const s = 0.85 + r() * 0.3;
+          for (const [dy, w] of [
+            [0, 14],
+            [9, 19],
+            [18, 24],
+          ] as const) {
+            p.fill(0x234a44).fillTriangle(
+              x,
+              y + dy - 6 * s,
+              x - w * s,
+              y + dy + 16 * s,
+              x + w * s,
+              y + dy + 16 * s,
+            );
+            p.fill(0xdce6f4, 0.75).fillTriangle(
+              x,
+              y + dy - 6 * s,
+              x - w * 0.45 * s,
+              y + dy + 3 * s,
+              x + w * 0.45 * s,
+              y + dy + 3 * s,
+            );
+          }
+          p.fill(0x3a2a24).fillRect(x - 2, y + 34 * s, 4, 6);
+        }
+      for (let i = 0; i < 26; i++)
+        p.fill(0xe8eff8, 0.2 + r() * 0.35).fillCircle(r() * SIZE, r() * SIZE, 0.8 + r());
+    },
+  },
+};
+
+/**
+ * Obstacles of the Cripta (core/terrain.ts), by kind: a stone column, a sarcophagus, a gravestone. Each is drawn
+ * so its foot fills the hit circle (OBSTACLE_RADIUS 20, 24, 15) at the image's centre.
+ */
+export const OBSTACLE_ART: Record<string, ArtDef> = {
+  'obstacle.0': {
+    w: 44,
+    h: 70,
+    draw(p) {
+      p.shadow(22, 58, 42, 12);
+      p.outline = 2;
+      p.inkColor = 0x14131f;
+      p.rrect(4, 46, 36, 14, 4, 0x4a4866); // plinth
+      p.rrect(8, 6, 28, 44, 3, 0x5c5a7c); // shaft
+      p.rrect(3, 2, 38, 9, 3, 0x6a6890); // capital
+      p.ink();
+      for (let i = 0; i < 3; i++) p.fill(0x3e3c58, 0.8).fillRect(13 + i * 7, 13, 2.5, 32); // flutes
+      p.fill(0x3a9a8a, 0.35).fillEllipse(30, 44, 12, 5); // moss
+      p.shine(10, 8, 4, 36, 0.25);
+    },
+  },
+  'obstacle.1': {
+    w: 54,
+    h: 50,
+    draw(p) {
+      p.shadow(27, 40, 52, 14);
+      p.outline = 2;
+      p.inkColor = 0x14131f;
+      p.rrect(3, 12, 48, 30, 6, 0x4c4a68); // body
+      p.rrect(1, 6, 52, 14, 6, 0x605e82); // lid
+      p.ink();
+      p.fill(0x8a88a8, 0.8).fillRect(25, 8, 4, 10).fillRect(20, 11, 14, 3); // cross on the lid
+      p.fill(0x3e3c58).fillRect(8, 26, 38, 3);
+      p.fill(0xcbd8ec, 0.5).fillCircle(9, 34, 2).fillCircle(45, 34, 2);
+      p.shine(6, 8, 18, 4, 0.25);
+    },
+  },
+  'obstacle.2': {
+    w: 34,
+    h: 44,
+    draw(p) {
+      p.shadow(17, 38, 32, 9);
+      p.outline = 2;
+      p.inkColor = 0x14131f;
+      p.rrect(5, 6, 24, 32, 11, 0x56546f);
+      p.rrect(2, 34, 30, 7, 3, 0x45435c);
+      p.ink();
+      p.fill(0x2e2c44).fillRect(16, 12, 3, 15).fillRect(11, 16, 13, 3);
+      p.fill(0x3a9a8a, 0.35).fillEllipse(10, 35, 10, 4);
+      p.shine(9, 9, 4, 12, 0.25);
+    },
+  },
 };
 
 /**

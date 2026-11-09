@@ -23,7 +23,8 @@ export class Spawner {
     this.timer -= dt;
     while (this.timer <= 0) {
       this.timer += seg.interval;
-      for (let i = 0; i < seg.batch && world.enemies.size < config.enemies.maxActive; i++) {
+      const batch = this.batchSize(world, seg.batch);
+      for (let i = 0; i < batch && world.enemies.size < config.enemies.maxActive; i++) {
         spawnOnRing(world, world.rng.weighted(seg.enemies).id, seg.hpMult);
       }
     }
@@ -49,10 +50,11 @@ export class Spawner {
     const min = (world.time - world.vigilStart) / 60;
     const hp = seg.hpMult * (1 + v.hpPerMinute * min);
     world.enemyDamage = 1 + v.damagePerMinute * min;
-    const batch = seg.batch + Math.floor(v.batchPerMinute * min);
+    const base = seg.batch + Math.floor(v.batchPerMinute * min);
     this.timer -= dt;
     while (this.timer <= 0) {
       this.timer += Math.max(v.minInterval, seg.interval - v.intervalPerMinute * min);
+      const batch = this.batchSize(world, base);
       for (let i = 0; i < batch && world.enemies.size < config.enemies.maxActive; i++)
         spawnOnRing(world, world.rng.weighted(seg.enemies).id, hp);
     }
@@ -65,6 +67,13 @@ export class Spawner {
         world.events.push({ type: 'eliteSpawned' });
       }
     }
+  }
+
+  /** A batch scaled by the stage's spawn density: the fraction becomes a chance of one more. */
+  private batchSize(world: World, batch: number): number {
+    const n = batch * world.stage.mult.spawn;
+    const whole = Math.floor(n);
+    return whole + (world.rng.next() < n - whole ? 1 : 0);
   }
 
   /** Elites sent so far in the vigil. */

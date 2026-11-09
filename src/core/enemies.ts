@@ -1,9 +1,9 @@
 import { config } from '../data/config';
 import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/enemies';
-import { TAU } from './math';
 import { updateBoss } from './bosses';
 import { behaviourStep, isFaded } from './behaviours';
 import { hurtPlayer } from './player';
+import { BLOCKED, blockCircle, spawnPoint } from './terrain';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
 import type { WeaponId } from '../data/weapons';
@@ -71,7 +71,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.def = def;
   e.x = x;
   e.y = y;
-  e.maxHp = e.hp = def.hp * hpMult;
+  e.maxHp = e.hp = def.hp * hpMult * world.stage.mult.hp;
   e.kbx = e.kby = e.flash = e.slow = e.stun = 0;
   e.hitBy = null;
   e.orbitReady.fill(0);
@@ -88,16 +88,10 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
 export const spawnRadius = (world: World): number =>
   Math.hypot(world.view.w, world.view.h) / 2 + config.enemies.spawnMargin;
 
-/** Places a point on the spawn ring around the player at `angle`. */
-export function ringPoint(world: World, angle: number, out: { x: number; y: number }): void {
-  const r = spawnRadius(world);
-  out.x = world.player.x + Math.cos(angle) * r;
-  out.y = world.player.y + Math.sin(angle) * r;
-}
-
+/** Spawns just outside the view, where the stage's ground lets enemies come in (core/terrain.ts). */
 export function spawnOnRing(world: World, type: EnemyId, hpMult = 1): Enemy {
   const e = spawnEnemy(world, type, 0, 0, hpMult);
-  ringPoint(world, world.rng.next() * TAU, e);
+  spawnPoint(world, null, e);
   return e;
 }
 
@@ -149,6 +143,7 @@ export function updateEnemies(world: World, dt: number): void {
   const decay = Math.max(0, 1 - knockbackDecay * dt);
   // Sopro de Geada: nobody moves or bites while the world is frozen (knockback still applies).
   const frozen = world.freeze > 0;
+  const speedMult = world.stage.mult.speed;
 
   rebuildEnemyHash(world);
   for (let i = 0; i < list.length; i++) {
@@ -161,14 +156,14 @@ export function updateEnemies(world: World, dt: number): void {
     const dy = p.y - e.y;
     const distSq = dx * dx + dy * dy;
     if (distSq > recycleSq && !e.def.boss) {
-      // Too far behind: reappear on the ring in the direction the player is heading.
-      ringPoint(world, Math.atan2(p.facing.y, p.facing.x) + (world.rng.next() - 0.5) * 1.5, e);
+      // Too far behind: reappear ahead, in the direction the player is heading.
+      spawnPoint(world, Math.atan2(p.facing.y, p.facing.x) + (world.rng.next() - 0.5) * 1.5, e);
       continue;
     }
     const dist = Math.sqrt(distSq) || 1;
     // A boss using its ability moves on its own (or stands still) instead of walking to the hero.
     const acting = e.def.boss && updateBoss(world, e, dt);
-    let speed = frozen || acting ? 0 : e.def.speed * dt;
+    let speed = frozen || acting ? 0 : e.def.speed * speedMult * dt;
     if (e.stun > 0) {
       e.stun -= dt;
       speed = 0;
@@ -189,6 +184,7 @@ export function updateEnemies(world: World, dt: number): void {
         e.y += my + e.kby * dt;
         e.kbx *= decay;
         e.kby *= decay;
+        blockCircle(world, e, e.def.radius);
         continue;
       }
     } else {
@@ -223,11 +219,23 @@ export function updateEnemies(world: World, dt: number): void {
     e.y += my + e.kby * dt;
     e.kbx *= decay;
     e.kby *= decay;
+    if (blockCircle(world, e, e.def.radius)) {
+      // Walked into an obstacle: go around it along its edge, on the side the walk leans to.
+      const tx = -BLOCKED.y;
+      const ty = BLOCKED.x;
+      const lean = mx * tx + my * ty;
+      const side = Math.abs(lean) > 1e-3 ? Math.sign(lean) : e.uid & 1 ? 1 : -1;
+      const step = speed * 0.9;
+      e.x += tx * side * step;
+      e.y += ty * side * step;
+      blockCircle(world, e, e.def.radius);
+    }
   }
   rebuildEnemyHash(world);
 
   // Contact damage (player i-frames make only one hit land at a time).
   if (frozen) return;
+  const damageMult = world.enemyDamage * world.stage.mult.damage;
   const reach = config.player.radius + MAX_ENEMY_RADIUS;
   world.enemyHash.query(p.x, p.y, reach, near);
   for (let n = 0; n < near.length; n++) {
@@ -239,7 +247,7 @@ export function updateEnemies(world: World, dt: number): void {
       cx * cx + cy * cy < minD * minD &&
       !isFaded(e) &&
       e.stun <= 0 &&
-      hurtPlayer(p, e.def.damage * world.enemyDamage)
+      hurtPlayer(p, e.def.damage * damageMult)
     ) {
       world.events.push({ type: 'playerHit' });
       break;

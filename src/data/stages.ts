@@ -2,10 +2,36 @@ import { config } from './config';
 import type { EnemyId } from './enemies';
 import { buildWaves, type WaveSegment } from './waves';
 
+/**
+ * How a stage's ground plays (logic in core/terrain.ts):
+ * - `open`: an endless field.
+ * - `obstacles`: an endless field with columns, sarcophagi and gravestones, placed by the run's seed in cells of
+ *   `cell` px (one obstacle in `chance` of them), none within `clear` px of the start. They block the hero and the
+ *   enemies (circles: walkers slide along them); shots fly over.
+ * - `corridor`: an endless road running north–south, `width` px wide, between impassable frozen forest. Enemies come
+ *   from both ends, and `sides` of them out of the forest.
+ */
+export type StageLayout =
+  | { kind: 'open' }
+  | { kind: 'obstacles'; cell: number; chance: number; clear: number }
+  | { kind: 'corridor'; width: number; sides: number };
+
+/** Multipliers over the shared wave curve (enemies, elites and the boss alike), and the gold a run brings. */
+export interface StageMult {
+  hp: number;
+  damage: number;
+  speed: number;
+  /** Enemies per spawn batch. */
+  spawn: number;
+  gold: number;
+}
+
 /** A place to survive in. Names and texts live in i18n under `stages`. */
 export interface StageDef {
   /** Ground tile asset key (render/assets.ts). */
   tile: string;
+  layout: StageLayout;
+  mult: StageMult;
   waves: WaveSegment[];
   /** One elite at each of these times (seconds), with the HP multiplier of the segment then active. */
   elites: { id: EnemyId; at: number }[];
@@ -21,6 +47,8 @@ export const STAGES = {
   /** Arredores de Valmor: the village graveyard in the frozen south (cast as in the original's graveyard). */
   valmor: {
     tile: 'tile',
+    layout: { kind: 'open' },
+    mult: { hp: 1, damage: 1, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'blackKnight', at: config.matchDuration },
@@ -28,6 +56,8 @@ export const STAGES = {
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
   crypt: {
     tile: 'tile.crypt',
+    layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
+    mult: { hp: 1.6, damage: 1.4, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },
@@ -35,6 +65,8 @@ export const STAGES = {
   /** Estrada do Sul: the frozen road, the hooded ones and the wolf pack. */
   southRoad: {
     tile: 'tile.road',
+    layout: { kind: 'corridor', width: 520, sides: 0.2 },
+    mult: { hp: 2.3, damage: 1.8, speed: 1.1, spawn: 1.25, gold: 2 },
     waves: buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostWolf' }),
     elites: elites('goblin', 'golem'),
     boss: { id: 'oldWolf', at: config.matchDuration },

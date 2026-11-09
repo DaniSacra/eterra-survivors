@@ -4,7 +4,7 @@ import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
 import { ART_RES, Pen } from './art/pen';
-import { DECAL_ART, TILE_ART } from './art/tiles';
+import { DECAL_ART, OBSTACLE_ART, TILE_ART } from './art/tiles';
 import type { ArtDef } from './art/types';
 
 /**
@@ -28,6 +28,7 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
   ...art(DECAL_ART, ART_RES),
+  ...art(OBSTACLE_ART, ART_RES),
   ...art(ICON_ART, ART_RES),
 };
 

@@ -27,6 +27,7 @@ import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
 import { SpatialHash } from './spatialHash';
 import { applyUpgrade, banishKey, canBanish, candidates, rollUpgrades, type UpgradeOption } from './upgrades';
+import { blockCircle } from './terrain';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
 import { createZone, updateZones, type Zone } from './zones';
@@ -172,6 +173,7 @@ export class World {
     dt = Math.min(dt, config.maxDt);
     this.time += dt;
     updatePlayer(this.player, input, dt);
+    blockCircle(this, this.player, config.player.radius);
     if (this.freeze > 0) this.freeze = Math.max(0, this.freeze - dt);
     this.spawner.update(this, dt);
     updateEnemies(this, dt);

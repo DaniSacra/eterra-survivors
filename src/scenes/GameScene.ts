@@ -38,6 +38,7 @@ import { HIT_SPARK, SPARK, Sparks } from '../render/sparks';
 import { setSetting, settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
+import { Obstacles } from '../render/obstacles';
 import { Mirror } from '../render/mirror';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
@@ -74,6 +75,9 @@ const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> 
  * shake moves the view by up to intensity x side x zoom world px on each axis.
  */
 const MAX_SHAKE = 0.02;
+
+/** On the road, how much of the forest past each edge the camera may show (world px). */
+const FOREST_SHOWN = 70;
 
 /** Damage numbers: drawn at NUMBER_FONT px, shown NUMBER_WORLD world px tall but never under NUMBER_SCREEN on screen. */
 const NUMBER_FONT = 16;
@@ -142,6 +146,8 @@ export class GameScene extends Phaser.Scene {
   private stepDt = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
+  private obstacles!: Obstacles;
+  private forest: Phaser.GameObjects.TileSprite[] = [];
   /** Ground drawn past each side of the view (world px), so a camera shake never shows the world's empty edge. */
   private viewMargin = 24;
   /** Damage numbers' scale, so they never show under 14 px on screen however far the camera zooms out. */
@@ -174,6 +180,18 @@ export class GameScene extends Phaser.Scene {
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.decals = new Decals(this, this.world.stageId);
+    this.obstacles = new Obstacles(this, this.world);
+    // The road's frozen forest: one strip of pines on each side, over the ground, scrolled like it.
+    const layout = this.world.stage.layout;
+    this.forest =
+      layout.kind === 'corridor'
+        ? [0, 1].map((i) =>
+            this.add
+              .tileSprite(0, 0, 1, 1, 'tile.forest')
+              .setOrigin(i === 0 ? 1 : 0, 0)
+              .setDepth(4.6),
+          )
+        : [];
     this.gemMirror = new Mirror(
       () => this.add.image(0, 0, 'gem.small').setDepth(3).setScale(ART_SCALE),
       (img, g) => {
@@ -330,20 +348,40 @@ export class GameScene extends Phaser.Scene {
     this.placeView();
   }
 
-  /** Centers the camera on the hero and makes the ground and decals cover the view. */
+  /**
+   * Centers the camera on the hero (on the road, it never shows more than a strip of forest past either edge: on a
+   * wide screen the road stays centred) and makes the ground, decals and obstacles cover the view.
+   */
   private placeView(): void {
     const w = this.world;
     const cam = this.cameras.main;
-    cam.centerOn(w.player.x, w.player.y);
-    // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
-    // (computed from the player, since cam.worldView only updates at render time)
     const vw = cam.width / cam.zoom;
     const vh = cam.height / cam.zoom;
-    const vx = w.player.x - vw / 2 - this.viewMargin;
+    let cx = w.player.x;
+    const layout = w.stage.layout;
+    if (layout.kind === 'corridor') {
+      const reach = layout.width / 2 + FOREST_SHOWN - vw / 2;
+      cx = reach <= 0 ? 0 : clamp(cx, -reach, reach);
+    }
+    cam.centerOn(cx, w.player.y);
+    // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
+    // (computed from the player, since cam.worldView only updates at render time)
+    const vx = cx - vw / 2 - this.viewMargin;
     const vy = w.player.y - vh / 2 - this.viewMargin;
-    this.ground.setPosition(vx, vy).setSize(vw + this.viewMargin * 2, vh + this.viewMargin * 2);
+    const fw = vw + this.viewMargin * 2;
+    const fh = vh + this.viewMargin * 2;
+    this.ground.setPosition(vx, vy).setSize(fw, fh);
     this.ground.setTilePosition(vx, vy);
-    this.decals.update(vx, vy, vw + this.viewMargin * 2, vh + this.viewMargin * 2);
+    this.decals.update(vx, vy, fw, fh);
+    this.obstacles.update(vx, vy, fw, fh);
+    if (layout.kind === 'corridor')
+      this.forest.forEach((f, i) => {
+        const edge = (i === 0 ? -1 : 1) * (layout.width / 2);
+        const fwSide = Math.max(1, i === 0 ? edge - vx : vx + fw - edge);
+        f.setPosition(edge, vy)
+          .setSize(fwSide, fh)
+          .setTilePosition(i === 0 ? edge - fwSide : edge, vy);
+      });
   }
 
   override update(_time: number, delta: number): void {
