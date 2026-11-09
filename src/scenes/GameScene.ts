@@ -156,7 +156,11 @@ export class GameScene extends Phaser.Scene {
       () => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
       (img, e) => {
         const w = this.world;
-        if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
+        if (img.texture.key !== e.def.sprite) {
+          img.setTexture(e.def.sprite);
+          // Bosses over their escort and elites over the crowd, so they always show whole.
+          img.setDepth(e.def.boss ? 7 : e.def.elite ? 6 : 5);
+        }
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
         const a = w.freeze > 0 ? 0 : Math.sin(w.time * 9 + e.uid * 1.7) * 0.06;

@@ -92,6 +92,16 @@ export class Pen {
     this.g.fillStyle(0x000000, 0.28).fillEllipse(x, y, w, h);
     return this;
   }
+  /** An elite's ground mark instead of the shadow: a gold ring (it carries a chest) with two glints. */
+  eliteRing(x: number, y: number, w: number, h = w * 0.3): this {
+    this.g.fillStyle(0xe8b840, 0.3).fillEllipse(x, y, w, h);
+    this.g.lineStyle(2, 0xffd870, 0.95).strokeEllipse(x, y, w, h);
+    this.g
+      .fillStyle(0xffffff, 0.9)
+      .fillCircle(x - w * 0.42, y - h * 0.12, 1.3)
+      .fillCircle(x + w * 0.4, y + h * 0.18, 1);
+    return this;
+  }
   /** A shine: lighter blob, top left of a body. */
   shine(x: number, y: number, w: number, h: number, alpha = 0.45): this {
     this.g.fillStyle(0xffffff, alpha).fillEllipse(x, y, w, h);

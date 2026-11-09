@@ -175,6 +175,16 @@ export function drawFx(
   const hpK = Math.max(0, p.hp / p.stats.maxHp);
   g.fillStyle(INK, 0.8).fillRoundedRect(p.x - 17, p.y + 25, 34, 6, 3);
   g.fillStyle(hpK > 0.35 ? HP_OK : HP_LOW).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
+  // A chest on the ground twinkles: a soft gold ring around it and a star that blinks on its lid.
+  for (const it of world.pickups.active) {
+    if (it.type !== 'chest') continue;
+    const tw = Math.sin(world.time * 5 + it.x) * 0.5 + 0.5;
+    ground
+      .lineStyle(2, ITEM_GLINT, 0.35 + 0.3 * tw)
+      .strokeEllipse(it.x, it.y + 9, 34 + 4 * tw, 11 + 1.5 * tw);
+    const k = Math.max(0, Math.sin(world.time * 3 + it.y)) ** 4; // mostly off, then a quick twinkle
+    if (k > 0.05) star(g, it.x + 6, it.y - 9, 3 + 6 * k, 0xffffff, k);
+  }
   for (const f of world.puffs.active) {
     const k = f.ttl / config.effects.puffTtl; // 1 -> 0
     const r = f.r * (1.6 - k * 0.8);
@@ -344,6 +354,21 @@ function drawBossWarning(
       break;
     }
   }
+}
+
+/** A cartoon four-point star of radius `r` (a twinkle). */
+function star(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  r: number,
+  color: number,
+  alpha: number,
+): void {
+  const w = r * 0.28;
+  g.fillStyle(color, alpha);
+  g.fillTriangle(x - w, y, x + w, y, x, y - r).fillTriangle(x - w, y, x + w, y, x, y + r);
+  g.fillTriangle(x, y - w, x, y + w, x - r, y).fillTriangle(x, y - w, x, y + w, x + r, y);
 }
 
 /** A dashed arc (current line style), its dashes shifted `offset` px along it. */

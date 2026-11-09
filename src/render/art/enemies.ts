@@ -189,7 +189,7 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     w: 42,
     h: 42,
     draw(p) {
-      p.shadow(19, 39, 26, 7);
+      p.eliteRing(19, 38.5, 32, 8);
       p.poly([30, 2, 33, 1, 33, 38, 31, 38], 0x9a6232); // spear shaft
       p.poly([29, 4, 31.5, -1, 34, 4, 31.5, 8], 0xcbd8ec); // spear tip
       p.rrect(11, 28, 6, 10, 3, 0x3a9a6a).rrect(20, 28, 6, 10, 3, 0x3a9a6a);
@@ -212,7 +212,7 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     h: 56,
     draw(p) {
       p.outline = 2.5;
-      p.shadow(28, 52, 42, 9);
+      p.eliteRing(28, 51.5, 48, 10);
       p.rrect(14, 38, 11, 14, 3, 0x7a7266).rrect(31, 38, 11, 14, 3, 0x7a7266);
       p.rrect(1, 18, 12, 24, 4, 0x8a8276).rrect(43, 18, 12, 24, 4, 0x8a8276); // arms
       p.rrect(10, 14, 36, 28, 6, 0x9a9286); // torso

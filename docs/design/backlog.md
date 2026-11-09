@@ -759,7 +759,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   sem o branco (só o squash). Herói ferido com `setTint(0xff9090)` (multiplica, o rosto aparece) por 140 ms, com o
   contorno piscando branco. Tintas de lento e congelado ficam para a A-05 (família branco-lilás).
 
-**RF-03 · Chefes e elites por cima, elite e baú com cara de recompensa** · vfx + visual · P · aprovado
+**RF-03 · Chefes e elites por cima, elite e baú com cara de recompensa** · vfx + visual · P · ✅ feito
 
 - Por quê: 04-visual #5: todo inimigo na profundidade 5, o Cavaleiro aparece só pela capa e o Sineiro some sob as
   próprias Ossadas; 04-visual #6 e 06-vfx #17: o Goblin Lanceiro não se distingue de uma Gosma e ninguém sabe que ele
@@ -768,6 +768,9 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   anel dourado no chão das elites desenhado na própria textura (no lugar da sombra preta); brilho em estrela piscando no
   baú caído.
 - Aceite: capturas dos três chefes com escolta em 420x820: chefe inteiro visível; elite reconhecível numa multidão.
+- Feito: profundidade por papel (chefe 7, elite 6, comum 5) posta só na troca de textura do `enemyMirror`; Goblin
+  Lanceiro e Golem com anel dourado no chão desenhado na textura (`Pen.eliteRing`, no lugar da sombra preta); baú
+  caído com anel dourado pulsando e uma estrela branca que pisca na tampa (`fx.ts`).
 
 **RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · aprovado
 
