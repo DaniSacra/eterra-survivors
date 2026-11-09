@@ -884,3 +884,63 @@ na Etapa 7.
   página dele: elemento, receita acorrentada, o que faz (o texto novo de cada Elo) e a frase dele.
 - Conquistas: Primeiro Elo (`eloFirst`), Corrente Inteira (3 Elos numa partida, `elosRun3`), Livro Completo
   (`elosAll`) já existiam; nova **Um Herói, Todos os Elos** (`elosHero`, 200 de ouro, título "Forjador de Elos").
+
+## Etapa 7 · balanceamento
+
+- **Lab**: `tests/core/bands.test.ts` garante que cada Elo fica na faixa da categoria (contra a melhor Elo `aimed`)
+  e rende pelo menos 2,5x a base no nível máximo. Todas ficam entre 3,8x e 4,6x.
+- **Cripta**: com os efeitos novos (cura, proteção, estilhaço) a loja inteira vencia 92% (alvo 70–85%). `mult` de
+  HP 1,15 → 1,3 e de dano 1,65 → 1,75: 83%.
+- **Fúria da Forja**: o bumerangue voltava na metade de uma ida de 270 px; nas partidas o martelo rendia 1,0x a
+  base (sem bumerangue, 3,3x). Vida 1,8 → 3,4 s: vai tão longe quanto antes e volta. Real 360 → 1342 (4,1x o
+  martelo nas mesmas partidas).
+- **Fúria**: a onda passa a sair a cada 2 golpes (3x o dano, 0,8 s), o giro cai para 45. No lab 3,8x; nas partidas
+  do bot fica perto da lâmina (1,3x), como já ficava depois da Etapa 1 (1,4x): o bot anda fugindo, então "à frente"
+  costuma ser longe dos inimigos. Fica para o teste com gente.
+
+### Lab final (multidão, nível máximo)
+
+| Elo            | DPS  | x base | % da melhor Elo da categoria |
+| -------------- | ---- | ------ | ---------------------------- |
+| fan            | 2002 | 4,6x   | 100% (aimed)                 |
+| fury           | 1917 | 3,8x   | 96%                          |
+| lyraStar       | 1886 | 4,3x   | 94%                          |
+| jointBreaker   | 1855 | 4,1x   | 93%                          |
+| forgeFury      | 1836 | 4,2x   | 92%                          |
+| holyLight      | 1166 | 4,3x   | 58% (auto)                   |
+| fireSword      | 1176 | 4,2x   | 59%                          |
+| soulProcession | 1175 | 4,2x   | 59%                          |
+| storm          | 1153 | 4,2x   | 58%                          |
+| yahFlame       | 964  | 4,4x   | 48% (area)                   |
+| valmorWall     | 963  | 4,2x   | 48%                          |
+| blizzard       | 957  | 4,1x   | 48%                          |
+| vigil          | 941  | 4,2x   | 47%                          |
+
+## Antes e depois da rodada dos Elos (sim, 16 sementes = 576 partidas)
+
+| Fase    | Loja    | Vitórias antes | depois | Alvo   |
+| ------- | ------- | -------------- | ------ | ------ |
+| Valmor  | nenhuma | 6%             | 11%    | 0–15%  |
+| Valmor  | metade  | 58%            | 55%    | 40–60% |
+| Valmor  | inteira | 98%            | 98%    | 85%+   |
+| Cripta  | nenhuma | 0%             | 0%     | 0%     |
+| Cripta  | metade  | 16%            | 16%    | 15–35% |
+| Cripta  | inteira | 86%            | 83%    | 70–85% |
+| Estrada | nenhuma | 0%             | 0%     | 0%     |
+| Estrada | metade  | 2%             | 2%     | 0–10%  |
+| Estrada | inteira | 47%            | 52%    | 35–55% |
+
+| Loja    | 1º Elo (mediana) antes | depois  | partidas com Elo antes | depois | Elos/partida antes | depois |
+| ------- | ---------------------- | ------- | ---------------------- | ------ | ------------------ | ------ |
+| nenhuma | 9,0 min                | 5,6 min | 2%                     | 10%    | 0,0                | 0,4    |
+| metade  | 6,7 min                | 5,7 min | 47%                    | 46%    | 1,1                | 2,1    |
+| inteira | 6,7 min                | 5,8 min | 93%                    | 91%    | 2,6                | 4,5    |
+
+```
+antes  ELO X fury 1.7x · holyLight 4.5x · yahFlame 14.8x · fan 3.6x · vigil 12.8x · blizzard 2.4x · storm 1.4x · jointBreaker 4.2x · fireSword 3.2x · forgeFury 4.1x · soulProcession 3.9x · valmorWall 8.7x · lyraStar 2.8x
+depois ELO X fury 1.5x · holyLight 5.5x · yahFlame 30.9x · vigil 7.5x · blizzard 3.6x · storm 1.3x · jointBreaker 4.5x · fireSword 1.7x · forgeFury 7.4x · soulProcession 3.9x · valmorWall 7.7x · lyraStar 2.3x
+```
+
+O ELO X do sim compara a base no nível máximo com o Elo nas mesmas partidas; com a regra nova a base fica pouco
+tempo no máximo, então o número oscila muito entre rodadas. Fúria e Tempestade já ficavam abaixo de 2x antes
+desta rodada. O lab é a medida estável.

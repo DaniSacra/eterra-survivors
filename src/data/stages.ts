@@ -57,7 +57,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 1.15, damage: 1.65, speed: 1.05, spawn: 1.15, gold: 1.5 },
+    mult: { hp: 1.3, damage: 1.75, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },

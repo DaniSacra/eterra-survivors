@@ -440,6 +440,15 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: com `?dev`, a Loja no máximo vale na partida (Segunda Chance, Segunda Bainha etc.) e o save normal fica
   intocado.
 
+**D-08 · Redesenho dos Elos** · impl + visual + bal · G · ✅ feito
+
+- Por quê: pedido do Daniel. O Elo vinha do baú e era só a base mais forte.
+- O quê: o Elo se forja na hora, quando a arma e a passiva da receita chegam ao máximo. Cada Elo tem um elemento
+  com cor própria, um momento de forja (câmera lenta, som, corrente na barra de build) e um efeito próprio. O Livro
+  de Elos ganhou uma página por Elo e ouro de descoberta, e há uma conquista nova, "Um Herói, Todos os Elos".
+- Aceite: no lab, cada Elo rende pelo menos 2,5x a base e fica na faixa da categoria; no sim, o primeiro Elo sai
+  entre 5 e 7 min e as metas de vitória batem (números em `docs/balance-baseline.md`, "Rodada dos Elos").
+
 ## Etapa 6: Lançamento
 
 **L-01 · Medição em celular real** · bal + impl · P

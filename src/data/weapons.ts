@@ -447,8 +447,8 @@ export const WEAPONS = {
   /** Fúria: the blade whirls around the hero; every third blow a cutting wave runs ahead. */
   fury: {
     kind: 'arc',
-    wave: { every: 3, damage: 1.5, speed: 460, lifetime: 0.7, radius: 30 },
-    levels: [{ damage: 59, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
+    wave: { every: 2, damage: 3, speed: 460, lifetime: 0.8, radius: 34 },
+    levels: [{ damage: 45, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -556,7 +556,7 @@ export const WEAPONS = {
         speed: 300,
         count: 4,
         pierce: 999,
-        lifetime: 1.8,
+        lifetime: 3.4,
         radius: 18,
         spread: 0.35,
         knockback: 400,

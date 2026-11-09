@@ -66,7 +66,16 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   ("Elo Fúria: arma 6/7 · Força 5/5"); the pause lists each weapon's `eloStatus`. Each Elo has an `element`
   (`ELEMENTS`) whose colour (`ELEMENT_COLOR` in `render/ui.ts`, one each) tints its effects and projectiles. The
   forge moment (`GameScene.forgeMoment`): 0.5 s of slow motion, the `forge` sound, element sparks, the HUD notice
-  and a braided chain between the Elo and its passive in the build strip (`BuildSlots`), kept all run. Elites drop chests: gold, a
+  and a braided chain between the Elo and its passive in the build strip (`BuildSlots`), kept all run.
+  Each Elo has its own verb, as optional data on its `WeaponDef`: Fúria `wave`, Estrela de Lyra `split` (stars that
+  fall and burst again, `fuse` projectiles), Quebra-Junta `branch` / `aftershock` / `crush`, Leque de Facas
+  `ricochet` / `bleed`, Luz Sagrada `mend`, Chama de Yah `pulse`, Vigília `dart` (`bladeRadius`, shared with the
+  renderer), Nevasca `shatter` (queued, burst in `updateShatters`), Tempestade `chain`, Fúria da Forja
+  `boomerang`, Procissão `swell`, Muralha de Valmor `ward` (`hurtHero`) and Espada de Fogo `ground` (burning
+  zones). Kill and hit hooks live in `core/elos.ts`; damage over time (bleed, burn) is `applyDot` in
+  `core/enemies.ts`. The lab's dummies are immortal and ignore knockback, so effects that hang on kills, travel or
+  pushes must also be checked in `npm run sim` (`REAL DPS`). The first forge of each Elo banks
+  `ELO_DISCOVERY_GOLD`; the Livro de Elos (Coleção → Elos) opens a page per discovered Elo. Elites drop chests: gold, a
   level of something owned and a heal (`CHEST` in `data/pickups.ts`).
   When weapons and passives run short, `data/rewards.ts` cards (Bolsa de Ouro, Banquete, Bênção de Yah) keep the
   level-up at 3 cards; `canBanish` never lets Banir leave fewer.
