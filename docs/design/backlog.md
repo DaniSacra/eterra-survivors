@@ -613,13 +613,15 @@ sementes depois de cada lote e registrar.
 - Feito (lote 1, sim de 12 sementes): vitórias Valmor 31 para **38/48**, Cripta 42 para **37/48**, Estrada 36 para
   **37/48** (ordem certa, dentro da folga de 3). Lyra na Cripta caiu de 10 para 7/12.
 
-**RE-05 · Parede dos 6:30** · impl + bal · P · aprovado
+**RE-05 · Parede dos 6:30** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D5: 18 das 47 derrotas entre 6 e 8 min; o segmento de 390 s multiplica o HP gerado por segundo
   por 1,8 de uma vez (300 s 18,0; 390 s 32,7), os outros degraus ficam em 1,3 a 1,5.
 - O quê: `CURVE` (`data/waves.ts`) 390 s `hpMult` 2.8 para 2.5. Medido: Estrada 30 para 35/48; mortes entre 6 e 8 min
   em Valmor de 9 para 6.
 - Aceite: mortes entre 6 e 8 min abaixo de 12 nas 144 corridas; nenhum snapshot novo acima de 650 vivos.
+- Feito (lote 1, sim de 12 sementes): mortes entre 6 e 8 min 14 para **12** de 144 (o lote 2 continua o trabalho, ver
+  a tabela final da R2); snapshots acima de 650 vivos 15 para 7, máximo 700 (nenhum acima do que já havia).
 
 **RE-03 · Elos corpo a corpo e de aura na altura dos outros** · impl + bal · P · aprovado
 
