@@ -341,7 +341,7 @@ export class ShopScene extends Phaser.Scene {
     if (DEV_MODE) return this.devControls(id, level);
     // Keyboard players get the two-step rule spelled out (touch players see the button).
     if (!this.sys.game.device.input.touch && h >= 180)
-      d.push(label(this, x + w / 2, y + h - 12 - 52, t.shop.hintKeys, 11, { color: UI.muted }));
+      d.push(label(this, x + w / 2, y + h - 12 - 52, t.shop.hintKeys, 12, { color: UI.muted }));
     if (cost === null) {
       const done = seal(this, x + w - pad, y + h - pad - 12, t.shop.maxed);
       d.push(done.text, done.box);
@@ -394,7 +394,7 @@ export class ShopScene extends Phaser.Scene {
     add(x + pad * 2 + bw, high, t.dev.up, () => this.devStep(1), level === SHOP[id].maxLevel);
     add(x + pad, low, t.dev.allZero, () => this.devAll(false));
     add(x + pad * 2 + bw, low, t.dev.allMax, () => this.devAll(true));
-    if (h >= 200) d.push(label(this, x + w / 2, high - 30, t.dev.hint, 11, { color: UI.muted }));
+    if (h >= 200) d.push(label(this, x + w / 2, high - 30, t.dev.hint, 12, { color: UI.muted }));
   }
 
   private devStep(by: number): void {

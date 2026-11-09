@@ -72,7 +72,7 @@ export function drawBuildList(
       icon(tx + 7, cy + 9, `icon.${evo.evo.passive}`, 14);
       lx += 18;
     }
-    label(scene, lx, cy + 9, text, 11, { color, align: 'left' }).setOrigin(0, 0.5);
+    label(scene, lx, cy + 9, text, 12, { color, align: 'left' }).setOrigin(0, 0.5);
     ry += ROW;
   }
   const ids = Object.keys(world.passives) as PassiveId[];
