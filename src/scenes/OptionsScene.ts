@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
 import { optionButtons } from '../render/options';
-import { bindKeys, button, keyNav, label, restartOnResize } from '../render/ui';
+import { UI, bindKeys, button, keyNav, label, restartOnResize } from '../render/ui';
 import { SCENES } from './keys';
 
 /** Every option in one place (also shown in the pause menu), saved between sessions. */
@@ -16,7 +16,7 @@ export class OptionsScene extends Phaser.Scene {
     const ow = Math.min(340, width - 32);
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
     const top = Math.max(50, height / 2 - 170);
-    label(this, cx, top, t.options.title, 30, { bold: true });
+    label(this, cx, top, t.options.title, 30, { bold: true, color: UI.gold });
     const toggles = optionButtons(this, cx, top + 80, ow);
     const back = button(
       this,

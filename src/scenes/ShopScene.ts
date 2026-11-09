@@ -15,6 +15,7 @@ import {
   keyNav,
   label,
   restartOnResize,
+  seal,
   safeArea,
 } from '../render/ui';
 import { SCENES } from './keys';
@@ -95,15 +96,7 @@ export class ShopScene extends Phaser.Scene {
       }).setOrigin(1, 0.5);
       if (done) {
         // Completo: a seal of its own, so it never reads as "can't afford".
-        const seal = label(this, rx - 6, y + cardH / 2 - 12, t.shop.maxed, 12, {
-          bold: true,
-          color: UI.okText,
-        });
-        seal.setOrigin(1, 0.5);
-        this.add
-          .rectangle(seal.x + 6, seal.y, seal.width + 12, seal.height + 2, UI.ok, 0.18)
-          .setOrigin(1, 0.5)
-          .setStrokeStyle(1, UI.ok);
+        seal(this, rx, y + cardH / 2 - 12, t.shop.maxed);
       } else
         label(this, rx, y + cardH / 2 - 12, t.shop.cost(cost), 13, {
           bold: true,

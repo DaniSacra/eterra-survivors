@@ -119,9 +119,12 @@ export const t = {
 
   options: {
     title: 'Opções',
-    damageNumbers: (on: boolean) => `Números de dano: ${on ? 'sim' : 'não'}`,
-    calm: (on: boolean) => `Tela calma (sem tremor): ${on ? 'sim' : 'não'}`,
-    muted: (on: boolean) => `Som: ${on ? 'desligado' : 'ligado'}`,
+    damageNumbers: 'Números de dano',
+    calm: 'Tela calma (sem tremor)',
+    muted: 'Som',
+    /** The seal beside each option. */
+    on: 'Ligado',
+    off: 'Desligado',
   },
 
   end: {

@@ -96,6 +96,25 @@ export function disable(bg: Phaser.GameObjects.Rectangle): Phaser.GameObjects.Re
   return bg;
 }
 
+/** A status seal, right-aligned at `x`: `on` is the green "done" look (Loja's Completo), off a faded outline. */
+export interface Seal {
+  text: Phaser.GameObjects.Text;
+  set(text: string, on: boolean): void;
+}
+export function seal(scene: Phaser.Scene, x: number, y: number, text: string, on = true, size = 12): Seal {
+  const box = scene.add.rectangle(x, y, 1, 1).setOrigin(1, 0.5);
+  const txt = label(scene, x - 6, y, text, size, { bold: true }).setOrigin(1, 0.5);
+  const set = (s: string, isOn: boolean) => {
+    txt.setText(s).setColor(isOn ? UI.okText : UI.textOff);
+    box
+      .setSize(txt.width + 12, txt.height + 2)
+      .setFillStyle(isOn ? UI.ok : UI.panelOff, isOn ? 0.18 : 1)
+      .setStrokeStyle(1, isOn ? UI.ok : UI.borderOff);
+  };
+  set(text, on);
+  return { text: txt, set };
+}
+
 /** Full-screen translucent backdrop that also swallows clicks. */
 export function dim(scene: Phaser.Scene, alpha = 0.7): Phaser.GameObjects.Rectangle {
   const { width, height } = scene.scale;

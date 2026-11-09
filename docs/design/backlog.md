@@ -1058,12 +1058,15 @@ da Estrada), descritos nos próprios itens.
   `ceil(0.02 x maior lado x zoom) + 4`, para o chão e os decals. Capturas do tremor de 0.02 sem borda nos três
   tamanhos. Barrinha sob o herói em `UI.hp`, piscando em `UI.danger` abaixo de 35%.
 
-**RA-04 · Opções com selo de ligado e desligado** · visual · P · aprovado
+**RA-04 · Opções com selo de ligado e desligado** · visual · P · ✅ feito
 
 - Por quê: 04-visual #11: "Som: ligado" só em texto; título branco fora do padrão.
 - O quê: rótulo à esquerda e selo à direita (ligado como o "Completo" da Loja; desligado em `UI.textOff`); título em
   `UI.gold`; o mesmo selo nas opções da Pausa.
 - Aceite: dá para ver o estado das três opções sem ler.
+- Feito: componente `seal()` em `render/ui.ts` (ligado = o "Completo" da Loja, agora feito por ele; desligado = painel
+  apagado com borda e texto em `UI.textOff`), usado por `optionButtons` (Opções e Pausa) com rótulo à esquerda;
+  textos `t.options.on/off`; título das Opções em `UI.gold`.
 
 **RA-05 · Livro de Elos com silhueta e base visível** · visual · P · aprovado
 
