@@ -71,15 +71,16 @@ const MEET: Record<Metric, (s: MetaSave, d: AchievementDef) => void> = {
     for (const id of ENEMY_IDS.slice(0, d.goal)) s.bestiary[id] = { kills: 0, stage: 'valmor' };
   },
   shopLevels: (s) => void (s.shop = { might: 5, maxHp: 5 }),
+  vigil: (s, d) => void (s.records.teo = { ...newHeroRecord(), vigil: { crypt: d.goal } }),
 };
 
 describe('achievement data', () => {
-  it('35 achievements in 7 groups, 3.550 gold and 5 titles, every one with its texts', () => {
-    expect(ACHIEVEMENT_IDS).toHaveLength(35);
-    expect(new Set(ACHIEVEMENT_IDS).size).toBe(35);
-    expect(ACHIEVEMENT_IDS.reduce((n, id) => n + ACHIEVEMENTS[id].gold, 0)).toBe(3550);
+  it('36 achievements in 7 groups, 3.700 gold and 6 titles, every one with its texts', () => {
+    expect(ACHIEVEMENT_IDS).toHaveLength(36);
+    expect(new Set(ACHIEVEMENT_IDS).size).toBe(36);
+    expect(ACHIEVEMENT_IDS.reduce((n, id) => n + ACHIEVEMENTS[id].gold, 0)).toBe(3700);
     const titled = ACHIEVEMENT_IDS.filter((id) => ACHIEVEMENTS[id].title);
-    expect(titled).toHaveLength(5);
+    expect(titled).toHaveLength(6);
     expect(Object.keys(t.achievements.titles).sort()).toEqual([...titled].sort());
     for (const g of ACHIEVEMENT_GROUPS) {
       expect(ACHIEVEMENT_IDS.some((id) => ACHIEVEMENTS[id].group === g)).toBe(true);

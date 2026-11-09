@@ -22,8 +22,13 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - `npm run dev` — dev server · `npm test` — unit tests · `npm run lint` · `npm run typecheck` · `npm run build`
 - `npm run lab` — weapon DPS table (solo and crowd, L1/Lmax/Elo) from `tests/lab/weapons.test.ts`
 - `npm run sim` — 48 full runs (4 heroes x 3 stages x 4 seeds) with the bot in `tests/lab/bot.ts`; `SIM_HERO`,
-  `SIM_STAGE`, `SIM_SEEDS` narrow it. Both are skipped by `npm test`; results go in `docs/balance-baseline.md`
+  `SIM_STAGE`, `SIM_SEEDS` narrow it; `SIM_SHOP=full` plays the veteran, `SIM_VIGIL=1` goes on into the Noite Sem
+  Fim. It prints real DPS **per level** (`levelDps`: only while at that level), each Elo against its base at max
+  level in the same runs (`ELO X`, goal >= 2.5x) and the level where the card pool runs short (`POOL`). Both are
+  skipped by `npm test`; results go in `docs/balance-baseline.md`
 - Every step must end with `npm test`, `npm run lint` and `npm run build` green, and the game running.
+- Installable on phones (PWA): `public/manifest.webmanifest`, icons and `public/sw.js` (network first, offline
+  fallback), registered in `main.ts` in production builds only.
 
 ## Conventions
 
@@ -45,12 +50,23 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   role), `stages.ts`, `characters.ts`, `upgrades.ts` (passives), `pickups.ts`, `shop.ts`, `config.ts`.
   A new weapon (of an existing `kind`) or enemy = new data entry + its name in `pt-BR.ts` + an asset key.
   A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
-  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike. An evolution (Elo) is an evolved weapon entry
+  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike. Arc weapons can be aimed (`aim: 'nearest'`, they
+  wait for someone in reach), send a `shock` wave from the tip of the reach and strike twice in the same direction
+  (`combo`, Maça de Ferro and Quebra-Junta). An evolution (Elo) is an evolved weapon entry
   (one level) plus an `EVOLUTIONS` entry: base at max level, passive owned, then a chest. Elites drop chests.
+  The Elo moments: `eloReady` event (HUD notice, one-time tip, arrows to off-screen elites) and the `EloScene`
+  celebration when the chest forms it; the pause lists each weapon's `eloStatus`.
+  When weapons and passives run short, `data/rewards.ts` cards (Bolsa de Ouro, Banquete, Bênção de Yah) keep the
+  level-up at 3 cards; `canBanish` never lets Banir leave fewer.
   Each hero's starting weapon (`characters.ts` `weapon`) is a **signature weapon**: only that hero is ever
   offered it (and so its Elo). Everything else is a shared pool; keep hero names off shared weapons.
 - Meta progression (`core/meta.ts`, pure) is persisted by `render/save.ts` (localStorage, always try/catch):
   banked gold, shop levels, bought heroes, cleared stages. `World` takes a `RunSetup` (hero, stage, shop bonuses).
+  The Loja buys in two steps (`ShopCart`: select, then `confirmPurchase`), in sections (`SHOP_SECTIONS`).
+- **Noite Sem Fim**: after a victory the end screen offers "Continuar a vigília" (`world.continueVigil()`); the
+  spawner then grows the stage's last full wave (`config.vigil`: HP, contact damage, batch, an elite a minute).
+  The victory is banked when the boss falls; `recordVigil` adds only what the vigil brought, and each hero keeps
+  the longest vigil per stage (`HeroRecord.vigil`, Heróis tab, achievement `vigil5`).
 - `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture is drawn from
   code in `render/art/` (cartoon vector, `Pen`); swap an entry to an image URL to use real sprites.
   The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
@@ -59,7 +75,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   Effects (weapons, Elos, hits, statuses, telegraphs) belong to the `vfx-director` agent: each effect must show
   what its mechanic does.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Collection, Options, Game, Hud (overlay), LevelUp,
-  Pause, End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
+  Pause, Elo (the Elo celebration), End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
   Conquistas, Heróis): each tab draws in a `TabArea` and returns its focusable buttons; the scene owns the tab row,
   Back and keys (free-layout `keyNav` with `cols = 0`, Q/E switch tabs, Esc back).
 - Collection and achievements: `core/records.ts` (`summarizeRun`, favourite weapon, possible Elos),

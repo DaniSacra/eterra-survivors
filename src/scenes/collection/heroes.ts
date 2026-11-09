@@ -127,6 +127,8 @@ function heroCard(
     [c.bestHit, rec.bestHit > 0 ? t.int(rec.bestHit) : dash],
     [c.favorite, fav ? null : dash],
     [c.elos, c.elosOf(rec.elos.filter((e) => elos.includes(e)).length, elos.length)],
+    // Noite Sem Fim: the longest vigil on each stage, in the order of the stage marks above.
+    [c.vigil, STAGE_IDS.map((s) => (rec.vigil[s] ? formatTime(rec.vigil[s] as number) : dash)).join(t.sep)],
   ];
   const step = Math.min(24, (y + h - pad - rowsTop) / rows.length);
   const fs = step >= 20 ? 14 : 13;

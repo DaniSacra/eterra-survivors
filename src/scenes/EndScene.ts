@@ -14,6 +14,7 @@ import { UI, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } fr
 import { ART_SCALE } from '../render/art/pen';
 import { PASSIVES } from '../data/upgrades';
 import { setChoice } from './SelectScene';
+import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 
 /** Game over or victory: the run report (summary, damage per weapon, passives) over the frozen battlefield. */
@@ -22,6 +23,7 @@ export class EndScene extends Phaser.Scene {
   private unlocked: StageId | null = null;
   private newElos: WeaponId[] = [];
   private newAchievements: AchievementId[] = [];
+  private vigilRecord = false;
 
   constructor() {
     super(SCENES.end);
@@ -32,7 +34,9 @@ export class EndScene extends Phaser.Scene {
     unlocked?: StageId | null;
     newElos?: WeaponId[];
     newAchievements?: AchievementId[];
+    vigilRecord?: boolean;
   }): void {
+    this.vigilRecord = !!data.vigilRecord;
     this.world = data.world;
     this.unlocked = data.unlocked ?? null;
     this.newElos = data.newElos ?? [];
@@ -43,7 +47,8 @@ export class EndScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const cx = width / 2;
     const w = this.world;
-    const won = w.state === 'won';
+    // A Noite Sem Fim comes after a victory: its end reads as one too.
+    const won = w.state === 'won' || w.endless;
     // Phone lying down: two columns (the story and notes on the left, the weapons on the right).
     const wide = isShort(this) && width >= 700;
     const pw = wide ? Math.min(940, width - 16) : Math.min(600, width - 16);
@@ -75,10 +80,12 @@ export class EndScene extends Phaser.Scene {
     const actions: [string, () => void][] = [];
     const next = this.unlocked;
     if (next) actions.push([t.end.next, () => this.play(next)]);
+    if (w.state === 'won' && !w.endless) actions.push([t.end.continueVigil, () => this.vigil()]);
     actions.push([t.end.again, () => this.play(w.stageId)], [t.end.menu, () => this.toMenu()]);
     const buttons: Phaser.GameObjects.Rectangle[] = [];
     let by = y + 30;
-    if (actions.length === 3 && !wide) {
+    // Standing: the extra actions get full-width rows, Jogar de novo · Menu share the last one.
+    while (actions.length > 2 && !wide) {
       const [label0, action0] = actions.shift() as [string, () => void];
       buttons.push(button(this, cx, by, pw - 28, 46, action0, label0));
       by += 54;
@@ -87,7 +94,7 @@ export class EndScene extends Phaser.Scene {
     actions.forEach(([text, action], i) =>
       buttons.push(button(this, left + bw / 2 + i * (bw + 8), by, bw, 46, action, text)),
     );
-    keyNav(this, buttons, buttons.length === 3 && !wide ? 1 : buttons.length);
+    keyNav(this, buttons, wide ? buttons.length : buttons.length > 2 ? 1 : buttons.length);
     const total = by + 37;
     panel.setSize(pw, total);
     const offset = Math.max(8, (height - total) / 2);
@@ -103,14 +110,23 @@ export class EndScene extends Phaser.Scene {
   private header(x: number, y: number, w: number, won: boolean, compact: boolean): number {
     const cx = x + w / 2;
     const world = this.world;
-    label(this, cx, y + 18, won ? t.end.won : t.end.lost, compact ? 30 : 36, {
+    const vigil = world.endless;
+    label(this, cx, y + 18, vigil ? t.end.vigilOver : won ? t.end.won : t.end.lost, compact ? 30 : 36, {
       bold: true,
       color: won ? UI.gold : UI.danger,
     });
     y += compact ? 40 : 46;
-    const flavor = won ? t.stages[world.stageId].won : t.end.lostText(t.characters[world.character].name);
+    const flavor = vigil
+      ? t.end.vigilText(formatTime(world.vigilTime))
+      : won
+        ? t.stages[world.stageId].won
+        : t.end.lostText(t.characters[world.character].name);
     const text = label(this, cx, y, flavor, compact ? 14 : 15, { wrap: w }).setOrigin(0.5, 0);
     y += text.height + 6;
+    if (vigil && this.vigilRecord) {
+      label(this, cx, y, t.end.vigilRecord, 15, { bold: true, color: UI.gold }).setOrigin(0.5, 0);
+      y += 22;
+    }
     label(this, cx, y, t.end.run(t.stages[world.stageId].name, t.characters[world.character].name), 15, {
       bold: true,
       color: UI.gold,
@@ -275,6 +291,12 @@ export class EndScene extends Phaser.Scene {
     const choice = { character: this.world.character, stage };
     setChoice(this.registry, choice);
     this.scene.start(SCENES.game, choice);
+  }
+
+  /** Continuar a vigília: back to the battlefield, which goes on into the Noite Sem Fim. */
+  private vigil(): void {
+    (this.scene.get(SCENES.game) as GameScene).startVigil();
+    this.scene.stop();
   }
 
   private toMenu(): void {

@@ -218,6 +218,6 @@ export function describeAchievement(id: AchievementId): {
 /** "8.240 de 10.000" (times as minutes: "4:10 de 5:00"). */
 export function achievementProgress(id: AchievementId, value: number, goal: number): string {
   const metric = ACHIEVEMENTS[id].metric;
-  const f = metric === 'bestTime' || metric === 'untouched' ? formatTime : t.int;
+  const f = metric === 'bestTime' || metric === 'untouched' || metric === 'vigil' ? formatTime : t.int;
   return t.achievements.progress(f(value), f(goal));
 }

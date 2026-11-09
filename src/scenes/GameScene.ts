@@ -11,10 +11,10 @@ import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
-import { loadSave, recordRun } from '../render/save';
+import { loadSave, recordRun, recordVigil } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
-import { newRunSummary, summarizeRun } from '../core/records';
+import { newRunSummary, summarizeRun, type RunSummary } from '../core/records';
 import { liveAchievements } from '../core/achievements';
 import type { MetaSave } from '../core/meta';
 import type { AchievementId } from '../data/achievements';
@@ -113,6 +113,9 @@ export class GameScene extends Phaser.Scene {
   private fx!: Phaser.GameObjects.Graphics;
   private fxTop!: Phaser.GameObjects.Graphics;
   private banked = false;
+  /** The run as the boss fell, when the player went on into the Noite Sem Fim; and whether it set a record. */
+  private vigilBefore: RunSummary | null = null;
+  private vigilRecord = false;
   /** Elos this run formed for the first time ever (shown on the end screen). */
   private newElos: WeaponId[] = [];
   private newAchievements: AchievementId[] = [];
@@ -164,6 +167,8 @@ export class GameScene extends Phaser.Scene {
     this.liveShown.clear();
     this.nextCheck = 1;
     this.eloNotice = false;
+    this.vigilBefore = null;
+    this.vigilRecord = false;
     this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
     this.banked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
@@ -591,6 +596,29 @@ export class GameScene extends Phaser.Scene {
     return opens;
   }
 
+  /** "Continuar a vigília" (from the end screen): the run goes on; what it adds is recorded when it ends. */
+  startVigil(): void {
+    const w = this.world;
+    if (w.state !== 'won' || w.endless) return;
+    this.vigilBefore = summarizeRun(w);
+    w.continueVigil();
+    this.hud.announce(t.vigil.start, true);
+    this.hud.hint(t.vigil.hint);
+  }
+
+  /** The end of a Noite Sem Fim: records the vigil on top of the victory already banked. */
+  private bankVigil(): null {
+    const w = this.world;
+    const save = loadSave();
+    const best = save.records[w.character]?.vigil[w.stageId] ?? 0;
+    const run = summarizeRun(w);
+    this.vigilRecord = Math.floor(run.vigil) > best;
+    const recorded = recordVigil(run, this.vigilBefore ?? run);
+    this.newElos = recorded.elos;
+    this.newAchievements = recorded.achievements;
+    return null;
+  }
+
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
@@ -672,13 +700,14 @@ export class GameScene extends Phaser.Scene {
         case 'won':
         case 'lost': {
           sound.play(e.type);
-          const unlocked = this.bank();
+          const unlocked = w.endless ? this.bankVigil() : this.bank();
           this.time.delayedCall(900, () =>
             this.scene.launch(SCENES.end, {
               world: w,
               unlocked,
               newElos: this.newElos,
               newAchievements: this.newAchievements,
+              vigilRecord: this.vigilRecord,
             }),
           );
           break;

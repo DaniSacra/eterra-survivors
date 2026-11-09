@@ -17,7 +17,7 @@ export type AchievementGroup =
  *   of arriving; soloWins: victories with only the starting weapon;
  * - elosFound: Elos discovered; sharedUsed: shared weapons ever held; heroWins: victories of `hero`;
  *   heroesWon: heroes with a victory; heroAllStages: most stages won by one hero; stagesCleared; seen: bestiary
- *   size; shopLevels: shop levels bought.
+ *   size; shopLevels: shop levels bought; vigil: the longest Noite Sem Fim, seconds.
  */
 export type Metric =
   | 'runKills'
@@ -41,7 +41,8 @@ export type Metric =
   | 'bossFast'
   | 'stagesCleared'
   | 'seen'
-  | 'shopLevels';
+  | 'shopLevels'
+  | 'vigil';
 
 /** One achievement: done when `metric` reaches `goal`. Names and texts live in i18n under `achievements`. */
 export interface AchievementDef {
@@ -85,6 +86,7 @@ const DEFS = {
   untouched: { group: 'survival', metric: 'untouched', goal: 90, gold: 75 },
   closeWin: { group: 'survival', metric: 'closeWin', at: 0.1, goal: 1, gold: 75 },
   level50: { group: 'survival', metric: 'bestLevel', goal: 50, gold: 75 },
+  vigil5: { group: 'survival', metric: 'vigil', goal: 300, gold: 150, title: true },
   // Armas e Elos
   eloFirst: { group: 'weapons', metric: 'elosFound', goal: 1, gold: 50, charge: 'reroll' },
   elosRun3: { group: 'weapons', metric: 'runElos', goal: 3, gold: 100 },

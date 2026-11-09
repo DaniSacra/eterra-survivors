@@ -1,6 +1,19 @@
 /** Global tuning. Content (weapons, enemies, waves, upgrades) lives in its own data files. */
 export const config = {
   matchDuration: 600, // seconds; the boss arrives at the end
+  /**
+   * Noite Sem Fim (after beating the boss): the last full wave keeps growing. Per minute of vigil: enemy HP
+   * x(1 + hpPerMinute) and contact damage x(1 + damagePerMinute), one more enemy per batch every minute, batches a bit faster (down to minInterval); an
+   * elite every `eliteEvery` seconds (its chest keeps the Elos and rewards coming).
+   */
+  vigil: {
+    hpPerMinute: 2,
+    damagePerMinute: 1.5,
+    batchPerMinute: 1,
+    intervalPerMinute: 0.03,
+    minInterval: 0.3,
+    eliteEvery: 60,
+  },
   /** Playtesting: every hero is free. Set to false to sell them for gold again (data/characters.ts costs). */
   unlockAllHeroes: true,
   /** Playtesting: every stage is open. Set to false so each stage opens by clearing the previous one. */

@@ -41,6 +41,8 @@ export interface HeroRecord {
   maxMaxed: number;
   /** Victories holding only the starting weapon (or its Elo). */
   soloWins: number;
+  /** Longest Noite Sem Fim per stage, whole seconds of vigil after the boss. */
+  vigil: Partial<Record<StageId, number>>;
 }
 
 export interface BestiaryEntry {
@@ -132,6 +134,7 @@ export const newHeroRecord = (): HeroRecord => ({
   maxElos: 0,
   maxMaxed: 0,
   soloWins: 0,
+  vigil: {},
 });
 
 /** A finite number >= 0, else 0 (`int`: floored, for counters). */
@@ -177,6 +180,7 @@ function sanitizeRecord(raw: unknown): HeroRecord {
     maxElos: num(r.maxElos, true),
     maxMaxed: num(r.maxMaxed, true),
     soloWins: num(r.soloWins, true),
+    vigil: counts(r.vigil, STAGE_IDS),
   };
 }
 
@@ -355,6 +359,7 @@ export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
     const signature = CHARACTERS[run.hero].weapon;
     if (run.weapons.every((id) => id === signature)) rec.soloWins++;
   }
+  recordVigilTime(rec, run);
 
   for (const id of run.seen) save.bestiary[id] ??= { kills: 0, stage: run.stage };
   for (const id of ENEMY_IDS) {
@@ -369,6 +374,43 @@ export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   tot.damage += run.damage;
   tot.gold += Math.max(0, Math.floor(run.gold));
   tot.time += run.time;
+  return { elos, achievements: checkAchievements(save) };
+}
+
+function recordVigilTime(rec: HeroRecord, run: RunSummary): void {
+  const v = Math.floor(run.vigil);
+  if (v > (rec.vigil[run.stage] ?? 0)) rec.vigil[run.stage] = v;
+}
+
+/**
+ * The end of a Noite Sem Fim. The victory itself was recorded when the boss fell (`before` is the summary then);
+ * this adds only what the vigil brought: its gold, kills, damage and time, new Elos and bestiary entries, best
+ * marks and the vigil record. Runs and victories are not counted again.
+ */
+export function recordVigil(save: MetaSave, run: RunSummary, before: RunSummary): RunRecorded {
+  const gold = Math.max(0, Math.floor(run.gold - before.gold));
+  save.gold += gold;
+  const elos = discoverElos(save, run.elos);
+  const rec = (save.records[run.hero] ??= newHeroRecord());
+  rec.bestTime = Math.max(rec.bestTime, run.time);
+  rec.bestLevel = Math.max(rec.bestLevel, run.level);
+  rec.bestKills = Math.max(rec.bestKills, run.kills);
+  rec.bestHit = Math.max(rec.bestHit, run.bestHit);
+  rec.bestDamage = Math.max(rec.bestDamage, run.damage);
+  rec.maxElos = Math.max(rec.maxElos, run.elos.length);
+  rec.maxMaxed = Math.max(rec.maxMaxed, run.maxed);
+  for (const id of run.elos) if (!rec.elos.includes(id)) rec.elos.push(id);
+  recordVigilTime(rec, run);
+  for (const id of run.seen) save.bestiary[id] ??= { kills: 0, stage: run.stage };
+  for (const id of ENEMY_IDS) {
+    const k = (run.killsBy[id] ?? 0) - (before.killsBy[id] ?? 0);
+    if (k > 0) (save.bestiary[id] ??= { kills: 0, stage: run.stage }).kills += k;
+  }
+  const tot = save.totals;
+  tot.kills += run.kills - before.kills;
+  tot.damage += Math.max(0, run.damage - before.damage);
+  tot.gold += gold;
+  tot.time += Math.max(0, run.time - before.time);
   return { elos, achievements: checkAchievements(save) };
 }
 

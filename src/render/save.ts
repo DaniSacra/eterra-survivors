@@ -1,6 +1,7 @@
 import {
   newSave,
   recordRun as record,
+  recordVigil as recordVigilIn,
   sanitizeSave,
   serializeSave,
   type MetaSave,
@@ -34,6 +35,14 @@ export function writeSave(save: MetaSave): void {
 export function recordRun(run: RunSummary): RunRecorded {
   const save = loadSave();
   const out = record(save, run);
+  writeSave(save);
+  return out;
+}
+
+/** Records the end of a Noite Sem Fim (core/meta.ts `recordVigil`); `before` is the run when the boss fell. */
+export function recordVigil(run: RunSummary, before: RunSummary): RunRecorded {
+  const save = loadSave();
+  const out = recordVigilIn(save, run, before);
   writeSave(save);
   return out;
 }

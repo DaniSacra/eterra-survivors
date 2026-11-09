@@ -122,6 +122,13 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
         .filter(Boolean)
         .join(' · '),
   );
+  if (import.meta.env.SIM_VIGIL) {
+    const v = results.filter((r) => r.won);
+    out.push(
+      `VIGIL    ${v.length} victories went on: average ${Math.round(avgOf(v.map((r) => r.vigil)))} s of vigil, ` +
+        `${v.filter((r) => r.vigil >= 300).length} reached 5:00 (Até o Amanhecer)`,
+    );
+  }
   const short = results.filter((r) => r.poolShortLevel > 0);
   out.push(
     `POOL     ran short of 3 cards in ${short.length}/${results.length} runs, ` +

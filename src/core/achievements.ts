@@ -106,6 +106,8 @@ export const METRICS: Record<
     STAGE_IDS.filter((id) => s.cleared.includes(id) || (r?.won && r.stage === id)).length,
   seen: (s, _d, r) => ENEMY_IDS.filter((id) => s.bestiary[id] || r?.seen.includes(id)).length,
   shopLevels: (s) => SHOP_IDS.reduce((n, id) => n + (s.shop[id] ?? 0), 0),
+  vigil: (s, _d, r) =>
+    Math.max(r?.vigil ?? 0, ...CHARACTER_IDS.flatMap((h) => Object.values(s.records[h]?.vigil ?? {}))),
 };
 
 /** How far an achievement is: `value` (capped at the goal) out of `goal`. */

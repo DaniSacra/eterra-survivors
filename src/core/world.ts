@@ -71,6 +71,11 @@ export class World {
   readonly banished = new Set<string>();
   /** Base weapons whose ready Elo was already announced this run. */
   readonly eloAnnounced: WeaponId[] = [];
+  /** Noite Sem Fim: the run went on after the boss fell, from `vigilStart` (match time). */
+  endless = false;
+  vigilStart = 0;
+  /** Multiplies enemy contact damage (grows during the Noite Sem Fim). */
+  enemyDamage = 1;
   /** Bênçãos de Yah taken (reward cards, +might each). */
   blessings = 0;
   /** Match time when the level-up pool (weapons and passives) first ran short of a full choice; -1 = never. */
@@ -251,6 +256,20 @@ export class World {
       this.boss = null;
       this.end('won');
     }
+  }
+
+  /** Seconds of vigil so far (0 outside the Noite Sem Fim). */
+  get vigilTime(): number {
+    return this.endless ? this.time - this.vigilStart : 0;
+  }
+
+  /** "Continuar a vigília": after a victory, the run goes on with ever-growing waves until the hero falls. */
+  continueVigil(): void {
+    if (this.state !== 'won' || this.endless) return;
+    this.endless = true;
+    this.vigilStart = this.time;
+    this.boss = null;
+    this.state = 'playing';
   }
 
   private end(state: 'won' | 'lost'): void {

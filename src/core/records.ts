@@ -27,6 +27,8 @@ export interface RunSummary {
   /** Base weapons owned (an Elo counts as its base), for favourite weapon and "Conhece o Ofício". */
   weapons: WeaponId[];
   elos: WeaponId[];
+  /** Seconds survived in the Noite Sem Fim (0 if the run never went on after the boss). */
+  vigil: number;
   /** Weapons at max level at the end (an Elo counts). */
   maxed: number;
   killsBy: Partial<Record<EnemyId, number>>;
@@ -47,6 +49,7 @@ export const newRunSummary = (): RunSummary => ({
   hpLeft: 1,
   weapons: [],
   elos: [],
+  vigil: 0,
   maxed: 0,
   killsBy: {},
   seen: [],
@@ -60,7 +63,9 @@ export function summarizeRun(world: World, out: RunSummary = newRunSummary()): R
   const p = world.player;
   out.hero = world.character;
   out.stage = world.stageId;
-  out.won = world.state === 'won';
+  // The Noite Sem Fim comes after a victory: it ends with the hero falling, but the run was won.
+  out.won = world.state === 'won' || world.endless;
+  out.vigil = world.vigilTime;
   out.time = world.time;
   out.level = world.level;
   out.kills = world.kills;

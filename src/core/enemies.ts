@@ -228,7 +228,7 @@ export function updateEnemies(world: World, dt: number): void {
     const minD = config.player.radius + e.def.radius;
     const cx = p.x - e.x;
     const cy = p.y - e.y;
-    if (cx * cx + cy * cy < minD * minD && !isFaded(e) && hurtPlayer(p, e.def.damage)) {
+    if (cx * cx + cy * cy < minD * minD && !isFaded(e) && hurtPlayer(p, e.def.damage * world.enemyDamage)) {
       world.events.push({ type: 'playerHit' });
       break;
     }

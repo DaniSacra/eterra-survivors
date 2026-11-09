@@ -178,6 +178,7 @@ export const t = {
       bestHit: 'Maior golpe',
       favorite: 'Arma favorita',
       elos: 'Elos',
+      vigil: 'Noite Sem Fim',
       /** No record yet. */
       none: '-',
       elosOf: (n: number, total: number) => `${n} de ${total}`,
@@ -288,7 +289,18 @@ export const t = {
     off: 'Desligado',
   },
 
+  /** Noite Sem Fim: after the boss, the run can go on with ever-growing waves. */
+  vigil: {
+    start: 'A Noite Sem Fim começou!',
+    hint: 'As ondas não param de crescer. Até onde você aguenta?',
+  },
+
   end: {
+    /** Offered after a victory: go on into the Noite Sem Fim. */
+    continueVigil: 'Continuar a vigília',
+    vigilOver: 'A vigília terminou',
+    vigilText: (time: string) => `Você aguentou ${time} na Noite Sem Fim.`,
+    vigilRecord: 'Novo recorde da vigília!',
     won: 'Vitória!',
     lost: 'Fim de jogo',
     lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
@@ -359,6 +371,7 @@ export const t = {
       untouched: { name: 'Nem um Arranhão', desc: 'Passe 1:30 sem levar dano.' },
       closeWin: { name: 'Por um Fio', desc: 'Vença uma fase com 10% da vida ou menos.' },
       level50: { name: 'Lenda da Taverna', desc: (n) => `Chegue ao nível ${n} numa partida.` },
+      vigil5: { name: 'Até o Amanhecer', desc: 'Aguente 5 minutos na Noite Sem Fim.' },
       eloFirst: { name: 'Primeiro Elo', desc: 'Forme um Elo.' },
       elosRun3: { name: 'Corrente Inteira', desc: (n) => `Forme ${n} Elos numa partida.` },
       maxed4: {
@@ -391,6 +404,7 @@ export const t = {
       shop10: { name: 'Freguês do Gaspar', desc: (n) => `Compre ${n} níveis na Loja.` },
     } satisfies Record<AchievementId, AchievementText> as Record<AchievementId, AchievementText>,
     titles: {
+      vigil5: 'Vigia da Noite',
       killsTotal50k: 'Guardião de Valmor',
       soloWin: 'Fiel à Primeira',
       winAll: 'Um dos Quatro',

@@ -1,3 +1,4 @@
+import { config } from '../../src/data/config';
 import type { Enemy } from '../../src/core/enemies';
 import { weaponReport } from '../../src/core/report';
 import type { UpgradeOption } from '../../src/core/upgrades';
@@ -39,6 +40,8 @@ export interface SimResult {
   top: string[];
   /** Real DPS of every weapon held at the end, at its final level. */
   dps: { id: WeaponId; level: number; dps: number; levelDps: number; prevDps: number; levelTime: number }[];
+  /** Seconds survived in the Noite Sem Fim (SIM_VIGIL only). */
+  vigil: number;
   /** Level at which the level-up pool first ran short of 3 weapon/passive cards (0 = never). */
   poolShortLevel: number;
   /** Base weapons owned at the end (an Elo counts as its base). */
@@ -205,6 +208,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     top: [],
     dps: [],
     poolShortLevel: 0,
+    vigil: 0,
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
@@ -212,7 +216,12 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
   const side = seed % 2 ? 1 : -1;
   let bossAt = -1;
   let nextSnap = 120;
-  while ((w.state === 'playing' || w.state === 'levelup') && w.time < 900) {
+  // SIM_VIGIL=1: a victory goes on into the Noite Sem Fim (up to 30 minutes of vigil).
+  const vigil = !!import.meta.env.SIM_VIGIL;
+  const limit = vigil ? config.matchDuration + 120 + 1800 : 900;
+  while (true) {
+    if (vigil && w.state === 'won' && !w.endless) w.continueVigil();
+    if (!((w.state === 'playing' || w.state === 'levelup') && w.time < limit)) break;
     if (w.state === 'levelup') {
       choose(w);
       continue;
@@ -245,7 +254,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
       nextSnap += 120;
     }
   }
-  res.won = w.state === 'won';
+  res.won = w.state === 'won' || w.endless;
   res.time = Math.round(w.time);
   res.level = w.level;
   res.kills = w.kills;
@@ -266,6 +275,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     levelTime: r.levelTime,
   }));
   res.poolShortLevel = w.poolShortAt >= 0 ? w.poolShortLevel : 0;
+  res.vigil = Math.round(w.vigilTime);
   res.top = report
     .sort((a, b) => b.damage - a.damage)
     .slice(0, 3)
