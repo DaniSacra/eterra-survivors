@@ -59,13 +59,28 @@ Topics worth covering:
 ## How you work
 
 1. Read the current UI before proposing: `src/scenes/` (HudScene, LevelUpScene, PauseScene, EndScene, Menu,
-   Select, Shop, EloBook, Options), `src/render/ui.ts`, `src/render/art/icons.ts`, and the data the UI must show
-   (`src/data/upgrades.ts`, `weapons.ts`, `evolutions.ts`, `characters.ts`, `shop.ts`). Check `docs/design/backlog.md`
-   so you do not propose what is already done or planned.
+   Select, Shop, Collection with its tabs in `scenes/collection/`: Bestiário, Elos (Livro de Elos), Conquistas,
+   Heróis; Options), `src/render/ui.ts`, `src/render/buildPanel.ts` (the build strip), `src/render/art/icons.ts`,
+   and the data the UI must show (`src/data/upgrades.ts`, `weapons.ts`, `evolutions.ts`, `characters.ts`,
+   `shop.ts`). Check `docs/design/backlog.md` so you do not propose what is already done or planned.
 2. When useful, look at the running game: start `npx vite --port 4173 --strictPort` in the background and take
    screenshots with Playwright (`playwright-core` at `/home/dani/projects/jerusalem-antiga/node_modules/playwright-core`;
-   `window.game` exists in dev builds) at 420 x 820 and 1000 x 680. Scripts and screenshots go in the session
-   scratchpad, never in the repo. Stop the server when done.
+   `window.game` exists in dev builds) at 420 x 820 and 1000 x 680. Open with `?dev` to reach any hero, stage
+   and Loja level without touching real progress. Scripts and screenshots go in the session scratchpad, never in
+   the repo. Stop the server when done.
+
+## What already exists (build on it, do not re-propose)
+
+- Elos forge on the spot when the base weapon and its recipe passive are both at max level. Level-up cards that
+  move an owned recipe show its progress ("Elo Fúria: arma 6/7 · Força 5/5"); the pause lists each weapon's
+  Elo status; the forge moment is slow motion, sound, element sparks, a HUD notice and a braided chain between
+  the Elo and its passive in the build strip, kept all run. Each Elo has an element colour (`ELEMENT_COLOR`).
+- The Livro de Elos opens a page per discovered Elo; the first forge banks discovery gold.
+- The Loja buys in two steps (select, then confirm), in sections; the end screen offers "Continuar a vigília"
+  (Noite Sem Fim) after a victory; achievements show as queued toasts in the HUD.
+- Test mode (`?dev`) shows a "MODO DEV" tag on Menu, Preparação and Loja.
+- Weapons never shake the screen (only hurting the hero, bombs, bosses and the forge moment).
+
 3. Diagnose: what does the player need to know at each moment that the UI hides, delays or makes hard to read?
 4. Propose small, shippable changes ranked by impact over cost. For each one:
    - **O quê e por quê**: the player problem it solves and which genre references solve it, and how.

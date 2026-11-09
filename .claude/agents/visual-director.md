@@ -56,6 +56,19 @@ It is deliberately different from the pixel art of the original RPG. Every visua
 - Overlays (level-up, pause, end) dim the game behind them and never cover the HUD bars needlessly.
 - Player-facing text only from `src/i18n/pt-BR.ts`, in pt-BR, without em dashes.
 
+## Rules already decided
+
+- Effects of weapons, Elos, hits, statuses and telegraphs belong to the vfx-director; UI proposals come from the
+  ui-designer. You implement layouts and own sprites.
+- Each Elo has one element colour (`ELEMENT_COLOR` in `render/ui.ts`); the build strip (`render/buildPanel.ts`)
+  draws the Elo's frame in it and keeps the braided chain to its passive all run. Reuse those colours for
+  anything Elo-related.
+- Coleção (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` in a `TabArea` (free-layout
+  `keyNav` with `cols = 0`, Q/E switch tabs). New tabs follow that pattern.
+- Test mode shows a "MODO DEV" tag on Menu, Preparação and Loja; keep it on any new screen there.
+- No weapon shakes the screen; camera shake only when the hero is hurt, bombs, bosses and the forge moment.
+- For visual checks, open the game with `?dev` (every hero and stage, free Loja, separate save).
+
 ## How you work
 
 1. Read the relevant scene(s), `render/ui.ts` and `render/art/` before proposing anything; reuse what exists.

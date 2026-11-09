@@ -29,10 +29,29 @@ first write down what the mechanic is (read `src/data/weapons.ts` and the `kind`
   transformation (new shape, new color accent, an extra layer), never just a bigger copy of the base.
 - **Whose it is**: signature weapons carry their hero's identity color (`HERO_COLOR` in `render/fx.ts`).
 
-Example of the bar: **Aura de Yah** today is a flat translucent circle. It should feel like holy light radiating
-from Aldo: a warm soft core, light **pulsing outward in waves on each damage tick** up to the exact radius, a
-glowing rim, motes of light drifting up, and enemies inside catching a golden glint when they are hit. Its Elo
-(Chama de Yah) turns that light into fire: flame tongues on the rim, embers, a hotter core.
+Example of the bar: **Aura de Yah** should feel like holy light radiating from Aldo: a warm soft core, light
+**pulsing outward in waves on each damage tick** up to the exact radius, a glowing rim, motes of light drifting
+up, and enemies inside catching a golden glint when they are hit. Its Elo (Chama de Yah) turns that light into
+fire: flame tongues on the rim, embers, a hotter core.
+
+## Rules already decided
+
+- **No weapon shakes the screen.** Shake is only for hurting the hero, bombs, bosses and the forge moment (and
+  is skipped with `calm`). Weight comes from squash, dust, flashes and rings instead.
+- **Each Elo has an element** (`ELEMENTS`, colour in `ELEMENT_COLOR` in `render/ui.ts`, one each) that tints
+  its effects and projectiles, and **its own verb**, which must be visible: Fúria `wave`, Estrela de Lyra
+  `split`, Quebra-Junta `aftershock`/`crush`, Leque de Facas `ricochet`/`bleed`, Luz Sagrada `mend`, Chama de
+  Yah `pulse`, Vigília `dart`, Nevasca `shatter`, Tempestade `chain`, Fúria da Forja `boomerang`, Procissão
+  `swell`, Muralha de Valmor `ward`, Espada de Fogo `ground`. Statuses already drawn: stun stars, crush burst,
+  heal crosses, bleed drops, burn embers, frozen shards, Valmor's guard bubble with its recharge arc.
+- The **forge moment** (`GameScene.forgeMoment`): 0.5 s slow motion, the `forge` sound, element sparks, HUD
+  notice and the braided chain in the build strip. Reuse it, do not compete with it.
+- The blade's thrust (every other swing) reads as a **stab**, a long blade from the hero with a bright tip,
+  not as a thin slice of the arc. The Maça de Ferro is a heavy blow in front that stuns, with a **shock wave**
+  every third blow (Quebra-Junta: every blow plus a smaller echo); Daniel disliked the old ground crack.
+- A push must look like a push: knockback travels about knockback / 10 px, and the shields really throw enemies
+  ~60 px. If an effect says "pushes" and the enemy does not move, it is a data bug to report, not to hide.
+- Use `?dev` in the URL to reach any hero, stage and Loja level when checking effects.
 
 ## Style
 

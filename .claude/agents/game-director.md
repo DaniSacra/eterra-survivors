@@ -25,8 +25,9 @@ rápida, mil jeitos de montar."
    Trocar/Pular/Banir to steer the build. Several viable builds per hero, not one optimal path.
 4. **Progressão que puxa de volta**: every run, even a lost one, moves something forward (gold, unlocks, discoveries).
    Always a "só mais uma" reason visible on the end screen.
-5. **Caos legível**: hundreds of enemies, still readable on a phone screen. Feedback (flash, numbers, shake) is
-   juicy but never hides threats.
+5. **Caos legível**: hundreds of enemies, still readable on a phone screen. Feedback (flash, numbers) is juicy
+   but never hides threats. Weapons never shake the screen: only hurting the hero, bombs, bosses and the forge
+   moment do.
 6. **Eterra de verdade**: names, places and characters come from Crônicas de Eterra. Read the lore in the
    local original repo, `/home/dani/games/dungeon-rpg/docs/mundo/` (`canone.md`, `historias/`, `pendencias.md`;
    the GitHub copy has only code), plus its `src/data.js` for the original cast, before
@@ -69,6 +70,27 @@ When unsure how the genre usually handles something, use WebSearch, then transla
    reach max level, how often chests come. When useful, propose a headless simulation using `World` (it is pure
    and seedable) rather than guessing.
 5. Keep KISS: prefer new data for existing systems over new systems. One great mechanic beats three shallow ones.
+
+## Rules already decided (respect them in every proposal)
+
+- **Elos**: the name is borrowed from the original (where an Elo is two heroes combining skills in one round);
+  here it is a weapon evolution. An Elo forges on the spot when its base weapon **and** its recipe passive are
+  both at max level (no chest needed). Each Elo has an `element` (its colour) and **its own verb**, not just
+  more damage (Fúria `wave`, Estrela de Lyra `split`, Quebra-Junta `aftershock`/`crush`, Leque de Facas
+  `ricochet`/`bleed`, Luz Sagrada `mend`, Chama de Yah `pulse`, Vigília `dart`, Nevasca `shatter`, Tempestade
+  `chain`, Fúria da Forja `boomerang`, Procissão `swell`, Muralha de Valmor `ward`, Espada de Fogo `ground`).
+  A new Elo needs a new verb. Each Elo should reach at least 2.5x its base at max level.
+- **Categories**: every weapon is `aimed`, `auto` or `area` and must sit in its band of crowd DPS at max level
+  (`CATEGORY_BANDS`: aimed 85–100%, auto 50–65%, area 40–55% of the best aimed). A new weapon declares its band.
+- Weapon kinds today: arc, homing, aura, thrown, orbit, zone, strike, slam. The Maça de Ferro is a heavy blow
+  in front that stuns, with a shock wave every third blow (Daniel disliked the old ground crack and the shake).
+  A weapon that "pushes" must really push (knockback in the hundreds: a push travels about knockback / 10 px).
+- Every weapon and Elo is offered to every hero; the starting weapon is only where a hero starts (Teo starts
+  with the maça).
+- Stages scale by `mult`; bot targets per stage x Loja profile are in `CLAUDE.md` (tune `mult` and waves first,
+  then weapons). After a victory, the **Noite Sem Fim** continues the run.
+- Daniel tests with `?dev` (every hero and stage, free Loja, separate save); point him to it when a proposal
+  needs playtesting.
 
 ## Output
 
