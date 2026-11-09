@@ -31,7 +31,7 @@ import {
   drawFx,
   newMoments,
 } from '../render/fx';
-import { SPARK, Sparks } from '../render/sparks';
+import { HIT_SPARK, SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
@@ -287,6 +287,7 @@ export class GameScene extends Phaser.Scene {
     this.sparks.frame(this.calm);
     this.deathSparks();
     this.swingSparks();
+    this.boltSparks();
     this.bossMoments();
 
     this.placeView();
@@ -382,6 +383,25 @@ export class GameScene extends Phaser.Scene {
         const out = s.weapon === 'fury' ? a + Math.PI / 2 : a;
         sp.add(x, y, Math.cos(out) * 150, Math.sin(out) * 150, 0.35, spark[1], spark[0], SPARK.star);
       }
+    }
+  }
+
+  /** Bolts that land this frame: sparks (purple for Lyra's lightning) or embers rising from the fire. */
+  private boltSparks(): void {
+    if (this.stepDt <= 0) return;
+    const fresh = config.effects.boltTtl - this.stepDt - 1e-6;
+    const sp = this.sparks;
+    for (const b of this.world.bolts.active) {
+      if (b.ttl < fresh) continue;
+      const spark = HIT_SPARK[b.weapon];
+      if (!spark) continue;
+      if (spark[0] === SPARK.ember)
+        for (let i = 0; i < 4; i++) {
+          const a = sp.rand() * Math.PI * 2;
+          const d = b.radius * 0.8 * sp.rand();
+          sp.add(b.x + Math.cos(a) * d, b.y + Math.sin(a) * d, 0, -30, 0.35, 5, spark[1], SPARK.ember);
+        }
+      else sp.burst(b.x, b.y, 4, 160, 5, spark[1], SPARK.star, 0.25, false);
     }
   }
 

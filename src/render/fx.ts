@@ -5,6 +5,7 @@ import { isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
+import type { Bolt } from '../core/effects';
 import { INK } from './art/pen';
 import { UI } from './ui';
 import { star } from './sparks';
@@ -63,19 +64,35 @@ const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
 const FROST_COLOR = 0x9ad8ff;
 const BLIZZARD_COLOR = 0xe8f6ff;
 const BLIZZARD_EDGE = 0x4a8ad8;
-/** How each strike weapon falls from the sky: lightning (default) or fire. */
+/**
+ * How each strike weapon falls from the sky. Lightning (default, Lyra's): bolt color and its outline width, and
+ * `branches` for Tempestade. Fire: a fireball, or a burning sword (`sword`) that plants itself.
+ */
 interface BoltStyle {
   color: number;
   core: number;
   width: number;
   fire: boolean;
+  sword: boolean;
+  branches: number;
 }
-const BOLT_PLAIN: BoltStyle = { color: 0xfff6a0, core: 0xffffff, width: 5, fire: false };
-const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
-  storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false },
-  fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true },
-  fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true },
+const BOLT_PLAIN: BoltStyle = {
+  color: 0xc890ff,
+  core: 0xffffff,
+  width: 5,
+  fire: false,
+  sword: false,
+  branches: 0,
 };
+const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
+  storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false, sword: false, branches: 2 },
+  fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true, sword: false, branches: 0 },
+  fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
+};
+/** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
+const FIRE_SWORD: OrbitStyle = { color: 0xffd890, dark: 0xff6a20, blade: true };
+/** Part of a strike's life spent falling, before the burst on the ground. */
+const FALL = 0.25;
 const PUFF_COLOR = 0xf4f6fb;
 const PUFF_SHADE = 0xb8c0d8;
 /** Death puffs this big are bosses (radius 30 and up; elites are 18 to 26). */
@@ -259,30 +276,94 @@ export function drawFx(
       SWING_STYLE[s.weapon] ?? SWING_PLAIN,
     );
   }
-  for (const b of world.bolts.active) {
-    const t = b.ttl / config.effects.boltTtl;
-    const style = BOLT_STYLE[b.weapon] ?? BOLT_PLAIN;
-    const c = style.color;
-    const w = style.width;
-    if (style.fire) {
-      // A falling flame: a fat streak from up and to the left, then a burst of fire on the ground.
-      for (let i = 0; i < BOLT_LAYERS.length; i++) {
-        const L = BOLT_LAYERS[i] as readonly [number, number, number];
-        g.lineStyle(w * L[0] * 1.6, L[1] === -1 ? c : L[1], L[2] * t);
-        g.lineBetween(b.x - 90 * t, b.y - 200 * t, b.x, b.y);
+  for (const b of world.bolts.active) drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
+}
+
+/** A cheap hash of a point in [0, 1): the same bolt keeps the same zigzag, and every bolt gets its own. */
+const hash = (x: number, y: number, k: number): number => {
+  const v = Math.sin(x * 12.9898 + y * 78.233 + k * 37.719) * 43758.5453;
+  return v - Math.floor(v);
+};
+
+/**
+ * Something falling from the sky (`u` 0 -> 1 over its life). The damage area is marked on the ground (`g`), never
+ * as a disc over the enemies. Lightning: a zigzag of its own (outline, Lyra's purple, white core) and a scorch
+ * mark; Tempestade adds branches and a cloud shadow. Fire: a fireball dropping, then a flower of flame petals out to
+ * the exact radius; Espada de Fogo plants a burning sword in the middle.
+ */
+function drawBolt(
+  g: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  b: Bolt,
+  u: number,
+): void {
+  const st = BOLT_STYLE[b.weapon] ?? BOLT_PLAIN;
+  const fade = 1 - u;
+  const r = b.radius;
+  if (st.fire) {
+    if (u < FALL) {
+      // The fall: a fireball (or the sword, point first) coming down from up and to the left.
+      const fk = u / FALL;
+      const x = b.x - 50 * (1 - fk);
+      const y = b.y - 150 * (1 - fk);
+      if (st.sword) drawSword(top, x, y - 24, Math.PI / 2 - 0.3 * (1 - fk), 16, FIRE_SWORD);
+      else {
+        top.fillStyle(st.color, 0.9).fillTriangle(x - 7, y - 3, x + 3, y - 7, x - 30, y - 70);
+        top.fillStyle(st.color).fillCircle(x, y, 9);
+        top.fillStyle(st.core).fillCircle(x - 1, y - 1, 6);
+        top.fillStyle(0xffffff).fillCircle(x - 2, y - 2, 3);
       }
-      g.fillStyle(style.core, 0.5 * t).fillCircle(b.x, b.y, b.radius * (1.3 - t * 0.3));
-    } else {
-      // Ink, then color, then a white core: a cartoon lightning bolt.
-      for (let i = 0; i < BOLT_LAYERS.length; i++) {
-        const L = BOLT_LAYERS[i] as readonly [number, number, number];
-        g.lineStyle(w * L[0], L[1] === -1 ? c : L[1], L[2] * t);
-        g.lineBetween(b.x, b.y - 260, b.x + 8, b.y - 120);
-        g.lineBetween(b.x + 8, b.y - 120, b.x - 6, b.y);
-      }
+      return;
     }
-    g.fillStyle(c, 0.4 * t).fillCircle(b.x, b.y, b.radius);
-    g.lineStyle(2, 0xffffff, 0.8 * t).strokeCircle(b.x, b.y, b.radius * (1.2 - t * 0.2));
+    const bk = (u - FALL) / (1 - FALL); // 0 -> 1 over the burst
+    const grow = 1 - (1 - bk) * (1 - bk);
+    g.fillStyle(st.color, 0.2 * fade).fillCircle(b.x, b.y, r);
+    // Flame petals opening out to the edge.
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const a = (i * Math.PI * 2) / n + b.x * 0.05;
+      const d = r * (0.3 + 0.4 * grow);
+      const pr = r * 0.32 * (0.6 + 0.4 * grow);
+      g.fillStyle(i % 2 ? st.color : FLAME_COLOR, 0.55 * fade).fillCircle(
+        b.x + Math.cos(a) * d,
+        b.y + Math.sin(a) * d,
+        pr,
+      );
+    }
+    g.fillStyle(st.core, 0.6 * fade).fillCircle(b.x, b.y, r * 0.35 * (1 - 0.5 * bk));
+    g.lineStyle(2, 0xfff0c0, 0.8 * fade).strokeCircle(b.x, b.y, r);
+    // A ring of light smoke rolling just past the edge.
+    g.lineStyle(4 * fade + 1, 0xf0e8d8, 0.3 * fade).strokeCircle(b.x, b.y, r * (1 + 0.2 * bk));
+    if (st.sword) drawSword(top, b.x, b.y - 24, Math.PI / 2, 16, FIRE_SWORD);
+    return;
+  }
+  // Lightning: the scorch and the cloud shadow on the ground, then the bolt and its flash on top.
+  if (st.branches) g.fillStyle(INK, 0.18 * fade).fillEllipse(b.x + 10, b.y - 4, r * 2.6, r * 1.1);
+  g.fillStyle(0x1a1424, 0.3 * fade).fillCircle(b.x, b.y, r);
+  g.lineStyle(2, st.color, 0.9 * fade).strokeCircle(b.x, b.y, r);
+  const x1 = b.x + (hash(b.x, b.y, 1) - 0.5) * 30;
+  const x2 = b.x + (hash(b.x, b.y, 2) - 0.5) * 34;
+  const x3 = b.x + (hash(b.x, b.y, 3) - 0.5) * 22;
+  for (let i = 0; i < BOLT_LAYERS.length; i++) {
+    const L = BOLT_LAYERS[i] as readonly [number, number, number];
+    top.lineStyle(st.width * L[0], L[1] === -1 ? st.color : L[1], L[2] * fade);
+    top.lineBetween(b.x + 10, b.y - 270, x1, b.y - 180);
+    top.lineBetween(x1, b.y - 180, x2, b.y - 95);
+    top.lineBetween(x2, b.y - 95, x3, b.y - 40);
+    top.lineBetween(x3, b.y - 40, b.x, b.y);
+    for (let k = 0; k < st.branches; k++) {
+      // Tempestade: forks off the main bolt.
+      const fx = k ? x2 : x1;
+      const fy = k ? b.y - 95 : b.y - 180;
+      const side = hash(b.x, b.y, 5 + k) > 0.5 ? 1 : -1;
+      top.lineBetween(fx, fy, fx + side * 28, fy + 38);
+      top.lineBetween(fx + side * 28, fy + 38, fx + side * 34, fy + 70);
+    }
+  }
+  if (u < 0.25) {
+    // The flash where it lands: small, white, quick.
+    const fk = u / 0.25;
+    top.fillStyle(0xffffff, 0.9 * (1 - fk)).fillCircle(b.x, b.y, 6 + r * 0.5 * fk);
   }
 }
 

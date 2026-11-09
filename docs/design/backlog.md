@@ -846,7 +846,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   são setores de anel preenchidos (sem as listras que o arco grosso fazia). `CLEAVE_SHOW` passou a ser exportado de
   `core/bosses.ts`.
 
-**RF-08 · Golpes do céu: bola de fogo, Espada de Fogo cravando, raio de Lyra** · vfx · M · aprovado
+**RF-08 · Golpes do céu: bola de fogo, Espada de Fogo cravando, raio de Lyra** · vfx · M · ✅ feito
 
 - Por quê: 06-vfx #4 e #7, 04-visual #2: o Fogo é um risco reto ("palito") e dois discos no `top` que escondem os
   inimigos (laranja a 0.4 sobre azul vira marrom); a Espada de Fogo não tem espada; o Raio tem sempre o mesmo
@@ -856,6 +856,13 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   clarão branco e faíscas no primeiro quadro, marca queimada no `ground`, contorno roxo de Lyra; Tempestade com 1 a 2
   galhos e sombra de nuvem. Nenhum disco opaco no `top`.
 - Aceite: capturas de Fogo, Espada de Fogo, Raio e Tempestade no quadro do impacto com os inimigos visíveis.
+- Feito: `drawBolt`: nenhum disco por cima dos inimigos; a área de dano fica no chão. Fogo: bola de fogo com cauda
+  caindo no primeiro quarto da vida, depois uma flor de 8 pétalas de chama abrindo até o raio exato, borda clara no
+  raio, anel de fumaça e brasas que sobem (pool de faíscas). Espada de Fogo: `drawSword` em cores de fogo caindo de
+  ponta e cravada no centro da explosão. Raio de Lyra: zigue-zague de 4 segmentos próprio de cada raio (hash de
+  `b.x`/`b.y`), contorno de tinta, roxo de Lyra e núcleo branco, clarão branco pequeno no pouso, marca queimada com
+  anel roxo no chão e faíscas roxas; Tempestade com 2 galhos e sombra de nuvem. Sem o escurecer de tela (não
+  precisou).
 
 **RF-09 · Projéteis e órbitas com rastro e a cor do dono** · vfx · M · aprovado
 
