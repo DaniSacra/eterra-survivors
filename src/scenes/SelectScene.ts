@@ -38,7 +38,15 @@ export function setChoice(registry: Phaser.Data.DataManager, choice: RunChoice):
 }
 
 /** Pick a hero and a stage. Locked heroes are bought here; locked stages open by winning the previous one. */
+/** After buying a hero, the main button waits this long (ms) before it can start the run (as the Loja's). */
+const BUY_READY_MS = 250;
+
 export class SelectScene extends Phaser.Scene {
+  /** The locked hero whose price was tapped once: the next tap buys (two steps, as in the Loja). */
+  private buying: CharacterId | null = null;
+  /** Game time before which the main button ignores taps (right after a purchase, so a double tap can't start). */
+  private readyAt = 0;
+
   constructor() {
     super(SCENES.select);
   }
@@ -119,7 +127,11 @@ export class SelectScene extends Phaser.Scene {
       bw,
       bh,
       () => this.go(),
-      owned ? t.select.go : t.select.unlock(cost),
+      owned
+        ? t.select.go
+        : this.buying === choice.character
+          ? t.select.confirmUnlock(cost)
+          : t.select.unlock(cost),
     );
     if (!owned && save.gold < cost) disable(go);
     else go.setStrokeStyle(3, UI.accent);
@@ -259,16 +271,23 @@ export class SelectScene extends Phaser.Scene {
   }
 
   private pick(change: Partial<RunChoice>): void {
+    this.buying = null;
     setChoice(this.registry, { ...lastChoice(this.registry), ...change });
     this.scene.restart();
   }
 
   /** Starts the run, or buys the selected hero first. */
   private go(): void {
+    if (this.game.loop.time < this.readyAt) return;
     const choice = lastChoice(this.registry);
     const save = loadSave();
     if (!heroUnlocked(save, choice.character)) {
-      if (unlockHero(save, choice.character)) writeSave(save);
+      if (this.buying !== choice.character) this.buying = choice.character;
+      else {
+        this.buying = null;
+        if (unlockHero(save, choice.character)) writeSave(save);
+        this.readyAt = this.game.loop.time + BUY_READY_MS;
+      }
       this.scene.restart();
       return;
     }

@@ -509,6 +509,8 @@ export const t = {
     back: 'Voltar',
     gold: (n: number) => `Ouro: ${n}`,
     unlock: (n: number) => `Liberar: ${n} ouro`,
+    /** The second step of buying a hero. */
+    confirmUnlock: (n: number) => `Confirmar: ${n} ouro`,
     locked: 'Vença a fase anterior',
     /** Seal on a stage already won. */
     cleared: 'Vencida',
