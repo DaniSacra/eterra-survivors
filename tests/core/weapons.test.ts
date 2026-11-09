@@ -80,10 +80,13 @@ describe('Luz de Elun (homing)', () => {
     const w = prepared('elunLight');
     const e = spawnEnemy(w, 'blackKnight', 200, 0);
     w.step(1 / 60, still);
-    expect(w.projectiles.size).toBe(1);
+    expect(w.projectiles.size).toBe(WEAPONS.elunLight.levels[0]!.count);
+    w.weapons[0]!.timer = 99; // no second volley
     e.y = 150; // the target dodges sideways
     for (let i = 0; i < 120 && e.hp === e.maxHp; i++) w.step(1 / 60, still);
     expect(e.hp).toBeLessThan(e.maxHp);
+    for (let i = 0; i < 60; i++) w.step(1 / 60, still);
+    expect(e.maxHp - e.hp).toBe(2 * WEAPONS.elunLight.levels[0]!.damage);
     expect(w.projectiles.size).toBe(0);
   });
 

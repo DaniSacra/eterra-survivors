@@ -174,7 +174,7 @@ export const t = {
     blade: { name: 'Lâmina de Valmor', desc: 'Golpe em arco à frente de Aldo.' },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
-    daggers: { name: 'Adagas de Andilla', desc: 'Facas lançadas em linha reta à frente.' },
+    daggers: { name: 'Adagas de Andilla', desc: 'Facas rápidas lançadas no inimigo mais próximo.' },
     paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta do herói.' },
     frost: { name: 'Geada de Valmor', desc: 'Manchas de gelo que ferem e atrasam os inimigos.' },
     hammer: {

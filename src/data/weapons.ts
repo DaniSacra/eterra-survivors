@@ -33,7 +33,7 @@ export interface AuraLevel extends BaseLevel {
   radius: number;
 }
 
-/** Straight shots thrown where Aldo faces, fanned out by `spread` radians between shots. */
+/** Straight shots fanned out by `spread` radians, thrown where the hero faces (or at the nearest enemy, see `aim`). */
 export interface ThrownLevel extends BaseLevel {
   speed: number;
   count: number;
@@ -79,7 +79,14 @@ export interface LevelsByKind {
 }
 export type WeaponKind = keyof LevelsByKind;
 
-export type WeaponDef = { [K in WeaponKind]: { kind: K; levels: LevelsByKind[K][] } }[WeaponKind];
+export type WeaponDef = {
+  [K in WeaponKind]: {
+    kind: K;
+    levels: LevelsByKind[K][];
+    /** Thrown weapons: 'nearest' aims at the closest enemy; 'facing' (default) flies where the hero walks. */
+    aim?: 'nearest' | 'facing';
+  };
+}[WeaponKind];
 
 /** Builds the level table from level 1 plus the changes of each next level. */
 function levels<L>(first: L, ...changes: Partial<L>[]): L[] {
@@ -93,8 +100,8 @@ export const WEAPONS = {
   blade: {
     kind: 'arc',
     levels: levels<ArcLevel>(
-      { damage: 10, cooldown: 0.9, range: 80, arc: 2.2, knockback: 140, swings: 1 },
-      { damage: 13, range: 84 },
+      { damage: 10, cooldown: 0.9, range: 85, arc: 2.5, knockback: 140, swings: 1 },
+      { damage: 13, range: 88 },
       { swings: 2 },
       { damage: 17, cooldown: 0.8, range: 90 },
       { damage: 21, arc: 2.7 },
@@ -110,55 +117,56 @@ export const WEAPONS = {
         damage: 9,
         cooldown: 1.3,
         speed: 280,
-        count: 1,
+        count: 2,
         pierce: 0,
         lifetime: 2.5,
         radius: 6,
         turnRate: 7,
         knockback: 40,
       },
-      { count: 2 },
-      { damage: 12 },
-      { count: 3, cooldown: 1.15 },
-      { pierce: 1, damage: 14 },
-      { count: 4 },
-      { damage: 18, cooldown: 1, pierce: 2 },
+      { cooldown: 1 },
+      { damage: 12, cooldown: 0.8 },
+      { count: 3 },
+      { pierce: 1, damage: 15 },
+      { count: 5 },
+      { damage: 20, pierce: 2 },
     ),
   },
   /** Aura de Yah: a burning halo that hurts everything close. */
   yahAura: {
     kind: 'aura',
     levels: levels<AuraLevel>(
-      { damage: 3, cooldown: 0.5, radius: 55 },
+      { damage: 4, cooldown: 0.5, radius: 55 },
       { radius: 65 },
-      { damage: 5 },
+      { damage: 6 },
       { radius: 75, cooldown: 0.45 },
-      { damage: 7 },
+      { damage: 8 },
       { radius: 90 },
-      { damage: 9, cooldown: 0.35 },
+      { damage: 11, cooldown: 0.35 },
     ),
   },
-  /** Adagas de Andilla: knives thrown straight ahead. */
+  /** Adagas de Andilla: quick knives thrown at the nearest enemy, passing through the first ones. */
   daggers: {
     kind: 'thrown',
+    aim: 'nearest',
     levels: levels<ThrownLevel>(
       {
-        damage: 8,
-        cooldown: 1,
-        speed: 420,
-        count: 1,
-        pierce: 0,
-        lifetime: 1.2,
-        radius: 6,
-        spread: 0.12,
+        damage: 12,
+        cooldown: 0.8,
+        speed: 460,
+        count: 2,
+        pierce: 1,
+        lifetime: 1.1,
+        radius: 7,
+        spread: 0.14,
         knockback: 30,
       },
-      { count: 2 },
-      { damage: 11 },
-      { count: 3, cooldown: 0.85 },
-      { pierce: 1 },
-      { count: 4, damage: 13 },
-      { damage: 16, cooldown: 0.7, pierce: 2 },
+      { count: 3 },
+      { damage: 15 },
+      { pierce: 2, cooldown: 0.7 },
+      { count: 4 },
+      { damage: 18 },
+      { damage: 21, pierce: 3 },
     ),
   },
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
@@ -206,7 +214,7 @@ export const WEAPONS = {
     levels: levels<ThrownLevel>(
       {
         damage: 22,
-        cooldown: 2.2,
+        cooldown: 1.8,
         speed: 260,
         count: 1,
         pierce: 3,
@@ -218,7 +226,7 @@ export const WEAPONS = {
       { damage: 28 },
       { count: 2 },
       { pierce: 5 },
-      { damage: 36, cooldown: 1.9 },
+      { damage: 36, cooldown: 1.6 },
       { count: 3 },
       { damage: 48, radius: 15 },
     ),
@@ -228,7 +236,7 @@ export const WEAPONS = {
     kind: 'homing',
     levels: levels<HomingLevel>(
       {
-        damage: 6,
+        damage: 8,
         cooldown: 1.6,
         speed: 170,
         count: 2,
@@ -239,11 +247,11 @@ export const WEAPONS = {
         knockback: 10,
       },
       { count: 3 },
-      { damage: 8 },
-      { pierce: 2, lifetime: 5 },
-      { count: 4 },
       { damage: 11 },
-      { count: 5, cooldown: 1.3 },
+      { pierce: 3, lifetime: 5 },
+      { count: 4 },
+      { damage: 14 },
+      { count: 5, damage: 18, cooldown: 1.1 },
     ),
   },
   /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
@@ -265,7 +273,7 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 48, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
+    levels: [{ damage: 60, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -287,15 +295,16 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    levels: [{ damage: 12, cooldown: 0.3, radius: 125 }],
+    levels: [{ damage: 14, cooldown: 0.3, radius: 125 }],
   },
   /** Leque de Facas: Andilla's fan of knives in every direction. */
   fan: {
     kind: 'thrown',
+    aim: 'nearest',
     levels: [
       {
-        damage: 20,
-        cooldown: 0.45,
+        damage: 15,
+        cooldown: 0.55,
         speed: 480,
         count: 10,
         pierce: 3,
@@ -310,7 +319,7 @@ export const WEAPONS = {
   vigil: {
     kind: 'orbit',
     levels: [
-      { damage: 22, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
+      { damage: 28, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
     ],
   },
   /** Nevasca: frost everywhere. */

@@ -4,6 +4,7 @@ import { orbitAngle, updateWeapons as rawUpdate } from '../../src/core/weapons';
 import type { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { WEAPONS, type WeaponId } from '../../src/data/weapons';
+import { Rng } from '../../src/core/math';
 import { bareWorld, still } from './helpers';
 
 function prepared(id: WeaponId) {
@@ -17,27 +18,48 @@ function updateWeapons(w: World, dt: number) {
   rawUpdate(w, dt);
 }
 
-describe('Adagas de Andilla (thrown)', () => {
-  it('flies straight where Aldo faces, even with enemies elsewhere', () => {
+describe('Adagas de Andilla (thrown, aimed)', () => {
+  it('throws at the nearest enemy, whatever way Andilla walks', () => {
+    const w = prepared('daggers');
+    w.player.facing.x = 1; // walking right...
+    w.player.facing.y = 0;
+    const far = spawnEnemy(w, 'blackKnight', 200, 0);
+    const near = spawnEnemy(w, 'blackKnight', -100, 0); // ...with the nearest enemy on the left
+    for (const e of [far, near]) e.def = { ...e.def, speed: 0 };
+    w.step(1 / 60, still);
+    const s = WEAPONS.daggers.levels[0]!;
+    expect(w.projectiles.size).toBe(s.count);
+    expect(w.projectiles.active[0]!.sprite).toBe('proj.daggers');
+    for (const p of w.projectiles.active) expect(Math.cos(p.angle)).toBeLessThan(0);
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    expect(near.hp).toBeLessThan(near.maxHp);
+    expect(far.hp).toBe(far.maxHp);
+  });
+
+  it('with nobody around, throws where Andilla faces', () => {
     const w = prepared('daggers');
     w.player.facing.x = 0;
     w.player.facing.y = 1;
-    spawnEnemy(w, 'blackKnight', 100, 0);
-    const ahead = spawnEnemy(w, 'blackKnight', 0, 120);
     w.step(1 / 60, still);
-    expect(w.projectiles.size).toBe(1);
-    const shot = w.projectiles.active[0]!;
-    expect(shot.sprite).toBe('proj.daggers');
-    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
-    expect(Math.abs(shot.x)).toBeLessThan(1);
-    expect(ahead.hp).toBeLessThan(ahead.maxHp);
+    for (const p of w.projectiles.active) expect(Math.sin(p.angle)).toBeGreaterThan(0.9);
   });
 
   it('Mãos Ligeiras adds a shot', () => {
     const w = prepared('daggers');
     w.player.stats.amount = 1;
     w.step(1 / 60, still);
-    expect(w.projectiles.size).toBe(2);
+    expect(w.projectiles.size).toBe(WEAPONS.daggers.levels[0]!.count + 1);
+  });
+});
+
+describe('Martelo do Gaspar (thrown, facing)', () => {
+  it('flies where the hero walks, even with an enemy elsewhere', () => {
+    const w = prepared('hammer');
+    w.player.facing.x = 1;
+    w.player.facing.y = 0;
+    spawnEnemy(w, 'blackKnight', -100, 0);
+    w.step(1 / 60, still);
+    expect(Math.cos(w.projectiles.active[0]!.angle)).toBeGreaterThan(0.9);
   });
 });
 
@@ -110,5 +132,17 @@ describe('Raio de Lyra (strike)', () => {
     expect(near.maxHp - near.hp).toBe(s.damage);
     expect(offscreen.hp).toBe(offscreen.maxHp);
     expect(w.bolts.size).toBe(1);
+  });
+
+  it('strikes the nearest enemy first', () => {
+    for (let seed = 1; seed <= 5; seed++) {
+      const w = prepared('lightning');
+      Object.assign(w, { rng: new Rng(seed) });
+      const others = [spawnEnemy(w, 'blackKnight', 180, 0), spawnEnemy(w, 'blackKnight', -150, 120)];
+      const nearest = spawnEnemy(w, 'blackKnight', 60, 60);
+      w.step(1 / 60, still);
+      expect(nearest.hp).toBeLessThan(nearest.maxHp);
+      for (const e of others) expect(e.hp).toBe(e.maxHp);
+    }
   });
 });

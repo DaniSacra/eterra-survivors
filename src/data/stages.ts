@@ -29,7 +29,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'ghost' }),
-    elites: elites('golem'),
+    elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
   /** Estrada do Sul: the frozen road, the hooded ones and the wolf pack. */

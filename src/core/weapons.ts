@@ -10,6 +10,7 @@ import {
   type OrbitLevel,
   type StrikeLevel,
   type ThrownLevel,
+  type WeaponDef,
   type WeaponId,
   type WeaponKind,
   type ZoneLevel,
@@ -156,7 +157,10 @@ function fireHoming(world: World, s: HomingLevel, w: OwnedWeapon): boolean {
 
 function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   const p = world.player;
-  const facing = Math.atan2(p.facing.y, p.facing.x);
+  // Aimed weapons throw at the nearest enemy on screen; with nobody around, where the hero faces.
+  const t =
+    (WEAPONS[w.id] as WeaponDef).aim === 'nearest' ? nearestEnemy(world, p.x, p.y, onScreen(world)) : null;
+  const facing = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.atan2(p.facing.y, p.facing.x);
   const count = amount(world, s.count);
   // A fan that covers the whole circle spreads evenly from the facing, so one knife always flies straight
   // ahead (an even count centred on the facing would leave a blind spot right in front).
@@ -228,7 +232,10 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   const count = amount(world, s.count);
   const radius = s.radius * world.player.stats.area;
   for (let i = 0; i < count; i++) {
-    const t = randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
+    // The first bolt of each volley strikes the nearest enemy (the one that matters); the rest fall at random.
+    const t =
+      (i === 0 ? nearestEnemy(world, world.player.x, world.player.y, onScreen(world)) : null) ??
+      randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!t) break;
     targets.push(t.uid);
     const x = t.x;
@@ -244,6 +251,9 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   }
   return targets.length > 0;
 }
+
+/** A distance that always stays inside the visible area. */
+const onScreen = (world: World): number => Math.min(world.view.w, world.view.h) / 2;
 
 function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
   const p = world.player;

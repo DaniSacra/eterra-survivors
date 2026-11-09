@@ -3,6 +3,8 @@ import type { World } from '../core/world';
 import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data/weapons';
 import { orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
+import { BossAct } from '../core/bosses';
+import type { Enemy } from '../core/enemies';
 import { INK } from './art/pen';
 import type { CharacterId } from '../data/characters';
 
@@ -29,6 +31,9 @@ const ORBIT_STYLE: Partial<Record<WeaponId, OrbitStyle>> = {
 const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
 const FROST_COLOR = 0x9ad8ff;
 const BOLT_COLOR = 0xfff6a0;
+/** Boss attack markers: a warm, friendly warning (not a dark one) that fills up as the hit comes. */
+const WARN_COLOR = 0xff8a4a;
+const WARN_EDGE = 0xffe0a0;
 
 /**
  * Redraws the transient shapes each frame: on the ground (under everyone) the hero light, frost and auras;
@@ -46,6 +51,7 @@ export function drawFx(
   const hero = HERO_COLOR[world.character];
   g.fillStyle(hero, 0.22).fillEllipse(p.x, p.y + 15, 40, 14);
   g.lineStyle(2, hero, 0.7).strokeEllipse(p.x, p.y + 15, 40, 14);
+  if (world.boss) drawBossWarning(g, top, world.boss);
   for (const z of world.zones.active) {
     const a = Math.min(1, z.ttl / 0.4) * 0.3;
     g.fillStyle(FROST_COLOR, a).fillCircle(z.x, z.y, z.radius);
@@ -85,6 +91,69 @@ export function drawFx(
     g.lineStyle(4, BOLT_COLOR, t).lineBetween(b.x, b.y - 260, b.x + 8, b.y - 120);
     g.lineBetween(b.x + 8, b.y - 120, b.x - 6, b.y);
     g.fillStyle(BOLT_COLOR, 0.4 * t).fillCircle(b.x, b.y, b.radius);
+  }
+}
+
+/** The telegraph of a boss ability: where it will hit, filling up during the windup. */
+function drawBossWarning(g: Phaser.GameObjects.Graphics, top: Phaser.GameObjects.Graphics, e: Enemy): void {
+  const ab = e.def.ability;
+  if (!ab || e.act === BossAct.Idle) return;
+  const aim = Math.atan2(e.aimY, e.aimX);
+  if (e.act === BossAct.Active) {
+    // The cleave landing: a quick white slash over everything.
+    if (ab.kind === 'cleave') {
+      const half = (ab.arc ?? 1) / 2;
+      top
+        .fillStyle(SLASH_COLOR, 0.6)
+        .slice(e.x, e.y, ab.range, aim - half, aim + half, false)
+        .fillPath();
+    }
+    return;
+  }
+  const k = 1 - Math.max(0, e.actT) / ab.windup; // 0 -> 1 as the hit comes
+  const fill = 0.12 + 0.28 * k;
+  g.lineStyle(3, WARN_EDGE, 0.5 + 0.5 * k).fillStyle(WARN_COLOR, fill);
+  switch (ab.kind) {
+    case 'cleave': {
+      const half = (ab.arc ?? 1) / 2;
+      g.slice(e.x, e.y, ab.range, aim - half, aim + half, false)
+        .fillPath()
+        .strokePath();
+      // An inner slice grows to the edge: when it touches, the sword falls.
+      g.fillStyle(WARN_COLOR, 0.35)
+        .slice(e.x, e.y, ab.range * k, aim - half, aim + half, false)
+        .fillPath();
+      break;
+    }
+    case 'lunge': {
+      const w = e.def.radius * 2;
+      const len = ab.range + e.def.radius;
+      const ux = e.aimX;
+      const uy = e.aimY;
+      const vx = (-uy * w) / 2;
+      const vy = (ux * w) / 2;
+      const ex = e.x + ux * len;
+      const ey = e.y + uy * len;
+      g.beginPath();
+      g.moveTo(e.x + vx, e.y + vy);
+      g.lineTo(ex + vx, ey + vy);
+      g.lineTo(ex - vx, ey - vy);
+      g.lineTo(e.x - vx, e.y - vy);
+      g.closePath();
+      g.fillPath().strokePath();
+      g.fillStyle(WARN_COLOR, 0.35).fillCircle(e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
+      break;
+    }
+    case 'toll': {
+      // Rings ripple out from the bell; small marks show where the dead will rise.
+      g.strokeCircle(e.x, e.y, ab.range * (0.4 + 0.6 * k));
+      const n = ab.count ?? 6;
+      for (let i = 0; i < n; i++) {
+        const a = (i * Math.PI * 2) / n;
+        g.fillCircle(e.x + Math.cos(a) * ab.range, e.y + Math.sin(a) * ab.range, 6 + 6 * k);
+      }
+      break;
+    }
   }
 }
 

@@ -104,20 +104,20 @@ Hoje só 2 de 96 corridas do bot chegam às 10:00 (1 vitória). Meta da etapa (p
 sobrevive em média 6 min ou mais em Valmor, sem herói muito acima dos outros. Cada item roda sim e lab antes e
 depois e registra em `docs/balance-baseline.md`.
 
-**E-01 · Suavizar a curva das 3:00 às 10:00** · impl + bal · P
+**E-01 · Suavizar a curva das 3:00 às 10:00** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: HP inimigo por segundo em Valmor 382, 625, 1330, 2125 contra 1000 a 1800 de DPS de boa
   build, com 500 a 580 vivos; o pico das 4:00 tira os básicos e dobra o HP.
 - O quê (`data/waves.ts`, `CURVE`): 240 s mantém básicos na mistura (`{ basic: 2, fast: 3, tank: 2 }`) e hpMult
   1.8; 300 s hpMult 2.1; 390 s 2.6; 480 s interval 0.55, batch 7, hpMult 3.1; 540 s interval 0.5, batch 8, hpMult 3.5.
 - Aceite: no sim, tempo médio de sobrevivência sobe em todas as fases; nenhum snapshot passa de 600 inimigos ativos.
 
-**E-02 · Inimigos rápidos mais lentos que o herói** · impl + bal · P
+**E-02 · Inimigos rápidos mais lentos que o herói** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: corvo 140, morcego 135 e aranha 125 contra herói 150 causam 42%, 55% e 65% do dano
   recebido. Com a curva nova, a Estrada vai de 0/24 para 5/24 corridas que chegam às 10:00.
 - O quê (`data/enemies.ts`): crow 126, bat 126, spider 120.
 - Aceite: no sim, a fatia de dano dos rápidos cai abaixo de 40% em todas as fases.
 
-**E-03 · Armas fracas na multidão** · impl + bal · M
+**E-03 · Armas fracas na multidão** · impl + bal · M · ✅ feito
 - Por quê: DPS em multidão (plano do Daniel): Luz de Elun 216, Adagas 278, Fogos-Fátuos 131, contra Lâmina 1984.
   balance-tester: Adagas é a pior heroína (187 s), Luz real 32, Martelo 57, Aura 77, Chama de Yah solo 38.
 - O quê (`data/weapons.ts`), começando pelas assinaturas:
@@ -129,27 +129,27 @@ depois e registra em `docs/balance-baseline.md`.
   - Geada e Nevasca seguem as melhores na prática (194 e 314): manter; se sobrar, L7 damage 7 e Nevasca 8.
 - Aceite: no lab, nenhuma arma base abaixo de metade da mediana de DPS em multidão no nível máximo.
 
-**E-04 · Adagas miram no inimigo mais próximo** · impl · P
+**E-04 · Adagas miram no inimigo mais próximo** · impl · P · ✅ feito
 - Por quê: decisão do Daniel. Hoje são lançadas para onde Andilla anda, o que pune a heroína de fuga. O Martelo
   mantém a direção do movimento (é a arma de "mirar andando").
 - O quê: nova opção por arma `thrown` (`aim: 'nearest' | 'facing'`, no `ThrownLevel` ou na entrada da arma) em
   `data/weapons.ts` e `core/weapons.ts`; Adagas e Leque usam `nearest`, Martelo e Fúria da Forja `facing`.
 - Aceite: teste: com o herói andando para a direita e um inimigo à esquerda, a adaga vai para a esquerda.
 
-**E-05 · Lyra: primeiro raio no mais próximo, vida -10** · impl + bal · P
+**E-05 · Lyra: primeiro raio no mais próximo, vida -10** · impl + bal · P · ✅ feito
 - Por quê: decisão do Daniel. balance-tester: Raio solo cresce só 2.5x de L1 a Lmax e Lyra é a mais lenta contra o
   chefe; ele propunha L7 damage 38 para 50.
 - O quê: no fogo `strike`, o primeiro raio de cada disparo vai no inimigo visível mais próximo, os demais ao acaso.
   `characters.ts` lyra `maxHp: -10`. Só aplicar o L7 50 se o sim ainda mostrar Lyra atrás.
 - Aceite: teste do primeiro alvo; no sim, tempo de Lyra contra o chefe dentro de 25% dos outros heróis.
 
-**E-06 · Chefes muito acima das elites** · impl + bal · P
+**E-06 · Chefes muito acima das elites** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: o Golem às 9:30 tem 4050 HP (900 x hpMult), mais que o chefe (3500 a 4000).
 - O quê: decisão do Daniel: chefes com 12 a 15 mil HP, ajustado pelo sim (ponto de partida: blackKnight 14000,
   bellRinger 13000, oldWolf 12000). Golem hp 900 para 650 (também ajuda E-08).
 - Aceite: no sim, luta de chefe entre 45 e 90 s para builds que chegam às 10:00.
 
-**E-07 · Uma mecânica telegrafada por chefe** · impl + visual + bal · G
+**E-07 · Uma mecânica telegrafada por chefe** · impl + visual + bal · G · ✅ feito
 - Por quê: plano do Daniel: hoje os chefes são só perseguidores grandes. Cada um ganha um padrão simples,
   legível no celular, em `src/core` com teste. Nomes vêm das habilidades do jogo original (`src/data.js`).
 - O quê:
@@ -160,19 +160,19 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: testes em `tests/core/` para tempo de aviso e dano; no sim, a mecânica causa dano mas não mata sozinha
   um herói com vida cheia.
 
-**E-08 · Elos mais cedo** · impl + bal · P
+**E-08 · Elos mais cedo** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: 0.1 a 0.8 Elos por corrida, chegando aos 8 a 9 min; só 0.8 a 2.4 baús das 6 elites.
 - O quê: `config.xp.step` 9 para 7; golem 650 (E-06); Elos pouco acima da base: fury damage 60, vigil damage 28.
   Elites da Cripta: hoje só Golem; ver pergunta 1 ao Daniel.
 - Aceite: no sim, média de pelo menos 1 Elo por corrida que passa dos 6 min, o primeiro antes das 7:00.
 
-**E-09 · Armadura não pode zerar o dano** · impl + bal · P
+**E-09 · Armadura não pode zerar o dano** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: armadura 5 corta 68% do dano e todo inimigo comum passa a dar 1.
 - O quê: passiva `armor` maxLevel 5 para 3 (`data/upgrades.ts`), ou `config.player.minDamage` 2. Escolher pelo sim
   (sugestão: maxLevel 3, mais simples de entender no card).
 - Aceite: no sim, build com armadura máxima ainda recebe dano relevante dos comuns depois das 6:00.
 
-**E-10 · Renda de ouro cerca de 2.5x** · impl + bal · P
+**E-10 · Renda de ouro cerca de 2.5x** · impl + bal · P · ✅ feito
 - Por quê: balance-tester: 9.6 de ouro por minuto; Loja completa (21.650) mais heróis (1.100) pede 115 a 360
   corridas.
 - O quê (`data/config.ts`, `gold`): dropChance 0.05, coin 5, chest 50.
@@ -352,7 +352,10 @@ depois e registra em `docs/balance-baseline.md`.
 | Estilo | "Cavaleiro sem luz de baixo, se mistura" | resolver com contraste e luz, nunca tornando o jogo sombrio |
 | Meta de balanceamento | 2/96 chegam às 10:00 | média de 6 min ou mais em Valmor por herói, sem herói muito acima |
 
-## Perguntas para o Daniel
+## Perguntas para o Daniel (respondidas em 2026-11-08: "tudo bem para tudo")
+
+Aplicado: Cripta alterna Golem e Goblin; mecânicas dos chefes com os nomes do original; morcegos e aranhas mudam de
+cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mais forte no começo (feito em E-03).
 
 1. **Golem na Cripta**: no original o Golem de Pedra existe no elenco, mas a Cripta da Igreja Velha usa Rato
    Gigante, Morcego Vampiro e Gosma Verde. Hoje a Cripta tem só o Golem como elite. Ele pertence à cripta? Se não,

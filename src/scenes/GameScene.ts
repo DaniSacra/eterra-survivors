@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { DamageNumber } from '../core/effects';
+import { BossAct } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
@@ -105,7 +106,13 @@ export class GameScene extends Phaser.Scene {
           .setPosition(e.x, e.y)
           .setScale(ART_SCALE * (1 + a), ART_SCALE * (1 - a))
           .setFlipX(w.player.x < e.x)
-          .setRotation(e.flash > 0 ? Math.sin(w.time * 70) * 0.15 : 0);
+          .setRotation(
+            e.act === BossAct.Windup
+              ? Math.sin(w.time * 18) * 0.18 // a boss winding up shakes, rings or crouches: the cue
+              : e.flash > 0
+                ? Math.sin(w.time * 70) * 0.15
+                : 0,
+          );
         if (e.flash > 0) img.setTint(0xff7070);
         else if (this.world.freeze > 0) img.setTint(0x80c8ff);
         else if (e.slow > 0) img.setTint(0xb8e0ff);

@@ -19,7 +19,7 @@ export const PASSIVES = {
   reach: { stat: 'area', perLevel: 0.1, maxLevel: 5 },
   attraction: { stat: 'magnet', perLevel: 30, maxLevel: 5 },
   recovery: { stat: 'regen', perLevel: 0.3, maxLevel: 5 },
-  armor: { stat: 'armor', perLevel: 1, maxLevel: 5 },
+  armor: { stat: 'armor', perLevel: 1, maxLevel: 3 },
   amount: { stat: 'amount', perLevel: 1, maxLevel: 2 },
   growth: { stat: 'growth', perLevel: 0.08, maxLevel: 5 },
 } satisfies Record<string, PassiveDef>;

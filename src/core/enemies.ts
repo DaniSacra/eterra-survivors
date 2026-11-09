@@ -1,6 +1,7 @@
 import { config } from '../data/config';
 import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/enemies';
 import { TAU } from './math';
+import { updateBoss } from './bosses';
 import { hurtPlayer } from './player';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
@@ -22,6 +23,11 @@ export interface Enemy extends Poolable {
   slow: number;
   /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
   orbitReady: number[];
+  /** Bosses only (core/bosses.ts): ability phase, seconds left in it, and the direction it aimed. */
+  act: number;
+  actT: number;
+  aimX: number;
+  aimY: number;
   dead: boolean;
 }
 
@@ -39,6 +45,10 @@ export const createEnemy = (): Enemy => ({
   flash: 0,
   slow: 0,
   orbitReady: new Array<number>(config.weapons.maxOwned).fill(0),
+  act: 0,
+  actT: 0,
+  aimX: 1,
+  aimY: 0,
   dead: false,
 });
 
@@ -55,6 +65,10 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.maxHp = e.hp = def.hp * hpMult;
   e.kbx = e.kby = e.flash = e.slow = 0;
   e.orbitReady.fill(0);
+  e.act = 0;
+  e.actT = def.ability ? def.ability.every / 2 : 0;
+  e.aimX = 1;
+  e.aimY = 0;
   e.dead = false;
   return e;
 }
@@ -136,7 +150,9 @@ export function updateEnemies(world: World, dt: number): void {
       continue;
     }
     const dist = Math.sqrt(distSq) || 1;
-    let speed = frozen ? 0 : e.def.speed * dt;
+    // A boss using its ability moves on its own (or stands still) instead of walking to the hero.
+    const acting = e.def.boss && updateBoss(world, e, dt);
+    let speed = frozen || acting ? 0 : e.def.speed * dt;
     if (e.slow > 0) {
       e.slow -= dt;
       speed *= config.zones.slowFactor;

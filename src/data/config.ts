@@ -42,7 +42,7 @@ export const config = {
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */
     base: 5,
-    step: 9,
+    step: 7,
     choices: 3,
     /** Fallback option when everything is maxed. */
     healAmount: 30,
@@ -73,7 +73,7 @@ export const config = {
     dropChance: 0.03,
     coin: 3,
     /** Extra gold in every chest. */
-    chest: 30,
+    chest: 25,
   },
   /** Level-up helpers every run starts with (the shop adds more). */
   charges: { reroll: 1, skip: 1, banish: 0 },
