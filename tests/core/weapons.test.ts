@@ -180,6 +180,20 @@ describe('Escudos de Valmor: the push', () => {
   });
 });
 
+describe('Martelo do Gaspar: the push', () => {
+  it('throws what it hits back by a real distance (~knockback / 10 px)', () => {
+    const w = prepared('hammer');
+    w.player.facing.x = 1;
+    const e = spawnEnemy(w, 'bones', 60, 0);
+    e.hp = e.maxHp = 1e6;
+    e.def = { ...e.def, speed: 0 };
+    const x0 = e.x;
+    for (let i = 0; i < 90; i++) w.step(1 / 60, still);
+    expect(e.hp).toBeLessThan(e.maxHp);
+    expect(e.x - x0).toBeGreaterThan(35);
+  });
+});
+
 describe('Lâmina de Valmor: the thrust', () => {
   const blade = WEAPONS.blade;
 

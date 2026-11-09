@@ -346,7 +346,7 @@ export const WEAPONS = {
         lifetime: 1.6,
         radius: 9,
         spread: 0.3,
-        knockback: 260,
+        knockback: 500,
       },
       { damage: 46 },
       { count: 2 },
@@ -463,7 +463,7 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    pulse: { every: 10, damage: 4, radius: 1.25, knockback: 320 },
+    pulse: { every: 10, damage: 4, radius: 1.25, knockback: 650 },
     levels: [{ damage: 10, cooldown: 0.3, radius: 150 }],
   },
   /** Leque de Facas: knives that bounce from enemy to enemy, and crits that make them bleed. */
