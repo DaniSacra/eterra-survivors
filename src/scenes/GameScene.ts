@@ -14,7 +14,7 @@ import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, recordRun } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
-import { isElo } from '../core/weapons';
+import { summarizeRun } from '../core/records';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -550,11 +550,7 @@ export class GameScene extends Phaser.Scene {
     const won = w.state === 'won';
     const next = STAGE_IDS[STAGE_IDS.indexOf(w.stageId) + 1];
     const opens = won && next !== undefined && !stageUnlocked(loadSave(), next) ? next : null;
-    this.newElos = recordRun(
-      w.gold,
-      won ? w.stageId : null,
-      w.weapons.filter((o) => isElo(o.id)).map((o) => o.id),
-    );
+    this.newElos = recordRun(summarizeRun(w)).elos;
     return opens;
   }
 

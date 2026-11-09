@@ -1153,11 +1153,13 @@ implementação abaixo; cada item é um commit.
 - Aceite: testes em `tests/core/records.test.ts`; F4 com 700 inimigos sem perda de FPS.
 - Feito: `World.step` com 700 inimigos no Node 0,34 ms antes e 0,35 ms depois (ruído); F4 no navegador a 60 FPS.
 
-**CC-02 · Save v2 (registros, Bestiário, totais)** · impl · M · aprovado
+**CC-02 · Save v2 (registros, Bestiário, totais)** · impl · M · ✅ feito
 
 - O quê: `SAVE_VERSION` 2; `records`, `bestiary`, `totals`, `achievements`, `fresh`, `title`; migração de v0/v1
   (semeia o Bestiário pelas fases vencidas); mescla com save de versão futura; `recordRun` puro em `core/meta.ts`.
 - Aceite: save v1 real continua com ouro, Loja, heróis, fases e Elos; testes de v0, lixo e versão futura.
+- Feito: testes em `tests/core/save.test.ts`; `achievements`, `fresh` e `title` entram no save junto com as
+  conquistas (CC-03), ainda na versão 2.
 
 **CC-03 · Conquistas (dados e lógica)** · impl · M · aprovado
 

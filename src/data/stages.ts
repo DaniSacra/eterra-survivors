@@ -44,3 +44,14 @@ export const STAGES = {
 export type StageId = keyof typeof STAGES;
 /** In unlock order: clearing one opens the next. */
 export const STAGE_IDS = Object.keys(STAGES) as StageId[];
+
+/** Every enemy a stage sends (its wave cast in role order, then its elites and boss), without repeats. */
+export function stageCast(id: StageId): EnemyId[] {
+  const s: StageDef = STAGES[id];
+  const ids = [
+    ...s.waves.flatMap((w) => w.enemies.map((e) => e.id)),
+    ...s.elites.map((e) => e.id),
+    s.boss.id,
+  ];
+  return [...new Set(ids)];
+}

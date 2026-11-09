@@ -63,7 +63,14 @@ describe('summarizeRun', () => {
     w.weapons[1]!.damage = 50;
     w.player.hp = w.player.stats.maxHp / 4;
     const s = summarizeRun(w);
-    expect(s).toMatchObject({ hero: 'lyra', stage: 'crypt', won: false, damage: 150, maxed: 2, hpLeft: 0.25 });
+    expect(s).toMatchObject({
+      hero: 'lyra',
+      stage: 'crypt',
+      won: false,
+      damage: 150,
+      maxed: 2,
+      hpLeft: 0.25,
+    });
     expect(s.weapons).toEqual(['lightning', 'blade', 'frost']);
     expect(s.elos).toEqual(['fury']);
   });

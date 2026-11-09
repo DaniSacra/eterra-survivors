@@ -16,7 +16,16 @@ export interface Player {
 
 export function createPlayer(): Player {
   const stats = { ...config.player.stats };
-  return { x: 0, y: 0, hp: stats.maxHp, facing: { x: 1, y: 0 }, moving: false, iframes: 0, hitsTaken: 0, stats };
+  return {
+    x: 0,
+    y: 0,
+    hp: stats.maxHp,
+    facing: { x: 1, y: 0 },
+    moving: false,
+    iframes: 0,
+    hitsTaken: 0,
+    stats,
+  };
 }
 
 export function updatePlayer(p: Player, input: Vec2, dt: number): void {

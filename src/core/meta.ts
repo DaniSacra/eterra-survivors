@@ -1,12 +1,62 @@
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
 import { config, type Stats } from '../data/config';
 import { SHOP, SHOP_IDS, type ChargeKey, type ShopDef, type ShopId } from '../data/shop';
-import { STAGE_IDS, type StageId } from '../data/stages';
+import { STAGES, STAGE_IDS, stageCast, type StageId } from '../data/stages';
+import { ENEMY_IDS, type EnemyId } from '../data/enemies';
 import { EVOLVED_IDS } from '../data/evolutions';
-import type { WeaponId } from '../data/weapons';
+import { WEAPON_IDS, type WeaponId } from '../data/weapons';
+import type { RunSummary } from './records';
 
-/** Bump when the save shape changes, and migrate older saves in `sanitizeSave`. */
-export const SAVE_VERSION = 1;
+/**
+ * Bump when the save shape changes, and migrate older saves in `sanitizeSave`.
+ * v2: hero records, bestiary and totals.
+ */
+export const SAVE_VERSION = 2;
+
+/** One hero's records (the Coleção's Heróis tab and the achievements read them). */
+export interface HeroRecord {
+  runs: number;
+  /** Victories per stage. */
+  wins: Partial<Record<StageId, number>>;
+  /** Longest run, seconds (victories go past 10:00). */
+  bestTime: number;
+  /** Shortest victory, seconds (0 = never won). */
+  fastestWin: number;
+  bestLevel: number;
+  bestKills: number;
+  bestHit: number;
+  bestDamage: number;
+  /** Runs each base weapon was held in (an Elo counts as its base). */
+  weaponRuns: Partial<Record<WeaponId, number>>;
+  /** Elos this hero has formed. */
+  elos: WeaponId[];
+  /** Longest stretch from the start of a run without being hit, seconds. */
+  untouched: number;
+  /** Lowest HP fraction left at a victory (1 = no victory yet). */
+  closestWin: number;
+  /** Most Elos in one run, and most weapons at max level at the end of one. */
+  maxElos: number;
+  maxMaxed: number;
+  /** Victories holding only the starting weapon (or its Elo). */
+  soloWins: number;
+}
+
+export interface BestiaryEntry {
+  kills: number;
+  /** The stage where it was first seen. */
+  stage: StageId;
+}
+
+export interface Totals {
+  runs: number;
+  wins: number;
+  kills: number;
+  damage: number;
+  /** Gold picked up in runs. */
+  gold: number;
+  /** Seconds played. */
+  time: number;
+}
 
 /** What survives between runs. Persisted by render/save.ts. */
 export interface MetaSave {
@@ -22,6 +72,11 @@ export interface MetaSave {
   /** The hero and stage last chosen, so the Preparação opens on them (absent: Aldo in Valmor). */
   lastHero?: CharacterId;
   lastStage?: StageId;
+  /** Per hero (`heroes` is the list of heroes bought). */
+  records: Partial<Record<CharacterId, HeroRecord>>;
+  /** Enemies seen at least once. */
+  bestiary: Partial<Record<EnemyId, BestiaryEntry>>;
+  totals: Totals;
   /**
    * The raw save when it came from a newer version (an old build still cached): kept so that writing it back
    * doesn't drop what this build doesn't know. See `serializeSave`.
@@ -44,11 +99,111 @@ export const newSave = (): MetaSave => ({
   heroes: [],
   cleared: [],
   elos: [],
+  records: {},
+  bestiary: {},
+  totals: newTotals(),
 });
 
+const newTotals = (): Totals => ({ runs: 0, wins: 0, kills: 0, damage: 0, gold: 0, time: 0 });
+
+export const newHeroRecord = (): HeroRecord => ({
+  runs: 0,
+  wins: {},
+  bestTime: 0,
+  fastestWin: 0,
+  bestLevel: 0,
+  bestKills: 0,
+  bestHit: 0,
+  bestDamage: 0,
+  weaponRuns: {},
+  elos: [],
+  untouched: 0,
+  closestWin: 1,
+  maxElos: 0,
+  maxMaxed: 0,
+  soloWins: 0,
+});
+
+/** A finite number >= 0, else 0 (`int`: floored, for counters). */
+function num(v: unknown, int = false): number {
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) return 0;
+  return int ? Math.floor(v) : v;
+}
+
+const obj = (v: unknown): Record<string, unknown> =>
+  v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+
+/** Known ids of `list`, in data order. */
+const known = <T extends string>(list: unknown, ids: readonly T[]): T[] =>
+  Array.isArray(list) ? ids.filter((id) => list.includes(id)) : [];
+
+/** Counters keyed by known ids (unknown ids and zeros dropped). */
+function counts<T extends string>(raw: unknown, ids: readonly T[]): Partial<Record<T, number>> {
+  const r = obj(raw);
+  const out: Partial<Record<T, number>> = {};
+  for (const id of ids) {
+    const n = num(r[id], true);
+    if (n > 0) out[id] = n;
+  }
+  return out;
+}
+
+function sanitizeRecord(raw: unknown): HeroRecord {
+  const r = obj(raw);
+  const closest = typeof r.closestWin === 'number' && Number.isFinite(r.closestWin) ? r.closestWin : 1;
+  return {
+    runs: num(r.runs, true),
+    wins: counts(r.wins, STAGE_IDS),
+    bestTime: num(r.bestTime),
+    fastestWin: num(r.fastestWin),
+    bestLevel: num(r.bestLevel, true),
+    bestKills: num(r.bestKills, true),
+    bestHit: num(r.bestHit),
+    bestDamage: num(r.bestDamage),
+    weaponRuns: counts(r.weaponRuns, WEAPON_IDS),
+    elos: known(r.elos, EVOLVED_IDS),
+    untouched: num(r.untouched),
+    closestWin: Math.max(0, Math.min(1, closest)),
+    maxElos: num(r.maxElos, true),
+    maxMaxed: num(r.maxMaxed, true),
+    soloWins: num(r.soloWins, true),
+  };
+}
+
+function sanitizeBestiary(raw: unknown): MetaSave['bestiary'] {
+  const r = obj(raw);
+  const out: MetaSave['bestiary'] = {};
+  for (const id of ENEMY_IDS) {
+    if (!(id in r)) continue;
+    const e = obj(r[id]);
+    // A stage this build doesn't know: the first stage that sends it (elites: the first stage).
+    const stage =
+      STAGE_IDS.find((s) => s === e.stage) ??
+      STAGE_IDS.find((s) => stageCast(s).includes(id)) ??
+      (STAGE_IDS[0] as StageId);
+    out[id] = { kills: num(e.kills, true), stage };
+  }
+  return out;
+}
+
 /**
- * Accepts anything (old, versionless or broken saves) and returns a valid save of the current version.
+ * v0/v1 saves know which stages were won: their cast was seen there (the boss with one kill, it fell), and at
+ * least that many runs were won. Nothing else can be told (not even the hero), so the rest starts empty.
+ */
+function seedFromCleared(save: MetaSave): void {
+  for (const stage of save.cleared) {
+    for (const id of stageCast(stage)) save.bestiary[id] ??= { kills: 0, stage };
+    const boss = save.bestiary[STAGES[stage].boss.id] as BestiaryEntry;
+    boss.kills = Math.max(boss.kills, 1);
+  }
+  save.totals.wins = Math.max(save.totals.wins, save.cleared.length);
+}
+
+/**
+ * Accepts anything (old, versionless or broken saves) and returns a valid save of the current version. Every
+ * field is repaired on its own, so one broken field never costs the rest.
  * Version 0 (no `version` field) had no Elos list: it simply starts empty, nothing else is lost.
+ * Versions 0 and 1 had no records, bestiary or totals: see `seedFromCleared`.
  */
 export function sanitizeSave(raw: unknown): MetaSave {
   const save = newSave();
@@ -62,6 +217,9 @@ export function sanitizeSave(raw: unknown): MetaSave {
     elos?: unknown;
     lastHero?: unknown;
     lastStage?: unknown;
+    records?: unknown;
+    bestiary?: unknown;
+    totals?: unknown;
   };
   if (typeof r.version === 'number' && r.version > SAVE_VERSION) save.future = r as Record<string, unknown>;
   if (typeof r.gold === 'number' && Number.isFinite(r.gold) && r.gold >= 0) save.gold = Math.floor(r.gold);
@@ -71,11 +229,16 @@ export function sanitizeSave(raw: unknown): MetaSave {
       if (typeof lv === 'number' && lv > 0) save.shop[id] = Math.min(Math.floor(lv), SHOP[id].maxLevel);
     }
   }
-  const known = <T extends string>(list: unknown, ids: readonly T[]): T[] =>
-    Array.isArray(list) ? ids.filter((id) => list.includes(id)) : [];
   save.heroes = known(r.heroes, CHARACTER_IDS);
   save.cleared = known(r.cleared, STAGE_IDS);
   save.elos = known(r.elos, EVOLVED_IDS);
+  const records = obj(r.records);
+  for (const id of CHARACTER_IDS) if (id in records) save.records[id] = sanitizeRecord(records[id]);
+  save.bestiary = sanitizeBestiary(r.bestiary);
+  const totals = obj(r.totals);
+  for (const k of Object.keys(save.totals) as (keyof Totals)[])
+    save.totals[k] = num(totals[k], k !== 'damage' && k !== 'time');
+  if (!(typeof r.version === 'number' && r.version >= 2)) seedFromCleared(save);
   // The last choice only if it can still be played (hero owned, stage open).
   const hero = CHARACTER_IDS.find((id) => id === r.lastHero);
   if (hero && heroUnlocked(save, hero)) save.lastHero = hero;
@@ -90,8 +253,30 @@ export function lastRun(save: MetaSave): { character: CharacterId; stage: StageI
 }
 
 /**
+ * Merges a newer build's progress (`old`) with this build's (`now`): numbers by the larger (records and counters
+ * only grow; `fastestWin` and `closestWin` by the smaller that is set), lists by union, objects key by key, so
+ * entries this build doesn't know survive. A text keeps the old value (the stage an enemy was first seen in).
+ */
+function mergeUp(old: unknown, now: unknown, key = ''): unknown {
+  if (typeof now === 'number') {
+    if (typeof old !== 'number' || !Number.isFinite(old)) return now;
+    if (key === 'fastestWin') return old > 0 && (now === 0 || old < now) ? old : now;
+    if (key === 'closestWin') return Math.min(old, now);
+    return Math.max(old, now);
+  }
+  if (Array.isArray(now)) return [...new Set([...(Array.isArray(old) ? old : []), ...now])];
+  if (now && typeof now === 'object') {
+    const base = obj(old);
+    const out: Record<string, unknown> = { ...base };
+    for (const [k, v] of Object.entries(now)) out[k] = mergeUp(base[k], v, k);
+    return out;
+  }
+  return typeof old === typeof now ? old : now;
+}
+
+/**
  * What gets written to storage. A save read from a newer version keeps its version, unknown fields, and the shop
- * levels, heroes, stages and Elos this build doesn't know, merged with what changed here.
+ * levels, heroes, stages, Elos, records, bestiary and totals this build doesn't know, merged with what changed here.
  */
 export function serializeSave(save: MetaSave): object {
   const { future, ...known } = save;
@@ -106,9 +291,63 @@ export function serializeSave(save: MetaSave): object {
     heroes: union(future.heroes, known.heroes),
     cleared: union(future.cleared, known.cleared),
     elos: union(future.elos, known.elos),
+    records: mergeUp(future.records, known.records),
+    bestiary: mergeUp(future.bestiary, known.bestiary),
+    totals: mergeUp(future.totals, known.totals),
     lastHero: known.lastHero,
     lastStage: known.lastStage,
   };
+}
+
+/** What a recorded run changed, for the end screen. */
+export interface RunRecorded {
+  /** Elos new to the save. */
+  elos: WeaponId[];
+}
+
+/**
+ * Records a finished run in the save: its gold, the stage if won, its Elos, the hero's records, the bestiary and
+ * the totals. Pure: render/save.ts loads, calls this and writes.
+ */
+export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
+  save.gold += Math.max(0, Math.floor(run.gold));
+  if (run.won) markCleared(save, run.stage);
+  const elos = discoverElos(save, run.elos);
+
+  const rec = (save.records[run.hero] ??= newHeroRecord());
+  rec.runs++;
+  rec.bestTime = Math.max(rec.bestTime, run.time);
+  rec.bestLevel = Math.max(rec.bestLevel, run.level);
+  rec.bestKills = Math.max(rec.bestKills, run.kills);
+  rec.bestHit = Math.max(rec.bestHit, run.bestHit);
+  rec.bestDamage = Math.max(rec.bestDamage, run.damage);
+  rec.untouched = Math.max(rec.untouched, run.untouched);
+  rec.maxElos = Math.max(rec.maxElos, run.elos.length);
+  rec.maxMaxed = Math.max(rec.maxMaxed, run.maxed);
+  for (const id of new Set(run.weapons)) rec.weaponRuns[id] = (rec.weaponRuns[id] ?? 0) + 1;
+  for (const id of run.elos) if (!rec.elos.includes(id)) rec.elos.push(id);
+  if (run.won) {
+    rec.wins[run.stage] = (rec.wins[run.stage] ?? 0) + 1;
+    rec.fastestWin = rec.fastestWin > 0 ? Math.min(rec.fastestWin, run.time) : run.time;
+    rec.closestWin = Math.min(rec.closestWin, run.hpLeft);
+    const signature = CHARACTERS[run.hero].weapon;
+    if (run.weapons.every((id) => id === signature)) rec.soloWins++;
+  }
+
+  for (const id of run.seen) save.bestiary[id] ??= { kills: 0, stage: run.stage };
+  for (const id of ENEMY_IDS) {
+    const k = run.killsBy[id] ?? 0;
+    if (k > 0) (save.bestiary[id] ??= { kills: 0, stage: run.stage }).kills += k;
+  }
+
+  const tot = save.totals;
+  tot.runs++;
+  if (run.won) tot.wins++;
+  tot.kills += run.kills;
+  tot.damage += run.damage;
+  tot.gold += Math.max(0, Math.floor(run.gold));
+  tot.time += run.time;
+  return { elos };
 }
 
 /** Marks Elos as discovered; returns the ones that were new. */

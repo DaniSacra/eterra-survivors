@@ -1,7 +1,14 @@
-import { discoverElos, markCleared, newSave, sanitizeSave, serializeSave, type MetaSave } from '../core/meta';
+import {
+  newSave,
+  recordRun as record,
+  sanitizeSave,
+  serializeSave,
+  type MetaSave,
+  type RunRecorded,
+} from '../core/meta';
+import type { RunSummary } from '../core/records';
 import type { CharacterId } from '../data/characters';
 import type { StageId } from '../data/stages';
-import type { WeaponId } from '../data/weapons';
 
 /** Browser persistence of the meta save. Storage may be missing or blocked: the game still runs without it. */
 const KEY = 'eterra-survivors.save';
@@ -22,14 +29,12 @@ export function writeSave(save: MetaSave): void {
   }
 }
 
-/** Records the end of a run: its gold, the stage if it was won, and its Elos. Returns the Elos new to the save. */
-export function recordRun(gold: number, cleared: StageId | null, elos: readonly WeaponId[] = []): WeaponId[] {
+/** Records the end of a run in the stored save (core/meta.ts `recordRun`). */
+export function recordRun(run: RunSummary): RunRecorded {
   const save = loadSave();
-  save.gold += Math.max(0, gold);
-  if (cleared) markCleared(save, cleared);
-  const fresh = discoverElos(save, elos);
+  const out = record(save, run);
   writeSave(save);
-  return fresh;
+  return out;
 }
 
 /** Remembers the hero and stage chosen, so the Preparação opens on them after a reload. */
