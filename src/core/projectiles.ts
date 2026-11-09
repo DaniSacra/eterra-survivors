@@ -1,5 +1,6 @@
 import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
+import { isFaded } from './behaviours';
 import { damageEnemy, type Enemy } from './enemies';
 import { angleDiff } from './math';
 import type { Poolable } from './pool';
@@ -50,9 +51,12 @@ export const createProjectile = (): Projectile => ({
 });
 
 const alive = (e: Enemy | null, uid: number): e is Enemy =>
-  !!e && e.uid === uid && !e.dead && e.poolIndex >= 0;
+  !!e && e.uid === uid && !e.dead && e.poolIndex >= 0 && !isFaded(e);
 
-/** Nearest living enemy to (x, y) within `range`, skipping uids in `exclude`. Uses the spatial hash. */
+/**
+ * Nearest living, hittable enemy to (x, y) within `range`, skipping uids in `exclude` (faded ghosts can't be
+ * hit, so they are never a target). Uses the spatial hash.
+ */
 export function nearestEnemy(
   world: World,
   x: number,
@@ -66,7 +70,7 @@ export function nearestEnemy(
   let bestSq = range * range;
   for (let i = 0; i < ids.length; i++) {
     const e = list[ids[i] as number] as Enemy;
-    if (e.dead || (exclude && exclude.includes(e.uid))) continue;
+    if (e.dead || isFaded(e) || (exclude && exclude.includes(e.uid))) continue;
     const dx = e.x - x;
     const dy = e.y - y;
     const dSq = dx * dx + dy * dy;
@@ -88,7 +92,7 @@ export function randomEnemyNear(world: World, hw: number, hh: number, exclude: n
   const p = world.player;
   for (let tries = 0; tries < 12; tries++) {
     const e = list[world.rng.int(list.length)] as Enemy;
-    if (e.dead || exclude.includes(e.uid)) continue;
+    if (e.dead || isFaded(e) || exclude.includes(e.uid)) continue;
     if (Math.abs(e.x - p.x) <= hw && Math.abs(e.y - p.y) <= hh) return e;
   }
   return null;
@@ -124,7 +128,8 @@ export function updateProjectiles(world: World, dt: number): void {
     world.enemyHash.query(p.x, p.y, p.radius + MAX_ENEMY_RADIUS, near);
     for (let n = 0; n < near.length; n++) {
       const e = enemies[near[n] as number] as Enemy;
-      if (e.dead || p.hits.includes(e.uid)) continue;
+      // A faded ghost lets shots pass through without using up their pierce.
+      if (e.dead || isFaded(e) || p.hits.includes(e.uid)) continue;
       const r = p.radius + e.def.radius;
       const dx = e.x - p.x;
       const dy = e.y - p.y;

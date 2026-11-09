@@ -474,7 +474,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   `state === 'playing'`. A vitória tem prioridade (o chefe caiu). Teste em `world.test.ts` com o cenário acima.
 - Aceite: teste novo verde; no cenário, `state === 'won'`, um só evento de fim, fase gravada como vencida.
 
-**RB-02 · Fantasma esmaecido come projéteis e atrai a mira** · impl · P · aprovado
+**RB-02 · Fantasma esmaecido come projéteis e atrai a mira** · impl · P · ✅ feito
 
 - Por quê: 02-code #1 e 01-balance B1 (reproduzido nos dois): com o Espectro esmaecido, `damageEnemy` ignora o golpe
   mas o projétil registra o acerto e gasta a perfuração (`projectiles.ts:121-137`); Adagas L1 contra fantasma e dois
@@ -485,7 +485,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   fantasma esmaecido e acerta quem está atrás; mira ignora esmaecido; teste de pierce > 0 (02-code #13).
 - Aceite: testes verdes; no cenário do balance-tester, o esqueleto 1 e o 2 levam dano com o fantasma esmaecido.
 
-**RB-03 · Sopro de Geada deixa o fantasma intocável por 6 s** · impl · P · aprovado
+**RB-03 · Sopro de Geada deixa o fantasma intocável por 6 s** · impl · P · ✅ feito
 
 - Por quê: 01-balance B2 (reproduzido): com o mundo congelado o `behaviourStep` não roda e o fantasma esmaecido fica
   imune os 6 s inteiros; o item de limpar a tela protege justamente ele.

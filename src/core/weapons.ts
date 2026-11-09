@@ -16,6 +16,7 @@ import {
   type WeaponKind,
   type ZoneLevel,
 } from '../data/weapons';
+import { isFaded } from './behaviours';
 import { addBolt } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import { TAU, angleDiff } from './math';
@@ -204,7 +205,7 @@ function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): 
     const ids = world.enemyHash.query(bx, by, hitR + MAX_ENEMY_RADIUS, world.scratch);
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;
-      if (e.dead || (e.orbitReady[slot] as number) > world.time) continue;
+      if (e.dead || isFaded(e) || (e.orbitReady[slot] as number) > world.time) continue;
       const r = hitR + e.def.radius;
       const dx = e.x - bx;
       const dy = e.y - by;

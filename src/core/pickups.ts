@@ -1,5 +1,7 @@
 import { config } from '../data/config';
 import { RANDOM_DROPS, type PickupId } from '../data/pickups';
+import { isFaded } from './behaviours';
+import { BossAct } from './bosses';
 import { addPuff } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import type { Poolable } from './pool';
@@ -62,6 +64,12 @@ const COLLECT: Record<PickupId, (world: World) => void> = {
   },
   freeze(world) {
     world.freeze = config.pickups.freezeTime;
+    // Frozen ghosts can't phase back in by themselves (behaviours don't run), so they turn solid now.
+    const list = world.enemies.active;
+    for (let i = 0; i < list.length; i++) {
+      const e = list[i] as Enemy;
+      if (isFaded(e)) e.act = BossAct.Idle;
+    }
   },
 };
 
