@@ -1006,6 +1006,14 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - O quê: raio `min(64, max(48, menorLado * 0.13))`.
 - Aceite: 360x640 e 820x1180 com joystick proporcional.
 
+**Medição F4 da R4** · ✅ feita
+
+- Mesmo método da R3 (420x820, CPU 4x, 701 inimigos), base `35e305e` (fim da R3) lado a lado: Lâmina L7 ~58 contra
+  ~57 FPS, 6 Elos (Fúria, Nevasca, Tempestade, Luz Sagrada, Chama, Leque) ~50 contra ~48, dentro do ruído.
+- Achado: a faixa da build como `Graphics` (retângulos arredondados com contorno, redesenhados pelo Phaser a cada
+  quadro mesmo sem mudar) derrubava a Lâmina para ~40 e os Elos para ~30. Agora molduras, pips e brilho são assados em
+  texturas (`generateTexture`) só quando `buildRev` muda; ficam só imagens no quadro.
+
 ### R5 · Arte e polimento (dono: visual-director)
 
 Começa pelos reabertos **A-05** (gemas x gelo, o mais visível), **A-04** (números em golpe de área) e **A-10** (chão
