@@ -8,6 +8,7 @@ import { CHARGE } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Bolt } from '../core/effects';
 import type { Projectile } from '../core/projectiles';
+import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
 import { UI } from './ui';
 import { star } from './sparks';
@@ -63,9 +64,13 @@ const ORBIT_STYLE: Partial<Record<WeaponId, OrbitStyle>> = {
   vigil: { color: 0xf0f6ff, dark: 0xe8b840, blade: true },
 };
 const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
-const FROST_COLOR = 0x9ad8ff;
-const BLIZZARD_COLOR = 0xe8f6ff;
+/** Frost patches in the ice family (white-lilac), never the gems' cyan; Nevasca keeps a strong blue edge. */
+const FROST_COLOR = 0xd8d2f0;
+const BLIZZARD_COLOR = 0xf4f2ff;
 const BLIZZARD_EDGE = 0x4a8ad8;
+/** How long a frost patch takes to land (ring opening, shards flying), and to break up at the end, seconds. */
+const ZONE_LAND = 0.15;
+const ZONE_BREAK = 0.4;
 /**
  * How each strike weapon falls from the sky. Lightning (default, Lyra's): bolt color and its outline width, and
  * `branches` for Tempestade. Fire: a fireball, or a burning sword (`sword`) that plants itself.
@@ -176,24 +181,7 @@ export function drawFx(
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
-  for (const z of world.zones.active) {
-    const a = Math.min(1, z.ttl / 0.4);
-    const elo = !!z.source && isElo(z.source.id);
-    g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, (elo ? 0.34 : 0.28) * a).fillCircle(z.x, z.y, z.radius);
-    g.lineStyle(elo ? 4 : 2.5, elo ? BLIZZARD_EDGE : 0xffffff, 0.8 * a).strokeCircle(z.x, z.y, z.radius);
-    // Ice crystals inside (snowflakes for Nevasca), turning slowly.
-    const n = elo ? 6 : 3;
-    for (let i = 0; i < n; i++) {
-      const ang = (i * Math.PI * 2) / n + world.time * (elo ? 0.8 : 0.4) + z.x * 0.01;
-      const cx = z.x + Math.cos(ang) * z.radius * 0.55;
-      const cy = z.y + Math.sin(ang) * z.radius * 0.55;
-      const r = elo ? 6 : 4;
-      g.lineStyle(elo ? 2 : 1.5, 0xffffff, 0.75 * a);
-      g.lineBetween(cx - r, cy, cx + r, cy);
-      g.lineBetween(cx - r * 0.5, cy - r * 0.87, cx + r * 0.5, cy + r * 0.87);
-      g.lineBetween(cx - r * 0.5, cy + r * 0.87, cx + r * 0.5, cy - r * 0.87);
-    }
-  }
+  for (const z of world.zones.active) drawZone(g, z, world.time);
   for (const w of world.weapons) {
     const kind = WEAPONS[w.id].kind;
     if (kind === 'aura') {
@@ -627,6 +615,72 @@ function drawAura(
     g.fillCircle(bx, by, w);
     g.fillTriangle(bx - w, by, bx + w, by, bx + Math.sin(t * 5 + i) * 2, by - h - w);
     g.fillStyle(0xfff0c0, 0.5).fillCircle(bx, by + 1, w * 0.45);
+  }
+}
+
+/**
+ * A patch of frost (Geada; Nevasca when it comes from the Elo). It lands with a ring opening out and shards flying;
+ * every damage tick a ring of frost runs from the middle to the edge and the crystals pulse; at the end its rim
+ * breaks into pieces. Nevasca adds falling snowflakes.
+ */
+function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
+  const elo = !!z.source && isElo(z.source.id);
+  const age = z.duration - z.ttl;
+  const fade = Math.min(1, z.ttl / ZONE_BREAK);
+  const land = Math.min(1, age / ZONE_LAND);
+  const r = z.radius * (1 - (1 - land) * (1 - land));
+  const tk = 1 - z.tick / config.zones.tick; // 0 right at a tick
+  g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade).fillCircle(z.x, z.y, r);
+  // The rim: whole while it lasts, broken into pieces as it melts away.
+  g.lineStyle(elo ? 4 : 2.5, elo ? BLIZZARD_EDGE : 0xffffff, 0.8 * fade);
+  if (z.ttl > ZONE_BREAK) g.strokeCircle(z.x, z.y, r);
+  else {
+    const gap = 0.5 * (1 - fade);
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI) / 4 + z.x * 0.01;
+      g.beginPath()
+        .arc(z.x, z.y, r, a + gap, a + Math.PI / 4 - gap)
+        .strokePath();
+    }
+  }
+  if (age < ZONE_LAND * 2) {
+    // Landing: shards of ice flying out of the rim.
+    const sk = age / (ZONE_LAND * 2);
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3 + z.y * 0.01;
+      const d = z.radius * (0.9 + 0.4 * sk);
+      shard(g, z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, a, 6, 1 - sk);
+    }
+  }
+  if (tk < 0.5) {
+    // The tick: a ring of frost from the middle to the edge.
+    const wk = tk / 0.5;
+    g.lineStyle(3 - 2 * wk, 0xffffff, 0.7 * (1 - wk) * fade).strokeCircle(z.x, z.y, r * (0.25 + 0.75 * wk));
+  }
+  // Ice crystals inside (snowflakes for Nevasca), turning slowly and pulsing on each tick.
+  const n = elo ? 6 : 3;
+  const pulse = 1 + 0.4 * Math.max(0, 1 - tk * 4);
+  for (let i = 0; i < n; i++) {
+    const ang = (i * Math.PI * 2) / n + time * (elo ? 0.8 : 0.4) + z.x * 0.01;
+    const cx = z.x + Math.cos(ang) * r * 0.55;
+    const cy = z.y + Math.sin(ang) * r * 0.55;
+    const cr = (elo ? 6 : 4) * pulse;
+    g.lineStyle(elo ? 2 : 1.5, 0xffffff, 0.75 * fade);
+    g.lineBetween(cx - cr, cy, cx + cr, cy);
+    g.lineBetween(cx - cr * 0.5, cy - cr * 0.87, cx + cr * 0.5, cy + cr * 0.87);
+    g.lineBetween(cx - cr * 0.5, cy + cr * 0.87, cx + cr * 0.5, cy - cr * 0.87);
+  }
+  if (!elo) return;
+  // Nevasca: snowflakes falling through the patch, each on its own column.
+  for (let i = 0; i < 6; i++) {
+    const ph = (time * 0.6 + i * 0.29) % 1;
+    const fx = z.x + (((i * 0.618 + z.x * 0.001) % 1) - 0.5) * r * 1.4;
+    const fy = z.y - r * 0.7 + ph * r * 1.4;
+    g.fillStyle(0xffffff, 0.8 * Math.sin(ph * Math.PI) * fade).fillCircle(
+      fx + Math.sin(time * 3 + i) * 3,
+      fy,
+      2,
+    );
   }
 }
 

@@ -896,7 +896,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Idle. Lobo Velho: 3 linhas de velocidade atrás dele na Mordida Funda e poeira onde ele para. `CHARGE` passou a ser
   exportado de `core/behaviours.ts` (só leitura no render).
 
-**RF-11 · Geada com pouso e tick visíveis** · vfx · P · aprovado
+**RF-11 · Geada com pouso e tick visíveis** · vfx · P · ✅ feito
 
 - Por quê: 06-vfx #11: a mancha surge pronta e o tick só aparece pelos inimigos tingidos; a Nevasca a 0.34 lava a
   tela com 4 zonas de 75 px.
@@ -904,6 +904,11 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   flocos determinísticos e fundo a 0.22. Cores na família nova do gelo (A-05: branco e branco-lilás), sem o ciano da
   gema.
 - Aceite: captura com Nevasca e gemas no chão: gemas visíveis dentro da zona.
+- Feito: `drawZone`: pouso em 0.15 s (o círculo abre de 0 ao raio e 6 lascas de gelo voam da borda); a cada tick
+  (`z.tick`) um anel de geada corre do meio até a borda e os cristais dão um pulso; nos últimos 0.4 s a borda se parte
+  em 8 pedaços que se afastam enquanto some. Fundo a 0.22 nas duas (Geada em branco-lilás `0xd8d2f0`, Nevasca em
+  branco com a borda azul forte); Nevasca com 6 flocos determinísticos caindo. Nada em ciano: as gemas seguem visíveis
+  dentro da zona.
 
 ### R4 · Interface (dono: ui-designer)
 
