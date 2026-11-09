@@ -59,7 +59,7 @@ describe('enemies', () => {
 
   it('take knockback scaled by resistance', () => {
     const w = quietWorld();
-    const s = spawnEnemy(w, 'skeleton', 300, 0);
+    const s = spawnEnemy(w, 'bones', 300, 0);
     const k = spawnEnemy(w, 'blackKnight', -300, 0);
     damageEnemy(w, s, 1, 1, 0, 100);
     damageEnemy(w, k, 1, 1, 0, 100);

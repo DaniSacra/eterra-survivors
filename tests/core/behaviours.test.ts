@@ -55,12 +55,17 @@ describe('enemy behaviours', () => {
     expect(isFaded(e)).toBe(false);
   });
 
-  it('the Rato Gigante joins the Crypt from the third minute', () => {
+  it('each stage keeps the cast of the original: graveyard dead in Valmor, rats and slime in the Crypt', () => {
+    const cast = (stage: keyof typeof STAGES) =>
+      new Set(STAGES[stage].waves.flatMap((s) => s.enemies.map((x) => x.id)));
+    expect([...cast('valmor')]).toEqual(expect.arrayContaining(['bones', 'bat', 'graveRat']));
+    expect([...cast('crypt')]).toEqual(expect.arrayContaining(['rat', 'slime']));
+    expect(cast('valmor').has('rat')).toBe(false);
+    // The Espectro (extra role) joins the Crypt from the third minute.
     const ids = (from: number) =>
       STAGES.crypt.waves.find((s) => s.from === from)?.enemies.map((x) => x.id) ?? [];
-    expect(ids(60)).not.toContain('rat');
-    expect(ids(120)).toContain('rat');
-    expect(STAGES.valmor.waves.flatMap((s) => s.enemies.map((x) => x.id))).not.toContain('rat');
+    expect(ids(60)).not.toContain('ghost');
+    expect(ids(120)).toContain('ghost');
   });
 });
 

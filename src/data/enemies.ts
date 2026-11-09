@@ -45,7 +45,32 @@ export interface EnemyDef {
 }
 
 export const ENEMIES = {
-  skeleton: { sprite: 'enemy.skeleton', radius: 11, hp: 10, speed: 70, damage: 5, xp: 1, knockbackResist: 0 },
+  // Arredores de Valmor: the graveyard of the original (Ossadas, grey bats, grave rats) and its sturdier dead.
+  bones: { sprite: 'enemy.bones', radius: 11, hp: 10, speed: 70, damage: 5, xp: 1, knockbackResist: 0 },
+  bat: { sprite: 'enemy.bat', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
+  skeleton: {
+    sprite: 'enemy.skeleton',
+    radius: 14,
+    hp: 45,
+    speed: 45,
+    damage: 8,
+    xp: 3,
+    knockbackResist: 0.6,
+  },
+  /** Rato de Cova: the small grey rats of the graveyard (Crônicas de Eterra). */
+  graveRat: { sprite: 'enemy.graveRat', radius: 9, hp: 6, speed: 100, damage: 4, xp: 1, knockbackResist: 0 },
+  // Cripta da Igreja Velha: the original crypt's giant rats and green slime, with tomb spiders and ghosts.
+  /** Rato Gigante: the big rats of the crypt (Crônicas de Eterra), darting at whoever comes close. */
+  rat: {
+    sprite: 'enemy.rat',
+    radius: 12,
+    hp: 14,
+    speed: 80,
+    damage: 6,
+    xp: 1,
+    knockbackResist: 0.1,
+    move: 'charge',
+  },
   spider: {
     sprite: 'enemy.spider',
     radius: 9,
@@ -57,9 +82,6 @@ export const ENEMIES = {
     move: 'zigzag',
   },
   slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 8, xp: 3, knockbackResist: 0.6 },
-  // Cripta da Igreja Velha
-  bones: { sprite: 'enemy.bones', radius: 11, hp: 14, speed: 65, damage: 5, xp: 1, knockbackResist: 0 },
-  bat: { sprite: 'enemy.bat', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
   ghost: {
     sprite: 'enemy.ghost',
     radius: 15,
@@ -69,17 +91,6 @@ export const ENEMIES = {
     xp: 3,
     knockbackResist: 0.7,
     move: 'phase',
-  },
-  /** Rato Gigante: the big rats of the crypt (Crônicas de Eterra), darting at whoever comes close. */
-  rat: {
-    sprite: 'enemy.rat',
-    radius: 12,
-    hp: 18,
-    speed: 80,
-    damage: 6,
-    xp: 1,
-    knockbackResist: 0.1,
-    move: 'charge',
   },
   // Estrada do Sul
   hooded: {

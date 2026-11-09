@@ -7,12 +7,14 @@ import type { ArtDef } from './types';
  */
 
 /** `eyes`: the glow color of a story skeleton, or null for a common one's funny cartoon eyes. */
-function skeleton(bone: number, eyes: number | null, w = 26, h = 30): ArtDef {
+function skeleton(bone: number, eyes: number | null, s = 1): ArtDef {
   return {
-    w,
-    h,
+    w: Math.round(26 * s),
+    h: Math.round(30 * s),
     draw(p) {
       const d = shade(bone, 0.62);
+      p.g.save();
+      p.g.scaleCanvas(s, s);
       p.shadow(13, 27, 16, 5);
       p.rrect(9, 20, 3, 7, 1.5, bone).rrect(14.5, 20, 3, 7, 1.5, bone); // legs
       p.rrect(7.5, 12, 12, 9, 3, bone); // ribcage
@@ -25,6 +27,32 @@ function skeleton(bone: number, eyes: number | null, w = 26, h = 30): ArtDef {
       if (eyes === null) p.eye(12.4, 8, 1.5).eye(17.6, 8, 1.5);
       else p.glow(12.6, 8.2, 0.9, eyes).glow(17.8, 8.2, 0.9, eyes);
       p.shine(11, 5, 4, 2.5, 0.35);
+      p.g.restore();
+    },
+  };
+}
+
+/** A rat: the big brown ones of the crypt, or the small grey ones of the graveyard. */
+function rat(fur: number, s: number): ArtDef {
+  return {
+    w: Math.round(34 * s),
+    h: Math.round(24 * s),
+    draw(p) {
+      p.g.save();
+      p.g.scaleCanvas(s, s);
+      p.shadow(17, 21, 22, 5);
+      p.line(6, 15, 1, 9, 2.6, INK).line(6, 15, 1, 9, 1.2, 0xe8a0a8); // tail
+      p.rrect(9, 16, 4, 5, 2, fur).rrect(19, 16, 4, 5, 2, fur); // legs
+      p.ellipse(15, 13, 22, 14, fur); // body: about 2 x radius, so it reads bigger than a bat
+      p.poly([20, 6, 32, 11, 31.5, 15, 20, 19], fur); // head and snout
+      p.circle(21, 5, 4.2, fur); // ear
+      p.ink();
+      p.fill(0xe8a0a8).fillCircle(21, 5, 2.2).fillCircle(32, 12.5, 1.5);
+      p.fill(shade(fur, 1.25)).fillEllipse(14, 17, 14, 4.5);
+      p.eye(25, 10.5, 2.4);
+      p.fill(0xffffff).fillRect(29, 15, 1.5, 2.2);
+      p.shine(10, 9, 6, 3, 0.3);
+      p.g.restore();
     },
   };
 }
@@ -84,7 +112,7 @@ function wolf(fur: number, belly: number, eyes: number, scale: number, scar = fa
 
 export const ENEMY_ART: Record<string, ArtDef> = {
   // ---- Arredores de Valmor ----
-  'enemy.skeleton': skeleton(0xe8e0c8, null),
+  'enemy.skeleton': skeleton(0xe8e0c8, null, 1.3), // the sturdy dead of the graveyard: bigger than an Ossada
   'enemy.spider': {
     w: 30,
     h: 24,
@@ -147,25 +175,8 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
-  'enemy.rat': {
-    w: 34,
-    h: 24,
-    draw(p) {
-      const fur = 0x8a7a6e;
-      p.shadow(17, 21, 22, 5);
-      p.line(6, 15, 1, 9, 2.6, INK).line(6, 15, 1, 9, 1.2, 0xe8a0a8); // tail
-      p.rrect(9, 16, 4, 5, 2, fur).rrect(19, 16, 4, 5, 2, fur); // legs
-      p.ellipse(15, 13, 22, 14, fur); // body: about 2 x radius, so it reads bigger than a bat
-      p.poly([20, 6, 32, 11, 31.5, 15, 20, 19], fur); // head and snout
-      p.circle(21, 5, 4.2, fur); // ear
-      p.ink();
-      p.fill(0xe8a0a8).fillCircle(21, 5, 2.2).fillCircle(32, 12.5, 1.5);
-      p.fill(shade(fur, 1.25)).fillEllipse(14, 17, 14, 4.5);
-      p.eye(25, 10.5, 2.4);
-      p.fill(0xffffff).fillRect(29, 15, 1.5, 2.2);
-      p.shine(10, 9, 6, 3, 0.3);
-    },
-  },
+  'enemy.rat': rat(0x8a7a6e, 1),
+  'enemy.graveRat': rat(0x8a8a94, 0.75), // Rato de Cova: the small grey rats of the graveyard
 
   // ---- Estrada do Sul ----
   'enemy.hooded': {

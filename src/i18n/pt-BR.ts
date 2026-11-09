@@ -225,7 +225,7 @@ export const t = {
     valmor: {
       name: 'Arredores de Valmor',
       desc: 'O cemitério da vila, na neve do sul.',
-      won: 'O Cavaleiro Negro caiu. Os mortos de Valmor voltam a dormir.',
+      won: 'O Cavaleiro Negro caiu. Mas o sino da igreja velha continua tocando.',
     },
     crypt: {
       name: 'Cripta da Igreja Velha',
@@ -305,6 +305,7 @@ export const t = {
     bat: 'Morcego',
     ghost: 'Espectro',
     rat: 'Rato Gigante',
+    graveRat: 'Rato de Cova',
     hooded: 'Encapuzado',
     crow: 'Corvo',
     frostWolf: 'Lobo da Geada',

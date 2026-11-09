@@ -18,17 +18,17 @@ const elites = (...ids: EnemyId[]) =>
   ELITE_TIMES.map((at, i) => ({ id: ids[i % ids.length] as EnemyId, at }));
 
 export const STAGES = {
-  /** Arredores de Valmor: the village graveyard in the frozen south. */
+  /** Arredores de Valmor: the village graveyard in the frozen south (cast as in the original's graveyard). */
   valmor: {
     tile: 'tile',
-    waves: buildWaves({ basic: 'skeleton', fast: 'spider', tank: 'slime' }),
+    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'blackKnight', at: config.matchDuration },
   },
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
   crypt: {
     tile: 'tile.crypt',
-    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'ghost', extra: 'rat' }),
+    waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
