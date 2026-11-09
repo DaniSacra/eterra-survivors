@@ -35,7 +35,7 @@ const NONE: readonly DamageNumber[] = [];
 
 export class GameScene extends Phaser.Scene {
   world!: World;
-  private controls!: Controls;
+  private controls: Controls | null = null;
   private hud!: HudScene;
   private ground!: Phaser.GameObjects.TileSprite;
   private decals!: Decals;
@@ -68,6 +68,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    // The scene instance is reused by "play again": nothing may leak from the last run.
+    this.controls = null;
+    this.gemStreak = 0;
+    this.lastGem = -1;
     this.world = new World(undefined, { ...this.choice, bonuses: shopBonuses(loadSave()) });
     this.banked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
@@ -304,7 +308,8 @@ export class GameScene extends Phaser.Scene {
         case 'levelUp':
           sound.play('levelUp');
           this.levelUpPulse();
-          this.scene.launch(SCENES.levelUp, { world: w });
+          // With level-ups queued, the open LevelUp scene refreshes itself for the next one.
+          if (!this.scene.isActive(SCENES.levelUp)) this.scene.launch(SCENES.levelUp, { world: w });
           break;
         case 'playerHit':
           sound.play('hurt');

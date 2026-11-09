@@ -527,7 +527,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - O quê: passar todos os cards ao `keyNav` (que já pula desabilitados) e Voltar numa linha própria.
 - Aceite: com A comprável, B caro, C e D compráveis, ↓ a partir de A vai para C.
 
-**RB-08 · Estado que vaza entre partidas e level-up lançado duas vezes** · impl · P · aprovado
+**RB-08 · Estado que vaza entre partidas e level-up lançado duas vezes** · impl · P · ✅ feito
 
 - Por quê: 02-code #9 e #10: `controls`, `gemStreak` e `lastGem` não são zerados no `create()` do GameScene (o tom da
   gema continua subindo da partida anterior); com level-ups em fila, a LevelUpScene reinicia duas vezes.
