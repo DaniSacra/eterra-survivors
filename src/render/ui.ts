@@ -125,6 +125,7 @@ export function disable(bg: Phaser.GameObjects.Rectangle): Phaser.GameObjects.Re
 /** A status seal, right-aligned at `x`: `on` is the green "done" look (Loja's Completo), off a faded outline. */
 export interface Seal {
   text: Phaser.GameObjects.Text;
+  box: Phaser.GameObjects.Rectangle;
   set(text: string, on: boolean): void;
 }
 export function seal(scene: Phaser.Scene, x: number, y: number, text: string, on = true, size = 12): Seal {
@@ -138,7 +139,7 @@ export function seal(scene: Phaser.Scene, x: number, y: number, text: string, on
       .setStrokeStyle(1, isOn ? UI.ok : UI.borderOff);
   };
   set(text, on);
-  return { text: txt, set };
+  return { text: txt, box, set };
 }
 
 /** The small gold "something new" dot (menu button, tabs, group chips). */

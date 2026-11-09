@@ -283,7 +283,8 @@ export class ShopScene extends Phaser.Scene {
     if (!this.sys.game.device.input.touch && h >= 180)
       d.push(label(this, x + w / 2, y + h - 12 - 52, t.shop.hintKeys, 11, { color: UI.muted }));
     if (cost === null) {
-      d.push(seal(this, x + w - pad, y + h - pad - 12, t.shop.maxed).text);
+      const done = seal(this, x + w - pad, y + h - pad - 12, t.shop.maxed);
+      d.push(done.text, done.box);
       return;
     }
     ry += 20;
