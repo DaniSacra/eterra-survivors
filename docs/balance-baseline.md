@@ -686,3 +686,101 @@ LOJA     everything costs 40300 gold = 44 average runs (909 gold/run)
 196/288 (antes 157). A Loja agora separa os perfis: a Estrada vai de 6% para 44% com meia loja e de 69% para 100% com a
 loja inteira, e a Cripta com meia loja vai de 56% para 88%. Loja inteira = **44 partidas médias** (alvo 40–60); vai
 subir quando a Etapa 6 apertar as fases (menos ouro por partida).
+
+## Etapa 6 · calibração aos alvos
+
+Mudanças:
+
+- **Curva de ondas** (`data/waves.ts`, comum às três fases): vida dos inimigos bem mais alta a partir do minuto 2
+  (x1,6 aos 2 min, x4,2 aos 5 min, x12 aos 9 min, antes x1,3 / x2,2 / x4,3) e uma coluna nova, `damage`, que
+  multiplica o dano de contato de todos em campo (x1,2 aos 2 min, x2,1 aos 5 min, x4,8 aos 9 min e no chefe). A
+  vigília cresce a partir dessa mesma onda (`seg.damage` x crescimento por minuto) e herda os multiplicadores.
+- **Multiplicadores de fase:** Valmor 1 / 1,05 de dano; Cripta vida 1,6 para 1,15 e dano 1,4 para 1,65; Estrada
+  dano 1,8 para 2,1 (velocidade, densidade e ouro como na Etapa 4).
+- **Chefes:** Cavaleiro Negro 10.500 para 18.000 de vida, Sineiro 13.000 para 20.000, Lobo Velho 10.500 para 14.000.
+- **Heróis:** Aldo +60 de vida e armadura 4 (era +30 e 2); Lyra área +5% (era +10%); Andilla velocidade +5 (era
+  +10). A estocada da Lâmina vem a cada 2 golpes, mais estreita e mais forte (alvo único 92 para 147, multidão
+  igual); a Fúria acompanha (66); adagas -4%.
+- **Conquistas:** Na Junta 100 para 250, Forja Acesa 260 mil para 750 mil, dano total 1 para 5 milhões, chefe rápido
+  40 s para 15 s (metade das vitórias do bot, como antes).
+
+### Lab depois
+
+```
+cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base
+aimed  blade                 48    501        147    100%  85-100%  | fury             2059   129   100%  4.1x
+aimed  mace                  59    447        104     89%  85-100%  | jointBreaker     1853   266    90%  4.1x
+aimed  staff                 37    443        221     88%  85-100%  | lyraStar         1853   296    90%  4.2x
+aimed  hammer                81    438        154     87%  85-100%  | forgeFury        1854   412    90%  4.2x
+aimed  daggers               40    435        435     87%  85-100%  | fan              1875  1875    91%  4.3x
+area   frost                  8    231         24     46%  40-55%  | blizzard          957    28    46%  4.1x
+area   shields               27    230         29     46%  40-55%  | valmorWall        963   198    47%  4.2x
+area   paladinSwords         26    223         28     44%  40-55%  | vigil             958   165    47%  4.3x
+area   yahAura                0    220         28     44%  40-55%  | yahFlame          960    48    47%  4.4x
+auto   fire                   8    281         25     56%  50-65%  | fireSword        1178    33    57%  4.2x
+auto   wisps                 23    278        117     55%  50-65%  | soulProcession   1175   365    57%  4.2x
+auto   lightning             23    277         59     55%  50-65%  | storm            1152    45    56%  4.2x
+auto   elunLight             13    274        106     55%  50-65%  | holyLight        1166   397    57%  4.3x
+
+```
+
+### Vitórias por fase e perfil de loja (depois, 16 sementes = 576 partidas)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  4/64 6%           6.1 min       197  aldo 6% · lyra 13% · teo 6% · andilla 0%
+         valmor    half  37/64 58%        10.1 min       747  aldo 69% · lyra 44% · teo 50% · andilla 69%
+         valmor    full  63/64 98%        10.2 min      1011  aldo 100% · lyra 100% · teo 94% · andilla 100%
+         crypt     none  0/64 0%           3.6 min       144  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         crypt     half  10/64 16%         6.8 min       695  aldo 6% · lyra 44%! · teo 13% · andilla 0%
+         crypt     full  55/64 86%         8.2 min      1547  aldo 81% · lyra 88% · teo 94% · andilla 81%
+         southRoad none  0/64 0%           1.7 min        55  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         southRoad half  1/64 2%           4.3 min       329  aldo 0% · lyra 0% · teo 0% · andilla 6%
+         southRoad full  30/64 47%         8.6 min      1930  aldo 56% · lyra 50% · teo 44% · andilla 38%
+
+
+REAL DPS blade:max 350 (140) · elunLight:max 783 (93) · yahAura:max 45 (81) · daggers:max 775 (149) · staff:max 1042 (157) · paladinSwords:max 63 (101) · frost:max 737 (101) · lightning:max 1260 (124) · hammer:max 579 (114) · wisps:max 1042 (103) · shields:max 94 (104) · mace:max 257 (138) · fire:max 728 (105) · fury 680 (112) · holyLight 3219 (60) · yahFlame 382 (49) · fan 2634 (91) · vigil 523 (52) · blizzard 1495 (53) · storm 1733 (60) · jointBreaker 896 (45) · fireSword 1788 (21) · forgeFury 1836 (37) · soulProcession 3137 (42) · valmorWall 602 (25) · lyraStar 1978 (36)
+ELO X    fury 2.3x · holyLight 4.6x · yahFlame 12.6x · fan 3.4x · vigil 10.4x · blizzard 2.1x · storm 1.5x · jointBreaker 3.9x · fireSword 2.9x · forgeFury 3.9x · soulProcession 3.5x · valmorWall 8.8x · lyraStar 2.7x
+ACHIEVE  veteran wins 200/576 · run damage median 753849 (>=750000: 51%) · best hit median 258 (>=200: 80%) · boss time median 15s (<=15s: 52%)
+LOJA     everything costs 40300 gold = 54 average runs (739 gold/run)
+VIGIL    36 victories went on: average 243 s of vigil, 9 reached 5:00 (Até o Amanhecer)
+```
+
+Todos os alvos de fase batem (a Cripta com loja inteira está no limite, 86% para 70–85%). O espalhamento entre heróis
+ficou dentro de 20 pontos em todas as células menos uma: Lyra na Cripta com meia loja (44% contra 16%). Essa célula
+oscilou de 13% a 44% entre rodadas com mudanças pequenas; com 16 partidas por herói o ruído é de ±12 pontos, então
+vale olhar de novo com mais sementes ou em jogo. ELO X abaixo de 2,5x em Nevasca (2,1x) e Tempestade (1,5x), e a
+Fúria em 2,3x: as bases ficaram fortes no jogo real com a curva nova.
+
+## Antes e depois da rodada
+
+### Vitórias do bot por fase x perfil de loja
+
+| Fase | Loja | Antes (Etapa 0) | Depois (Etapa 6) | Alvo |
+| --- | --- | --- | --- | --- |
+| Valmor | nenhuma | 91% | 6% (morte aos 6,1 min) | 0–15%, morte 6–8 min |
+| Valmor | metade | 97% | 58% | 40–60% |
+| Valmor | inteira | 88% | 98% | 85%+ |
+| Cripta | nenhuma | 72% | 0% (morte aos 3,6 min) | 0%, morte antes de 6 min |
+| Cripta | metade | 97% | 16% | 15–35% |
+| Cripta | inteira | 97% | 86% | 70–85% |
+| Estrada | nenhuma | 100% | 0% (morte aos 1,7 min) | 0%, morte antes de 5 min |
+| Estrada | metade | 97% | 2% | 0–10% |
+| Estrada | inteira | 97% | 47% | 35–55% |
+
+### DPS por categoria no lab (multidão, nível máximo, % da melhor `aimed`)
+
+| Categoria | Faixa | Antes | Depois |
+| --- | --- | --- | --- |
+| aimed | 85–100% | 63–100% | 87–100% |
+| auto | 50–65% | 16–53% | 55–56% |
+| area | 40–55% | 42–65% | 44–46% |
+| Elos (vs melhor Elo aimed) | mesma faixa da base | 16–100% | 46–100% |
+
+### Loja
+
+| | Antes | Depois |
+| --- | --- | --- |
+| Custo da Loja inteira | 21.650 | 40.300 |
+| Ouro médio por partida (sim) | 689 | 739 |
+| Partidas médias para comprar tudo | 31 | 54 (alvo 40–60) |
