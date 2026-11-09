@@ -992,7 +992,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   rótulo para "Confirmar desistir" por 2 s; todos com a mesma largura; título em `UI.gold`.
 - Aceite: um toque acidental em Desistir não encerra a partida; capturas em 420x820 e 1000x680 alinhadas.
 
-**RU-07 · Lembrar herói e fase escolhidos** · impl · P · aprovado
+**RU-07 · Lembrar herói e fase escolhidos** · impl · P · ✅ feito
 
 - Por quê: 03-qa #9: a escolha vive só no `registry`; depois de recarregar, a Preparação volta para Aldo e Valmor
   mesmo com a Cripta liberada (pilar 1: do menu ao jogo em menos de 10 s).

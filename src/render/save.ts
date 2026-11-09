@@ -1,4 +1,5 @@
 import { discoverElos, markCleared, newSave, sanitizeSave, serializeSave, type MetaSave } from '../core/meta';
+import type { CharacterId } from '../data/characters';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
 
@@ -29,4 +30,13 @@ export function recordRun(gold: number, cleared: StageId | null, elos: readonly 
   const fresh = discoverElos(save, elos);
   writeSave(save);
   return fresh;
+}
+
+/** Remembers the hero and stage chosen, so the Preparação opens on them after a reload. */
+export function rememberChoice(character: CharacterId, stage: StageId): void {
+  const save = loadSave();
+  if (save.lastHero === character && save.lastStage === stage) return;
+  save.lastHero = character;
+  save.lastStage = stage;
+  writeSave(save);
 }

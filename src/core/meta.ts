@@ -19,6 +19,9 @@ export interface MetaSave {
   cleared: StageId[];
   /** Elos ever formed (the Livro de Elos shows their recipes). */
   elos: WeaponId[];
+  /** The hero and stage last chosen, so the Preparação opens on them (absent: Aldo in Valmor). */
+  lastHero?: CharacterId;
+  lastStage?: StageId;
   /**
    * The raw save when it came from a newer version (an old build still cached): kept so that writing it back
    * doesn't drop what this build doesn't know. See `serializeSave`.
@@ -57,6 +60,8 @@ export function sanitizeSave(raw: unknown): MetaSave {
     heroes?: unknown;
     cleared?: unknown;
     elos?: unknown;
+    lastHero?: unknown;
+    lastStage?: unknown;
   };
   if (typeof r.version === 'number' && r.version > SAVE_VERSION) save.future = r as Record<string, unknown>;
   if (typeof r.gold === 'number' && Number.isFinite(r.gold) && r.gold >= 0) save.gold = Math.floor(r.gold);
@@ -71,7 +76,17 @@ export function sanitizeSave(raw: unknown): MetaSave {
   save.heroes = known(r.heroes, CHARACTER_IDS);
   save.cleared = known(r.cleared, STAGE_IDS);
   save.elos = known(r.elos, EVOLVED_IDS);
+  // The last choice only if it can still be played (hero owned, stage open).
+  const hero = CHARACTER_IDS.find((id) => id === r.lastHero);
+  if (hero && heroUnlocked(save, hero)) save.lastHero = hero;
+  const stage = STAGE_IDS.find((id) => id === r.lastStage);
+  if (stage && stageUnlocked(save, stage)) save.lastStage = stage;
   return save;
+}
+
+/** The hero and stage to preselect: the last valid choice, else Aldo in Valmor. */
+export function lastRun(save: MetaSave): { character: CharacterId; stage: StageId } {
+  return { character: save.lastHero ?? 'aldo', stage: save.lastStage ?? 'valmor' };
 }
 
 /**
@@ -91,6 +106,8 @@ export function serializeSave(save: MetaSave): object {
     heroes: union(future.heroes, known.heroes),
     cleared: union(future.cleared, known.cleared),
     elos: union(future.elos, known.elos),
+    lastHero: known.lastHero,
+    lastStage: known.lastStage,
   };
 }
 

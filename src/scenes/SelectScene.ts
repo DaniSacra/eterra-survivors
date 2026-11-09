@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { heroUnlocked, stageUnlocked, unlockHero } from '../core/meta';
+import { heroUnlocked, lastRun, stageUnlocked, unlockHero } from '../core/meta';
 import type { RunSetup } from '../core/world';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
 import { STAGES, STAGE_IDS, type StageId } from '../data/stages';
@@ -7,17 +7,23 @@ import type { StatKey } from '../data/config';
 import { formatStatDelta } from '../render/describe';
 import { HERO_COLOR } from '../render/fx';
 import { t } from '../i18n/pt-BR';
-import { loadSave, writeSave } from '../render/save';
+import { loadSave, rememberChoice, writeSave } from '../render/save';
 import { UI, bindKeys, button, disable, isConfirm, isShort, label, restartOnResize } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
-/** The last choice, kept in the game registry so "play again" and the next visit remember it. */
+/** The last choice, kept in the game registry (and in the save, for the next visit). */
 export const RUN_KEY = 'run';
 export type RunChoice = Required<Pick<RunSetup, 'character' | 'stage'>>;
 
 export function lastChoice(registry: Phaser.Data.DataManager): RunChoice {
-  return (registry.get(RUN_KEY) as RunChoice | undefined) ?? { character: 'aldo', stage: 'valmor' };
+  return (registry.get(RUN_KEY) as RunChoice | undefined) ?? lastRun(loadSave());
+}
+
+/** Sets the choice for this session and remembers it in the save. */
+export function setChoice(registry: Phaser.Data.DataManager, choice: RunChoice): void {
+  registry.set(RUN_KEY, choice);
+  rememberChoice(choice.character, choice.stage);
 }
 
 /** Pick a hero and a stage. Locked heroes are bought here; locked stages open by winning the previous one. */
@@ -33,7 +39,7 @@ export class SelectScene extends Phaser.Scene {
     const choice = lastChoice(this.registry);
     if (!stageUnlocked(save, choice.stage)) {
       choice.stage = 'valmor';
-      this.registry.set(RUN_KEY, choice);
+      setChoice(this.registry, choice);
     }
     const gap = 8;
     const wrapW = Math.min(640, width - 24);
@@ -225,7 +231,7 @@ export class SelectScene extends Phaser.Scene {
   }
 
   private pick(change: Partial<RunChoice>): void {
-    this.registry.set(RUN_KEY, { ...lastChoice(this.registry), ...change });
+    setChoice(this.registry, { ...lastChoice(this.registry), ...change });
     this.scene.restart();
   }
 
@@ -238,7 +244,7 @@ export class SelectScene extends Phaser.Scene {
       this.scene.restart();
       return;
     }
-    this.registry.set(RUN_KEY, choice);
+    setChoice(this.registry, choice);
     this.scene.start(SCENES.game, choice);
   }
 }

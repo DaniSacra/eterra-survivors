@@ -11,7 +11,7 @@ import { formatCompact, formatDecimal } from '../render/describe';
 import { UI, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { PASSIVES } from '../data/upgrades';
-import { RUN_KEY } from './SelectScene';
+import { setChoice } from './SelectScene';
 import { SCENES } from './keys';
 
 /** Game over or victory: the run report (summary, damage per weapon, passives) over the frozen battlefield. */
@@ -237,7 +237,7 @@ export class EndScene extends Phaser.Scene {
   /** Starts a run with the same hero on `stage` (remembered as the last choice). */
   private play(stage: StageId): void {
     const choice = { character: this.world.character, stage };
-    this.registry.set(RUN_KEY, choice);
+    setChoice(this.registry, choice);
     this.scene.start(SCENES.game, choice);
   }
 

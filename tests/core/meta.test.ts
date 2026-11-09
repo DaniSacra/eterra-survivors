@@ -3,6 +3,7 @@ import {
   SAVE_VERSION,
   buy,
   discoverElos,
+  lastRun,
   newSave,
   nextGoal,
   sanitizeSave,
@@ -185,5 +186,27 @@ describe('save versions and Elos', () => {
     const goal = nextGoal(s)!;
     const cheapest = Math.min(...SHOP_IDS.map((id) => SHOP[id].baseCost));
     expect(goal.cost).toBe(cheapest);
+  });
+
+  it('remembers the last hero and stage only while they can still be played', () => {
+    expect(lastRun(sanitizeSave(null))).toEqual({ character: 'aldo', stage: 'valmor' });
+    // An old save without the fields stays valid.
+    expect(lastRun(sanitizeSave({ version: 1, gold: 10, cleared: ['valmor'] }))).toEqual({
+      character: 'aldo',
+      stage: 'valmor',
+    });
+    const ok = sanitizeSave({ cleared: ['valmor'], heroes: ['lyra'], lastHero: 'lyra', lastStage: 'crypt' });
+    expect(lastRun(ok)).toEqual({ character: 'lyra', stage: 'crypt' });
+    // A stage no longer open, or junk, falls back to the default.
+    expect(lastRun(sanitizeSave({ lastHero: 'lyra', lastStage: 'crypt' })).stage).toBe('valmor');
+    expect(lastRun(sanitizeSave({ lastHero: 'gandalf', lastStage: 42 }))).toEqual({
+      character: 'aldo',
+      stage: 'valmor',
+    });
+    // Survives a round trip through storage.
+    expect(lastRun(sanitizeSave(JSON.parse(JSON.stringify(serializeSave(ok)))))).toEqual({
+      character: 'lyra',
+      stage: 'crypt',
+    });
   });
 });
