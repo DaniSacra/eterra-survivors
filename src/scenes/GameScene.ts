@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { DamageNumber } from '../core/effects';
 import { BossAct } from '../core/bosses';
-import { isFaded } from '../core/behaviours';
+import { CHARGE, isFaded } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
@@ -51,6 +51,9 @@ const HIT_WHITE = 0.5;
 const AREA_HIT = Object.fromEntries(
   WEAPON_IDS.map((id) => [id, WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone']),
 ) as Record<WeaponId, boolean>;
+
+/** Dust and earth kicked up by bosses. */
+const DUST = 0xc8bca8;
 
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
@@ -214,11 +217,24 @@ export class GameScene extends Phaser.Scene {
         // Slowed enemies take heavy, slow steps.
         const a = w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06;
         const hit = e.flash / HIT_FLASH; // 1 -> 0 after a hit
+        // Chargers crouch while winding up and stretch as they burst into the dash.
+        let sx = 1 + a + 0.15 * hit;
+        let sy = 1 - a - 0.15 * hit;
+        if (e.def.move === 'charge') {
+          if (e.act === BossAct.Windup) {
+            sx += 0.15;
+            sy -= 0.2;
+          } else if (e.act === BossAct.Active && e.actT > CHARGE.dash - 0.2) {
+            sx += 0.15;
+            sy -= 0.08;
+          }
+        }
         img
           .setPosition(e.x, e.y)
-          .setScale(ART_SCALE * (1 + a + 0.15 * hit), ART_SCALE * (1 - a - 0.15 * hit))
+          .setScale(ART_SCALE * sx, ART_SCALE * sy)
           .setFlipX(w.player.x < e.x)
-          .setRotation(e.act === BossAct.Windup ? Math.sin(w.time * 18) * 0.18 : 0); // a boss winding up shakes
+          // A boss winding up shakes (rings the bell, raises the sword).
+          .setRotation(e.act === BossAct.Windup && e.def.ability ? Math.sin(w.time * 18) * 0.18 : 0);
         if (this.stepDt > 0 && e.flash === HIT_FLASH) this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
         if (hit > 1 - HIT_WHITE && !this.calm && !(e.hitBy && AREA_HIT[e.hitBy])) img.setTintFill(TINT.hit);
@@ -420,7 +436,9 @@ export class GameScene extends Phaser.Scene {
     const was = this.bossAct;
     this.bossAct = act;
     const ab = b?.def.ability;
-    if (!b || !ab || act === was || was !== BossAct.Windup) return;
+    if (!b || !ab || act === was) return;
+    if (was === BossAct.Active && ab.kind === 'lunge') this.lungeDust(b);
+    if (was !== BossAct.Windup) return;
     if (ab.kind === 'cleave' && act === BossAct.Active) {
       this.shake(150, 0.008);
       const aim = Math.atan2(b.aimY, b.aimX);
@@ -431,7 +449,34 @@ export class GameScene extends Phaser.Scene {
         const y = b.y + Math.sin(a) * ab.range;
         this.sparks.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 30, 0.45, 6, 0xe8e2d0, SPARK.star, true);
       }
+    } else if (ab.kind === 'toll') {
+      // The dead rise: a puff of earth and bone on each mark.
+      const n = ab.count ?? 6;
+      for (let i = 0; i < n; i++) {
+        const a = (i * Math.PI * 2) / n;
+        const x = b.x + Math.cos(a) * ab.range;
+        const y = b.y + Math.sin(a) * ab.range;
+        this.sparks.add(x, y, 0, 0, 0.4, 20, DUST, SPARK.ring, true);
+        this.sparks.burst(x, y, 2, 70, 5, 0xe8e2d0, SPARK.star, 0.4);
+      }
     }
+  }
+
+  /** Lobo Velho's lunge ending: dust where it stops. */
+  private lungeDust(b: Enemy): void {
+    for (let i = 0; i < 5; i++)
+      this.sparks.add(
+        b.x - b.aimX * 10,
+        b.y + b.def.radius * 0.6,
+        (i - 2) * 40,
+        -20 - (i % 2) * 20,
+        0.45,
+        6,
+        DUST,
+        SPARK.star,
+        true,
+      );
+    this.sparks.add(b.x, b.y + b.def.radius * 0.6, 0, 0, 0.4, b.def.radius * 1.6, DUST, SPARK.ring, true);
   }
 
   /** The chest's reward icon pops out of the hero and floats up, then fades. */

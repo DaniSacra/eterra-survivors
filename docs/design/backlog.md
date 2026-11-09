@@ -881,7 +881,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   do tamanho exato do hitbox, rastro dourado mais longo e o círculo guardado como anel dourado com 4 marcas girando.
   Sinos ficaram como estavam (não fazem parte deste item).
 
-**RF-10 · Investidas legíveis e chegada das Ossadas** · vfx + visual · P · aprovado
+**RF-10 · Investidas legíveis e chegada das Ossadas** · vfx + visual · P · ✅ feito
 
 - Por quê: 04-visual #8 e 06-vfx #13: o preparo da investida de Encapuzado, Rato e Goblin é o tremor de rotação,
   invisível em 24 px; com 6 na tela não se sabe quem vai investir nem para onde; as Ossadas do Sineiro surgem do nada; a
@@ -890,6 +890,11 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   `aimX`/`aimY`; esticão na arrancada; puff de terra nas marcas das Ossadas na troca Windup para Idle do Sineiro; 3
   linhas de velocidade atrás do Lobo Velho e poeira no fim.
 - Aceite: captura de 6 Encapuzados em preparo: dá para dizer a direção de cada um.
+- Feito: inimigos com `move: 'charge'` agacham no `Windup` (escala +0.15 x -0.2, sem o tremor de rotação, que ficou só
+  para chefes) e mostram uma seta coral no chão na direção `aimX`/`aimY` que cresce até a arrancada; esticão nos
+  primeiros 0.2 s da investida. Sineiro: puff de terra (anel) e lascas de osso em cada marca na troca Windup para
+  Idle. Lobo Velho: 3 linhas de velocidade atrás dele na Mordida Funda e poeira onde ele para. `CHARGE` passou a ser
+  exportado de `core/behaviours.ts` (só leitura no render).
 
 **RF-11 · Geada com pouso e tick visíveis** · vfx · P · aprovado
 

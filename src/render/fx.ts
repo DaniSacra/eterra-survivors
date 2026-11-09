@@ -4,6 +4,7 @@ import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data
 import { isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW } from '../core/bosses';
+import { CHARGE } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Bolt } from '../core/effects';
 import type { Projectile } from '../core/projectiles';
@@ -173,6 +174,7 @@ export function drawFx(
   g.lineStyle(3, hero, 1).strokeEllipse(p.x, p.y + 15, 44, 16);
   g.lineStyle(2, 0xffffff, 0.35).strokeEllipse(p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
+  drawCharges(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
   for (const z of world.zones.active) {
     const a = Math.min(1, z.ttl / 0.4);
@@ -628,6 +630,33 @@ function drawAura(
   }
 }
 
+/** Common chargers (Encapuzado, Rato, Goblin) winding up: a coral arrow on the ground shows where they will run. */
+function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemies.active;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i] as Enemy;
+    if (e.act !== BossAct.Windup || e.def.move !== 'charge') continue;
+    const k = 1 - Math.max(0, e.actT) / CHARGE.windup; // 0 -> 1 as the dash comes
+    const ux = e.aimX;
+    const uy = e.aimY;
+    const r = e.def.radius;
+    const x0 = e.x + ux * (r + 4);
+    const y0 = e.y + uy * (r + 4);
+    const len = 14 + 16 * k;
+    const x1 = x0 + ux * len;
+    const y1 = y0 + uy * len;
+    g.lineStyle(4, WARN_COLOR, 0.5 + 0.4 * k).lineBetween(x0, y0, x1, y1);
+    g.fillStyle(WARN_COLOR, 0.6 + 0.4 * k).fillTriangle(
+      x1 + ux * 9,
+      y1 + uy * 9,
+      x1 - uy * 6,
+      y1 + ux * 6,
+      x1 + uy * 6,
+      y1 - ux * 6,
+    );
+  }
+}
+
 /** Chest, Badalada and Sopro de Geada: shapes that say what happened, instead of a full-screen flash. */
 function drawMoments(
   g: Phaser.GameObjects.Graphics,
@@ -761,6 +790,17 @@ function drawBossWarning(
   const aim = Math.atan2(e.aimY, e.aimX);
   if (e.act === BossAct.Active) {
     // The cleave landing: the same sweep as the hero's blades, in the danger colors.
+    if (ab.kind === 'lunge') {
+      // Speed lines streaming behind the running wolf.
+      const r = e.def.radius;
+      top.lineStyle(3, 0xffffff, 0.6);
+      for (let i = -1; i <= 1; i++) {
+        const sx = e.x - e.aimX * (r + 4) - e.aimY * i * r * 0.5;
+        const sy = e.y - e.aimY * (r + 4) + e.aimX * i * r * 0.5;
+        const l = 26 + 14 * (1 - Math.abs(i)) + 8 * Math.sin(time * 30 + i);
+        top.lineBetween(sx, sy, sx - e.aimX * l, sy - e.aimY * l);
+      }
+    }
     if (ab.kind === 'cleave') {
       const half = (ab.arc ?? 1) / 2;
       const t = 1 - Math.max(0, e.actT) / CLEAVE_SHOW;

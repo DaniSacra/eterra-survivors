@@ -8,7 +8,7 @@ import { BossAct as Act } from './bosses';
  */
 
 /** Charge: when close, stops to crouch for a moment, then dashes in a straight line. */
-const CHARGE = { trigger: 200, windup: 0.5, dash: 0.55, speedMult: 2.6, rest: 3.5 };
+export const CHARGE = { trigger: 200, windup: 0.5, dash: 0.55, speedMult: 2.6, rest: 3.5 };
 /** Phase: now and then fades out (harmless, cannot be hit) and drifts faster. */
 const PHASE = { faded: 1.2, solid: 4, fadedSpeed: 1.4 };
 /** Zigzag: weaves sideways while closing in. */
