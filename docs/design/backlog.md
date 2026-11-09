@@ -590,7 +590,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 Todos os números vêm do `01-balance.md` (sim de 12 sementes e variantes medidas). Aplicar por lote, rodar o sim de 12
 sementes depois de cada lote e registrar.
 
-**RE-01 · Aldo em Valmor, a primeira partida, justa** · impl + bal · P · aprovado
+**RE-01 · Aldo em Valmor, a primeira partida, justa** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D3: Aldo vence 18 de 36 (o pior); Aldo em Valmor 5 de 12, nível médio 33,5, a primeira partida
   de todo jogador novo. Na corrida a Lâmina L7 rende 67 DPS e a Fúria 59 contra 166 a 171 da Nevasca e da Luz
@@ -598,6 +598,9 @@ sementes depois de cada lote e registrar.
 - O quê (`data/weapons.ts`): `blade` `range` +10 em todos os níveis (L1 95 ... L7 122); `fury` `range` 125 para 150.
   Reserva, se o lote não levar Aldo em Valmor a 7 de 12: Aldo `maxHp` +20 para +30 (`characters.ts`).
 - Aceite: Aldo em Valmor pelo menos 7 de 12; Aldo entre 55% e 85% no total.
+- Feito (lote 1, sim de 12 sementes): Aldo em Valmor 4 para **10/12**; Aldo 18 para **24/36** (67%). Reserva de
+  `maxHp` não foi necessária. Lab: Lâmina multidão Lmax 1984 para 2349, Fúria 5115 para 7254; DPS real da Fúria no sim
+  86 para 95.
 
 **RE-02 · Cada fase pelo menos tão difícil quanto a anterior** · impl + bal · P · aprovado
 

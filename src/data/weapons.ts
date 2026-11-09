@@ -100,13 +100,13 @@ export const WEAPONS = {
   blade: {
     kind: 'arc',
     levels: levels<ArcLevel>(
-      { damage: 10, cooldown: 0.9, range: 85, arc: 2.5, knockback: 140, swings: 1 },
-      { damage: 13, range: 88 },
+      { damage: 10, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
+      { damage: 13, range: 98 },
       { swings: 2 },
-      { damage: 17, cooldown: 0.8, range: 90 },
+      { damage: 17, cooldown: 0.8, range: 100 },
       { damage: 21, arc: 2.7 },
-      { damage: 25, cooldown: 0.7, range: 100 },
-      { damage: 36, range: 112, arc: 3 },
+      { damage: 25, cooldown: 0.7, range: 110 },
+      { damage: 36, range: 122, arc: 3 },
     ),
   },
   /** Luz de Elun: seeking motes of holy light. */
@@ -299,7 +299,7 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 60, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
+    levels: [{ damage: 60, cooldown: 0.65, range: 150, arc: Math.PI * 2, knockback: 220, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
