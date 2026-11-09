@@ -183,7 +183,7 @@ function levels<L>(first: L, ...changes: Partial<L>[]): L[] {
 }
 
 export const WEAPONS = {
-  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front and, every third blow, a long thrust. */
+  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front and, every other blow, a long thrust. */
   blade: {
     kind: 'arc',
     category: 'aimed',
@@ -436,7 +436,7 @@ export const WEAPONS = {
 
   // Evolved forms (see data/evolutions.ts): one level, never offered on level-up; they forge from their recipe.
 
-  /** Fúria: the blade whirls around the hero; every third blow a cutting wave runs ahead. */
+  /** Fúria: the blade whirls around the hero; every other blow a cutting wave runs ahead. */
   fury: {
     kind: 'arc',
     wave: { every: 2, damage: 3, speed: 460, lifetime: 0.8, radius: 34 },

@@ -122,8 +122,6 @@ export const config = {
     idleRetry: 0.2,
     /** Longest stun a boss takes from a slam (seconds). */
     bossStun: 0.1,
-    /** How far in front of the hero a slam lands (its tremor's centre), world px before the area stat. */
-    slamImpact: 45,
   },
   effects: {
     slashTtl: 0.18,

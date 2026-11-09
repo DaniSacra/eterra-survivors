@@ -37,7 +37,7 @@ describe('Fúria: the cutting wave', () => {
   const def = WEAPONS.fury;
   const l = def.levels[0]!;
 
-  it('every third blow sends a wave ahead that cuts through everything in its line', () => {
+  it('every other blow sends a wave ahead that cuts through everything in its line', () => {
     const w = armed('fury');
     const a = tough(w, l.range + 60, 0);
     const b = tough(w, l.range + 120, 0);

@@ -5,6 +5,7 @@ import type { World } from '../../src/core/world';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
 import { bareWorld, still } from './helpers';
 import { config } from '../../src/data/config';
+import { t } from '../../src/i18n/pt-BR';
 
 const blade = WEAPONS.blade.levels[0]!;
 const light = WEAPONS.elunLight.levels[0]!;
@@ -401,4 +402,18 @@ describe('random volleys with most of the crowd off screen', () => {
       const count = (WEAPONS[id].levels[0] as { count: number }).count;
       expect(w.targetsScratch.length).toBe(count);
     });
+});
+
+describe('rhythm texts match the data', () => {
+  // "a cada dois golpes" / "a cada segundo golpe" = 2, "três" / "terceiro" = 3.
+  const words: Record<string, number> = { dois: 2, segundo: 2, três: 3, terceiro: 3, quatro: 4, quarto: 4 };
+  const said = (desc: string) => {
+    const m = /a cada (\S+) golpe/i.exec(desc);
+    return m ? words[m[1]!.toLowerCase()] : undefined;
+  };
+  it('Lâmina, Fúria and Maça say the rhythm they have', () => {
+    expect(said(t.weapons.blade.desc)).toBe(WEAPONS.blade.thrust.every);
+    expect(said(t.weapons.fury.desc)).toBe(WEAPONS.fury.wave.every);
+    expect(said(t.weapons.mace.desc)).toBe(WEAPONS.mace.waveEvery);
+  });
 });

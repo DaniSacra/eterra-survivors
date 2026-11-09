@@ -555,7 +555,7 @@ export const t = {
   weapons: {
     blade: {
       name: 'Lâmina de Valmor',
-      desc: 'Golpe em arco à frente. A cada três golpes, uma estocada longa e mais forte.',
+      desc: 'Golpe em arco à frente. A cada dois golpes, uma estocada longa e mais forte.',
     },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
@@ -581,7 +581,7 @@ export const t = {
     lightning: { name: 'Raio', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: {
       name: 'Fúria',
-      desc: 'A espada gira contra todos ao redor e, a cada terceiro golpe, solta uma onda cortante à frente.',
+      desc: 'A espada gira contra todos ao redor e, a cada segundo golpe, solta uma onda cortante à frente.',
     },
     holyLight: {
       name: 'Luz Sagrada',
