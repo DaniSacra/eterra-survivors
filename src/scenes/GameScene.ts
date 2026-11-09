@@ -34,6 +34,7 @@ export class GameScene extends Phaser.Scene {
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
+  private fxTop!: Phaser.GameObjects.Graphics;
   private banked = false;
   private choice!: RunChoice;
 
@@ -67,6 +68,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.fx = this.add.graphics().setDepth(4);
+    this.fxTop = this.add.graphics().setDepth(11);
     this.playerSprite = this.add
       .image(0, 0, CHARACTERS[this.world.character].sprite)
       .setDepth(10)
@@ -118,6 +120,8 @@ export class GameScene extends Phaser.Scene {
     const kb = this.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin;
     kb.on('keydown-ESC', this.pauseGame, this);
     kb.on('keydown-P', this.pauseGame, this);
+    // Space too; holding it must not reopen the pause right after resuming.
+    kb.on('keydown-SPACE', (e: KeyboardEvent) => e.repeat || this.pauseGame());
     // Phones: switching apps or locking the screen pauses the run.
     this.game.events.on(Phaser.Core.Events.BLUR, this.pauseGame, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
@@ -158,7 +162,7 @@ export class GameScene extends Phaser.Scene {
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(w.damageNumbers.active);
-    drawFx(this.fx, w);
+    drawFx(this.fx, this.fxTop, w);
     // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
     // (computed from the player, since cam.worldView only updates at render time)
     const vw = cam.width / cam.zoom;
