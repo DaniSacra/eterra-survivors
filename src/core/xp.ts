@@ -21,7 +21,8 @@ export function dropGem(world: World, x: number, y: number, value: number): void
   if (gems.size >= config.gems.maxActive) {
     let best = gems.active[0] as Gem;
     let bestSq = Infinity;
-    for (const g of gems.active) {
+    for (let i = 0; i < gems.active.length; i++) {
+      const g = gems.active[i] as Gem;
       const dSq = (g.x - x) ** 2 + (g.y - y) ** 2;
       if (dSq < bestSq) {
         bestSq = dSq;
@@ -51,7 +52,8 @@ export function addXp(world: World, amount: number): void {
 
 /** Pedra-Ímã: every gem on the ground starts flying to the player. */
 export function pullAllGems(world: World): void {
-  for (const g of world.gems.active) g.pulled = true;
+  const list = world.gems.active;
+  for (let i = 0; i < list.length; i++) (list[i] as Gem).pulled = true;
 }
 
 export function updateGems(world: World, dt: number): void {

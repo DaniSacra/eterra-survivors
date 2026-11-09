@@ -33,6 +33,19 @@ import { SCENES } from './keys';
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
 
+/** A damage number's text object, with the rounded value it shows (so it only converts when that changes). */
+type NumberText = Phaser.GameObjects.Text & { shown?: number };
+
+/** Asset key of a gem worth `value` (tiers are highest first). No closure: it runs per gem per frame. */
+function gemSprite(value: number): string {
+  const tiers = config.gems.tiers;
+  for (let i = 0; i < tiers.length; i++) {
+    const tier = tiers[i] as (typeof tiers)[number];
+    if (value >= tier.min) return tier.sprite;
+  }
+  return 'gem.small';
+}
+
 export class GameScene extends Phaser.Scene {
   world!: World;
   private controls: Controls | null = null;
@@ -44,7 +57,7 @@ export class GameScene extends Phaser.Scene {
   private playerOutline!: Phaser.GameObjects.Image;
   private enemyMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
-  private damageMirror!: Mirror<DamageNumber, Phaser.GameObjects.Text>;
+  private damageMirror!: Mirror<DamageNumber, NumberText>;
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
@@ -80,7 +93,7 @@ export class GameScene extends Phaser.Scene {
     this.gemMirror = new Mirror(
       () => this.add.image(0, 0, 'gem.small').setDepth(3).setScale(ART_SCALE),
       (img, g) => {
-        const key = (config.gems.tiers.find((tier) => g.value >= tier.min) ?? config.gems.tiers[0]).sprite;
+        const key = gemSprite(g.value);
         if (img.texture.key !== key) img.setTexture(key);
         img.setPosition(g.x, g.y);
       },
@@ -111,7 +124,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.damageMirror = new Mirror(
-      () =>
+      (): NumberText =>
         this.add
           .text(0, 0, '', {
             fontFamily: UI.font,
@@ -123,8 +136,8 @@ export class GameScene extends Phaser.Scene {
           .setOrigin(0.5)
           .setDepth(12.5), // under the hero (13), over everything else
       (txt, d) => {
-        const v = String(Math.round(d.value));
-        if (txt.text !== v) txt.setText(v);
+        const v = Math.round(d.value);
+        if (txt.shown !== v) txt.setText(String((txt.shown = v)));
         const color = d.strong ? DAMAGE_TEXT.strong : DAMAGE_TEXT.color;
         if (txt.style.color !== color) txt.setColor(color);
         txt

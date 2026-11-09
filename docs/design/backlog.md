@@ -546,7 +546,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - Feito: nova linha de base (12 sementes) em `docs/balance-baseline.md`, seção "Revisão 2026-11-08 · R1": 109/144
   vitórias, Valmor 31, Cripta 42, Estrada 36; 1º Elo médio 7:49.
 
-**RT-02 · Alocação por quadro no GameScene** · impl · P · aprovado
+**RT-02 · Alocação por quadro no GameScene** · impl · P · ✅ feito
 
 - Por quê: 02-code #5: `tiers.find(...)` cria uma closure por gema por quadro (até 250) e `String(Math.round(...))`
   uma string por número por quadro; viola a regra de desempenho.

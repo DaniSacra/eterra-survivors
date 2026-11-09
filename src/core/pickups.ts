@@ -57,7 +57,9 @@ const COLLECT: Record<PickupId, (world: World) => void> = {
     const p = world.player;
     const hw = world.view.w / 2;
     const hh = world.view.h / 2;
-    for (const e of world.enemies.active as Enemy[]) {
+    const list = world.enemies.active;
+    for (let i = 0; i < list.length; i++) {
+      const e = list[i] as Enemy;
       if (Math.abs(e.x - p.x) <= hw && Math.abs(e.y - p.y) <= hh)
         damageEnemy(world, e, config.pickups.bombDamage);
     }

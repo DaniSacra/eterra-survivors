@@ -121,6 +121,7 @@ export function updateEffects(world: World, dt: number): void {
   expire(world.slashes, dt);
   expire(world.bolts, dt);
   const rise = config.effects.damageNumberRise * dt;
-  for (const d of world.damageNumbers.active) d.y -= rise;
+  const nums = world.damageNumbers.active;
+  for (let i = 0; i < nums.length; i++) (nums[i] as DamageNumber).y -= rise;
   expire(world.damageNumbers, dt);
 }

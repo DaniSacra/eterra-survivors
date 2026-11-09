@@ -52,7 +52,9 @@ export function addZone(
 export function updateZones(world: World, dt: number): void {
   const list = world.enemies.active;
   const { tick } = config.zones;
-  for (const z of world.zones.active) {
+  const zones = world.zones.active;
+  for (let i = 0; i < zones.length; i++) {
+    const z = zones[i] as Zone;
     z.tick -= dt;
     if (z.tick > 0) continue;
     z.tick += tick;

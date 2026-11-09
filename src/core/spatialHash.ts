@@ -16,7 +16,7 @@ export class SpatialHash {
   }
 
   clear(): void {
-    for (const c of this.used) c.length = 0;
+    for (let i = 0; i < this.used.length; i++) (this.used[i] as number[]).length = 0;
     this.used.length = 0;
     // The world is infinite: drop stale empty cells now and then so the map doesn't grow forever.
     if (this.cells.size > 4096) this.cells.clear();
