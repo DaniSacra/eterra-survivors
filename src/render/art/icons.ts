@@ -176,6 +176,21 @@ export const ICON_ART: Record<string, ArtDef> = {
       p.fill(0xffffff, 0.35).fillRect(5, 10.5, 3, 7);
     },
   },
+  /** A gold cup, for unlocked achievements and the in-run notice. */
+  'icon.trophy': {
+    w: 20,
+    h: 22,
+    draw(p) {
+      p.outline = 1.5;
+      p.ellipse(3.5, 6.5, 5, 6, 0xd8a040).ellipse(16.5, 6.5, 5, 6, 0xd8a040);
+      p.poly([3.5, 2, 16.5, 2, 15, 10, 10, 13.5, 5, 10], 0xffd870);
+      p.rrect(8.5, 12, 3, 5, 1, 0xd8a040).rrect(4.5, 16, 11, 4.5, 1.5, 0xd8a040);
+      p.ink();
+      p.fill(0x8a5a20).fillEllipse(3.5, 6.5, 2, 3).fillEllipse(16.5, 6.5, 2, 3);
+      p.fill(0xffffff, 0.55).fillEllipse(7.5, 5.5, 2.5, 5);
+      p.fill(0xb07a30).fillRect(5.5, 18.6, 9, 1.2);
+    },
+  },
   /** A small cartoon skull, for the kill counter in the HUD. */
   'icon.kills': {
     w: 16,

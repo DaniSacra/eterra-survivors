@@ -1197,10 +1197,14 @@ implementação abaixo; cada item é um commit.
   elites, chefes), ficha embaixo em pé e à direita deitado/largo. Frases do original com a fonte num comentário; as
   seis sem texto no original ganharam linhas escritas para o Survivors (decisão do Daniel, a revisar no teste).
 
-**CC-07 · Aba Conquistas** · impl + ui · M · aprovado
+**CC-07 · Aba Conquistas** · impl + ui · M · ✅ feito
 
 - O quê: páginas por grupo, progresso com barra, novas destacadas, escolha de título.
 - Aceite: as 35 aparecem com progresso correto; abrir a aba limpa o ponto do menu.
+- Feito: chips de grupo com "3/6" (3 + 4 em pé, uma linha deitado/largo; esquerda/direita troca de página), linhas
+  com troféu ou cadeado, recompensa (com carga e título), progresso e barra; abrir a aba esvazia `fresh` e grava,
+  as novas piscam uma vez e o chip do grupo mostra o ponto durante a visita. Tocar numa conquista com título
+  destrancada veste o título (tocar de novo tira). Ícone novo `icon.trophy`.
 
 **CC-08 · Aba Heróis** · impl + ui · M · aprovado
 

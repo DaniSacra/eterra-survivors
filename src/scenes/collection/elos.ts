@@ -62,7 +62,9 @@ export function drawElos(a: TabArea): TabContent {
       label(scene, lx + step + ICON / 2, rowY, t.elos.mystery, 15, { bold: true, color: UI.gold });
     }
     label(scene, lx + step + ICON + SYMBOL / 2, rowY, t.elos.equals, 16, { bold: true, color: UI.muted });
-    const elo = scene.add.image(lx + 2 * step + ICON / 2, rowY, `icon.${id}`).setScale((ART_SCALE * ICON) / 28);
+    const elo = scene.add
+      .image(lx + 2 * step + ICON / 2, rowY, `icon.${id}`)
+      .setScale((ART_SCALE * ICON) / 28);
     // A shadow of the Elo: its shape shows, its colors stay hidden.
     if (!seen) elo.setTint(UI.border);
     const owner = SIGNATURE_OWNER[evo.from];

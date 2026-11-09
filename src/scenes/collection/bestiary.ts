@@ -109,7 +109,12 @@ class Sheet {
     const lx = this.x + pad;
     const w = this.w - pad * 2;
     if (!id || !entry) {
-      add(label(s, this.x + this.w / 2, this.y + this.h / 2, t.bestiary.empty, 14, { color: UI.muted, wrap: w }));
+      add(
+        label(s, this.x + this.w / 2, this.y + this.h / 2, t.bestiary.empty, 14, {
+          color: UI.muted,
+          wrap: w,
+        }),
+      );
       return;
     }
     const roomy = this.h >= 260;

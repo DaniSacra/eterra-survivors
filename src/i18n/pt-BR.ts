@@ -119,6 +119,14 @@ export const t = {
   collection: {
     title: 'Coleção',
     tabs: { bestiary: 'Bestiário', elos: 'Elos', achievements: 'Conquistas', heroes: 'Heróis' },
+    /** The Conquistas tab. */
+    count: (n: number, total: number) => `${n} de ${total} conquistas`,
+    groupCount: (n: number, total: number) => `${n}/${total}`,
+    done: 'Feita',
+    /** The title an achievement gives, after its reward. */
+    titleOf: (name: string) => `Título: ${name}`,
+    useTitle: 'Usar título',
+    inUse: 'Em uso',
   },
 
   /** The Coleção's Bestiário: the sheet of each enemy met, in player terms (core/format.ts `enemyTraits`). */

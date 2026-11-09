@@ -14,6 +14,7 @@ import {
   safeArea,
 } from '../render/ui';
 import { drawBestiary } from './collection/bestiary';
+import { drawAchievements, forgetSession } from './collection/achievements';
 import { drawElos } from './collection/elos';
 import { TABS, type TabArea, type TabContent, type TabId } from './collection/tab';
 import { SCENES } from './keys';
@@ -24,7 +25,7 @@ const TAB_KEY = 'collection.tab';
 const DRAW: Record<TabId, (a: TabArea) => TabContent> = {
   bestiary: drawBestiary,
   elos: drawElos,
-  achievements: () => ({ buttons: [] }),
+  achievements: drawAchievements,
   heroes: () => ({ buttons: [] }),
 };
 
@@ -33,12 +34,16 @@ export class CollectionScene extends Phaser.Scene {
   private tab: TabId = 'bestiary';
   /** Opened from the tab row by the keyboard: the focus stays on the tabs. */
   private fromTabs = false;
+  private page: string | undefined;
+  private focus: number | undefined;
 
   constructor() {
     super(SCENES.collection);
   }
 
-  init(data: { tab?: TabId; fromTabs?: boolean }): void {
+  init(data: { tab?: TabId; fromTabs?: boolean; page?: string; focus?: number }): void {
+    this.page = data.page;
+    this.focus = data.focus;
     this.tab = data.tab ?? (this.registry.get(TAB_KEY) as TabId | undefined) ?? 'bestiary';
     this.fromTabs = data.fromTabs ?? false;
     this.registry.set(TAB_KEY, this.tab);
@@ -78,20 +83,22 @@ export class CollectionScene extends Phaser.Scene {
       h: height - top - (short ? 8 : 66),
       short,
       save,
+      page: this.page,
+      focus: this.focus,
+      reopen: (page, focus) => this.scene.restart({ tab: this.tab, page, focus }),
     };
     const content = DRAW[this.tab](area);
 
     const all = [...tabs, ...content.buttons, back];
     const n = tabs.length;
     const current = TABS.indexOf(this.tab);
-    const start =
-      this.fromTabs || content.buttons.length === 0 || (content.start ?? 0) < 0
-        ? current
-        : n + (content.start ?? 0);
+    const first = this.focus ?? content.start ?? 0;
+    const start = this.fromTabs || content.buttons.length === 0 || first < 0 ? current : n + first;
+    const inContent = (i: number) => i >= n && i < n + content.buttons.length;
     const nav = keyNav(this, all, 0, start, (i, prev) => {
       // Left and right along the tab row switch tabs right away.
       if (i < n && prev < n && i !== current) this.open(TABS[i] as TabId, true);
-      else if (i >= n && i < n + content.buttons.length) content.onFocus?.(i - n);
+      else if (inContent(i)) content.onFocus?.(i - n, inContent(prev) ? prev - n : -1);
     });
     content.bindFocus?.((i) => nav.focus(n + i));
     bindKeys(this, (kb) => {
@@ -119,7 +126,7 @@ export class CollectionScene extends Phaser.Scene {
         color: open ? UI.gold : UI.muted,
       });
       if (open) this.add.rectangle(tx, y + 17, tw - 12, 3, UI.goldHex);
-      if (news && id === 'achievements') newsDot(this, tx + tw / 2 - 6, y - 14);
+      if (news && id === 'achievements' && !open) newsDot(this, tx + tw / 2 - 6, y - 14);
       return bg;
     });
   }
@@ -130,6 +137,7 @@ export class CollectionScene extends Phaser.Scene {
   }
 
   private back(): void {
+    forgetSession(this.registry);
     this.scene.start(SCENES.menu);
   }
 }
