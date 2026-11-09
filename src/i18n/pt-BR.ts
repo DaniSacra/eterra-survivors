@@ -286,8 +286,8 @@ export const t = {
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
     newElo: (name: string) => `Elo descoberto: ${name}! Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,
-    toBuy: (name: string, missing: number) => `Faltam ${missing} de ouro para ${name}`,
-    canBuy: (name: string, cost: number) => `Já dá para comprar ${name} (${cost}) na Loja!`,
+    /** The long-term goal: the most expensive thing left in the Loja. */
+    toBuy: (name: string, missing: number) => `Faltam ${int(missing)} para ${name}`,
     run: (stage: string, hero: string) => `${stage} · ${hero}`,
     weapon: 'Arma',
     weaponLevel: 'Nv',
@@ -401,7 +401,23 @@ export const t = {
     level: (lv: number, max: number) => `${lv}/${max}`,
     cost: (n: number) => `${n} ouro`,
     maxed: 'Completo',
+    maxedShort: '✓',
+    costShort: (n: number) => int(n),
     back: 'Voltar',
+    sections: { stats: 'Atributos', helps: 'Ajudas na escolha', special: 'Especiais' },
+    /** The detail panel of the selected item. */
+    now: 'Agora',
+    next: 'Próximo',
+    none: 'nada ainda',
+    buy: (cost: number) => `Comprar (${int(cost)})`,
+    missing: (n: number) => `Faltam ${int(n)} ouro`,
+    hintKeys: 'Setas escolhem · Espaço ou Enter compra',
+    /** A charge item's total per run: "Trocar +2 por partida". */
+    chargeTotal: {
+      reroll: (n: number) => `Trocar +${n} por partida`,
+      skip: (n: number) => `Pular +${n} por partida`,
+      banish: (n: number) => `Banir +${n} por partida`,
+    },
     items: {
       might: 'Pedra de Amolar',
       maxHp: 'Sopa Quente',

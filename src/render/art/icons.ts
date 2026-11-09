@@ -296,4 +296,31 @@ export const ICON_ART: Record<string, ArtDef> = {
     p.ink();
     p.fill(0xffffff, 0.7).fillEllipse(C - 2.5, 10, 4, 2);
   }),
+  // Level-up helpers (Loja: Ajudas na escolha)
+  /** Trocar: two arrows chasing each other in a circle. */
+  'icon.reroll': passive(0x2a4a5a, (p) => {
+    p.g.lineStyle(2.5, 0xe8eff8, 1);
+    p.g
+      .beginPath()
+      .arc(C, C, 7, Math.PI * 0.15, Math.PI * 0.85)
+      .strokePath();
+    p.g
+      .beginPath()
+      .arc(C, C, 7, Math.PI * 1.15, Math.PI * 1.85)
+      .strokePath();
+    p.fill(0xe8eff8).fillTriangle(C - 9.5, C - 1, C - 4, C - 1, C - 6.5, C + 3);
+    p.fill(0xe8eff8).fillTriangle(C + 9.5, C + 1, C + 4, C + 1, C + 6.5, C - 3);
+  }),
+  /** Pular: a double chevron forward. */
+  'icon.skip': passive(0x3a4a2a, (p) => {
+    p.outline = 1.2;
+    p.poly([6, 7, 9, 7, 15, C, 9, 21, 6, 21, 12, C], 0xe8e2d0);
+    p.poly([13, 7, 16, 7, 22, C, 16, 21, 13, 21, 19, C], 0xe8e2d0);
+    p.ink();
+  }),
+  /** Banir: a red "no" sign. */
+  'icon.banish': passive(0x5a2a2a, (p) => {
+    p.g.lineStyle(3, 0xff8090, 1).strokeCircle(C, C, 7.5);
+    p.g.lineBetween(C - 5.3, C + 5.3, C + 5.3, C - 5.3);
+  }),
 };

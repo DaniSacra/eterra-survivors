@@ -31,3 +31,11 @@ export const SHOP = {
 
 export type ShopId = keyof typeof SHOP;
 export const SHOP_IDS = Object.keys(SHOP) as ShopId[];
+
+/** The Loja's sections, in order: starting stats, level-up helpers, and the special purchases. */
+export const SHOP_SECTIONS = {
+  stats: SHOP_IDS.filter((id) => 'stat' in SHOP[id] && id !== 'amount'),
+  helps: SHOP_IDS.filter((id) => 'charge' in SHOP[id]),
+  special: ['amount'] as ShopId[],
+} satisfies Record<string, ShopId[]>;
+export type ShopSection = keyof typeof SHOP_SECTIONS;

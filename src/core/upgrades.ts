@@ -131,8 +131,7 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
       if (owned) {
         markLevel(owned, world.time);
         owned.level = opt.level;
-      }
-      else world.addWeapon(opt.id);
+      } else world.addWeapon(opt.id);
       break;
     }
     case 'evolution': {

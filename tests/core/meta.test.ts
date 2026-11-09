@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   SAVE_VERSION,
+  biggestGoal,
   buy,
+  confirmPurchase,
+  shopShortfall,
   discoverElos,
   lastRun,
   newSave,
-  nextGoal,
   sanitizeSave,
   serializeSave,
   shopBonuses,
@@ -58,6 +60,29 @@ describe('shop', () => {
     ).toEqual({ ...newSave(), gold: 12, shop: { maxHp: SHOP.maxHp.maxLevel }, heroes: ['lyra'] });
     // Saves from before heroes and stages still load.
     expect(sanitizeSave({ gold: 5, shop: {} })).toEqual({ ...newSave(), gold: 5 });
+  });
+});
+
+describe('Loja purchase flow', () => {
+  it('buys only on confirmation of a selected item, and only with enough gold', () => {
+    const save = newSave();
+    save.gold = 10_000;
+    const cart = { selected: null };
+    expect(confirmPurchase(save, cart)).toBe(false); // nothing selected: nothing bought
+    expect(save.gold).toBe(10_000);
+    const selected = { selected: 'maxHp' as const };
+    expect(save.shop.maxHp ?? 0).toBe(0); // selecting alone buys nothing
+    expect(confirmPurchase(save, selected)).toBe(true);
+    expect(save.shop.maxHp).toBe(1);
+    save.gold = SHOP.maxHp.baseCost * 2 - 1;
+    expect(shopShortfall(save, 'maxHp')).toBe(1);
+    expect(confirmPurchase(save, selected)).toBe(false);
+    expect(save.shop.maxHp).toBe(1);
+    save.gold += 1;
+    expect(shopShortfall(save, 'maxHp')).toBe(0);
+    expect(confirmPurchase(save, selected)).toBe(true);
+    save.shop.maxHp = SHOP.maxHp.maxLevel;
+    expect(shopShortfall(save, 'maxHp')).toBeNull();
   });
 });
 
@@ -187,11 +212,12 @@ describe('save versions and Elos', () => {
     expect(s.elos).toEqual(['fury', 'storm']);
   });
 
-  it('the next goal is the cheapest thing left to buy', () => {
+  it('the long-term goal is the most expensive next level left in the Loja', () => {
     const s = newSave();
-    const goal = nextGoal(s)!;
-    const cheapest = Math.min(...SHOP_IDS.map((id) => SHOP[id].baseCost));
-    expect(goal.cost).toBe(cheapest);
+    const priciest = Math.max(...SHOP_IDS.map((id) => SHOP[id].baseCost));
+    expect(biggestGoal(s)!.cost).toBe(priciest);
+    for (const id of SHOP_IDS) s.shop[id] = SHOP[id].maxLevel;
+    expect(biggestGoal(s)).toBeNull();
   });
 
   it('remembers the last hero and stage only while they can still be played', () => {

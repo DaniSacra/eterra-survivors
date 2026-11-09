@@ -379,25 +379,9 @@ export function discoverElos(save: MetaSave, ids: readonly WeaponId[]): WeaponId
   return fresh;
 }
 
-/** The cheapest thing still to buy (a shop level, or a hero while heroes are sold), for the end screen. */
 /** Whether any hero has held this base weapon in a run (the Livro de Elos then reveals its Elo's passive). */
 export function weaponUsed(save: MetaSave, id: WeaponId): boolean {
   return Object.values(save.records).some((r) => (r?.weaponRuns[id] ?? 0) > 0);
-}
-
-export function nextGoal(
-  save: MetaSave,
-): { kind: 'shop'; id: ShopId; cost: number } | { kind: 'hero'; id: CharacterId; cost: number } | null {
-  let best: ReturnType<typeof nextGoal> = null;
-  for (const id of SHOP_IDS) {
-    const cost = shopCost(save, id);
-    if (cost !== null && (!best || cost < best.cost)) best = { kind: 'shop', id, cost };
-  }
-  for (const id of CHARACTER_IDS) {
-    const cost = CHARACTERS[id].cost;
-    if (!heroUnlocked(save, id) && (!best || cost < best.cost)) best = { kind: 'hero', id, cost };
-  }
-  return best;
 }
 
 export const heroUnlocked = (save: MetaSave, id: CharacterId): boolean =>
@@ -441,6 +425,34 @@ export function buy(save: MetaSave, id: ShopId): boolean {
 }
 
 /** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */
+/**
+ * The Loja's two-step purchase: choosing an item only selects it (its detail shows); buying needs a confirmation
+ * of the selected item, and enough gold.
+ */
+export interface ShopCart {
+  selected: ShopId | null;
+}
+
+export function confirmPurchase(save: MetaSave, cart: ShopCart): boolean {
+  return cart.selected !== null && buy(save, cart.selected);
+}
+
+/** Gold still missing for the next level of `id`: 0 when affordable, null when maxed. */
+export function shopShortfall(save: MetaSave, id: ShopId): number | null {
+  const cost = shopCost(save, id);
+  return cost === null ? null : Math.max(0, cost - save.gold);
+}
+
+/** The most expensive next level in the Loja (a long-term goal for the end screen), null when all is bought. */
+export function biggestGoal(save: MetaSave): { id: ShopId; cost: number } | null {
+  let best: { id: ShopId; cost: number } | null = null;
+  for (const id of SHOP_IDS) {
+    const cost = shopCost(save, id);
+    if (cost !== null && (!best || cost > best.cost)) best = { id, cost };
+  }
+  return best;
+}
+
 export function shopBonuses(save: MetaSave): RunBonuses {
   const out: RunBonuses = { stats: {}, charges: { ...config.charges } };
   for (const id of SHOP_IDS) {

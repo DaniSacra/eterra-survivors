@@ -4,7 +4,7 @@ import { almostElo, passiveReport, weaponReport } from '../core/report';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
-import { nextGoal } from '../core/meta';
+import { biggestGoal } from '../core/meta';
 import { closestAchievement } from '../core/achievements';
 import type { AchievementId } from '../data/achievements';
 import { loadSave } from '../render/save';
@@ -262,17 +262,11 @@ export class EndScene extends Phaser.Scene {
         UI.text,
         'icon.lock',
       );
-    const goal = nextGoal(save);
+    // A long-term goal, not a nudge to spend now: how far the most expensive thing in the Loja still is.
+    const goal = biggestGoal(save);
     line(t.end.banked(save.gold), 14, UI.text);
-    if (goal) {
-      const name = goal.kind === 'shop' ? t.shop.items[goal.id] : t.characters[goal.id].name;
-      const can = save.gold >= goal.cost;
-      line(
-        can ? t.end.canBuy(name, goal.cost) : t.end.toBuy(name, goal.cost - save.gold),
-        14,
-        can ? UI.gold : UI.muted,
-      );
-    }
+    if (goal && goal.cost > save.gold)
+      line(t.end.toBuy(t.shop.items[goal.id], goal.cost - save.gold), 14, UI.muted);
     return y;
   }
 

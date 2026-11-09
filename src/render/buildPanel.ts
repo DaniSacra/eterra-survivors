@@ -236,9 +236,9 @@ const GROUPS: { key: keyof typeof t.levelUp.groups; stats: StatKey[] }[] = [
 ];
 
 /** Each stat shows the icon of the passive that raises it (gold has no passive: its own icon). */
-const STAT_ICON = Object.fromEntries(PASSIVE_IDS.map((id) => [PASSIVES[id].stat, `icon.${id}`])) as Partial<
-  Record<StatKey, string>
->;
+export const STAT_ICON = Object.fromEntries(
+  PASSIVE_IDS.map((id) => [PASSIVES[id].stat, `icon.${id}`]),
+) as Partial<Record<StatKey, string>>;
 
 const ROW = 18;
 const FONT = 13;
