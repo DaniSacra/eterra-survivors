@@ -554,7 +554,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   mudar; laços `for...of` sobre pools do core (`zones.ts`, `xp.ts`, `effects.ts`, `pickups.ts`) viram `for` indexado.
 - Aceite: nenhum `find`/closure/`String()` por entidade no `update` do GameScene (revisão do diff).
 
-**RT-03 · Save aceita `Infinity` e rebaixa versão futura** · impl · P · aprovado
+**RT-03 · Save aceita `Infinity` e rebaixa versão futura** · impl · P · ✅ feito
 
 - Por quê: 02-code #8: `r.gold >= 0` aceita `Infinity` (vira `null` e 0 na leitura seguinte); um save de versão maior
   que `SAVE_VERSION` perde os campos novos ao ser regravado por um build antigo em cache.

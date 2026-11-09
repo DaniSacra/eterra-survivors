@@ -19,6 +19,11 @@ export interface MetaSave {
   cleared: StageId[];
   /** Elos ever formed (the Livro de Elos shows their recipes). */
   elos: WeaponId[];
+  /**
+   * The raw save when it came from a newer version (an old build still cached): kept so that writing it back
+   * doesn't drop what this build doesn't know. See `serializeSave`.
+   */
+  future?: Record<string, unknown>;
 }
 
 export type Charges = Record<ChargeKey, number>;
@@ -45,8 +50,16 @@ export const newSave = (): MetaSave => ({
 export function sanitizeSave(raw: unknown): MetaSave {
   const save = newSave();
   if (!raw || typeof raw !== 'object') return save;
-  const r = raw as { gold?: unknown; shop?: unknown; heroes?: unknown; cleared?: unknown; elos?: unknown };
-  if (typeof r.gold === 'number' && r.gold >= 0) save.gold = Math.floor(r.gold);
+  const r = raw as {
+    version?: unknown;
+    gold?: unknown;
+    shop?: unknown;
+    heroes?: unknown;
+    cleared?: unknown;
+    elos?: unknown;
+  };
+  if (typeof r.version === 'number' && r.version > SAVE_VERSION) save.future = r as Record<string, unknown>;
+  if (typeof r.gold === 'number' && Number.isFinite(r.gold) && r.gold >= 0) save.gold = Math.floor(r.gold);
   if (r.shop && typeof r.shop === 'object') {
     for (const id of SHOP_IDS) {
       const lv = (r.shop as Record<string, unknown>)[id];
@@ -59,6 +72,26 @@ export function sanitizeSave(raw: unknown): MetaSave {
   save.cleared = known(r.cleared, STAGE_IDS);
   save.elos = known(r.elos, EVOLVED_IDS);
   return save;
+}
+
+/**
+ * What gets written to storage. A save read from a newer version keeps its version, unknown fields, and the shop
+ * levels, heroes, stages and Elos this build doesn't know, merged with what changed here.
+ */
+export function serializeSave(save: MetaSave): object {
+  const { future, ...known } = save;
+  if (!future) return known;
+  const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+  const union = (old: unknown, now: readonly string[]) => [...new Set([...list(old), ...now])];
+  const shop = future.shop && typeof future.shop === 'object' ? future.shop : {};
+  return {
+    ...future,
+    gold: known.gold,
+    shop: { ...shop, ...known.shop },
+    heroes: union(future.heroes, known.heroes),
+    cleared: union(future.cleared, known.cleared),
+    elos: union(future.elos, known.elos),
+  };
 }
 
 /** Marks Elos as discovered; returns the ones that were new. */

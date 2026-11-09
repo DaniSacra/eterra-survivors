@@ -1,4 +1,4 @@
-import { discoverElos, markCleared, newSave, sanitizeSave, type MetaSave } from '../core/meta';
+import { discoverElos, markCleared, newSave, sanitizeSave, serializeSave, type MetaSave } from '../core/meta';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
 
@@ -15,7 +15,7 @@ export function loadSave(): MetaSave {
 
 export function writeSave(save: MetaSave): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify(save));
+    localStorage.setItem(KEY, JSON.stringify(serializeSave(save)));
   } catch {
     // Private mode or full storage: progress just isn't kept.
   }

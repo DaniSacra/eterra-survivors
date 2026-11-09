@@ -6,6 +6,7 @@ import {
   newSave,
   nextGoal,
   sanitizeSave,
+  serializeSave,
   shopBonuses,
   shopCost,
 } from '../../src/core/meta';
@@ -131,6 +132,41 @@ describe('save versions and Elos', () => {
     const s = sanitizeSave(old);
     expect(s).toEqual({ ...newSave(), gold: 340, shop: { might: 2 }, heroes: ['teo'], cleared: ['valmor'] });
     expect(s.version).toBe(SAVE_VERSION);
+  });
+
+  it('rejects a gold value that would not survive JSON (Infinity, NaN)', () => {
+    expect(sanitizeSave({ gold: Infinity }).gold).toBe(0);
+    expect(sanitizeSave({ gold: NaN }).gold).toBe(0);
+    expect(sanitizeSave({ gold: 12.7 }).gold).toBe(12);
+  });
+
+  it('a save from a newer version keeps what this build does not know when written back', () => {
+    const future = {
+      version: SAVE_VERSION + 1,
+      gold: 500,
+      shop: { might: 1, newThing: 3 },
+      heroes: ['teo', 'newHero'],
+      cleared: ['valmor', 'newStage'],
+      elos: ['fury', 'newElo'],
+      quests: { done: 4 },
+    };
+    const s = sanitizeSave(JSON.parse(JSON.stringify(future)));
+    expect(s.elos).toEqual(['fury']); // this build only uses what it knows
+    buy(s, 'might');
+    s.cleared.push('crypt');
+    const back = JSON.parse(JSON.stringify(serializeSave(s)));
+    expect(back.version).toBe(SAVE_VERSION + 1);
+    expect(back.quests).toEqual({ done: 4 });
+    expect(back.shop).toEqual({ might: 2, newThing: 3 });
+    expect(back.gold).toBe(500 - SHOP.might.baseCost * 2); // level 2 bought here
+    expect(back.heroes).toEqual(['teo', 'newHero']);
+    expect(back.cleared).toEqual(['valmor', 'newStage', 'crypt']);
+    expect(back.elos).toEqual(['fury', 'newElo']);
+  });
+
+  it('a current save is written as is', () => {
+    const s = sanitizeSave({ version: SAVE_VERSION, gold: 10, elos: ['fury'] });
+    expect(serializeSave(s)).toEqual({ ...newSave(), gold: 10, elos: ['fury'] });
   });
 
   it('keeps known Elos and drops unknown ids', () => {
