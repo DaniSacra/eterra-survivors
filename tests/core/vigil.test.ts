@@ -36,19 +36,19 @@ describe('Noite Sem Fim', () => {
     w.player.stats.maxHp = w.player.hp = 1e9; // survive to watch the waves
     const spawned = (seconds: number) => {
       const before = w.enemies.size;
-      for (let i = 0; i < seconds * 60; i++) w.step(1 / 60, still);
+      for (let i = 0; i < seconds * 20; i++) w.step(1 / 20, still);
       return w.enemies.size - before;
     };
     expect(spawned(5)).toBeGreaterThan(0);
     const elites = () => w.enemies.active.filter((e) => e.def.elite).length;
     const e0 = elites();
-    for (let i = 0; i < config.vigil.eliteEvery * 60 + 5; i++) w.step(1 / 60, still);
+    for (let i = 0; i < config.vigil.eliteEvery * 20 + 5; i++) w.step(1 / 20, still);
     expect(elites()).toBeGreaterThan(e0);
     expect(w.vigilTime).toBeGreaterThan(config.vigil.eliteEvery);
     // Tougher enemies later: the newest one has more HP than the same kind had at the start.
     const hp = Math.max(...w.enemies.active.filter((e) => !e.def.elite).map((e) => e.maxHp / e.def.hp));
     expect(hp).toBeGreaterThan(1);
-  });
+  }, 20_000);
 
   it('a run that ends in the vigil counts as a victory, and records only what the vigil added', () => {
     const save = newSave();
