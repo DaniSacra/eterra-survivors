@@ -58,15 +58,15 @@ const SWEEP = 0.55;
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = 0xff9a30;
-/** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or hanging bells. */
+/** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
 interface OrbitStyle {
   color: number;
   dark: number;
   blade: boolean;
 }
 const ORBIT_STYLE: Partial<Record<WeaponId, OrbitStyle>> = {
-  bells: { color: 0xc89040, dark: 0x8a5a24, blade: false },
-  funeralToll: { color: 0xe8b860, dark: 0xa87a30, blade: false },
+  shields: { color: 0x8aa8c8, dark: 0x8a5a24, blade: false },
+  valmorWall: { color: 0xe8c860, dark: 0xa87a30, blade: false },
   vigil: { color: 0xf0f6ff, dark: 0xe8b840, blade: true },
 };
 const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
@@ -296,7 +296,7 @@ export function drawFx(
             ring(top, x, y, r);
           }
           drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
-        } else drawBell(top, x, y, r, style);
+        } else drawShield(top, x, y, r, style);
       }
     }
   }
@@ -1207,23 +1207,16 @@ function drawSword(
   g.strokePath();
 }
 
-/** A hanging bronze bell of hit radius `r`: dome, flared rim, clapper and a shine. */
-function drawBell(g: Phaser.GameObjects.Graphics, x: number, y: number, r: number, st: OrbitStyle): void {
-  const top = y - r * 0.3;
-  const rim = y + r * 0.6;
-  g.fillStyle(st.color).lineStyle(2.5, INK);
-  g.beginPath();
-  g.arc(x, top, r * 0.5, Math.PI, 0);
-  g.lineTo(x + r * 0.8, rim);
-  g.lineTo(x - r * 0.8, rim);
-  g.closePath();
-  g.fillPath();
-  g.strokePath();
-  g.fillStyle(st.dark)
-    .fillEllipse(x, rim, r * 1.7, r * 0.4)
-    .strokeEllipse(x, rim, r * 1.7, r * 0.4);
-  g.fillStyle(INK);
-  disc(g, x, rim + r * 0.25, r * 0.18);
-  g.fillStyle(st.dark).fillRect(x - r * 0.12, top - r * 0.75, r * 0.24, r * 0.3);
-  g.fillStyle(0xffffff, 0.35).fillEllipse(x - r * 0.25, top, r * 0.25, r * 0.45);
+/** A round shield of hit radius `r`: a wooden rim, a painted face with a band across and a steel boss. */
+function drawShield(g: Phaser.GameObjects.Graphics, x: number, y: number, r: number, st: OrbitStyle): void {
+  g.fillStyle(st.dark).lineStyle(2.5, INK);
+  disc(g, x, y, r);
+  g.strokeCircle(x, y, r);
+  g.fillStyle(st.color);
+  disc(g, x, y, r * 0.78);
+  g.fillStyle(0xf0f4ff, 0.85).fillRect(x - r * 0.78, y - r * 0.14, r * 1.56, r * 0.28);
+  g.fillStyle(0xcbd8ec).lineStyle(1.5, INK);
+  disc(g, x, y, r * 0.3);
+  g.strokeCircle(x, y, r * 0.3);
+  g.fillStyle(0xffffff, 0.4).fillEllipse(x - r * 0.35, y - r * 0.4, r * 0.5, r * 0.3);
 }

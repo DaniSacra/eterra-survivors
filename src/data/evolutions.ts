@@ -20,7 +20,7 @@ export const EVOLUTIONS: Partial<Record<WeaponId, Evolution>> = {
   storm: { from: 'lightning', passive: 'haste' },
   forgeFury: { from: 'hammer', passive: 'swiftness' },
   soulProcession: { from: 'wisps', passive: 'growth' },
-  funeralToll: { from: 'bells', passive: 'attraction' },
+  valmorWall: { from: 'shields', passive: 'attraction' },
   jointBreaker: { from: 'mace', passive: 'armor' },
   fireSword: { from: 'fire', passive: 'might' },
   lyraStar: { from: 'staff', passive: 'growth' },

@@ -205,10 +205,11 @@ export class World {
     this.upgradeOptions = rollUpgrades(this);
   }
 
-  /** Pular: gives up this level-up's choice. */
+  /** Pular: gives up this level-up's choice, for a little gold. */
   skipLevelUp(): void {
     if (this.state !== 'levelup' || this.charges.skip <= 0) return;
     this.charges.skip--;
+    this.gold += config.skipGold;
     this.finishLevelUp();
   }
 

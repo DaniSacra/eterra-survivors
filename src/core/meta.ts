@@ -161,6 +161,17 @@ function counts<T extends string>(raw: unknown, ids: readonly T[]): Partial<Reco
   return out;
 }
 
+/** Weapons renamed since older saves (Sinos de Bronze became Escudos de Valmor): their records carry over. */
+const RENAMED: Record<string, string> = { bells: 'shields', funeralToll: 'valmorWall' };
+const renamedList = (raw: unknown): unknown =>
+  Array.isArray(raw) ? raw.map((id) => (typeof id === 'string' ? (RENAMED[id] ?? id) : id)) : raw;
+function renamedKeys(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(raw)) out[RENAMED[k] ?? k] = v;
+  return out;
+}
+
 function sanitizeRecord(raw: unknown): HeroRecord {
   const r = obj(raw);
   const closest = typeof r.closestWin === 'number' && Number.isFinite(r.closestWin) ? r.closestWin : 1;
@@ -173,8 +184,8 @@ function sanitizeRecord(raw: unknown): HeroRecord {
     bestKills: num(r.bestKills, true),
     bestHit: num(r.bestHit),
     bestDamage: num(r.bestDamage),
-    weaponRuns: counts(r.weaponRuns, WEAPON_IDS),
-    elos: known(r.elos, EVOLVED_IDS),
+    weaponRuns: counts(renamedKeys(r.weaponRuns), WEAPON_IDS),
+    elos: known(renamedList(r.elos), EVOLVED_IDS),
     untouched: num(r.untouched),
     closestWin: Math.max(0, Math.min(1, closest)),
     maxElos: num(r.maxElos, true),
@@ -248,7 +259,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
   }
   save.heroes = known(r.heroes, CHARACTER_IDS);
   save.cleared = known(r.cleared, STAGE_IDS);
-  save.elos = known(r.elos, EVOLVED_IDS);
+  save.elos = known(renamedList(r.elos), EVOLVED_IDS);
   const records = obj(r.records);
   for (const id of CHARACTER_IDS) if (id in records) save.records[id] = sanitizeRecord(records[id]);
   save.bestiary = sanitizeBestiary(r.bestiary);

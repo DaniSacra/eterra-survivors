@@ -8,7 +8,7 @@ import { disc, ring } from './shapes';
  * Fed by GameScene from what the core already exposes (fresh hits, new puffs); purely visual.
  */
 export const SPARK = {
-  /** White four-point star: blades, knives, hammers, bells. */
+  /** White four-point star: blades, knives, hammers, shields. */
   star: 0,
   /** Gold plus: holy light. */
   cross: 1,

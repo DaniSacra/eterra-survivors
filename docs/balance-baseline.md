@@ -577,3 +577,49 @@ ELO X    fury 1.6x · holyLight 3.1x · yahFlame 8.7x · fan 3.2x · vigil 4.7x 
 259/288 (antes 271). Teo com a Maça vence tudo sem loja (100%); Lyra cai a 38–50% sem loja, quase sempre por
 não derrubar o chefe até o limite (chega aos 10 min em 8 de 8). Andilla na Cripta sem loja 3/8: as facas param
 no primeiro inimigo. A Etapa 6 equilibra os heróis.
+
+## Etapa 3 · ajustes de armas
+
+Mudanças: Martelo do Gaspar desenhado a 1,2x e com raio 9 (11 no máximo), dano reajustado à faixa; Sinos viram
+**Escudos de Valmor** (órbita 80, raio 11, empurrão 150) e o Elo vira **Muralha de Valmor**; saves antigos levam
+`bells`/`funeralToll` para os ids novos. Pular dá +15 de ouro (`config.skipGold`), mostrado no botão.
+
+### Lab depois
+
+```
+cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base
+aimed  daggers               42    449        449    100%  85-100%  | fan              1875  1875   100%  4.2x
+aimed  mace                  59    447        104    100%  85-100%  | jointBreaker     1853   266    99%  4.1x
+aimed  staff                 37    443        221     99%  85-100%  | lyraStar         1853   296    99%  4.2x
+aimed  blade                 43    439         80     98%  85-100%  | fury             1872   117   100%  4.3x
+aimed  hammer                81    438        154     98%  85-100%  | forgeFury        1854   412    99%  4.2x
+area   frost                  8    231         24     51%  40-55%  | blizzard          957    28    51%  4.1x
+area   shields               27    230         29     51%  40-55%  | valmorWall        963   198    51%  4.2x
+area   paladinSwords         26    223         28     50%  40-55%  | vigil             958   165    51%  4.3x
+area   yahAura                0    220         28     49%  40-55%  | yahFlame          960    48    51%  4.4x
+auto   fire                   8    281         25     63%  50-65%  | fireSword        1178    33    63%  4.2x
+auto   wisps                 23    278        117     62%  50-65%  | soulProcession   1175   365    63%  4.2x
+auto   lightning             23    277         59     62%  50-65%  | storm            1152    45    61%  4.2x
+auto   elunLight             13    274        106     61%  50-65%  | holyLight        1166   397    62%  4.3x
+
+```
+
+### Vitórias por fase e perfil de loja (depois)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  22/32 69%        10.2 min       569  aldo 50% · lyra 63% · teo 88% · andilla 75%
+         valmor    half  27/32 84%        10.2 min       693  aldo 100% · lyra 63%! · teo 88% · andilla 88%
+         valmor    full  32/32 100%              -       906  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         crypt     none  25/32 78%         3.5 min       465  aldo 100%! · lyra 63% · teo 100%! · andilla 50%!
+         crypt     half  30/32 94%        10.2 min       695  aldo 100% · lyra 75% · teo 100% · andilla 100%
+         crypt     full  31/32 97%        10.2 min       873  aldo 100% · lyra 100% · teo 88% · andilla 100%
+         southRoad none  25/32 78%         5.2 min       488  aldo 88% · lyra 75% · teo 88% · andilla 63%
+         southRoad half  31/32 97%        10.3 min       692  aldo 100% · lyra 100% · teo 100% · andilla 88%
+         southRoad full  32/32 100%              -       876  aldo 100% · lyra 100% · teo 100% · andilla 100%
+
+REAL DPS blade:max 113 (114) · elunLight:max 336 (63) · yahAura:max 24 (81) · daggers:max 292 (104) · staff:max 238 (122) · paladinSwords:max 24 (71) · frost:max 189 (77) · lightning:max 292 (76) · hammer:max 183 (77) · wisps:max 368 (84) · shields:max 33 (75) · mace:max 96 (121) · fire:max 183 (69) · fury 166 (73) · holyLight 990 (43) · yahFlame 119 (54) · fan 726 (65) · vigil 120 (29) · blizzard 287 (37) · storm 406 (38) · jointBreaker 265 (49) · fireSword 366 (15) · forgeFury 502 (43) · soulProcession 880 (35) · valmorWall 114 (33) · lyraStar 495 (53)
+ELO X    fury 1.5x · holyLight 3.0x · yahFlame 10.0x · fan 3.1x · vigil 6.6x · blizzard 1.7x · storm 1.5x · jointBreaker 3.0x · fireSword 1.8x · forgeFury 4.1x · soulProcession 2.6x · valmorWall 4.7x · lyraStar 2.9x
+```
+
+266/288 (antes 259): pouca mudança, como esperado. A dificuldade de verdade vem das Etapas 4 e 6.

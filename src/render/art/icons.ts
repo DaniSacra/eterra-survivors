@@ -168,14 +168,17 @@ const wisp =
       p.fill(0xffffff).fillCircle(x, y, 2.2);
     }
   };
-const bell =
-  (c: number, rings = false) =>
+const shield =
+  (face: number, gold = false) =>
   (p: Pen): void => {
     p.outline = 1.2;
-    p.poly([8, 19, 9.5, 10, C, 6, 18.5, 10, 20, 19], c);
+    p.circle(C, C, 9, gold ? 0xa87a30 : 0x8a5a24);
+    p.circle(C, C, 7, face);
     p.ink();
-    p.fill(INK).fillCircle(C, 20.5, 1.6);
-    if (rings) p.g.lineStyle(1.5, 0xffd870, 0.9).strokeCircle(C, 13, 11);
+    p.fill(0xf0f4ff, 0.85).fillRect(C - 7, C - 1.2, 14, 2.4);
+    p.circle(C, C, 2.6, 0xcbd8ec);
+    p.ink();
+    if (gold) p.g.lineStyle(1.5, 0xffd870, 0.9).strokeCircle(C, C, 11.5);
   };
 
 export const ICON_ART: Record<string, ArtDef> = {
@@ -232,7 +235,7 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.staff': weapon(staff(0xb070f0)),
   'icon.hammer': weapon(hammer(0x8a8a96)),
   'icon.wisps': weapon(wisp(0x40e0d8, 2)),
-  'icon.bells': weapon(bell(0xc89040)),
+  'icon.shields': weapon(shield(0x8aa8c8)),
   'icon.mace': weapon(mace(0x8a8a96, 0xcbd8ec)),
   'icon.fire': weapon(flame(0xff8a3a, 0xffd060)),
   // Elos
@@ -245,7 +248,7 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.storm': elo(bolt(0xd8b8ff, 2)),
   'icon.forgeFury': elo(hammer(0xffa040)),
   'icon.soulProcession': elo(wisp(0x8ac0f0, 3)),
-  'icon.funeralToll': elo(bell(0xe8b860, true)),
+  'icon.valmorWall': elo(shield(0xe8c860, true)),
   'icon.jointBreaker': elo(mace(0xc86a3a, 0xffe8a0)),
   'icon.fireSword': elo(flame(0xff5a2a, 0xffe080, true)),
   'icon.lyraStar': elo(staff(0xd8a0ff, true)),

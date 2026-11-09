@@ -297,22 +297,22 @@ export const WEAPONS = {
     category: 'aimed',
     levels: levels<ThrownLevel>(
       {
-        damage: 28,
+        damage: 37,
         cooldown: 1.8,
         speed: 260,
         count: 1,
         pierce: 3,
         lifetime: 1.6,
-        radius: 12,
+        radius: 9,
         spread: 0.3,
         knockback: 260,
       },
-      { damage: 35 },
+      { damage: 46 },
       { count: 2 },
       { pierce: 5 },
-      { damage: 45, cooldown: 1.6 },
+      { damage: 59, cooldown: 1.6 },
       { count: 3 },
-      { damage: 60, radius: 15 },
+      { damage: 79, radius: 11 },
     ),
   },
   /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
@@ -339,18 +339,18 @@ export const WEAPONS = {
       { count: 5, damage: 26, cooldown: 1.1 },
     ),
   },
-  /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
-  bells: {
+  /** Escudos de Valmor: round shields circling close, shoving back whatever they hit. */
+  shields: {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 6.7, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
-      { damage: 8.5 },
+      { damage: 9.4, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 2.2, knockback: 150 },
+      { damage: 12 },
       { count: 2 },
-      { orbitRadius: 125, radius: 20 },
-      { damage: 11, cooldown: 0.7 },
+      { orbitRadius: 88, radius: 12 },
+      { damage: 16, cooldown: 0.7 },
       { count: 3 },
-      { damage: 16, spin: 2 },
+      { damage: 23, spin: 2.6 },
     ),
   },
   /** Maça de Ferro: the blow splits the ground ahead, the ground shakes where it landed, and whoever is hit reels. */
@@ -400,7 +400,7 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 62, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
+    levels: [{ damage: 60, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -520,11 +520,11 @@ export const WEAPONS = {
       },
     ],
   },
-  /** Dobre Fúnebre: the bells toll for everything around Aldo. */
-  funeralToll: {
+  /** Muralha de Valmor: a ring of shields, wide and close-set, that the dead can't get through. */
+  valmorWall: {
     kind: 'orbit',
     levels: [
-      { damage: 42, cooldown: 0.5, count: 6, orbitRadius: 140, radius: 26, spin: 2.2, knockback: 320 },
+      { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 200 },
     ],
   },
   /** Estrela de Lyra: three big orbs at a time, bursting wide. */

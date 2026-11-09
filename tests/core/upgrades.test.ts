@@ -229,3 +229,16 @@ describe('passive limit', () => {
     expect(statPreview(w, { kind: 'heal' })).toBeNull();
   });
 });
+
+describe('Pular', () => {
+  it('gives a little gold for the choice given up', () => {
+    const w = quietWorld();
+    w.charges.skip = 1;
+    w.pendingLevelUps = 1;
+    w.step(1 / 60, still);
+    const gold = w.gold;
+    w.skipLevelUp();
+    expect(w.gold).toBe(gold + config.skipGold);
+    expect(w.state).toBe('playing');
+  });
+});

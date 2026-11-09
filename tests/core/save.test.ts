@@ -235,3 +235,16 @@ describe('recordRun', () => {
     expect(s.totals.wins).toBe(3);
   });
 });
+
+describe('renamed weapons', () => {
+  it('old Sinos de Bronze records become Escudos de Valmor (and Dobre Fúnebre, Muralha de Valmor)', () => {
+    const s = sanitizeSave({
+      version: 2,
+      elos: ['funeralToll', 'fury'],
+      records: { aldo: { weaponRuns: { bells: 3, blade: 2 }, elos: ['funeralToll'] } },
+    });
+    expect([...s.elos].sort()).toEqual(['fury', 'valmorWall']);
+    expect(s.records.aldo?.weaponRuns).toMatchObject({ shields: 3, blade: 2 });
+    expect(s.records.aldo?.elos).toEqual(['valmorWall']);
+  });
+});

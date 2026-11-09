@@ -97,6 +97,8 @@ export const config = {
   achievementCharges: true,
   /** Level-up helpers every run starts with (the shop adds more). */
   charges: { reroll: 1, skip: 1, banish: 0 },
+  /** Gold for giving up a level-up's choice (Pular). */
+  skipGold: 15,
   zones: {
     /** Seconds between damage ticks of a frost patch. */
     tick: 0.5,

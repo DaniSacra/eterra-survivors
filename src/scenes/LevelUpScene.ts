@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { World } from '../core/world';
 import type { ChargeKey } from '../data/shop';
+import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
@@ -168,6 +169,16 @@ export class LevelUpScene extends Phaser.Scene {
       const x = side ? bx : cx + (i - 1) * (bw + 8);
       const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
       const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
+      if (key === 'skip') {
+        // What skipping pays, in gold under the label.
+        const main = b.getData('label') as Phaser.GameObjects.Text;
+        const h = b.height;
+        main.setY(y - h * 0.16).setFontSize(Math.min(18, h * 0.36));
+        label(this, x, y + h * 0.25, t.levelUp.skipGold(config.skipGold), Math.min(13, h * 0.3), {
+          bold: true,
+          color: UI.gold,
+        });
+      }
       if (c <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });

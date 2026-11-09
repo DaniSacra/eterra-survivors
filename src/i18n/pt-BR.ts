@@ -77,6 +77,8 @@ export const t = {
       banish: (n: number) => `Banir (${n})`,
     } satisfies Record<ChargeKey, (n: number) => string>,
     chargeKeys: 'R troca · X pula · B bane',
+    /** Under Pular's label: what skipping gives. */
+    skipGold: (gold: number) => `+${gold} ouro`,
     evolution: 'Elo',
     evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
     recipeHave: (passive: string) => `Elo: + ${passive} (você tem)`,
@@ -112,7 +114,7 @@ export const t = {
       storm: 'O céu inteiro responde de uma vez.',
       forgeFury: 'Da forja do Gaspar, martelos que não param.',
       soulProcession: 'As luzes seguem em fila, como velas numa procissão.',
-      funeralToll: 'Os sinos dobram, e os mortos sabem que é por eles.',
+      valmorWall: 'Escudo junto de escudo: por aqui ninguém passa.',
       jointBreaker: 'Ferro contra osso: o chão se abre duas vezes.',
       fireSword: 'Aço e chama caem juntos do céu.',
       lyraStar: 'O cajado de Lyra acende uma estrela, e ela não cabe numa só.',
@@ -537,7 +539,10 @@ export const t = {
       desc: 'Um martelo pesado lançado à frente, que atravessa e empurra longe.',
     },
     wisps: { name: 'Fogos-Fátuos', desc: 'Luzes lentas que perseguem os mortos por muito tempo.' },
-    bells: { name: 'Sinos de Bronze', desc: 'Sinos pesados girando largo em volta do herói.' },
+    shields: {
+      name: 'Escudos de Valmor',
+      desc: 'Escudos girando perto do herói, que empurram quem acertam.',
+    },
     lightning: { name: 'Raio', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
     holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
@@ -551,7 +556,7 @@ export const t = {
     storm: { name: 'Tempestade', desc: 'O céu inteiro desaba sobre os mortos.' },
     forgeFury: { name: 'Fúria da Forja', desc: 'Martelos que não param, atravessando tudo.' },
     soulProcession: { name: 'Procissão das Almas', desc: 'Uma fila longa de luzes caminha pelo campo.' },
-    funeralToll: { name: 'Dobre Fúnebre', desc: 'Os sinos dobram por tudo o que chega perto.' },
+    valmorWall: { name: 'Muralha de Valmor', desc: 'Um anel de escudos largo e cerrado em volta do herói.' },
     mace: {
       name: 'Maça de Ferro',
       desc: 'O golpe abre uma fenda à frente e, logo depois, o chão treme onde a maça bateu. Quem é atingido fica tonto.',

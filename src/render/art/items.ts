@@ -26,8 +26,8 @@ const blade = (steel: number, hilt: number, len: number): ArtDef => ({
   },
 });
 
-/** Drawn 1.8x so the hammer is as big as its hit area (radius 12): smaller, it was lost on the ground. */
-const HAMMER_SCALE = 1.8;
+/** Drawn 1.2x, about the size of its hit area (radius 9), so it still reads on the ground. */
+const HAMMER_SCALE = 1.2;
 const hammer = (head: number, glow: boolean): ArtDef => ({
   w: Math.round(26 * HAMMER_SCALE),
   h: Math.round(22 * HAMMER_SCALE),

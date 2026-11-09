@@ -133,7 +133,7 @@ describe('Elo moments', () => {
     expect(weaponUsed(save, 'mace')).toBe(false);
     recordRun(save, { ...newRunSummary(), hero: 'lyra', weapons: ['lightning', 'mace'] });
     expect(weaponUsed(save, 'mace')).toBe(true);
-    expect(weaponUsed(save, 'bells')).toBe(false);
+    expect(weaponUsed(save, 'shields')).toBe(false);
   });
 });
 
