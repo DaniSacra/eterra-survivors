@@ -984,7 +984,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Aceite: fim com Lâmina no máximo + Força mostra a linha de "faltou pouco"; vitória em Valmor oferece a Cripta num
   toque.
 
-**RU-06 · Pausa com Desistir protegido** · ui + impl · P · aprovado
+**RU-06 · Pausa com Desistir protegido** · ui + impl · P · ✅ feito
 
 - Por quê: 04-visual #10 e 03-qa: Desistir logo abaixo de Continuar, mesmo peso, sem confirmação; larguras
   desalinhadas, título branco.

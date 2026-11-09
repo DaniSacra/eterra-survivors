@@ -103,6 +103,8 @@ export const t = {
     title: 'Pausa',
     resume: 'Continuar',
     quit: 'Desistir',
+    /** Desistir asks once more (for 2 s) before ending the run. */
+    quitConfirm: 'Confirmar desistir',
   },
 
   elos: {
