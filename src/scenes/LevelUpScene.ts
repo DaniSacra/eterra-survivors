@@ -53,6 +53,7 @@ export class LevelUpScene extends Phaser.Scene {
     const touch = this.sys.game.device.input.touch;
     // The HUD (bars, counters, build strip) is drawn on top: the cards stay clear of it.
     const hud = this.scene.get(SCENES.hud) as HudScene;
+    hud.quiet();
     const n = opts.length;
     // Short screens (phone lying down): the charge buttons go in a column beside the cards.
     const side = height < hud.barsBottom + 480 && width >= 440 + 150 + 32;

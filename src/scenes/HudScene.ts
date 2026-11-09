@@ -71,6 +71,8 @@ export class HudScene extends Phaser.Scene {
   private hintBg!: Phaser.GameObjects.Rectangle;
   private hintText!: Phaser.GameObjects.Text;
   private toastOn = false;
+  /** The notice showing now (put back at the head of the queue when an overlay hushes the HUD). */
+  private toastNow: Toast | null = null;
   private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
   /** Safe-area insets, refreshed on layout. */
   private inset = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -85,6 +87,7 @@ export class HudScene extends Phaser.Scene {
     this.shownRev = -1;
     this.toastQueue = [];
     this.toastOn = false;
+    this.toastNow = null;
   }
 
   create(): void {
@@ -219,6 +222,7 @@ export class HudScene extends Phaser.Scene {
     const next = this.toastQueue.shift();
     if (!next) return;
     this.toastOn = true;
+    this.toastNow = next;
     this.toastText.setText(next.text);
     const w = this.toastText.width + 54;
     this.toastBg.setSize(w, 34).setPosition(0, 0).setStrokeStyle(2, next.rim);
@@ -241,8 +245,25 @@ export class HudScene extends Phaser.Scene {
       alpha: 0,
       delay: 2500,
       duration: 300,
-      onComplete: () => (this.toastOn = false),
+      onComplete: () => {
+        this.toastOn = false;
+        this.toastNow = null;
+      },
     });
+  }
+
+  /**
+   * A choice opened (level-up, pause): the banner, the tip and the notice showing now go away, so the screen is the
+   * choice's alone. The notice goes back to the head of the queue and shows again once the run goes on.
+   */
+  quiet(): void {
+    for (const o of [this.banner, this.hintBox, this.toastBox]) {
+      this.tweens.killTweensOf(o);
+      o.setAlpha(0);
+    }
+    if (this.toastNow) this.toastQueue.unshift(this.toastNow);
+    this.toastNow = null;
+    this.toastOn = false;
   }
 
   /** A tip in a gold-rimmed box under the banner, for a few seconds. */
