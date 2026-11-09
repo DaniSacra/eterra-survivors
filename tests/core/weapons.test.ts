@@ -176,6 +176,17 @@ describe('random-target weapons and the boss (RE-06)', () => {
     },
   );
 
+  it.each(['daggers', 'fan'] as const)(
+    '%s: aimed throws go for the boss on screen, not the nearer escort',
+    (id) => {
+      const { w } = bossFight(id, 300);
+      updateWeapons(w, 1 / 60);
+      expect(w.projectiles.size).toBeGreaterThan(0);
+      const s = WEAPONS[id].levels[0]!;
+      for (const p of w.projectiles.active) expect(Math.abs(p.angle)).toBeLessThanOrEqual(s.count * s.spread);
+    },
+  );
+
   it.each(['lightning', 'fire', 'frost'] as const)('%s: a boss off screen is not aimed at', (id) => {
     const { w, boss } = bossFight(id, 700);
     for (let i = 0; i < 30; i++) w.step(1 / 60, still);

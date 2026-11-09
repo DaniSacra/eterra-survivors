@@ -168,9 +168,12 @@ function fireHoming(world: World, s: HomingLevel, w: OwnedWeapon): boolean {
 
 function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   const p = world.player;
-  // Aimed weapons throw at the nearest enemy on screen; with nobody around, where the hero faces.
+  // Aimed weapons throw at the boss when it is on screen, else at the nearest enemy on screen; with nobody
+  // around, where the hero faces.
   const t =
-    (WEAPONS[w.id] as WeaponDef).aim === 'nearest' ? nearestEnemy(world, p.x, p.y, onScreen(world)) : null;
+    (WEAPONS[w.id] as WeaponDef).aim === 'nearest'
+      ? (bossOnScreen(world) ?? nearestEnemy(world, p.x, p.y, onScreen(world)))
+      : null;
   const facing = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.atan2(p.facing.y, p.facing.x);
   const count = amount(world, s.count);
   // A fan that covers the whole circle spreads evenly from the facing, so one knife always flies straight

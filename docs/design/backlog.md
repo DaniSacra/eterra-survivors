@@ -696,6 +696,11 @@ sementes depois de cada lote e registrar.
   chefe fora dela). Sim: Lyra sem derrota por tempo esgotado na Estrada (**0**, era 1); tempo esgotado em toda a
   Estrada 2 para **1**; mediana da luta de chefe 64 para **57 s** (Estrada 74 para 49 s); derrotas na luta de chefe 5
   para 2. Reserva do `oldWolf` não foi necessária.
+- Complemento (depois do lote 4): com o Leque mirando (RE-04) a Andilla passou a perder por tempo esgotado na Estrada
+  (4 a 5 de 12): as facas iam na escolta, mais perto que o Lobo Velho, que o herói mantém longe. Agora as armas que
+  miram (`aim: 'nearest'`, Adagas e Leque) também vão no chefe na tela; teste em `weapons.test.ts`. E a reserva:
+  `oldWolf` `hp` 12000 para **10500**. Com 48 sementes: 9 tempos esgotados na Estrada em 192 corridas (2,3 por 12),
+  Lyra 3 em 48.
 
 **E-09 (reaberto) · Armadura não pode zerar o dano** · lote 4. Ver o item na Etapa 2.
 
