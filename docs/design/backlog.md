@@ -704,13 +704,18 @@ sementes depois de cada lote e registrar.
 
 **E-09 (reaberto) · Armadura não pode zerar o dano** · lote 4. Ver o item na Etapa 2.
 
-**RE-08 · Andilla como teto, não como regra** · bal · P · aprovado (condicional)
+**RE-08 · Andilla como teto, não como regra** · bal · P · ✅ feito
 
 - Por quê: 01-balance D2: Andilla vence 32 de 36 (89%) e ganha 687 de ouro por corrida contra 364 a 410; o Daniel pediu
   a Andilla forte no começo (E-03), então não se nerfa antes de subir os outros.
 - O quê: só se, depois dos lotes 1 a 4, a Andilla tiver 34 de 36 vitórias ou mais: Adagas L1 `cooldown` 0.8 para 0.9.
   Caso contrário, nada e o item fecha como "não necessário".
 - Aceite: Andilla dentro da meta da R2 (55% a 85%) ou, se acima, a mudança aplicada e medida.
+- Feito (condição atingida: Andilla 35/36 depois do lote 4): Adagas L1 `cooldown` 0.8 para **0.9** (só L1 a L3; o L4
+  já põe 0.7). Medido: Andilla 35 para **32/36** (89%) no sim final de 12 sementes; com 48 sementes, 133/144 (92%).
+  Ela segue acima de 85%, e testei nerfs maiores (L4 0.75, L6/L7 com menos dano, `moveSpeed` +5): nenhum mexe mais que
+  1 a 3 vitórias em 72, porque as derrotas dela são quase só tempo esgotado no chefe. Não apliquei para não tirar a
+  força do começo que o Daniel pediu (E-03); fica como teto, conferir jogando.
 
 ### R3 · Efeitos visuais (dono: vfx-director)
 

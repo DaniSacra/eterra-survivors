@@ -152,7 +152,7 @@ export const WEAPONS = {
     levels: levels<ThrownLevel>(
       {
         damage: 12,
-        cooldown: 0.8,
+        cooldown: 0.9,
         speed: 460,
         count: 2,
         pierce: 1,
