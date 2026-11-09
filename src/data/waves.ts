@@ -32,10 +32,10 @@ const CURVE: [number, number, number, number, Partial<Record<Role, number>>][] =
   [120, 1, 3, 1.3, { basic: 3, fast: 2, tank: 1, extra: 1 }],
   [180, 0.9, 4, 1.6, { basic: 3, fast: 3, tank: 1, extra: 1 }],
   [240, 0.8, 5, 1.8, { basic: 2, fast: 3, tank: 2, extra: 1 }],
-  [300, 0.7, 6, 2.1, { basic: 3, fast: 2, tank: 2, extra: 1 }],
-  [390, 0.6, 7, 2.5, { basic: 2, fast: 3, tank: 2, extra: 2 }],
-  [480, 0.55, 7, 3.5, { basic: 3, fast: 2, tank: 3, extra: 1 }],
-  [540, 0.5, 8, 4.1, { basic: 2, fast: 3, tank: 3, extra: 2 }],
+  [300, 0.7, 6, 2.2, { basic: 3, fast: 2, tank: 2, extra: 1 }],
+  [390, 0.6, 7, 2.6, { basic: 2, fast: 3, tank: 2, extra: 2 }],
+  [480, 0.55, 7, 3.7, { basic: 3, fast: 2, tank: 3, extra: 1 }],
+  [540, 0.5, 8, 4.3, { basic: 2, fast: 3, tank: 3, extra: 2 }],
   // The boss fight: a trickle of escorts.
   [600, 2, 3, 4.5, { basic: 1 }],
 ];

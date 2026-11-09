@@ -15,7 +15,7 @@ export interface CharacterDef {
 
 export const CHARACTERS = {
   /** Guerreiro: tough, starts with his village blade. */
-  aldo: { sprite: 'player.aldo', weapon: 'blade', stats: { maxHp: 20, armor: 1 }, cost: 0 },
+  aldo: { sprite: 'player.aldo', weapon: 'blade', stats: { maxHp: 30, armor: 2 }, cost: 0 },
   /** Maga, Aldo's younger sister: lightning, wide spells, frail. */
   lyra: { sprite: 'player.lyra', weapon: 'lightning', stats: { area: 0.1, maxHp: -10 }, cost: 800 },
   /** Clérigo: the holy light, and wounds that close by themselves. */

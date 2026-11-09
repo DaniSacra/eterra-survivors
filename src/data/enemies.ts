@@ -58,12 +58,12 @@ export const ENEMIES = {
   },
   slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 8, xp: 3, knockbackResist: 0.6 },
   // Cripta da Igreja Velha
-  bones: { sprite: 'enemy.bones', radius: 11, hp: 12, speed: 65, damage: 5, xp: 1, knockbackResist: 0 },
+  bones: { sprite: 'enemy.bones', radius: 11, hp: 14, speed: 65, damage: 5, xp: 1, knockbackResist: 0 },
   bat: { sprite: 'enemy.bat', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
   ghost: {
     sprite: 'enemy.ghost',
     radius: 15,
-    hp: 38,
+    hp: 44,
     speed: 55,
     damage: 8,
     xp: 3,
@@ -74,7 +74,7 @@ export const ENEMIES = {
   rat: {
     sprite: 'enemy.rat',
     radius: 12,
-    hp: 16,
+    hp: 18,
     speed: 80,
     damage: 6,
     xp: 1,

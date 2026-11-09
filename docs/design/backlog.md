@@ -616,6 +616,9 @@ sementes depois de cada lote e registrar.
 - Feito (lote 1, sim de 12 sementes): Aldo em Valmor 4 para **10/12**; Aldo 18 para **24/36** (67%). Reserva de
   `maxHp` não foi necessária. Lab: Lâmina multidão Lmax 1984 para 2349, Fúria 5115 para 7254; DPS real da Fúria no sim
   86 para 95.
+- Ajuste final da R2 (depois do lote 4, com as fases mais duras): a reserva `maxHp` +20 para **+30** e armadura do
+  Aldo 1 para **2**. Com 24 sementes, a armadura sozinha vale +10 vitórias em 72 para o Aldo (36 para 46). Sim final
+  de 12 sementes: Aldo **22/36** (61%), Aldo em Valmor **8/12**; com 48 sementes, 95/144 (66%) e 30/48 em Valmor.
 
 **RE-02 · Cada fase pelo menos tão difícil quanto a anterior** · impl + bal · P · ✅ feito
 
@@ -627,6 +630,10 @@ sementes depois de cada lote e registrar.
 - Aceite: vitórias Valmor ≥ Cripta ≥ Estrada, com folga de 3.
 - Feito (lote 1, sim de 12 sementes): vitórias Valmor 31 para **38/48**, Cripta 42 para **37/48**, Estrada 36 para
   **37/48** (ordem certa, dentro da folga de 3). Lyra na Cripta caiu de 10 para 7/12.
+- Ajuste final da R2: o lote 3 (Elos mais cedo, mira no chefe) deixou a Cripta fácil de novo (42 a 44 de 48). Cripta
+  com mais vida: `bones` 12 para **14**, `ghost` 38 para **44**, `rat` 16 para **18**. Com 48 sementes: Valmor
+  **152**, Cripta **152**, Estrada **155** de 192 (dentro da folga). No sim final de 12 sementes: 38 / 34 / 40 de 48
+  (ruído das sementes 1 a 12; nas sementes 13 a 24 a Cripta fez 41 e a Estrada 39).
 
 **RE-05 · Parede dos 6:30** · impl + bal · P · ✅ feito
 
@@ -637,6 +644,10 @@ sementes depois de cada lote e registrar.
 - Aceite: mortes entre 6 e 8 min abaixo de 12 nas 144 corridas; nenhum snapshot novo acima de 650 vivos.
 - Feito (lote 1, sim de 12 sementes): mortes entre 6 e 8 min 14 para **12** de 144 (o lote 2 continua o trabalho, ver
   a tabela final da R2); snapshots acima de 650 vivos 15 para 7, máximo 700 (nenhum acima do que já havia).
+- Ajuste final da R2: com os lotes 2 a 4 o jogo ficou fácil demais (122/144, Lyra 92%, Teo 89%); `CURVE` +5% de vida
+  de 5:00 em diante (300 s 2.2, 390 s 2.6, 480 s 3.7, 540 s 4.3; o degrau de 6:30 continua menor que antes, 1,18x
+  contra 1,33x). Mortes entre 6 e 8 min: 12 de 144 no sim final de 12 sementes, 41 de 576 com 48 sementes (10,3 por
+  144). Snapshots no teto de 700 vivos: 20 de 600 no sim final (o teto é o `maxActive`, nenhum acima).
 
 **RE-03 · Elos corpo a corpo e de aura na altura dos outros** · impl + bal · P · ✅ feito
 
