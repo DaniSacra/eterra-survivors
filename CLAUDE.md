@@ -47,6 +47,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture is drawn from
   code in `render/art/` (cartoon vector, `Pen`); swap an entry to an image URL to use real sprites.
   The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
+  UI/UX proposals (what the player sees and when) come from the `ui-designer` agent, based on the reference
+  screenshots in `docs/design/ui-references/`; the visual-director implements them.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Game, Hud (overlay), LevelUp, Pause, End.
 - Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
   `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.
