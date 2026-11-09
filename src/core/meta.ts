@@ -439,8 +439,11 @@ export function weaponUsed(save: MetaSave, id: WeaponId): boolean {
   return Object.values(save.records).some((r) => (r?.weaponRuns[id] ?? 0) > 0);
 }
 
+/** Test mode (`?dev`, set by the render layer): every hero and stage open, whatever the config says. */
+export const playtest = { unlockAll: false };
+
 export const heroUnlocked = (save: MetaSave, id: CharacterId): boolean =>
-  config.unlockAllHeroes || CHARACTERS[id].cost === 0 || save.heroes.includes(id);
+  playtest.unlockAll || config.unlockAllHeroes || CHARACTERS[id].cost === 0 || save.heroes.includes(id);
 
 /** Buys a hero if affordable. Returns true on success. */
 export function unlockHero(save: MetaSave, id: CharacterId): boolean {
@@ -454,7 +457,12 @@ export function unlockHero(save: MetaSave, id: CharacterId): boolean {
 /** The first stage is always open; each next one opens when the previous is cleared (or all, while playtesting). */
 export function stageUnlocked(save: MetaSave, id: StageId): boolean {
   const i = STAGE_IDS.indexOf(id);
-  return config.unlockAllStages || i === 0 || save.cleared.includes(STAGE_IDS[i - 1] as StageId);
+  return (
+    playtest.unlockAll ||
+    config.unlockAllStages ||
+    i === 0 ||
+    save.cleared.includes(STAGE_IDS[i - 1] as StageId)
+  );
 }
 
 export function markCleared(save: MetaSave, id: StageId): void {
@@ -468,6 +476,11 @@ export function shopCost(save: MetaSave, id: ShopId): number | null {
   const def: ShopDef = SHOP[id];
   const next = shopLevel(save, id) + 1;
   return next > def.maxLevel ? null : def.baseCost * next;
+}
+
+/** Test mode: puts an item at any level (clamped to 0..max), for free. */
+export function setShopLevel(save: MetaSave, id: ShopId, level: number): void {
+  save.shop[id] = Math.max(0, Math.min(SHOP[id].maxLevel, Math.round(level)));
 }
 
 /** Buys the next level if affordable. Returns true on success. */

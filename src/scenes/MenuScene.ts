@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { devTag } from '../render/dev';
 import { t } from '../i18n/pt-BR';
 import { UI, button, isShort, keyNav, label, newsDot, restartOnResize, safeArea } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
@@ -83,6 +84,7 @@ export class MenuScene extends Phaser.Scene {
       ),
     ]);
 
+    devTag(this);
     restartOnResize(this);
     this.cameras.main.fadeIn(150);
   }

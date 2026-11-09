@@ -472,6 +472,16 @@ export const t = {
     } satisfies Record<ChargeKey, string>,
   },
 
+  /** Test mode (`?dev` in the URL). */
+  dev: {
+    tag: 'MODO DEV · progresso à parte',
+    down: '−',
+    up: '+',
+    allMax: 'Tudo no máximo',
+    allZero: 'Zerar tudo',
+    hint: '+ e − mudam o nível (grátis)',
+  },
+
   bossWarning: (boss: string) => `${boss} chegou!`,
   /** Segunda Chance used: the hero got up again. */
   revived: 'Segunda Chance! De pé outra vez.',

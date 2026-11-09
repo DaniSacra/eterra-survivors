@@ -2,18 +2,20 @@ import Phaser from 'phaser';
 import {
   confirmPurchase,
   shopCost,
+  setShopLevel,
   shopLevel,
   shopShortfall,
   type MetaSave,
   type ShopCart,
 } from '../core/meta';
-import { SHOP, SHOP_SECTIONS, type ShopId, type ShopSection } from '../data/shop';
+import { SHOP, SHOP_IDS, SHOP_SECTIONS, type ShopId, type ShopSection } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from '../render/art/pen';
 import { STAT_ICON } from '../render/buildPanel';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
 import { setSetting, settings } from '../render/settings';
+import { DEV_MODE, devTag } from '../render/dev';
 import {
   UI,
   backButton,
@@ -163,7 +165,15 @@ export class ShopScene extends Phaser.Scene {
     });
     this.select(ids[start] as ShopId);
 
-    bindKeys(this, (kb) => kb.once('keydown-ESC', () => this.back()));
+    bindKeys(this, (kb) => {
+      kb.once('keydown-ESC', () => this.back());
+      if (DEV_MODE)
+        kb.on('keydown', (e: KeyboardEvent) => {
+          if (e.key === '+' || e.key === '=') this.devStep(1);
+          else if (e.key === '-') this.devStep(-1);
+        });
+    });
+    devTag(this);
     restartOnResize(this);
   }
 
@@ -201,8 +211,8 @@ export class ShopScene extends Phaser.Scene {
       this.nav?.focus(index);
       this.select(id);
     });
-    // Space/Enter on the focused card buys it (the confirmation).
-    card.setData('action', () => this.confirm());
+    // Space/Enter on the focused card buys it (the confirmation); in test mode it raises it for free.
+    card.setData('action', () => (DEV_MODE ? this.devStep(1) : this.confirm()));
     const l = x - w / 2;
     const icon = Math.min(26, h - 12);
     this.add.image(l + 8 + icon / 2, y, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
@@ -216,9 +226,15 @@ export class ShopScene extends Phaser.Scene {
       bold: true,
       align: 'left',
     }).setOrigin(0, compact ? 0.5 : 0);
-    if (!compact) label(this, tx, y + h / 2 - 20, level, 12, { color: UI.muted, align: 'left' });
+    if (!compact && !DEV_MODE) label(this, tx, y + h / 2 - 20, level, 12, { color: UI.muted, align: 'left' });
     const py = compact ? y : y + h / 2 - 12;
-    if (cost === null) seal(this, rx, py, compact ? t.shop.maxedShort : t.shop.maxed);
+    if (DEV_MODE)
+      // Test mode: no prices, just where each item stands.
+      label(this, rx, py, level, 12, {
+        bold: true,
+        color: shopLevel(save, id) ? UI.gold : UI.muted,
+      }).setOrigin(1, 0.5);
+    else if (cost === null) seal(this, rx, py, compact ? t.shop.maxedShort : t.shop.maxed);
     else
       label(this, rx, py, compact ? t.shop.costShort(cost) : t.shop.cost(cost), 12, {
         bold: true,
@@ -262,6 +278,7 @@ export class ShopScene extends Phaser.Scene {
     };
     let ry = y + pad + big + 8;
     row(ry, t.shop.now, effectAt(id, level), UI.text);
+    if (DEV_MODE) return this.devControls(id, level);
     // Keyboard players get the two-step rule spelled out (touch players see the button).
     if (!this.sys.game.device.input.touch && h >= 180)
       d.push(label(this, x + w / 2, y + h - 12 - 52, t.shop.hintKeys, 11, { color: UI.muted }));
@@ -293,6 +310,51 @@ export class ShopScene extends Phaser.Scene {
     );
     d.push(buyBtn, buyBtn.getData('label') as Phaser.GameObjects.Text);
     if (missing) disable(buyBtn);
+  }
+
+  /** Test mode: − and + for this item, and the whole Loja at max or at zero, all free. */
+  private devControls(id: ShopId, level: number): void {
+    const { x, y, w, h } = this.detailBox;
+    const d = this.detail;
+    const pad = 12;
+    const bw = (w - pad * 3) / 2;
+    const add = (bx: number, by: number, text: string, act: () => void, off = false) => {
+      const b = button(this, bx + bw / 2, by, bw, 36, act, text);
+      const txt = b.getData('label') as Phaser.GameObjects.Text;
+      // The signs read big; the long labels shrink to fit narrow panels.
+      if (text.length === 1) txt.setFontSize(24);
+      else if (txt.width > bw - 12) txt.setFontSize(13);
+      d.push(b, txt);
+      if (off) disable(b);
+    };
+    const low = y + h - pad - 18;
+    const high = low - 44;
+    add(x + pad, high, t.dev.down, () => this.devStep(-1), level === 0);
+    add(x + pad * 2 + bw, high, t.dev.up, () => this.devStep(1), level === SHOP[id].maxLevel);
+    add(x + pad, low, t.dev.allZero, () => this.devAll(false));
+    add(x + pad * 2 + bw, low, t.dev.allMax, () => this.devAll(true));
+    if (h >= 200) d.push(label(this, x + w / 2, high - 30, t.dev.hint, 11, { color: UI.muted }));
+  }
+
+  private devStep(by: number): void {
+    const id = this.cart.selected;
+    if (!DEV_MODE || !id || !this.ready) return;
+    const save = loadSave();
+    setShopLevel(save, id, shopLevel(save, id) + by);
+    this.devSave(save);
+  }
+
+  private devAll(max: boolean): void {
+    if (!this.ready) return;
+    const save = loadSave();
+    for (const id of SHOP_IDS) setShopLevel(save, id, max ? SHOP[id].maxLevel : 0);
+    this.devSave(save);
+  }
+
+  private devSave(save: MetaSave): void {
+    this.ready = false;
+    writeSave(save);
+    this.scene.restart({ focus: this.cart.selected });
   }
 
   private confirm(): void {

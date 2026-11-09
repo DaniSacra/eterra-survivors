@@ -127,4 +127,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   (Etapa 6 in `docs/balance-baseline.md`) and still needs playtesting.
 - Overlays bind keys through `bindKeys()` (render/ui.ts): the key that opens an overlay is still queued that
   frame and would otherwise trigger it immediately.
-- `window.game` is exposed in dev builds only, for browser automation.
+- `window.game` is exposed in dev builds and in test mode, for browser automation.
+- **Test mode** (`?dev` at the end of the URL, also on the published game; `render/dev.ts`): every hero and stage
+  open (`playtest.unlockAll` in `core/meta.ts`), the Loja sets any level for free (− / +, keys + and −, the whole
+  Loja at max or zero; `setShopLevel`), a "MODO DEV" tag on Menu, Preparação and Loja, and its own save key
+  (`eterra-survivors.save.dev`), so the player's real progress is never touched.

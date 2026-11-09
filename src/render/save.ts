@@ -11,9 +11,10 @@ import { checkAchievements } from '../core/achievements';
 import type { RunSummary } from '../core/records';
 import type { CharacterId } from '../data/characters';
 import type { StageId } from '../data/stages';
+import { DEV_MODE } from './dev';
 
 /** Browser persistence of the meta save. Storage may be missing or blocked: the game still runs without it. */
-const KEY = 'eterra-survivors.save';
+const KEY = DEV_MODE ? 'eterra-survivors.save.dev' : 'eterra-survivors.save'; // test mode keeps its own progress
 
 export function loadSave(): MetaSave {
   try {

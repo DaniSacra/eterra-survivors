@@ -432,6 +432,14 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: `config.unlockAllHeroes` e `config.unlockAllStages` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
 - Aceite: um jogador novo libera o segundo herói em 3 a 5 corridas no sim.
 
+**D-07 · Modo de teste `?dev`** · impl · P · ✅ feito
+
+- Por quê: pedido do Daniel para validar o jogo com qualquer herói, qualquer fase e qualquer combinação da Loja.
+- O quê: `?dev` no fim da URL (vale no jogo publicado); heróis e fases liberados, Loja com − / + grátis por item,
+  "Tudo no máximo" e "Zerar tudo", selo "MODO DEV" e save próprio (o progresso real não muda).
+- Aceite: com `?dev`, a Loja no máximo vale na partida (Segunda Chance, Segunda Bainha etc.) e o save normal fica
+  intocado.
+
 ## Etapa 6: Lançamento
 
 **L-01 · Medição em celular real** · bal + impl · P

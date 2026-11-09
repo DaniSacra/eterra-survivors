@@ -11,6 +11,7 @@ import {
   sanitizeSave,
   serializeSave,
   shopBonuses,
+  setShopLevel,
   shopCost,
 } from '../../src/core/meta';
 import { dropPickup } from '../../src/core/pickups';
@@ -45,6 +46,17 @@ describe('shop', () => {
     expect(w.player.stats.maxHp).toBe(config.player.stats.maxHp + CHARACTERS.aldo.stats.maxHp + 20);
     expect(w.player.hp).toBe(w.player.stats.maxHp);
     expect(w.charges.reroll).toBe(config.charges.reroll + 3);
+  });
+
+  it('test mode sets any level for free, clamped to the item range', () => {
+    const save = newSave();
+    setShopLevel(save, 'might', 4);
+    expect(shopBonuses(save).stats.might).toBeCloseTo(0.2);
+    setShopLevel(save, 'might', 99);
+    expect(save.shop.might).toBe(SHOP.might.maxLevel);
+    setShopLevel(save, 'might', -3);
+    expect(shopBonuses(save).stats.might).toBeUndefined();
+    expect(save.gold).toBe(0);
   });
 
   it('Segunda Chance: the hero gets up once with half their life, briefly untouchable', () => {

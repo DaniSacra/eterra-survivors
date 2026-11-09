@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { devTag } from '../render/dev';
 import { heroUnlocked, lastRun, stageUnlocked, unlockHero } from '../core/meta';
 import type { RunSetup } from '../core/world';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
@@ -141,6 +142,7 @@ export class SelectScene extends Phaser.Scene {
         else if (k === 'escape') this.scene.start(SCENES.menu);
       }),
     );
+    devTag(this);
     restartOnResize(this);
   }
 

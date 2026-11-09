@@ -12,6 +12,10 @@ import { OptionsScene } from './scenes/OptionsScene';
 import { CollectionScene } from './scenes/CollectionScene';
 import { EloScene } from './scenes/EloScene';
 import { sound } from './render/sound';
+import { DEV_MODE } from './render/dev';
+import { playtest } from './core/meta';
+
+playtest.unlockAll = DEV_MODE;
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -39,7 +43,7 @@ const game = new Phaser.Game({
 sound.init();
 
 // Dev-only handle for browser automation and console debugging.
-if (import.meta.env.DEV) (window as unknown as { game: Phaser.Game }).game = game;
+if (import.meta.env.DEV || DEV_MODE) (window as unknown as { game: Phaser.Game }).game = game;
 
 // Installed on a phone (Adicionar à tela inicial): the service worker keeps the game playable offline.
 if (import.meta.env.PROD && 'serviceWorker' in navigator)
