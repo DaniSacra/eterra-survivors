@@ -19,6 +19,21 @@ describe('World', () => {
     expect(w.events).toContainEqual({ type: 'lost' });
   });
 
+  it('a boss killed in the same step the hero dies is a win, reported once', () => {
+    const w = bareWorld();
+    w.addWeapon('yahAura');
+    w.player.hp = 1;
+    spawnEnemy(w, 'skeleton', 5, 0);
+    const boss = spawnEnemy(w, 'blackKnight', 0, 40);
+    boss.hp = 1;
+    w.boss = boss;
+    w.step(1 / 60, still);
+    expect(w.player.hp).toBeLessThanOrEqual(0);
+    expect(w.state).toBe('won');
+    const ends = w.events.filter((e) => e.type === 'won' || e.type === 'lost');
+    expect(ends).toEqual([{ type: 'won' }]);
+  });
+
   it('does not advance when not playing', () => {
     const w = new World(1);
     w.state = 'levelup';

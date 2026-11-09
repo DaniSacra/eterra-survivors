@@ -465,7 +465,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 
 ### R1 · Bugs e integridade
 
-**RB-01 · Vitória e derrota no mesmo passo viram derrota** · impl · P · aprovado
+**RB-01 · Vitória e derrota no mesmo passo viram derrota** · impl · P · ✅ feito
 
 - Por quê: 02-code #2 (reproduzido): herói com 1 de HP mordido no mesmo passo em que a Aura mata o chefe termina com
   `state = 'lost'` e eventos `['playerHit', 'won', 'lost']`; o `bank()` lê `lost`, a fase **não** é liberada, a tela de

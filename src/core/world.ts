@@ -140,8 +140,10 @@ export class World {
     updatePickups(this);
     updateEffects(this, dt);
 
+    // The boss may have fallen this step: victory wins over a simultaneous death.
+    if (this.state !== 'playing') return;
     if (this.player.hp <= 0) this.end('lost');
-    else if (this.state === 'playing' && this.pendingLevelUps > 0) this.openLevelUp();
+    else if (this.pendingLevelUps > 0) this.openLevelUp();
   }
 
   /** Picks one of `upgradeOptions`. Opens the next choice if more level-ups are queued. */
@@ -211,6 +213,7 @@ export class World {
   }
 
   private end(state: 'won' | 'lost'): void {
+    if (this.state === 'won' || this.state === 'lost') return;
     this.state = state;
     this.events.push({ type: state });
   }
