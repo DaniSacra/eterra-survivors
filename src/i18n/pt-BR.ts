@@ -208,6 +208,8 @@ export const t = {
     gold: (n: number) => `Ouro: ${n}`,
     unlock: (n: number) => `Liberar: ${n} ouro`,
     locked: 'Vença a fase anterior',
+    /** Seal on a stage already won. */
+    cleared: 'Vencida',
     keys: '←→ herói · ↑↓ fase · Enter parte',
     signature: (weapon: string) => `Arma própria: ${weapon}`,
   },

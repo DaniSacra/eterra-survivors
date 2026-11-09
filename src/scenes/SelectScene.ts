@@ -8,7 +8,17 @@ import { formatStatDelta } from '../render/describe';
 import { HERO_COLOR } from '../render/fx';
 import { t } from '../i18n/pt-BR';
 import { loadSave, rememberChoice, writeSave } from '../render/save';
-import { UI, bindKeys, button, disable, isConfirm, isShort, label, restartOnResize } from '../render/ui';
+import {
+  UI,
+  bindKeys,
+  button,
+  disable,
+  isConfirm,
+  isShort,
+  label,
+  restartOnResize,
+  seal,
+} from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
@@ -76,7 +86,16 @@ export class SelectScene extends Phaser.Scene {
     const sh = Math.max(36, Math.min(62, (by - y - (short ? 30 : 54)) / STAGE_IDS.length - gap));
     STAGE_IDS.forEach((id, i) => {
       const yy = y + i * (sh + gap) + sh / 2;
-      this.stageCard(id, cx, yy, wrapW, sh, id === choice.stage, stageUnlocked(save, id));
+      this.stageCard(
+        id,
+        cx,
+        yy,
+        wrapW,
+        sh,
+        id === choice.stage,
+        stageUnlocked(save, id),
+        save.cleared.includes(id),
+      );
     });
     y += STAGE_IDS.length * (sh + gap) + 8;
 
@@ -90,10 +109,11 @@ export class SelectScene extends Phaser.Scene {
     const bh = short ? 44 : 46;
     if (!this.sys.game.device.input.touch && !short)
       label(this, cx, by - 38, t.select.keys, 12, { color: UI.muted });
-    button(this, cx - bw / 2 - gap / 2, by, bw, bh, () => this.scene.start(SCENES.menu), t.select.back);
+    // The main action on the left (focused look), Back on the right, as on the end screen.
+    button(this, cx + bw / 2 + gap / 2, by, bw, bh, () => this.scene.start(SCENES.menu), t.select.back);
     const go = button(
       this,
-      cx + bw / 2 + gap / 2,
+      cx - bw / 2 - gap / 2,
       by,
       bw,
       bh,
@@ -137,15 +157,17 @@ export class SelectScene extends Phaser.Scene {
     const card = button(this, x, y, w, h, () => this.pick({ character: id }));
     card.setStrokeStyle(on ? 3 : 2, on ? UI.accent : UI.border);
     const top = y - h / 2;
+    // The hero standing in the card's corner, feet on its line, big enough to tell who it is.
     this.add
-      .image(x - w / 2 + 20, top + 20, CHARACTERS[id].sprite)
-      .setScale(ART_SCALE * 0.9)
+      .image(x - w / 2 + 23, top + Math.min(58, h - 2), CHARACTERS[id].sprite)
+      .setOrigin(0.5, 1)
+      .setScale(ART_SCALE * 1.2)
       .setAlpha(owned ? 1 : 0.4);
-    label(this, x - w / 2 + 38, top + 9, c.name, 16, { bold: true, align: 'left' });
-    label(this, x - w / 2 + 38, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
+    label(this, x - w / 2 + 46, top + 9, c.name, 16, { bold: true, align: 'left' });
+    label(this, x - w / 2 + 46, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
     if (h < 70) return;
     const desc = owned ? c.desc : t.select.unlock(CHARACTERS[id].cost);
-    const d = label(this, x - w / 2 + 10, top + 46, desc, 12, {
+    const d = label(this, x - w / 2 + 10, top + 58, desc, 12, {
       color: owned ? UI.text : UI.gold,
       align: 'left',
       wrap: w - 20,
@@ -203,6 +225,7 @@ export class SelectScene extends Phaser.Scene {
     h: number,
     on: boolean,
     open: boolean,
+    cleared: boolean,
   ): void {
     const s = t.stages[id];
     const card = button(this, x, y, w, h, () => open && this.pick({ stage: id }));
@@ -223,10 +246,13 @@ export class SelectScene extends Phaser.Scene {
       align: 'left',
       color: open ? UI.text : UI.textOff,
     });
+    // Vencida: the same seal as the shop's Completo, top right.
+    if (cleared) seal(this, x + w / 2 - 10, y - h / 2 + 16, t.select.cleared);
     if (h >= 44)
       label(this, tl, y - h / 2 + 29, open ? s.desc : t.select.locked, 12, {
         color: open ? UI.muted : UI.textOff,
         align: 'left',
+        wrap: w - (tl - (x - w / 2)) - 10,
       });
   }
 

@@ -1081,13 +1081,16 @@ da Estrada), descritos nos próprios itens.
   nomes da receita (ou "Nasce de") embaixo. Card com 74 px no mínimo (vira 3 colunas em 820x420). De carona: ícone
   da Geada em branco-lilás, como as zonas (A-05).
 
-**RA-06 · Preparação: botão principal à esquerda, herói maior, fase vencida** · visual · P · aprovado
+**RA-06 · Preparação: botão principal à esquerda, herói maior, fase vencida** · visual · P · ✅ feito
 
 - Por quê: 04-visual #17: Partir à direita contra o padrão (principal à esquerda, como na tela final); herói de ~18 px
   no cartão; 05-ui #12: o jogador não vê quais fases já venceu.
 - O quê: Partir à esquerda, Voltar à direita; herói do cartão a `ART_SCALE * 1.2`; selo "Vencida" (`t.select.cleared`)
   com o estilo do "Completo" da Loja, lendo `save.cleared`.
 - Aceite: captura com Valmor vencida e Cripta aberta mostra o selo; nada sobreposto em 420x820 e 1000x680.
+- Feito: Partir à esquerda (borda de foco), Voltar à direita; herói do cartão a `ART_SCALE * 1.2`, de pé no canto
+  com os pés na linha da descrição (o chapéu da Lyra cabe no cartão); selo "Vencida" com o `seal()` da RA-04 no canto
+  superior direito do cartão da fase. Conferido em 390x844, 420x820, 820x420, 1000x680 e 1920x1080.
 
 ### Rejeitados nesta revisão
 
