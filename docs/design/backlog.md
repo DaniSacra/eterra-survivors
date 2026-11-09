@@ -200,7 +200,7 @@ depois e registra em `docs/balance-baseline.md`.
   antes. Próximo passo, se o Daniel quiser: a próxima elite depois da receita pronta solta o baú mais cedo, ou uma
   elite extra aos 6:00.
 
-**E-09 · Armadura não pode zerar o dano** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+**E-09 · Armadura não pode zerar o dano** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
 - Por quê: balance-tester: armadura 5 corta 68% do dano e todo inimigo comum passa a dar 1.
 - O quê: passiva `armor` maxLevel 5 para 3 (`data/upgrades.ts`), ou `config.player.minDamage` 2. Escolher pelo sim
@@ -211,6 +211,13 @@ depois e registra em `docs/balance-baseline.md`.
   O quê: `config.player.minDamage` 1 para **2** (regra única para herói, passiva e Loja; `SHOP.armor` fica como está).
   Aceite novo: no sim veterano (`bal/veteran.test.ts` do balance-tester), dano recebido por minuto acima de 10 em
   pelo menos metade das corridas, e o sim normal sem queda de mais de 2 vitórias em 48.
+- Feito na R2 (lote 4): `config.player.minDamage` 1 para **2**, teste em `pickups.test.ts` (armadura 7 leva 2 de um
+  golpe comum). Sim normal: 122/144 antes e depois (nenhuma queda). Sim veterano (Loja inteira, 48 corridas): **4 de
+  48** com mais de 10 de dano por minuto, igual com `minDamage` 1; vitórias 45/48. Aceite novo **não cumprido**, e não
+  por causa da armadura: só o Aldo apanha (12 a 13 por minuto em Valmor e na Cripta, 3 na Estrada); Lyra, Teo e
+  Andilla com a Loja inteira matam tudo antes de encostar (0 a 0,8 por minuto). O veterano fácil é poder total, não
+  armadura: pede a dificuldade extra por fase vencida ("Ideias para depois"). A regra de 2 fica porque é o piso certo
+  quando o Aldo empilha armadura.
 
 **E-10 · Renda de ouro cerca de 2.5x** · impl + bal · P · ✅ feito (valores corrigidos no texto em 2026-11-08)
 

@@ -74,6 +74,14 @@ describe('new passive stats', () => {
     expect(w.player.hp).toBe(config.player.stats.maxHp - 2 - config.player.minDamage);
   });
 
+  it('full armor (hero 1 + passive 3 + shop 3) still takes 2 from a common hit (E-09)', () => {
+    const w = quietWorld();
+    w.player.stats.armor = 7;
+    hurtPlayer(w.player, 6);
+    expect(config.player.minDamage).toBe(2);
+    expect(w.player.hp).toBe(config.player.stats.maxHp - 2);
+  });
+
   it('growth multiplies picked xp', () => {
     const w = quietWorld();
     w.player.stats.growth = 2;

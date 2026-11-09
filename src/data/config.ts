@@ -26,7 +26,7 @@ export const config = {
       greed: 1, // gold multiplier
     },
     /** Hits never do less than this, whatever the armor. */
-    minDamage: 1,
+    minDamage: 2,
   },
   enemies: {
     maxActive: 700,
