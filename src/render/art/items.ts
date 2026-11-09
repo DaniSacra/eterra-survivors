@@ -26,15 +26,21 @@ const blade = (steel: number, hilt: number, len: number): ArtDef => ({
   },
 });
 
+/** Drawn 1.8x so the hammer is as big as its hit area (radius 12): smaller, it was lost on the ground. */
+const HAMMER_SCALE = 1.8;
 const hammer = (head: number, glow: boolean): ArtDef => ({
-  w: 26,
-  h: 22,
+  w: Math.round(26 * HAMMER_SCALE),
+  h: Math.round(22 * HAMMER_SCALE),
   draw(p) {
+    p.g.save();
+    p.g.scaleCanvas(HAMMER_SCALE, HAMMER_SCALE);
     if (glow) p.fill(0xffa040, 0.35).fillCircle(19, 11, 11);
     p.rrect(1, 9.5, 16, 3.5, 1.5, 0x9a6232);
     p.rrect(14, 3, 10, 16, 2.5, head);
     p.ink();
-    p.shine(17, 6, 4, 3, glow ? 0.6 : 0.35);
+    p.fill(0xffffff, 0.5).fillRect(15.5, 4.5, 2, 13); // bright steel edge: reads on every ground
+    p.shine(17, 6, 4, 3, glow ? 0.6 : 0.5);
+    p.g.restore();
   },
 });
 
@@ -93,7 +99,7 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.holyLight': glowOrb(0xffffff, 0xffe070, 5),
   'proj.daggers': blade(0xe8eff8, 0x55555e, 16),
   'proj.fan': blade(0xffd8e0, 0xa8323e, 18),
-  'proj.hammer': hammer(0x8a8a96, false),
+  'proj.hammer': hammer(0xc4cede, false),
   'proj.forgeFury': hammer(0xffa040, true),
   'proj.wisps': wisp(0xe8ffff, 0x40e0d8, 1),
   'proj.soulProcession': wisp(0xffffff, 0x8ac0f0, 1.3),
