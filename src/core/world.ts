@@ -52,6 +52,8 @@ export class World {
   /** The choices on screen while `state === 'levelup'`. */
   upgradeOptions: UpgradeOption[] = [];
   readonly passives: Partial<Record<PassiveId, number>> = {};
+  /** Bumped whenever weapons or passives change, so the renderer redraws the build only then. */
+  buildRev = 0;
   /** Gold picked up this run (banked into the save when the run ends). */
   gold = 0;
   /** Uses left of the level-up helpers. */

@@ -48,14 +48,19 @@ export function rollUpgrades(world: World, n = config.xp.choices): UpgradeOption
   return pool.length > 0 ? pool.slice(0, n) : [{ kind: 'heal' }];
 }
 
+/** An owned base weapon's Elo recipe is complete (max level + its passive owned): the next chest forms it. */
+export function eloReady(world: World, weaponId: WeaponId): boolean {
+  const evolved = evolutionOf(weaponId);
+  if (!evolved || world.hasWeapon(evolved.id)) return false;
+  const base = world.weapons.find((w) => w.id === weaponId);
+  return !!base && base.level >= maxLevel(weaponId) && (world.passives[evolved.evo.passive] ?? 0) > 0;
+}
+
 /** The first evolution whose recipe is complete: base weapon at max level + its passive owned. */
 export function readyEvolution(world: World): UpgradeOption | null {
   for (const id of EVOLVED_IDS) {
     const evo = EVOLUTIONS[id];
-    if (!evo || world.hasWeapon(id)) continue;
-    const base = world.weapons.find((w) => w.id === evo.from);
-    if (base && base.level >= maxLevel(base.id) && (world.passives[evo.passive] ?? 0) > 0)
-      return { kind: 'evolution', id, from: evo.from };
+    if (evo && eloReady(world, evo.from)) return { kind: 'evolution', id, from: evo.from };
   }
   return null;
 }
@@ -70,8 +75,10 @@ export function chestReward(world: World): UpgradeOption {
   return readyEvolution(world) ?? world.rng.pick(candidates(world, false)) ?? { kind: 'heal' };
 }
 
+/** Applies a choice or a chest reward. Anything that changes the build bumps `world.buildRev` (the HUD redraws). */
 export function applyUpgrade(world: World, opt: UpgradeOption): void {
   const p = world.player;
+  if (opt.kind !== 'heal') world.buildRev++;
   switch (opt.kind) {
     case 'weapon': {
       const owned = world.weapons.find((w) => w.id === opt.id);

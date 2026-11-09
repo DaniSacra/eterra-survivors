@@ -4,6 +4,7 @@ import {
   candidates,
   rollUpgrades,
   weaponLevelDiff,
+  eloReady,
   weaponsCompletedBy,
 } from '../../src/core/upgrades';
 import { addXp, xpToNext } from '../../src/core/xp';
@@ -116,5 +117,34 @@ describe('passive limit', () => {
     expect(weaponsCompletedBy(['frost'], 'might')).toEqual([]);
     // An Elo already formed needs nothing more.
     expect(weaponsCompletedBy(['fury'], 'might')).toEqual([]);
+  });
+
+  it('bumps buildRev on every build change, not on a heal', () => {
+    const w = quietWorld();
+    const r0 = w.buildRev;
+    applyUpgrade(w, { kind: 'weapon', id: 'frost', level: 1 });
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
+    expect(w.buildRev).toBe(r0 + 2);
+    applyUpgrade(w, { kind: 'heal' });
+    expect(w.buildRev).toBe(r0 + 2);
+    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    expect(w.buildRev).toBe(r0 + 3);
+  });
+
+  it('eloReady: base at max level and the passive owned, until the Elo is formed', () => {
+    const w = quietWorld();
+    const blade = w.weapons.find((o) => o.id === 'blade');
+    if (!blade) throw new Error('aldo starts with the blade');
+    blade.level = WEAPONS.blade.levels.length;
+    expect(eloReady(w, 'blade')).toBe(false);
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
+    expect(eloReady(w, 'blade')).toBe(true);
+    blade.level--;
+    expect(eloReady(w, 'blade')).toBe(false);
+    blade.level++;
+    expect(eloReady(w, 'frost')).toBe(false); // not owned
+    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    expect(eloReady(w, 'blade')).toBe(false);
+    expect(eloReady(w, 'fury')).toBe(false);
   });
 });

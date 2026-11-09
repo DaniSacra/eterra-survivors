@@ -3,6 +3,7 @@ import { formatTime } from '../core/format';
 import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
 import { t } from '../i18n/pt-BR';
+import { BuildSlots } from '../render/buildPanel';
 import { Joystick } from '../render/joystick';
 import { UI, button, label, safeArea } from '../render/ui';
 import { spawnOnRing } from '../core/enemies';
@@ -29,6 +30,9 @@ export class HudScene extends Phaser.Scene {
   private pauseBtn!: Phaser.GameObjects.Rectangle;
   private pauseIcon!: Phaser.GameObjects.Graphics;
   private hpText!: Phaser.GameObjects.Text;
+  /** The build strip (weapons and passives with level pips), redrawn only when `world.buildRev` changes. */
+  private build!: BuildSlots;
+  private shownRev = -1;
   private debugOn = false;
   private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
   /** Safe-area insets, refreshed on layout. */
@@ -41,6 +45,7 @@ export class HudScene extends Phaser.Scene {
   init(data: { world: World }): void {
     this.world = data.world;
     this.shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
+    this.shownRev = -1;
   }
 
   create(): void {
@@ -73,6 +78,7 @@ export class HudScene extends Phaser.Scene {
       .fillStyle(UI.textHex, 1)
       .fillRect(-7, -8, 5, 16)
       .fillRect(2, -8, 5, 16);
+    this.build = new BuildSlots(this);
     this.joystick = new Joystick(this);
     this.layout();
 
@@ -98,6 +104,10 @@ export class HudScene extends Phaser.Scene {
     this.kills.setPosition(right, top + 26);
     this.hpText.setPosition(left + this.hpWidth() / 2, top + PAD + HP_H / 2);
     this.gold.setPosition(left, top + PAD + HP_H + 6);
+    // Roomy screens get bigger slots; a new size means a redraw.
+    this.build.setSize(width >= 700 && height >= 600 ? 28 : 24);
+    this.build.container.setPosition(left, top + PAD + HP_H + 28);
+    this.shownRev = -1;
     this.bossName.setPosition(width / 2, height - s.bottom - 58);
     this.banner.setPosition(width / 2, height * 0.3);
     this.pauseBtn.setPosition(right - 20, top + 70);
@@ -158,6 +168,11 @@ export class HudScene extends Phaser.Scene {
       g.fillStyle(UI.dim, 0.7).fillRect(bx, by, bw, 14);
       g.fillStyle(UI.hp).fillRect(bx, by, (bw * Math.max(0, boss.hp)) / boss.maxHp, 14);
       g.lineStyle(1, UI.dangerHex).strokeRect(bx, by, bw, 14);
+    }
+
+    if (w.buildRev !== this.shownRev) {
+      this.shownRev = w.buildRev;
+      this.build.refresh(w);
     }
 
     // Texts only change when their value does (setText re-renders a texture).

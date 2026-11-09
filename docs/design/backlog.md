@@ -941,7 +941,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Aceite: toque 100 ms depois de abrir não escolhe; teste da lista de armas; captura sem faixa clara e com o pulso
   visível.
 
-**RU-02 · Faixa da build no HUD** · ui + impl · M · aprovado
+**RU-02 · Faixa da build no HUD** · ui + impl · M · ✅ feito
 
 - Por quê: 05-ui #1 e referência do Daniel (`docs/design/ui-references/hud-active-weapons.png`): o jogador não vê a
   build durante a corrida, nem slots livres, nem que só falta um baú para o Elo. É o item que mais leva a profundidade
