@@ -492,6 +492,8 @@ export const t = {
   /** Test mode (`?dev` in the URL). */
   dev: {
     tag: 'MODO DEV · progresso à parte',
+    /** Standing, where the corner is narrow. */
+    tagShort: 'MODO DEV',
     down: '−',
     up: '+',
     allMax: 'Tudo no máximo',
