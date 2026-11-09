@@ -50,11 +50,17 @@ const HIT_FLASH = config.enemies.hitFlash;
 const HIT_WHITE = 0.5;
 
 /**
- * Weapons that hit a whole area on a beat (auras, frost patches): no white flash, or the crowd inside would turn
- * into one white blob on every tick; their sparks, the squash and the weapon's own pulse show the hit.
+ * Weapons that hit many at once (swings, slams, auras, frost, bursts, chains, ricochets, burning ground): no white
+ * flash, or the crowd inside would turn into one white blob; their sparks, the squash and the weapon's own shape
+ * show the hit. Only single-target hits (bolts, thrown shots, orbiting blades, homing motes) flash white.
  */
 const AREA_HIT = Object.fromEntries(
-  WEAPON_IDS.map((id) => [id, WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone']),
+  WEAPON_IDS.map((id) => {
+    const d = WEAPONS[id] as WeaponDef;
+    const kind = d.kind === 'aura' || d.kind === 'zone' || d.kind === 'arc' || d.kind === 'slam';
+    const blast = d.kind === 'thrown' && d.levels.some((l) => (l.blast ?? 0) > 0);
+    return [id, kind || blast || !!(d.split || d.chain || d.ricochet || d.ward || d.ground || d.wave)];
+  }),
 ) as Record<WeaponId, boolean>;
 
 /** Dust and earth kicked up by bosses. */
