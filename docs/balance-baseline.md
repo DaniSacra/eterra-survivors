@@ -824,3 +824,26 @@ ELO X    fury 1.4x · holyLight 5.8x · yahFlame 1.6x · vigil 0.4x · blizzard 
 
 O ELO X do sim (Elo contra a base no máximo, nas mesmas partidas) ficou instável: com a regra nova a base fica
 pouco tempo no nível máximo. A Etapa 7 passa a garantir o 2,5x pelo lab.
+
+## Etapa 4 · efeitos novos das Elos iniciais
+
+- **Fúria**: redemoinho em volta do herói; a cada 3º golpe, uma onda cortante à frente que atravessa tudo
+  (`wave`: 1,5x o golpe, 460 px/s por 0,7 s).
+- **Estrela de Lyra**: a explosão solta 5 estrelinhas que caem a 70 px e explodem de novo a 50% (uma geração,
+  `split`).
+- **Quebra-Junta**: uma fenda que se ramifica em três na ponta (`branch`), cada tremor acorda um menor 0,35 s
+  depois (`aftershock`, 60%), e o atordoado leva 1,5x (`crush`, "esmagar").
+- **Leque de Facas**: cada faca ricocheteia para o inimigo mais próximo até 3 vezes (`ricochet`); o crítico faz
+  sangrar (`bleed`: 50% do golpe por segundo por 3 s, dano contínuo genérico em `applyDot`, tom esmeralda).
+
+Com os efeitos, o Leque ia a 8091 de DPS em multidão (18,6x a base) e a Estrela a 3315. Os números foram
+recalibrados para cada Elo ficar onde estava (lab, multidão, % da melhor Elo `aimed`):
+
+| Elo          | antes       | só efeitos   | depois (recalibrado)                                       |
+| ------------ | ----------- | ------------ | ---------------------------------------------------------- |
+| fury         | 2059 · 4,1x | 2312 · 4,6x  | 2066 · 4,1x (dano 66 → 59)                                 |
+| jointBreaker | 1853 · 4,1x | 2046 · 4,6x  | 1855 · 4,1x (dano 118 → 107, 1 fenda)                      |
+| lyraStar     | 1853 · 4,2x | 3315 · 7,5x  | 1886 · 4,3x (dano 58 → 33)                                 |
+| fan          | 1875 · 4,3x | 8091 · 18,6x | 2002 · 4,6x (dano 52 → 22, 7 → 5 facas, recarga 0,3 → 0,4) |
+
+O Leque perde contra um alvo só (solo 1875 → 485): antes era fora da curva; hoje fica perto das outras `aimed`.

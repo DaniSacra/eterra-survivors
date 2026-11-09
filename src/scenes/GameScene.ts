@@ -316,6 +316,7 @@ export class GameScene extends Phaser.Scene {
           // Covered in frost (light on top), blinking in the last second before they walk again.
           img.setTint(TINT.frost, TINT.frost, TINT.frozen, TINT.frozen);
         else if (e.slow > 0) img.setTint(TINT.slowed);
+        else if (e.dot > 0) img.setTint(e.dotKind === 'bleed' ? TINT.bleed : TINT.burn);
         else img.clearTint();
         img.setAlpha(isFaded(e) ? 0.3 : 1); // a fading ghost: harmless and untouchable for a moment
       },

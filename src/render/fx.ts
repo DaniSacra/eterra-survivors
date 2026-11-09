@@ -151,6 +151,9 @@ export const TINT = {
   /** Top of a frozen enemy (the frost on it): the bottom gets `frozen`. */
   frost: 0xf4f6ff,
   slowed: 0xe2def2,
+  /** Bleeding (Leque de Facas): the shadow element's emerald; burning (Espada de Fogo): ember orange. */
+  bleed: 0x8ef0b4,
+  burn: 0xffa070,
   heroHurt: 0xff9090,
   /** The hero's outline while invulnerable, and the snow under the menu's party. */
   blink: 0xffffff,

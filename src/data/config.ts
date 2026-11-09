@@ -54,6 +54,8 @@ export const config = {
     knockbackDecay: 10, // per second
     hitFlash: 0.1,
   },
+  /** Damage over time (bleeding, burning): seconds between ticks. */
+  dotTick: 0.5,
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */
     base: 5,

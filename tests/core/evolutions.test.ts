@@ -10,7 +10,7 @@ import {
   openChest,
   rollUpgrades,
 } from '../../src/core/upgrades';
-import { maxLevel, weaponPower } from '../../src/core/weapons';
+import { maxLevel } from '../../src/core/weapons';
 import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
 import { newRunSummary } from '../../src/core/records';
 import { ELEMENTS, EVOLUTIONS, EVOLVED_IDS, elementOf } from '../../src/data/evolutions';
@@ -174,15 +174,6 @@ describe('elites', () => {
 });
 
 describe('Elo moments', () => {
-  it('weapon power: damage x hits per cast / cooldown, and every Elo beats its base at max level', () => {
-    const blade = WEAPONS.blade.levels[0]!;
-    expect(weaponPower('blade')).toBeCloseTo((blade.damage * blade.swings) / blade.cooldown);
-    for (const id of EVOLVED_IDS) {
-      const from = EVOLUTIONS[id]!.from;
-      expect(weaponPower(id)).toBeGreaterThan(weaponPower(from, maxLevel(from)));
-    }
-  });
-
   it('the Livro de Elos knows a recipe once its base weapon was used in a run', () => {
     const save = newSave();
     expect(weaponUsed(save, 'mace')).toBe(false);

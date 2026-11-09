@@ -1,7 +1,8 @@
 import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { isFaded } from './behaviours';
-import { damageEnemy, type Enemy } from './enemies';
+import { WEAPONS, type WeaponDef } from '../data/weapons';
+import { applyDot, damageEnemy, type Enemy } from './enemies';
 import { addBolt } from './effects';
 import { angleDiff } from './math';
 import type { Poolable } from './pool';
@@ -25,6 +26,10 @@ export interface Projectile extends Poolable {
   /** Chance of a critical hit, and its damage multiplier. */
   critChance: number;
   critMult: number;
+  /** Leque de Facas: hits left that bounce to the nearest enemy instead of ending the shot. */
+  bounces: number;
+  /** Estrela de Lyra's small stars: falling, they touch nothing, and burst where they land (when `ttl` ends). */
+  fuse: boolean;
   /** Asset key (one per weapon). */
   sprite: string;
   /** The weapon credited with its damage. */
@@ -51,6 +56,8 @@ export const createProjectile = (): Projectile => ({
   blast: 0,
   critChance: 0,
   critMult: 1,
+  bounces: 0,
+  fuse: false,
   sprite: '',
   source: null,
   target: null,
@@ -114,6 +121,15 @@ export function updateProjectiles(world: World, dt: number): void {
   for (let i = 0; i < list.length; i++) {
     const p = list[i] as Projectile;
     p.ttl -= dt;
+    if (p.fuse) {
+      p.x += Math.cos(p.angle) * p.speed * dt;
+      p.y += Math.sin(p.angle) * p.speed * dt;
+      if (p.ttl <= 0) {
+        burst(world, p);
+        p.dead = true;
+      }
+      continue;
+    }
     if (p.ttl <= 0) {
       p.dead = true;
       continue;
@@ -149,8 +165,22 @@ export function updateProjectiles(world: World, dt: number): void {
         break;
       }
       const crit = p.critChance > 0 && world.rng.next() < p.critChance;
-      damageEnemy(world, e, crit ? p.damage * p.critMult : p.damage, cos, sin, p.knockback, p.source);
+      const amount = crit ? p.damage * p.critMult : p.damage;
+      damageEnemy(world, e, amount, cos, sin, p.knockback, p.source);
       p.hits.push(e.uid);
+      const def = p.source ? (WEAPONS[p.source.id] as WeaponDef) : null;
+      // Leque de Facas: a crit opens a wound that bleeds.
+      if (crit && def?.bleed) applyDot(e, 'bleed', amount * def.bleed.dps, def.bleed.duration, p.source);
+      // ...and the knife bounces to the nearest enemy it hasn't hit (this overwrites `near`: stop here).
+      if (p.bounces > 0 && def?.ricochet) {
+        const next = nearestEnemy(world, p.x, p.y, def.ricochet.range, p.hits);
+        if (next) {
+          p.bounces--;
+          p.angle = Math.atan2(next.y - p.y, next.x - p.x);
+          p.ttl = Math.max(p.ttl, def.ricochet.range / p.speed);
+          break;
+        }
+      }
       if (--p.pierce < 0) {
         p.dead = true;
         break;
@@ -162,8 +192,13 @@ export function updateProjectiles(world: World, dt: number): void {
 
 const isDead = (p: Projectile): boolean => p.dead;
 
-/** A bursting shot: everything within `blast` of where it struck is hit, pushed out from the centre. */
+/**
+ * A bursting shot: everything within `blast` of where it struck is hit, pushed out from the centre. Estrela de
+ * Lyra's orb then splits into small stars that fall around and burst again (they don't split).
+ */
 function burst(world: World, p: Projectile): void {
+  const split = !p.fuse && p.source ? (WEAPONS[p.source.id] as WeaponDef).split : undefined;
+  if (split) scatterStars(world, p, split);
   const list = world.enemies.active;
   const ids = world.enemyHash.query(p.x, p.y, p.blast + MAX_ENEMY_RADIUS, world.targetsScratch);
   if (p.source) addBolt(world, p.x, p.y, p.blast, p.source.id);
@@ -180,3 +215,39 @@ function burst(world: World, p: Projectile): void {
   }
   world.numberBudget = Infinity;
 }
+
+/** Estrela de Lyra: `count` small stars thrown evenly around the burst (a random turn), landing `distance` away. */
+function scatterStars(
+  world: World,
+  p: Projectile,
+  split: { count: number; distance: number; scale: number; fall: number },
+): void {
+  const turn = world.rng.next() * Math.PI * 2;
+  for (let k = 0; k < split.count; k++) {
+    const star = world.projectiles.acquire();
+    star.x = p.x;
+    star.y = p.y;
+    star.angle = turn + (k * Math.PI * 2) / split.count;
+    star.speed = (split.distance * world.player.stats.area) / split.fall;
+    star.ttl = split.fall;
+    star.fuse = true;
+    star.sprite = STARLET;
+    star.source = p.source;
+    star.damage = p.damage * split.scale;
+    star.blast = p.blast * split.scale;
+    star.knockback = p.knockback * split.scale;
+    star.radius = 0;
+    star.pierce = 0;
+    star.turnRate = 0;
+    star.target = null;
+    star.targetUid = 0;
+    star.critChance = 0;
+    star.critMult = 1;
+    star.bounces = 0;
+    star.hits.length = 0;
+    star.dead = false;
+  }
+}
+
+/** Asset key of Estrela de Lyra's small falling stars. */
+export const STARLET = 'proj.starlet';

@@ -27,6 +27,13 @@ export interface Enemy extends Poolable {
   slow: number;
   /** Seconds left stunned (a slam): it can't move or bite. */
   stun: number;
+  /** Damage over time (Leque de Facas bleeding, Espada de Fogo burning): seconds left, damage per second, kind. */
+  dot: number;
+  dotDps: number;
+  dotTick: number;
+  dotKind: DotKind;
+  /** The weapon credited with that damage. */
+  dotBy: OwnedWeapon | null;
   /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
   orbitReady: number[];
   /** Bosses only (core/bosses.ts): ability phase, seconds left in it, and the direction it aimed. */
@@ -52,6 +59,11 @@ export const createEnemy = (): Enemy => ({
   hitBy: null,
   slow: 0,
   stun: 0,
+  dot: 0,
+  dotDps: 0,
+  dotTick: 0,
+  dotKind: 'bleed',
+  dotBy: null,
   orbitReady: new Array<number>(config.weapons.maxOwned).fill(0),
   act: 0,
   actT: 0,
@@ -59,6 +71,33 @@ export const createEnemy = (): Enemy => ({
   aimY: 0,
   dead: false,
 });
+
+export type DotKind = 'bleed' | 'burn';
+
+/**
+ * Puts damage over time on an enemy (`dps` for `duration` s). The stronger one stays: a weaker one only refreshes
+ * the time if it lasts longer.
+ */
+export function applyDot(e: Enemy, kind: DotKind, dps: number, duration: number, by: OwnedWeapon | null): void {
+  if (dps >= e.dotDps || e.dot <= 0) {
+    if (e.dot <= 0) e.dotTick = config.dotTick;
+    e.dotDps = dps;
+    e.dotKind = kind;
+    e.dotBy = by;
+    e.dot = Math.max(e.dot, duration);
+  } else e.dot = Math.max(e.dot, duration);
+}
+
+/** Ticks an enemy's damage over time. */
+function tickDot(world: World, e: Enemy, dt: number): void {
+  e.dot -= dt;
+  e.dotTick -= dt;
+  if (e.dotTick <= 0) {
+    e.dotTick += config.dotTick;
+    damageEnemy(world, e, e.dotDps * config.dotTick, 0, 0, 0, e.dotBy);
+  }
+  if (e.dot <= 0) e.dotDps = 0;
+}
 
 /** Reused output of behaviourStep. */
 const STEP = { x: 0, y: 0 };
@@ -72,7 +111,8 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.x = x;
   e.y = y;
   e.maxHp = e.hp = def.hp * hpMult * world.stage.mult.hp;
-  e.kbx = e.kby = e.flash = e.slow = e.stun = 0;
+  e.kbx = e.kby = e.flash = e.slow = e.stun = e.dot = e.dotDps = e.dotTick = 0;
+  e.dotBy = null;
   e.hitBy = null;
   e.orbitReady.fill(0);
   e.act = 0;
@@ -168,6 +208,7 @@ export function updateEnemies(world: World, dt: number): void {
       e.stun -= dt;
       speed = 0;
     }
+    if (e.dot > 0) tickDot(world, e, dt);
     if (e.slow > 0) {
       e.slow -= dt;
       speed *= config.zones.slowFactor;

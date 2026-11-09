@@ -70,6 +70,49 @@ const wisp = (core: number, halo: number, s: number): ArtDef => ({
 });
 
 /**
+ * Fúria's cutting wave: a crescent bulging forward (to the right), drawn pale so the element's red tint shows
+ * true; a white edge on the front reads as the cut.
+ */
+const crescent = (r: number): ArtDef => ({
+  w: r * 2,
+  h: r * 2,
+  draw(p) {
+    const c = r;
+    const pts: { x: number; y: number }[] = [];
+    const span = 1.25;
+    for (let k = 0; k <= 10; k++) {
+      const a = -span + (k / 10) * span * 2;
+      pts.push({ x: c + Math.cos(a) * r * 0.95, y: c + Math.sin(a) * r * 0.95 });
+    }
+    for (let k = 10; k >= 0; k--) {
+      const a = -span + (k / 10) * span * 2;
+      pts.push({ x: c - r * 0.35 + Math.cos(a) * r * 0.95, y: c + Math.sin(a) * r * 0.8 });
+    }
+    p.fill(0xffffff, 0.3).fillCircle(c + r * 0.2, c, r * 0.9);
+    p.fill(0xffe8e0).fillPoints(pts, true);
+    p.g.lineStyle(1.5, 0xffffff, 0.95).strokePoints(pts.slice(0, 11), false);
+  },
+});
+
+/** Estrela de Lyra's small falling stars: a five-point star in the arcane pink, with a halo. */
+const starlet = (r: number): ArtDef => ({
+  w: r * 3,
+  h: r * 3,
+  draw(p) {
+    const c = r * 1.5;
+    p.fill(0xf0a0e8, 0.35).fillCircle(c, c, r * 1.4);
+    const pts: { x: number; y: number }[] = [];
+    for (let k = 0; k < 10; k++) {
+      const a = -Math.PI / 2 + (k * Math.PI) / 5;
+      const d = k % 2 === 0 ? r : r * 0.45;
+      pts.push({ x: c + Math.cos(a) * d, y: c + Math.sin(a) * d });
+    }
+    p.fill(0xfff0fc).fillPoints(pts, true);
+    p.fill(0xffffff, 0.9).fillCircle(c, c, r * 0.3);
+  },
+});
+
+/**
  * XP gems: the only saturated, twinkling cyan on screen (the ice family is white and white-lilac, never this), a
  * light blue that stands out on the dark ground of every stage; size and twinkle tell the value.
  */
@@ -100,6 +143,8 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.daggers': blade(0xe8eff8, 0x55555e, 16),
   'proj.staff': glowOrb(0xf4e8ff, 0xb070f0, 5), // Lyra's purple
   'proj.lyraStar': glowOrb(0xfff6c0, 0xd8a0ff, 7),
+  'proj.starlet': starlet(6),
+  'proj.fury': crescent(18),
   'proj.fan': blade(0xffd8e0, 0xa8323e, 18),
   'proj.hammer': hammer(0xc4cede, false),
   'proj.forgeFury': hammer(0xffa040, true),

@@ -131,6 +131,26 @@ export type WeaponDef = {
     thrust?: { every: number; range: number; arc: number; damage: number };
     /** Thrown weapons: the chance of a critical hit, and its damage multiplier. */
     crit?: { chance: number; mult: number };
+    /**
+     * Arc weapons (Fúria): every `every`-th blow also sends a cutting wave where the hero faces, through everything
+     * (x`damage` of the blow, `speed` px/s for `lifetime` s, hit radius `radius`).
+     */
+    wave?: { every: number; damage: number; speed: number; lifetime: number; radius: number };
+    /**
+     * Bursting shots (Estrela de Lyra): the burst throws `count` small stars that land `distance` px around it
+     * after `fall` s and burst again at `scale` of the damage and radius (one generation only).
+     */
+    split?: { count: number; distance: number; scale: number; fall: number };
+    /** Slam weapons (Quebra-Junta): each fissure branches at its tip into `count` more, `angle` apart, x`length` long. */
+    branch?: { count: number; angle: number; length: number };
+    /** Slam weapons: each tremor sets off one smaller tremor (x`scale` damage and radius) `delay` s later. */
+    aftershock?: { scale: number; delay: number };
+    /** Slam weapons: damage multiplier against enemies already stunned when hit (esmagar). */
+    crush?: number;
+    /** Thrown weapons (Leque de Facas): a shot that hits bounces to the nearest enemy within `range`, `count` times. */
+    ricochet?: { count: number; range: number };
+    /** Thrown weapons: a critical hit makes the enemy bleed `dps` x the hit's damage per second for `duration` s. */
+    bleed?: { dps: number; duration: number };
   };
 }[WeaponKind];
 
@@ -395,12 +415,13 @@ export const WEAPONS = {
     ),
   },
 
-  // Evolved forms (see data/evolutions.ts): one level, never offered on level-up, only from a chest.
+  // Evolved forms (see data/evolutions.ts): one level, never offered on level-up; they forge from their recipe.
 
-  /** Fúria: Aldo spins the blade against everything around him. */
+  /** Fúria: the blade whirls around the hero; every third blow a cutting wave runs ahead. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 66, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
+    wave: { every: 3, damage: 1.5, speed: 460, lifetime: 0.7, radius: 30 },
+    levels: [{ damage: 59, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -424,17 +445,19 @@ export const WEAPONS = {
     kind: 'aura',
     levels: [{ damage: 15, cooldown: 0.3, radius: 150 }],
   },
-  /** Leque de Facas: a wider fan of knives, faster, and crits that cut deeper. */
+  /** Leque de Facas: knives that bounce from enemy to enemy, and crits that make them bleed. */
   fan: {
     kind: 'thrown',
     aim: 'facing',
     crit: { chance: 0.3, mult: 3 },
+    ricochet: { count: 3, range: 220 },
+    bleed: { dps: 0.5, duration: 3 },
     levels: [
       {
-        damage: 52,
-        cooldown: 0.3,
+        damage: 22,
+        cooldown: 0.4,
         speed: 560,
-        count: 7,
+        count: 5,
         pierce: 0,
         lifetime: 1,
         radius: 8,
@@ -461,19 +484,22 @@ export const WEAPONS = {
     kind: 'strike',
     levels: [{ damage: 36, cooldown: 0.8, count: 8, radius: 52 }],
   },
-  /** Quebra-Junta: two fissures fanned out at once, and a tremor that shakes the whole front. */
+  /** Quebra-Junta: the fissure branches in three, each tremor wakes a smaller one, and the stunned get crushed. */
   jointBreaker: {
     kind: 'slam',
     combo: 0.8,
+    branch: { count: 2, angle: 0.55, length: 0.6 },
+    aftershock: { scale: 0.6, delay: 0.35 },
+    crush: 1.5,
     levels: [
       {
-        damage: 118,
+        damage: 107,
         cooldown: 0.9,
         length: 240,
         width: 46,
         knockback: 110,
-        count: 2,
-        spread: 0.45,
+        count: 1,
+        spread: 0,
         tremor: 1,
         tremorRadius: 95,
         stun: 0.5,
@@ -527,13 +553,14 @@ export const WEAPONS = {
       { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 200 },
     ],
   },
-  /** Estrela de Lyra: three big orbs at a time, bursting wide. */
+  /** Estrela de Lyra: the orb bursts and splits into small stars that fall around it and burst again. */
   lyraStar: {
     kind: 'thrown',
     aim: 'facing',
+    split: { count: 5, distance: 70, scale: 0.5, fall: 0.35 },
     levels: [
       {
-        damage: 58,
+        damage: 33,
         cooldown: 0.6,
         speed: 380,
         count: 3,

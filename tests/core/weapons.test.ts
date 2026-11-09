@@ -84,14 +84,42 @@ describe('Maça de Ferro (slam: fissure, tremor, stun)', () => {
     expect(w.player.hp).toBe(hp);
   });
 
-  it('the Elo opens two fissures in a fan and hits an enemy where they cross only once', () => {
+  it('Quebra-Junta: the fissure branches in three at its tip, and an enemy where they meet is hit once', () => {
     const w = prepared('jointBreaker');
-    const j = WEAPONS.jointBreaker.levels[0]!;
+    const def = WEAPONS.jointBreaker;
+    const j = def.levels[0]!;
     w.player.facing.x = 1;
-    const near = spawnEnemy(w, 'blackKnight', 30, 0);
+    const fork = spawnEnemy(w, 'blackKnight', j.length + 5, 0);
+    const branch = spawnEnemy(
+      w,
+      'blackKnight',
+      j.length + Math.cos(def.branch.angle) * j.length * def.branch.length * 0.8,
+      Math.sin(def.branch.angle) * j.length * def.branch.length * 0.8,
+    );
     updateWeapons(w, 1 / 60);
-    expect(w.slashes.active.filter((s) => s.form === 'fissure')).toHaveLength(2);
-    expect(near.maxHp - near.hp).toBeCloseTo(j.damage);
+    expect(w.slashes.active.filter((s) => s.form === 'fissure')).toHaveLength(1 + def.branch.count);
+    expect(fork.maxHp - fork.hp).toBeCloseTo(j.damage);
+    expect(branch.hp).toBeLessThan(branch.maxHp);
+  });
+
+  it('Quebra-Junta: each tremor wakes a smaller one, and the stunned are crushed', () => {
+    const w = prepared('jointBreaker');
+    const def = WEAPONS.jointBreaker;
+    const j = def.levels[0]!;
+    w.player.facing.x = 1;
+    const d = config.weapons.slamImpact;
+    // Off the fissure, inside both tremors: its first tremor finds it unstunned, the aftershock stunned.
+    const e = spawnEnemy(w, 'skeleton', d, j.tremorRadius * def.aftershock.scale - 10);
+    e.hp = e.maxHp = 1e6;
+    updateWeapons(w, 1 / 60);
+    expect(e.hp).toBe(e.maxHp);
+    let t = 0;
+    for (; t < def.combo + 0.02; t += 1 / 60) updateWeapons(w, 1 / 60);
+    const first = e.maxHp - e.hp;
+    expect(first).toBeCloseTo(j.damage * j.tremor);
+    for (; t < def.combo + def.aftershock.delay + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
+    expect(e.maxHp - e.hp - first).toBeCloseTo(j.damage * j.tremor * def.aftershock.scale * def.crush);
+    expect(w.slashes.active.filter((s) => s.form === 'tremor')).toHaveLength(2);
   });
 });
 
