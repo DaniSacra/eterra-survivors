@@ -42,7 +42,7 @@ export const config = {
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */
     base: 5,
-    step: 7,
+    step: 6.5,
     choices: 3,
     /** Fallback option when everything is maxed. */
     healAmount: 30,

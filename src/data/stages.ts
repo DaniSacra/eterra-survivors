@@ -12,7 +12,7 @@ export interface StageDef {
   boss: { id: EnemyId; at: number };
 }
 
-const ELITE_TIMES = [100, 220, 330, 420, 500, 570];
+const ELITE_TIMES = [90, 200, 300, 390, 480, 560];
 /** Alternates the given elites over the shared schedule. */
 const elites = (...ids: EnemyId[]) =>
   ELITE_TIMES.map((at, i) => ({ id: ids[i % ids.length] as EnemyId, at }));

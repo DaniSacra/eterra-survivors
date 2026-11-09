@@ -181,7 +181,7 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: testes em `tests/core/` para tempo de aviso e dano; no sim, a mecânica causa dano mas não mata sozinha
   um herói com vida cheia.
 
-**E-08 · Elos mais cedo** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 (aceite não cumprido) · aprovado
+**E-08 · Elos mais cedo** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 (aceite não cumprido) · ✅ feito
 
 - Por quê: balance-tester: 0.1 a 0.8 Elos por corrida, chegando aos 8 a 9 min; só 0.8 a 2.4 baús das 6 elites.
 - O quê: `config.xp.step` 9 para 7; golem 650 (E-06); Elos pouco acima da base: fury damage 60, vigil damage 28.
@@ -191,6 +191,14 @@ depois e registra em `docs/balance-baseline.md`.
   corridas formam um Elo antes das 7:00. Aceite não cumprido. Novo O quê: `ELITE_TIMES` (`data/stages.ts:15`) de
   `[100, 220, 330, 420, 500, 570]` para `[90, 200, 300, 390, 480, 560]`. Reserva, só se o aceite ainda falhar:
   `config.xp.step` 7 para 6.5. Medir com `SIM_SEEDS=12`.
+- Feito na R2 (lote 3, com a reserva): `ELITE_TIMES` novo **e** `config.xp.step` 7 para **6.5**. Só os horários novos
+  pioraram (1,76 Elo por corrida contra 1,94: o baú chega antes de a arma estar no máximo e vira um nível qualquer);
+  com a reserva, 1º Elo médio 8:08 para **7:40**, corridas com Elo antes das 7:00 24 para **44** de 144, Elos por
+  corrida que passa dos 6 min 2,00 para **2,06**. Aceite (média antes das 7:00) **ainda não cumprido**: medido com um
+  robô que anota quando a receita fica pronta, ela fica pronta em média aos 6:50 e o baú vem 51 s depois. O robô sobe
+  as 4 armas por igual, então a primeira só chega ao máximo perto dos 7 min; um jogador que foca uma arma chega bem
+  antes. Próximo passo, se o Daniel quiser: a próxima elite depois da receita pronta solta o baú mais cedo, ou uma
+  elite extra aos 6:00.
 
 **E-09 · Armadura não pode zerar o dano** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
 
