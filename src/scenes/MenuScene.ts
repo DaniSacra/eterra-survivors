@@ -27,10 +27,18 @@ export class MenuScene extends Phaser.Scene {
       button(this, cx, height * 0.58 + 68, bw, 48, () => this.scene.start(SCENES.shop), t.menu.shop),
     ]);
     const touch = this.sys.game.device.input.touch;
-    label(this, cx, height * 0.58 + 130, touch ? t.menu.controlsTouch : t.menu.controlsDesktop, 14, {
-      color: UI.muted,
-      wrap,
-    });
+    const controls = touch ? t.menu.controlsTouch : t.menu.controlsDesktop;
+    label(
+      this,
+      cx,
+      height * 0.58 + 130,
+      import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls,
+      14,
+      {
+        color: UI.muted,
+        wrap,
+      },
+    );
 
     restartOnResize(this);
   }

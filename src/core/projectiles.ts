@@ -79,18 +79,17 @@ export function nearestEnemy(
 }
 
 /**
- * A random living enemy within `range` of the player, not in `exclude`. A few random probes of the
- * active list (no allocation, no full scan); null when none hit.
+ * A random living enemy inside the rectangle of half-size (hw, hh) around the player (the visible area), not
+ * in `exclude`. A few random probes of the active list (no allocation, no full scan); null when none hit.
  */
-export function randomEnemyNear(world: World, range: number, exclude: number[]): Enemy | null {
+export function randomEnemyNear(world: World, hw: number, hh: number, exclude: number[]): Enemy | null {
   const list = world.enemies.active;
   if (list.length === 0) return null;
   const p = world.player;
-  const rangeSq = range * range;
   for (let tries = 0; tries < 12; tries++) {
     const e = list[world.rng.int(list.length)] as Enemy;
     if (e.dead || exclude.includes(e.uid)) continue;
-    if ((e.x - p.x) ** 2 + (e.y - p.y) ** 2 <= rangeSq) return e;
+    if (Math.abs(e.x - p.x) <= hw && Math.abs(e.y - p.y) <= hh) return e;
   }
   return null;
 }

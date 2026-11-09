@@ -4,7 +4,7 @@ import { SHOP, SHOP_IDS, type ShopDef, type ShopId } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
-import { UI, bindKeys, button, keyNav, label, restartOnResize } from '../render/ui';
+import { UI, bindKeys, button, disable, keyNav, label, restartOnResize } from '../render/ui';
 import { SCENES } from './keys';
 
 /** Permanent upgrades, bought with banked gold. */
@@ -14,10 +14,10 @@ export class ShopScene extends Phaser.Scene {
   }
 
   /** Keyboard focus, kept when the scene rebuilds after a purchase. */
-  private focus = 0;
+  private focus: ShopId | null = null;
 
-  init(data: { focus?: number }): void {
-    this.focus = data.focus ?? 0;
+  init(data: { focus?: ShopId }): void {
+    this.focus = data.focus ?? null;
   }
 
   create(): void {
@@ -30,6 +30,7 @@ export class ShopScene extends Phaser.Scene {
     label(this, cx, 66, t.shop.intro, 14, { color: UI.muted, wrap: Math.min(520, width - 32) });
     label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: '#ffd870' });
 
+    let focus = 0;
     const gap = 8;
     const top = 124;
     const avail = height - top - 70;
@@ -43,38 +44,57 @@ export class ShopScene extends Phaser.Scene {
       const x = left + (i % cols) * (cardW + gap) + cardW / 2;
       const y = top + Math.floor(i / cols) * (cardH + gap) + cardH / 2;
       const cost = shopCost(save, id);
-      const card = button(this, x, y, cardW, cardH, () => this.buy(id, i));
-      cards.push(card);
-      if (cost === null || cost > save.gold) card.setAlpha(0.55);
+      const done = cost === null;
+      const affordable = !done && cost <= save.gold;
+      const card = button(this, x, y, cardW, cardH, () => this.buy(id));
+      if (affordable) {
+        if (id === this.focus) focus = cards.length;
+        cards.push(card);
+      } else disable(card);
       const lx = x - cardW / 2 + 10;
       const small = cardH < 50;
-      label(this, lx, y - cardH / 2 + 5, t.shop.items[id], small ? 14 : 16, { bold: true, align: 'left' });
+      label(this, lx, y - cardH / 2 + 5, t.shop.items[id], small ? 14 : 16, {
+        bold: true,
+        align: 'left',
+        color: affordable ? UI.text : UI.textOff,
+      });
       label(this, lx, y - cardH / 2 + (small ? 22 : 27), describeShop(id), small ? 12 : 13, {
-        color: UI.muted,
+        color: affordable ? UI.muted : UI.textOff,
         align: 'left',
       });
       const rx = x + cardW / 2 - 10;
-      label(this, rx, y - cardH / 2 + 13, t.shop.level(shopLevel(save, id), SHOP[id].maxLevel), 13).setOrigin(
-        1,
-        0.5,
-      );
-      label(this, rx, y + cardH / 2 - 12, cost === null ? t.shop.maxed : t.shop.cost(cost), 13, {
-        bold: true,
-        color: '#ffd870',
+      label(this, rx, y - cardH / 2 + 13, t.shop.level(shopLevel(save, id), SHOP[id].maxLevel), 13, {
+        color: affordable ? UI.text : UI.textOff,
       }).setOrigin(1, 0.5);
+      if (done) {
+        // Completo: a seal of its own, so it never reads as "can't afford".
+        const seal = label(this, rx - 6, y + cardH / 2 - 12, t.shop.maxed, 12, {
+          bold: true,
+          color: UI.okText,
+        });
+        seal.setOrigin(1, 0.5);
+        this.add
+          .rectangle(seal.x + 6, seal.y, seal.width + 12, seal.height + 2, UI.ok, 0.18)
+          .setOrigin(1, 0.5)
+          .setStrokeStyle(1, UI.ok);
+      } else
+        label(this, rx, y + cardH / 2 - 12, t.shop.cost(cost), 13, {
+          bold: true,
+          color: affordable ? '#ffd870' : '#c07070',
+        }).setOrigin(1, 0.5);
     });
     cards.push(button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back));
-    keyNav(this, cards, cols, this.focus);
+    keyNav(this, cards, cols, focus);
 
     bindKeys(this, (kb) => kb.once('keydown-ESC', () => this.back()));
     restartOnResize(this);
   }
 
-  private buy(id: ShopId, index: number): void {
+  private buy(id: ShopId): void {
     const save = loadSave();
     if (!buy(save, id)) return;
     writeSave(save);
-    this.scene.restart({ focus: index });
+    this.scene.restart({ focus: id });
   }
 
   private back(): void {

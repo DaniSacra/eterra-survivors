@@ -3,7 +3,7 @@ import type { World } from '../core/world';
 import type { ChargeKey } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { describeUpgrade } from '../render/describe';
-import { UI, button, dim, label, restartOnResize, bindKeys } from '../render/ui';
+import { UI, bindKeys, button, dim, disable, label, restartOnResize } from '../render/ui';
 import { SCENES } from './keys';
 
 const CHARGES: ChargeKey[] = ['reroll', 'skip', 'banish'];
@@ -60,7 +60,7 @@ export class LevelUpScene extends Phaser.Scene {
       const n = w.charges[key];
       const x = width / 2 + (i - 1) * (bw + 8);
       const b = button(this, x, bottom + 54, bw, 40, () => this.useCharge(key), t.levelUp.charges[key](n));
-      if (n <= 0) b.setAlpha(0.4).disableInteractive();
+      if (n <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, 0xff8090);
     });
     if (!this.sys.game.device.input.touch)

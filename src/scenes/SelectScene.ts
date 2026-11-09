@@ -5,7 +5,7 @@ import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters'
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { t } from '../i18n/pt-BR';
 import { loadSave, writeSave } from '../render/save';
-import { UI, bindKeys, button, isConfirm, label, restartOnResize } from '../render/ui';
+import { UI, bindKeys, button, disable, isConfirm, label, restartOnResize } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
@@ -42,7 +42,7 @@ export class SelectScene extends Phaser.Scene {
     // Heroes: 4 in a row when wide, 2 x 2 on phones.
     const hcols = width >= 600 ? 4 : 2;
     const hw = (wrapW - gap * (hcols - 1)) / hcols;
-    const hh = Math.min(104, (height - 330) / (4 / hcols) - gap);
+    const hh = Math.min(126, (height - 330) / (4 / hcols) - gap);
     let y = 92;
     label(this, cx - wrapW / 2, y, t.select.hero, 15, { color: UI.muted, align: 'left' });
     y += 24;
@@ -76,7 +76,7 @@ export class SelectScene extends Phaser.Scene {
       () => this.go(),
       owned ? t.select.go : t.select.unlock(cost),
     );
-    if (!owned && save.gold < cost) go.setAlpha(0.45);
+    if (!owned && save.gold < cost) disable(go);
     else go.setStrokeStyle(3, UI.accent);
 
     // Keyboard: left/right (A/D) change hero, up/down (W/S) change stage among the open ones.
@@ -126,19 +126,20 @@ export class SelectScene extends Phaser.Scene {
       align: 'left',
       wrap: w - 20,
     });
-    // The signature weapon, if it fits under the description.
-    if (top + 46 + d.height + 16 <= y + h / 2)
-      label(
-        this,
-        x - w / 2 + 10,
-        y + h / 2 - 8,
-        t.select.signature(t.weapons[CHARACTERS[id].weapon].name),
-        11,
-        {
-          color: '#ffd870',
-          wrap: w - 20,
-        },
-      ).setOrigin(0, 1);
+    // The signature weapon, right under the description's real (wrapped) height, if it fits.
+    const sig = label(
+      this,
+      x - w / 2 + 10,
+      d.y + d.height + 4,
+      t.select.signature(t.weapons[CHARACTERS[id].weapon].name),
+      12,
+      {
+        color: '#ffd870',
+        align: 'left',
+        wrap: w - 20,
+      },
+    );
+    if (sig.y + sig.height > y + h / 2 - 4) sig.destroy();
   }
 
   private stageCard(
@@ -153,11 +154,15 @@ export class SelectScene extends Phaser.Scene {
     const s = t.stages[id];
     const card = button(this, x, y, w, h, () => open && this.pick({ stage: id }));
     card.setStrokeStyle(on ? 3 : 2, on ? UI.accent : UI.border);
-    if (!open) card.setAlpha(0.45);
-    label(this, x - w / 2 + 12, y - h / 2 + 8, s.name, 16, { bold: true, align: 'left' });
+    if (!open) disable(card);
+    label(this, x - w / 2 + 12, y - h / 2 + 8, s.name, 16, {
+      bold: true,
+      align: 'left',
+      color: open ? UI.text : UI.textOff,
+    });
     if (h >= 44)
       label(this, x - w / 2 + 12, y - h / 2 + 29, open ? s.desc : t.select.locked, 12, {
-        color: UI.muted,
+        color: open ? UI.muted : UI.textOff,
         align: 'left',
       });
   }

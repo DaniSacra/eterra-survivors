@@ -62,19 +62,19 @@ com tom sombrio.
 
 ## Etapa 1: Bugs
 
-**B-01 · Leque de Facas com ponto cego à frente** · impl · P
+**B-01 · Leque de Facas com ponto cego à frente** · impl · P · ✅ feito
 - Por quê: balance-tester: count 10 par, nenhuma faca no centro (±18°); DPS solo 0, esqueleto a 100 px nunca morre.
 - O quê: decisão do Daniel: quando o leque cobre o círculo inteiro, rotacionar meio passo (`core/weapons.ts`, fogo
   `thrown`), em vez de mudar para count 11. Teste em `tests/core/weapons.test.ts`: alvo logo à frente é atingido.
 - Aceite: teste novo verde; no lab, Leque mata o esqueleto parado a 100 px.
 
-**B-02 · "Arma própria" sobrepõe a descrição na Preparação** · impl + visual · P
+**B-02 · "Arma própria" sobrepõe a descrição na Preparação** · impl + visual · P · ✅ feito
 - Por quê: visual-director: cards de Aldo e Andilla em 1000x680; quebra de linha não contada, label sem
   alinhamento à esquerda, fonte 11px (`SelectScene.ts`).
 - O quê: posicionar o label pela altura real do texto da descrição, alinhar à esquerda, fonte mínima 12px.
 - Aceite: nada sobreposto em desktop (1000x680 e 1920x1080) e no celular 390x844, nos quatro heróis.
 
-**B-03 · Estados desabilitados: cargas e Loja** · impl + visual · P
+**B-03 · Estados desabilitados: cargas e Loja** · impl + visual · P · ✅ feito
 - Por quê: plano do Daniel (Trocar/Pular/Banir com 0 cargas parecem clicáveis) e visual-director (Loja com 0 ouro:
   `card.setAlpha(0.55)` deixa o painel translúcido e não distingue caro de esgotado, `ShopScene.ts`).
 - O quê: um estilo único de "desabilitado" em `render/ui.ts` (painel opaco, texto e borda em tom apagado), usado
@@ -82,18 +82,18 @@ com tom sombrio.
 - Aceite: com 0 cargas, os três botões aparecem desabilitados e não respondem; na Loja dá para distinguir à primeira
   vista comprável, caro e completo.
 
-**B-04 · Raio e Geada miram fora da tela no retrato** · impl · P
+**B-04 · Raio e Geada miram fora da tela no retrato** · impl · P · ✅ feito
 - Por quê: balance-tester: `viewReach = max(w,h)/2` (`core/weapons.ts`) deixa alvos nas laterais fora da tela no
   celular em pé. Baixa severidade, mas é o caso de uso principal do Daniel.
 - O quê: usar a meia-largura e a meia-altura da vista separadamente (retângulo visível).
 - Aceite: teste com vista 390x844: todo alvo escolhido está dentro do retângulo visível.
 
-**B-05 · Lâmina com 2 golpes acerta duas vezes quem está sobre o herói** · impl · P
+**B-05 · Lâmina com 2 golpes acerta duas vezes quem está sobre o herói** · impl · P · ✅ feito
 - Por quê: balance-tester (`core/weapons.ts`, fogo `arc`). Menor.
 - O quê: um inimigo recebe no máximo um acerto por disparo, mesmo com frente e costas.
 - Aceite: teste com inimigo sobreposto ao herói recebe um acerto por disparo.
 
-**B-06 · Dica "F3 depuração" aparece em produção** · impl · P
+**B-06 · Dica "F3 depuração" aparece em produção** · impl · P · ✅ feito
 - Por quê: visual-director: o menu mostra a dica de depuração para jogadores.
 - O quê: `t.menu.controlsDesktop` sem o F3; mostrar a dica de F3 só em build de desenvolvimento.
 - Aceite: no GitHub Pages a dica não cita F3.

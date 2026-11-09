@@ -118,8 +118,10 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
       const dy = e.y - p.y;
       const d = Math.hypot(dx, dy);
       if (d > range + e.def.radius) continue;
-      // Inside the cone, or touching Aldo (so enemies hugging him don't slip through).
-      if (d > e.def.radius && Math.abs(angleDiff(angle, Math.atan2(dy, dx))) > s.arc / 2) continue;
+      // Inside the cone, or touching Aldo (so enemies hugging him don't slip through). Only the first swing
+      // counts the touch, so a front-and-back slash hits a hugging enemy once.
+      const touching = k === 0 && d <= e.def.radius;
+      if (!touching && Math.abs(angleDiff(angle, Math.atan2(dy, dx))) > s.arc / 2) continue;
       damageEnemy(world, e, dmg(world, s.damage), dx / (d || 1), dy / (d || 1), s.knockback, w);
     }
   }
@@ -156,8 +158,12 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const facing = Math.atan2(p.facing.y, p.facing.x);
   const count = amount(world, s.count);
+  // A fan that covers the whole circle spreads evenly from the facing, so one knife always flies straight
+  // ahead (an even count centred on the facing would leave a blind spot right in front).
+  const ring = count * s.spread >= TAU - 1e-6;
   for (let i = 0; i < count; i++) {
-    const shot = launch(world, w, facing + (i - (count - 1) / 2) * s.spread);
+    const offset = ring ? (i * TAU) / count : (i - (count - 1) / 2) * s.spread;
+    const shot = launch(world, w, facing + offset);
     shot.speed = s.speed;
     shot.damage = dmg(world, s.damage);
     shot.knockback = s.knockback;
@@ -207,7 +213,7 @@ function fireZone(world: World, s: ZoneLevel, w: OwnedWeapon): boolean {
   const count = amount(world, s.count);
   const radius = s.radius * world.player.stats.area;
   for (let i = 0; i < count; i++) {
-    const e = randomEnemyNear(world, viewReach(world), targets);
+    const e = randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!e) break;
     targets.push(e.uid);
     addZone(world, e.x, e.y, radius, s.duration, dmg(world, s.damage), w);
@@ -222,7 +228,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   const count = amount(world, s.count);
   const radius = s.radius * world.player.stats.area;
   for (let i = 0; i < count; i++) {
-    const t = randomEnemyNear(world, viewReach(world), targets);
+    const t = randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!t) break;
     targets.push(t.uid);
     const x = t.x;
@@ -238,9 +244,6 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   }
   return targets.length > 0;
 }
-
-/** Random-target weapons only pick enemies roughly on screen. */
-const viewReach = (world: World): number => Math.max(world.view.w, world.view.h) / 2;
 
 function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
   const p = world.player;

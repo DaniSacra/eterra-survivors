@@ -10,6 +10,13 @@ export const UI = {
   panelHover: 0x232a3c,
   border: 0x4a5268,
   dim: 0x05060a,
+  /** Disabled controls: opaque, darker panel with a faded border and text. */
+  panelOff: 0x0f121a,
+  borderOff: 0x2a2f3c,
+  textOff: '#6a6658',
+  /** Done / complete seal. */
+  ok: 0x7cc46a,
+  okText: '#9ad88a',
 };
 
 export function label(
@@ -61,7 +68,14 @@ export function button(
     armed = false;
     onClick();
   });
-  if (text) label(scene, x, y, text, Math.min(22, h * 0.4), { bold: true });
+  if (text) bg.setData('label', label(scene, x, y, text, Math.min(22, h * 0.4), { bold: true }));
+  return bg;
+}
+
+/** The one disabled look: opaque dark panel, faded border and text, no input (keyNav skips it). */
+export function disable(bg: Phaser.GameObjects.Rectangle): Phaser.GameObjects.Rectangle {
+  bg.disableInteractive().setFillStyle(UI.panelOff).setStrokeStyle(2, UI.borderOff);
+  (bg.getData('label') as Phaser.GameObjects.Text | undefined)?.setColor(UI.textOff);
   return bg;
 }
 
