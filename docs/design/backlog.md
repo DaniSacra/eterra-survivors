@@ -789,7 +789,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   subindo (uma `Image` reusada). Badalada: anel dourado de som até as bordas em ~0.3 s (o tremor fica, fora do modo
   calmo). Sopro de Geada: onda branco-lilás com lascas até as bordas, geada e pingentes nas bordas da tela enquanto
   dura, tinta de 4 cantos nos congelados (topo claro) e os dois piscam no último 1 s. Lento: passos com cadência `time
-  * 4`. Sem véu (não foi preciso). Estado dos momentos em `render/fx.ts` (`Moments`), só tempos, sem alocar.
+  - 4`. Sem véu (não foi preciso). Estado dos momentos em `render/fx.ts` (`Moments`), só tempos, sem alocar.
 
 **RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · ✅ feito
 
@@ -909,6 +909,22 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   em 8 pedaços que se afastam enquanto some. Fundo a 0.22 nas duas (Geada em branco-lilás `0xd8d2f0`, Nevasca em
   branco com a borda azul forte); Nevasca com 6 flocos determinísticos caindo. Nada em ciano: as gemas seguem visíveis
   dentro da zona.
+
+**Medição F4 da R3** · ✅ feita
+
+- Chromium headless (GL por software), 420x820, CPU 4x, 701 inimigos com vida infinita, média de 10 leituras de
+  `actualFps`, base (`c264c41`, antes da R3) e R3 rodando lado a lado: sem armas ~54 contra ~50 FPS (dentro do ruído
+  da máquina, que variou de 47 a 59 nas duas versões), Lâmina L7 ~48 contra ~46, 6 Elos (Chama, Vigília, Nevasca,
+  Tempestade, Espada de Fogo, Fúria) ~37 contra ~43; uma arma por vez: Chama 57/55, Vigília 54/56, Nevasca 50/55,
+  Fúria 52/57.
+- Achado: os `fillCircle`, `strokeCircle`, `arc` e `slice` do Phaser montam sempre 100 pontos (e o preenchimento passa
+  pelo earcut), seja qual for o tamanho; com as faíscas, nuvens e motes novos isso derrubou os Elos para ~29 FPS. Saiu
+  `render/shapes.ts` (`disc`, `ring`, `arcLine`, `band`: leques e faixas de triângulos com poucos segmentos por
+  tamanho, de uma tabela pronta) e todo o `fx.ts` e o `sparks.ts` passaram a usá-lo; os efeitos novos ficaram mais
+  baratos que os antigos.
+- Chefes não piscam branco nem amassam muito ao levar golpe (com 6 armas o chefe virava uma silhueta branca, o mesmo
+  problema do herói vermelho do RF-02); o golpe aparece pelas faíscas e números.
+- L-01 (celular real) segue aberto.
 
 ### R4 · Interface (dono: ui-designer)
 

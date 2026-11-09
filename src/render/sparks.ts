@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { WeaponId } from '../data/weapons';
+import { disc, ring } from './shapes';
 
 /**
  * A fixed pool of tiny cartoon sparks (hit sparks, death stars, confetti, rings), created once and never
@@ -193,7 +194,8 @@ export class Sparks {
           g.fillStyle(s.color, a)
             .fillRect(s.x - r, s.y - w, r * 2, w * 2)
             .fillRect(s.x - w, s.y - r, w * 2, r * 2);
-          g.fillStyle(0xffffff, a).fillCircle(s.x, s.y, w * 1.2);
+          g.fillStyle(0xffffff, a);
+          disc(g, s.x, s.y, w * 1.2);
           break;
         }
         case SPARK.flake: {
@@ -210,8 +212,10 @@ export class Sparks {
         }
         case SPARK.ember: {
           const r = s.size * 0.45 * (1 - 0.6 * k);
-          g.fillStyle(s.color, a).fillCircle(s.x, s.y, r);
-          g.fillStyle(0xfff0a0, a).fillCircle(s.x, s.y - r * 0.2, r * 0.5);
+          g.fillStyle(s.color, a);
+          disc(g, s.x, s.y, r);
+          g.fillStyle(0xfff0a0, a);
+          disc(g, s.x, s.y - r * 0.2, r * 0.5);
           break;
         }
         case SPARK.confetti: {
@@ -230,7 +234,8 @@ export class Sparks {
         }
         case SPARK.ring: {
           const e = 1 - (1 - k) ** 3;
-          g.lineStyle(Math.max(1, 6 * (1 - k)), s.color, a).strokeCircle(s.x, s.y, s.size * e);
+          g.lineStyle(Math.max(1, 6 * (1 - k)), s.color, a);
+          ring(g, s.x, s.y, s.size * e);
           break;
         }
       }

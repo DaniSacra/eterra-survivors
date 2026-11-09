@@ -216,7 +216,9 @@ export class GameScene extends Phaser.Scene {
         // squash when hit. Frozen enemies stand still.
         // Slowed enemies take heavy, slow steps.
         const a = w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06;
-        const hit = e.flash / HIT_FLASH; // 1 -> 0 after a hit
+        // 1 -> 0 after a hit. Bosses are hit all the time: a small squash only, and no white flash (they would
+        // stay a white silhouette, like the hurt hero used to be red).
+        const hit = (e.flash / HIT_FLASH) * (e.def.boss ? 0.3 : 1);
         // Chargers crouch while winding up and stretch as they burst into the dash.
         let sx = 1 + a + 0.15 * hit;
         let sy = 1 - a - 0.15 * hit;

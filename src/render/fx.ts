@@ -12,6 +12,7 @@ import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
 import { UI } from './ui';
 import { star } from './sparks';
+import { arcLine, band, disc, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
 
 /** Identity color of each hero, for the light under their feet (so the eye finds them in a crowd). */
@@ -204,7 +205,8 @@ export function drawFx(
       const elo = isElo(w.id);
       if (elo) {
         // The guarded circle (Vigília: a gold ring with the four paladins' marks turning on it).
-        top.lineStyle(2, style.dark, style.blade ? 0.6 : 0.35).strokeCircle(p.x, p.y, orbitR);
+        top.lineStyle(2, style.dark, style.blade ? 0.6 : 0.35);
+        ring(top, p.x, p.y, orbitR);
         if (style.blade)
           for (let i = 0; i < 4; i++) {
             const a = world.time * 0.5 + (i * Math.PI) / 2;
@@ -245,8 +247,10 @@ export function drawFx(
           );
           // Vigília: a white-gold glow exactly the size of the hit.
           if (elo) {
-            top.fillStyle(0xfff6d0, 0.3).fillCircle(x, y, r);
-            top.lineStyle(1.5, ITEM_GLINT, 0.7).strokeCircle(x, y, r);
+            top.fillStyle(0xfff6d0, 0.3);
+            disc(top, x, y, r);
+            top.lineStyle(1.5, ITEM_GLINT, 0.7);
+            ring(top, x, y, r);
           }
           drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
         } else drawBell(top, x, y, r, style);
@@ -279,20 +283,26 @@ export function drawFx(
       // own send-off from the sparks.)
       if (f.r >= BOSS_PUFF) continue;
       const r = f.r;
-      if (k > 0.7) g.fillStyle(0xffffff, (k - 0.7) * 2).fillCircle(f.x, f.y, r * (1.1 - k * 0.4));
+      if (k > 0.7) {
+        g.fillStyle(0xffffff, (k - 0.7) * 2);
+        disc(g, f.x, f.y, r * (1.1 - k * 0.4));
+      }
       const out = 1 - k;
       for (let i = 0; i < 3; i++) {
         const a = i * 2.1 + f.x * 0.37;
         const cx = f.x + Math.cos(a) * r * (0.2 + 0.8 * out);
         const cy = f.y + Math.sin(a) * r * (0.2 + 0.6 * out) - r * 0.4 * out;
         const cr = r * (0.5 - 0.15 * i) * (0.5 + k * 0.7);
-        g.fillStyle(PUFF_SHADE, 0.75 * k).fillCircle(cx + cr * 0.15, cy + cr * 0.2, cr);
-        g.fillStyle(PUFF_COLOR, 0.9 * k).fillCircle(cx, cy, cr);
+        g.fillStyle(PUFF_SHADE, 0.75 * k);
+        disc(g, cx + cr * 0.15, cy + cr * 0.2, cr);
+        g.fillStyle(PUFF_COLOR, 0.9 * k);
+        disc(g, cx, cy, cr);
       }
     } else {
       const r = f.r * (1.6 - k * 0.8);
       const c = f.kind === 'gem' ? GEM_GLINT : ITEM_GLINT;
-      g.lineStyle(2, c, k).strokeCircle(f.x, f.y, r);
+      g.lineStyle(2, c, k);
+      ring(g, f.x, f.y, r);
     }
   }
   // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
@@ -347,7 +357,8 @@ function drawTrail(g: Phaser.GameObjects.Graphics, pr: Projectile, tr: Trail, ti
       const wob = Math.sin(time * 8 + i * 1.3 + pr.poolIndex) * 3;
       const x = pr.x - ux * d - uy * wob;
       const y = pr.y - uy * d + ux * wob;
-      g.fillStyle(tr.color, 0.5 - i * 0.12).fillCircle(x, y, tr.width * (1 - i * 0.2));
+      g.fillStyle(tr.color, 0.5 - i * 0.12);
+      disc(g, x, y, tr.width * (1 - i * 0.2));
     }
     return;
   }
@@ -391,38 +402,44 @@ function drawBolt(
       if (st.sword) drawSword(top, x, y - 24, Math.PI / 2 - 0.3 * (1 - fk), 16, FIRE_SWORD);
       else {
         top.fillStyle(st.color, 0.9).fillTriangle(x - 7, y - 3, x + 3, y - 7, x - 30, y - 70);
-        top.fillStyle(st.color).fillCircle(x, y, 9);
-        top.fillStyle(st.core).fillCircle(x - 1, y - 1, 6);
-        top.fillStyle(0xffffff).fillCircle(x - 2, y - 2, 3);
+        top.fillStyle(st.color);
+        disc(top, x, y, 9);
+        top.fillStyle(st.core);
+        disc(top, x - 1, y - 1, 6);
+        top.fillStyle(0xffffff);
+        disc(top, x - 2, y - 2, 3);
       }
       return;
     }
     const bk = (u - FALL) / (1 - FALL); // 0 -> 1 over the burst
     const grow = 1 - (1 - bk) * (1 - bk);
-    g.fillStyle(st.color, 0.2 * fade).fillCircle(b.x, b.y, r);
+    g.fillStyle(st.color, 0.2 * fade);
+    disc(g, b.x, b.y, r);
     // Flame petals opening out to the edge.
     const n = 8;
     for (let i = 0; i < n; i++) {
       const a = (i * Math.PI * 2) / n + b.x * 0.05;
       const d = r * (0.3 + 0.4 * grow);
       const pr = r * 0.32 * (0.6 + 0.4 * grow);
-      g.fillStyle(i % 2 ? st.color : FLAME_COLOR, 0.55 * fade).fillCircle(
-        b.x + Math.cos(a) * d,
-        b.y + Math.sin(a) * d,
-        pr,
-      );
+      g.fillStyle(i % 2 ? st.color : FLAME_COLOR, 0.55 * fade);
+      disc(g, b.x + Math.cos(a) * d, b.y + Math.sin(a) * d, pr);
     }
-    g.fillStyle(st.core, 0.6 * fade).fillCircle(b.x, b.y, r * 0.35 * (1 - 0.5 * bk));
-    g.lineStyle(2, 0xfff0c0, 0.8 * fade).strokeCircle(b.x, b.y, r);
+    g.fillStyle(st.core, 0.6 * fade);
+    disc(g, b.x, b.y, r * 0.35 * (1 - 0.5 * bk));
+    g.lineStyle(2, 0xfff0c0, 0.8 * fade);
+    ring(g, b.x, b.y, r);
     // A ring of light smoke rolling just past the edge.
-    g.lineStyle(4 * fade + 1, 0xf0e8d8, 0.3 * fade).strokeCircle(b.x, b.y, r * (1 + 0.2 * bk));
+    g.lineStyle(4 * fade + 1, 0xf0e8d8, 0.3 * fade);
+    ring(g, b.x, b.y, r * (1 + 0.2 * bk));
     if (st.sword) drawSword(top, b.x, b.y - 24, Math.PI / 2, 16, FIRE_SWORD);
     return;
   }
   // Lightning: the scorch and the cloud shadow on the ground, then the bolt and its flash on top.
   if (st.branches) g.fillStyle(INK, 0.18 * fade).fillEllipse(b.x + 10, b.y - 4, r * 2.6, r * 1.1);
-  g.fillStyle(0x1a1424, 0.3 * fade).fillCircle(b.x, b.y, r);
-  g.lineStyle(2, st.color, 0.9 * fade).strokeCircle(b.x, b.y, r);
+  g.fillStyle(0x1a1424, 0.3 * fade);
+  disc(g, b.x, b.y, r);
+  g.lineStyle(2, st.color, 0.9 * fade);
+  ring(g, b.x, b.y, r);
   const x1 = b.x + (hash(b.x, b.y, 1) - 0.5) * 30;
   const x2 = b.x + (hash(b.x, b.y, 2) - 0.5) * 34;
   const x3 = b.x + (hash(b.x, b.y, 3) - 0.5) * 22;
@@ -445,7 +462,8 @@ function drawBolt(
   if (u < 0.25) {
     // The flash where it lands: small, white, quick.
     const fk = u / 0.25;
-    top.fillStyle(0xffffff, 0.9 * (1 - fk)).fillCircle(b.x, b.y, 6 + r * 0.5 * fk);
+    top.fillStyle(0xffffff, 0.9 * (1 - fk));
+    disc(top, b.x, b.y, 6 + r * 0.5 * fk);
   }
 }
 
@@ -478,14 +496,10 @@ function drawSwing(
     band(g, cx, cy, inner, range, tail, lead);
     g.fillStyle(st.edge, 0.3 * fade);
     band(g, cx, cy, mid, range, lead - (lead - tail) * 0.35, lead);
-    g.lineStyle(3, 0xffffff, 0.95 * fade)
-      .beginPath()
-      .arc(cx, cy, range, tail, lead)
-      .strokePath();
-    g.lineStyle(2.5, st.edge, 0.9 * fade)
-      .beginPath()
-      .arc(cx, cy, range + 2.5, tail, lead)
-      .strokePath();
+    g.lineStyle(3, 0xffffff, 0.95 * fade);
+    arcLine(g, cx, cy, range, tail, lead);
+    g.lineStyle(2.5, st.edge, 0.9 * fade);
+    arcLine(g, cx, cy, range + 2.5, tail, lead);
   }
   if (t < SWEEP) {
     // The blade itself, leading the sweep.
@@ -507,11 +521,8 @@ function drawSwing(
   if (st.mark === 'none' || t < SWEEP * 0.8) return;
   const mk = (t - SWEEP * 0.8) / (1 - SWEEP * 0.8);
   // A shock ring opening out along the arc: "it shoves".
-  under
-    .lineStyle(5 * (1 - mk) + 1, 0xf0e8d8, 0.55 * (1 - mk))
-    .beginPath()
-    .arc(cx, cy, range * (0.95 + 0.25 * mk), a0, a1)
-    .strokePath();
+  under.lineStyle(5 * (1 - mk) + 1, 0xf0e8d8, 0.55 * (1 - mk));
+  arcLine(under, cx, cy, range * (0.95 + 0.25 * mk), a0, a1);
   if (st.mark !== 'crack') return;
   // Cracks in the ground at both ends of the swing.
   under.lineStyle(2.5, 0x3a2a24, 0.7 * (1 - mk * mk));
@@ -530,23 +541,6 @@ function drawSwing(
       y = ny;
     }
   }
-}
-
-/** Fills the ring sector between radii `r0` and `r1`, angles `a0` to `a1` (current fill style). */
-function band(
-  g: Phaser.GameObjects.Graphics,
-  cx: number,
-  cy: number,
-  r0: number,
-  r1: number,
-  a0: number,
-  a1: number,
-): void {
-  g.beginPath();
-  g.arc(cx, cy, r1, a0, a1);
-  g.arc(cx, cy, r0, a1, a0, true);
-  g.closePath();
-  g.fillPath();
 }
 
 /** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
@@ -574,19 +568,25 @@ function drawAura(
   const p = world.player;
   const t = world.time;
   const c = elo ? FLAME_COLOR : AURA_COLOR;
-  if (elo) g.fillStyle(c, 0.06).fillCircle(p.x, p.y, r);
+  if (elo) {
+    g.fillStyle(c, 0.06);
+    disc(g, p.x, p.y, r);
+  }
   for (let i = elo ? 1 : 0; i < AURA_CORE.length; i++) {
     const L = AURA_CORE[i] as readonly [number, number];
-    g.fillStyle(elo && i === 2 ? 0xfff0c0 : c, L[1]).fillCircle(p.x, p.y, r * L[0]);
+    g.fillStyle(elo && i === 2 ? 0xfff0c0 : c, L[1]);
+    disc(g, p.x, p.y, r * L[0]);
   }
   // The rim flares on the tick and rests between ticks.
   const flare = Math.max(0, 1 - k * 3);
-  g.lineStyle(2 + 2 * flare, c, 0.35 + 0.55 * flare).strokeCircle(p.x, p.y, r);
+  g.lineStyle(2 + 2 * flare, c, 0.35 + 0.55 * flare);
+  ring(g, p.x, p.y, r);
   // The beat: a wave from the core out to the exact edge (over the crowd, thin, so it is seen but hides nothing).
   if (k < 0.45) {
     const wk = k / 0.45;
     const wr = r * (0.3 + 0.7 * (1 - (1 - wk) ** 2));
-    top.lineStyle(4 - 3 * wk, elo ? 0xffc060 : 0xfff0a0, 0.7 * (1 - wk)).strokeCircle(p.x, p.y, wr);
+    top.lineStyle(4 - 3 * wk, elo ? 0xffc060 : 0xfff0a0, 0.7 * (1 - wk));
+    ring(top, p.x, p.y, wr);
   }
   // Motes of light (embers for the Chama) drifting up inside the radius, more with each level.
   const motes = elo ? 10 : 4 + Math.ceil(level / 2);
@@ -597,10 +597,12 @@ function drawAura(
     const mx = p.x + Math.cos(a) * d;
     const my = p.y + Math.sin(a) * d - ph * (elo ? 30 : 18);
     const ma = Math.sin(ph * Math.PI);
-    top
-      .fillStyle(elo ? (i % 2 ? FLAME_COLOR : 0xffd060) : 0xfff0a0, 0.75 * ma)
-      .fillCircle(mx, my, elo ? 2 : 2.2);
-    if (!elo) top.fillStyle(0xffffff, 0.8 * ma).fillCircle(mx, my, 1);
+    top.fillStyle(elo ? (i % 2 ? FLAME_COLOR : 0xffd060) : 0xfff0a0, 0.75 * ma);
+    disc(top, mx, my, elo ? 2 : 2.2);
+    if (!elo) {
+      top.fillStyle(0xffffff, 0.8 * ma);
+      disc(top, mx, my, 1);
+    }
   }
   if (!elo) return;
   // Round flame tongues licking up from the rim (they rise in screen space, like real flames), taller on a tick.
@@ -612,9 +614,10 @@ function drawAura(
     const h = 9 + 5 * Math.sin(t * 9 + i * 1.7) + 6 * flare;
     const w = 5;
     g.fillStyle(i % 2 ? AURA_COLOR : FLAME_COLOR, 0.55);
-    g.fillCircle(bx, by, w);
+    disc(g, bx, by, w);
     g.fillTriangle(bx - w, by, bx + w, by, bx + Math.sin(t * 5 + i) * 2, by - h - w);
-    g.fillStyle(0xfff0c0, 0.5).fillCircle(bx, by + 1, w * 0.45);
+    g.fillStyle(0xfff0c0, 0.5);
+    disc(g, bx, by + 1, w * 0.45);
   }
 }
 
@@ -630,17 +633,16 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
   const land = Math.min(1, age / ZONE_LAND);
   const r = z.radius * (1 - (1 - land) * (1 - land));
   const tk = 1 - z.tick / config.zones.tick; // 0 right at a tick
-  g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade).fillCircle(z.x, z.y, r);
+  g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade);
+  disc(g, z.x, z.y, r);
   // The rim: whole while it lasts, broken into pieces as it melts away.
   g.lineStyle(elo ? 4 : 2.5, elo ? BLIZZARD_EDGE : 0xffffff, 0.8 * fade);
-  if (z.ttl > ZONE_BREAK) g.strokeCircle(z.x, z.y, r);
+  if (z.ttl > ZONE_BREAK) ring(g, z.x, z.y, r);
   else {
     const gap = 0.5 * (1 - fade);
     for (let i = 0; i < 8; i++) {
       const a = (i * Math.PI) / 4 + z.x * 0.01;
-      g.beginPath()
-        .arc(z.x, z.y, r, a + gap, a + Math.PI / 4 - gap)
-        .strokePath();
+      arcLine(g, z.x, z.y, r, a + gap, a + Math.PI / 4 - gap);
     }
   }
   if (age < ZONE_LAND * 2) {
@@ -655,7 +657,8 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
   if (tk < 0.5) {
     // The tick: a ring of frost from the middle to the edge.
     const wk = tk / 0.5;
-    g.lineStyle(3 - 2 * wk, 0xffffff, 0.7 * (1 - wk) * fade).strokeCircle(z.x, z.y, r * (0.25 + 0.75 * wk));
+    g.lineStyle(3 - 2 * wk, 0xffffff, 0.7 * (1 - wk) * fade);
+    ring(g, z.x, z.y, r * (0.25 + 0.75 * wk));
   }
   // Ice crystals inside (snowflakes for Nevasca), turning slowly and pulsing on each tick.
   const n = elo ? 6 : 3;
@@ -676,11 +679,8 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
     const ph = (time * 0.6 + i * 0.29) % 1;
     const fx = z.x + (((i * 0.618 + z.x * 0.001) % 1) - 0.5) * r * 1.4;
     const fy = z.y - r * 0.7 + ph * r * 1.4;
-    g.fillStyle(0xffffff, 0.8 * Math.sin(ph * Math.PI) * fade).fillCircle(
-      fx + Math.sin(time * 3 + i) * 3,
-      fy,
-      2,
-    );
+    g.fillStyle(0xffffff, 0.8 * Math.sin(ph * Math.PI) * fade);
+    disc(g, fx + Math.sin(time * 3 + i) * 3, fy, 2);
   }
 }
 
@@ -748,11 +748,14 @@ function drawMoments(
         );
       }
     }
-    g.fillStyle(0xffffff, 0.25 * fade).fillCircle(p.x, p.y, 26);
+    g.fillStyle(0xffffff, 0.25 * fade);
+    disc(g, p.x, p.y, 26);
     const rk = Math.min(1, chest / 0.5);
     if (rk < 1) {
-      top.lineStyle(5 * (1 - rk) + 1, hero, 1 - rk).strokeCircle(p.x, p.y, 18 + 80 * (1 - (1 - rk) ** 3));
-      top.lineStyle(2, 0xffffff, 0.8 * (1 - rk)).strokeCircle(p.x, p.y, 14 + 70 * (1 - (1 - rk) ** 3));
+      top.lineStyle(5 * (1 - rk) + 1, hero, 1 - rk);
+      ring(top, p.x, p.y, 18 + 80 * (1 - (1 - rk) ** 3));
+      top.lineStyle(2, 0xffffff, 0.8 * (1 - rk));
+      ring(top, p.x, p.y, 14 + 70 * (1 - (1 - rk) ** 3));
     }
     if (m.elo && chest < 0.8) {
       const sk = chest / 0.8;
@@ -778,8 +781,12 @@ function drawMoments(
       if (bk <= 0) continue;
       const r = 20 + (edge - 20) * (1 - (1 - bk) ** 2);
       const a = bomb < 0.32 ? 1 : 1 - (bomb - 0.32) / 0.13;
-      top.lineStyle(i ? 3 : 7, i ? 0xffffff : ITEM_GLINT, (i ? 0.6 : 0.85) * a).strokeCircle(p.x, p.y, r);
-      if (!i) g.lineStyle(26, ITEM_GLINT, 0.12 * a).strokeCircle(p.x, p.y, r - 10);
+      top.lineStyle(i ? 3 : 7, i ? 0xffffff : ITEM_GLINT, (i ? 0.6 : 0.85) * a);
+      ring(top, p.x, p.y, r);
+      if (!i) {
+        g.lineStyle(26, ITEM_GLINT, 0.12 * a);
+        ring(g, p.x, p.y, r - 10);
+      }
     }
   }
   const frost = t - m.frost;
@@ -788,8 +795,10 @@ function drawMoments(
     const fk = Math.min(1, frost / 0.4);
     const r = 20 + (edge - 20) * (1 - (1 - fk) ** 2);
     const a = frost < 0.4 ? 1 : 1 - (frost - 0.4) / 0.1;
-    g.lineStyle(30, ICE, 0.18 * a).strokeCircle(p.x, p.y, r - 14);
-    top.lineStyle(4, 0xffffff, 0.85 * a).strokeCircle(p.x, p.y, r);
+    g.lineStyle(30, ICE, 0.18 * a);
+    ring(g, p.x, p.y, r - 14);
+    top.lineStyle(4, 0xffffff, 0.85 * a);
+    ring(top, p.x, p.y, r);
     for (let i = 0; i < 12; i++) {
       const sa = (i * Math.PI) / 6 + 0.2;
       shard(top, p.x + Math.cos(sa) * r, p.y + Math.sin(sa) * r, sa, 7, a);
@@ -872,17 +881,17 @@ function drawBossWarning(
       const half = (ab.arc ?? 1) / 2;
       const a0 = aim - half;
       const a1 = aim + half;
-      g.fillStyle(WARN_COLOR, fill).slice(e.x, e.y, ab.range, a0, a1, false).fillPath();
+      g.fillStyle(WARN_COLOR, fill);
+      band(g, e.x, e.y, 0, ab.range, a0, a1);
       // Stripes: bands rolling out toward the edge.
       g.lineStyle(5, WARN_COLOR, 0.3);
       for (let i = 0; i < 4; i++) {
         const r = ab.range * (((i + time * 1.5) % 4) / 4);
-        if (r > 8) g.beginPath().arc(e.x, e.y, r, a0, a1).strokePath();
+        if (r > 8) arcLine(g, e.x, e.y, r, a0, a1);
       }
       // An inner slice grows to the edge: when it touches, the sword falls.
-      g.fillStyle(WARN_COLOR, 0.32)
-        .slice(e.x, e.y, ab.range * k, a0, a1, false)
-        .fillPath();
+      g.fillStyle(WARN_COLOR, 0.32);
+      band(g, e.x, e.y, 0, ab.range * k, a0, a1);
       g.lineStyle(2.5, WARN_EDGE, edgeA);
       dashedArc(g, e.x, e.y, ab.range, a0, a1, march);
       dashedLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range, march);
@@ -925,13 +934,15 @@ function drawBossWarning(
       dashedLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, march);
       dashedLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, march);
       dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
-      g.fillStyle(WARN_COLOR, 0.45).fillCircle(e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
+      g.fillStyle(WARN_COLOR, 0.45);
+      disc(g, e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
       break;
     }
     case 'toll': {
       // Rings ripple out from the bell; small marks show where the dead will rise.
       const r = ab.range * (0.4 + 0.6 * k);
-      g.fillStyle(WARN_COLOR, fill * 0.6).fillCircle(e.x, e.y, r);
+      g.fillStyle(WARN_COLOR, fill * 0.6);
+      disc(g, e.x, e.y, r);
       g.lineStyle(2.5, WARN_EDGE, edgeA);
       dashedArc(g, e.x, e.y, r, 0, Math.PI * 2, march);
       const n = ab.count ?? 6;
@@ -940,8 +951,10 @@ function drawBossWarning(
         const mx = e.x + Math.cos(a) * ab.range;
         const my = e.y + Math.sin(a) * ab.range;
         const mr = 6 + 6 * k;
-        g.fillStyle(WARN_COLOR, 0.25 + 0.3 * k).fillCircle(mx, my, mr);
-        g.lineStyle(2, WARN_EDGE, edgeA).strokeCircle(mx, my, mr);
+        g.fillStyle(WARN_COLOR, 0.25 + 0.3 * k);
+        disc(g, mx, my, mr);
+        g.lineStyle(2, WARN_EDGE, edgeA);
+        ring(g, mx, my, mr);
       }
       break;
     }
@@ -962,7 +975,7 @@ function dashedArc(
   for (let a = a0 + offset / r - 2 * da; a < a1; a += 2 * da) {
     const s = Math.max(a0, a);
     const t = Math.min(a1, a + da);
-    if (t > s) g.beginPath().arc(x, y, r, s, t).strokePath();
+    if (t > s) arcLine(g, x, y, r, s, t);
   }
 }
 
@@ -1042,7 +1055,8 @@ function drawBell(g: Phaser.GameObjects.Graphics, x: number, y: number, r: numbe
   g.fillStyle(st.dark)
     .fillEllipse(x, rim, r * 1.7, r * 0.4)
     .strokeEllipse(x, rim, r * 1.7, r * 0.4);
-  g.fillStyle(INK).fillCircle(x, rim + r * 0.25, r * 0.18);
+  g.fillStyle(INK);
+  disc(g, x, rim + r * 0.25, r * 0.18);
   g.fillStyle(st.dark).fillRect(x - r * 0.12, top - r * 0.75, r * 0.24, r * 0.3);
   g.fillStyle(0xffffff, 0.35).fillEllipse(x - r * 0.25, top, r * 0.25, r * 0.45);
 }
