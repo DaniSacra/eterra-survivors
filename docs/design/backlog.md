@@ -257,7 +257,7 @@ depois e registra em `docs/balance-baseline.md`.
   margens com `env(safe-area-inset-*)`.
 - Aceite: em 390x844 e em paisagem, nenhum texto do HUD cortado pelo notch; vida legível sem olhar para o canto.
 
-**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
+**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
 
 - Por quê: plano do Daniel e visual-director: sans-serif, todos brancos e iguais, empilham sobre a multidão.
 - O quê: menores, somados por inimigo num intervalo curto (~0.25 s), cor própria para golpe forte, ocultos para
@@ -275,6 +275,14 @@ depois e registra em `docs/balance-baseline.md`.
   continuam somando nele. Como o dano de um disparo é igual para todos, "os 4 maiores" vira "os 4 primeiros". Desvio
   por `uid` nos dois eixos (±8 x ±6). Fonte de 16 px com escala `max(13, 14 / zoom) / 16`: nunca abaixo de 14 px de
   tela. O golpe do chefe acerta o herói, que não mostra número, então não precisou de regra.
+- Revisão 2026-11-09 (04-visual #5): os verbos novos dos Elos (onda, estrela, corrente, bumerangue, ricochete) e as
+  zonas da Geada voltaram a empilhar: ~25 números sobre a Lyra com a Estrela, colunas de "59" e "119" da Fúria da
+  Forja, cacho de ~20 "6" da Geada (`10-elos-b-420x820.png`, `07-crowd-valmor-420x820.png`). O orçamento só vale para
+  `arc` e `strike` (`core/weapons.ts`, `core/projectiles.ts:226`). Novo O quê: (a) `zone` sem número, como `aura`
+  (`core/world.ts:258-262`); (b) orçamento **por quadro** de números novos (ex. 6 por `step`, `config.effects`) no
+  lugar do orçamento por disparo, cobrindo todo verbo de uma vez (testado no core, sem `Rng`); (c) `maxDamageNumbers`
+  24 no retrato só se (a) e (b) não bastarem. Dono: impl + vfx. Tamanho: P. Aceite novo: as capturas citadas sem
+  pilha sobre o herói; teste do orçamento por quadro.
 
 **A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
@@ -426,11 +434,19 @@ depois e registra em `docs/balance-baseline.md`.
   compartilhadas e o bot pegando 4, a média esperada é ~50%; aceite trocado por "nenhuma arma compartilhada 15
   pontos acima ou abaixo da média do PICKS". Maça 49% e Fogo 48%: cumprido.
 
-**D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito
+**D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto (decisão do Daniel)
 
 - Por quê: com a renda de E-10, comprar heróis vira uma meta curta e boa.
 - O quê: `config.unlockAllHeroes` e `config.unlockAllStages` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
 - Aceite: um jogador novo libera o segundo herói em 3 a 5 corridas no sim.
+- Revisão 2026-11-09 (02-code #9, 03-qa #3, 05-ui lateral): o item foi marcado feito, mas `config.unlockAllHeroes` e
+  `unlockAllStages` seguem `true` (`data/config.ts:18-20`): no jogo publicado não se compra herói, não aparece "Nova
+  fase liberada" nem "Próxima fase" (RU-05), e 2 dos 4 testes pulados do `npm test` são da progressão normal. Com o
+  `?dev` (D-07) os interruptores não servem mais para testar; o QA desligou os dois em tempo de execução e o fluxo
+  inteiro funciona (`t5.js`, `t21.js`). Novo O quê: os dois `false`, **depois** de NB-09 (comprar herói com
+  confirmação) e NB-02 (tela final que cabe com a linha de fase liberada); o teste de `playtest.unlockAll` é o NT-02.
+  Decisão do Daniel (recomendação do game-director: desligar agora). Aceite: save novo sem `?dev` mostra só o Aldo e
+  Valmor abertos; `npm test` sem os dois `skipIf` da progressão.
 
 **D-07 · Modo de teste `?dev`** · impl · P · ✅ feito
 
@@ -546,7 +562,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - Aceite: no Chromium, `ctx.suspend()` seguido de um toque volta a tocar; Daniel confere no iPhone (trocar de app e
   voltar).
 
-**RB-05 · Celular deitado: botões e cartas fora da tela** · impl + ui · M · ✅ feito
+**RB-05 · Celular deitado: botões e cartas fora da tela** · impl + ui · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
 
 - Por quê: 03-qa #1, #2, #4, #5, #6 (820x420): Trocar/Pular/Banir abaixo da tela no level-up (`LevelUpScene.ts:39-40`,
   77); Loja corta Paciência e Bênção do Templo (`ShopScene.ts:38-41`); Livro de Elos esconde a última linha
@@ -557,6 +573,16 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   menu reposicionada; Pausa com `top` abaixo do HUD; no resize do GameScene pausado, centralizar câmera e chão.
 - Aceite: capturas em 820x420 e 640x360 de level-up, Loja, Livro, Preparação, Menu e Pausa sem nada fora da tela nem
   sobreposto; 420x820 e 1000x680 sem regressão.
+- Revisão 2026-11-09 (03-qa #4, 04-visual #2): o aceite em 640x360 não está cumprido e apareceu o caso em pé de 360 px.
+  Em 640x360, 667x375 e 740x360 a Loja esconde Bênção do Templo, Segunda Bainha e Segunda Chance (inalcançáveis no
+  toque) e o Comprar sai pela direita (`ShopScene.ts:140-143`, `cardH` mínimo 34); a 3ª carta do level-up e o
+  Desistir da Pausa ficam cortados (`shots/l640-93-pause.png`, `shots/l740-92-levelup.png`). Em 360x740 em pé a Loja
+  vira uma coluna, o detalhe cobre a lista e os Especiais somem (`nodev/03-shop-360x740.png`). Novo O quê, um critério
+  só para as duas orientações: card da Loja com largura mínima 150 e altura mínima 40 (alvo de toque); um degrau a mais
+  de compactação abaixo de ~380 px de altura (Loja com 3 colunas e cards de uma linha, Pausa com botões de 32 px,
+  level-up com cartas sem descrição longa); o detalhe da Loja encolhe (nome, Agora/Próximo e Comprar numa linha) antes
+  de sobrepor a lista. A tela final é o NB-02. Tamanho: M. Aceite novo: capturas em 360x640, 360x740, 640x360,
+  667x375 e 740x360 de Loja (os 15 itens tocáveis), level-up e Pausa sem nada fora da tela nem sobreposto.
 
 **RB-06 · Toque duplo na Loja compra dois níveis** · impl · P · ✅ feito
 
@@ -801,7 +827,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Lanceiro e Golem com anel dourado no chão desenhado na textura (`Pen.eliteRing`, no lugar da sombra preta); baú
   caído com anel dourado pulsando e uma estrela branca que pisca na tampa (`fx.ts`).
 
-**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · ✅ feito
+**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
 
 - Por quê: 06-vfx #5 e #12: o baú (`cameras.main.flash`, `GameScene.ts:331`) pinta a tela de amarelo opaco num quadro e
   não mostra o que veio, justamente o momento do Elo; Badalada e Sopro de Geada idem; o fim do congelamento chega sem
@@ -819,6 +845,9 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   calmo). Sopro de Geada: onda branco-lilás com lascas até as bordas, geada e pingentes nas bordas da tela enquanto
   dura, tinta de 4 cantos nos congelados (topo claro) e os dois piscam no último 1 s. Lento: passos com cadência `time
   - 4`. Sem véu (não foi preciso). Estado dos momentos em `render/fx.ts` (`Moments`), só tempos, sem alocar.
+- Revisão 2026-11-09 (04-visual #16, 06-vfx #14): sobrou um: a Segunda Chance faz `cameras.main.flash(400, …)` de tela
+  inteira (`GameScene.ts:872`). Novo O quê: reviver com o anel de nível (`levelUpPulse`) e/ou os raios do baú na cor
+  do herói, sem véu; o vfx-director escolhe. Tamanho: P. Aceite: `grep cameras.main.flash src` vazio.
 
 **RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · ✅ feito
 
@@ -1205,7 +1234,7 @@ implementação abaixo; cada item é um commit.
   título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
   abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
-**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito
+**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
 
 - O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
   (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
@@ -1213,6 +1242,12 @@ implementação abaixo; cada item é um commit.
 - Feito: `enemyTraits` em `core/format.ts` e `bestiaryOrder` em `data/stages.ts` (testados); grade 4 x 4 (fases,
   elites, chefes), ficha embaixo em pé e à direita deitado/largo. Frases do original com a fonte num comentário; as
   seis sem texto no original ganharam linhas escritas para o Survivors (decisão do Daniel, a revisar no teste).
+- Revisão 2026-11-09 (04-visual #8, 05-ui lateral): o aceite "não vistos sem nenhum dado" não foi cumprido na arte:
+  `bestiary.ts:26` usa `setTint(UI.border)`, que multiplica a cor, então a Gosma continua verde, o Goblin com a lança e
+  os Lobos da Geada brancos com olho (`04-coll-bestiary-420x820.png`): estraga a surpresa da fase seguinte. Novo O quê:
+  para inimigos não vistos, `setTintFill(UI.borderOff)` com alfa 0,9 (a forma fica, cor e olhos não); o Livro de Elos
+  continua com `setTint` (RA-05). Dono: visual. Tamanho: P. Aceite: captura com os 16 inimigos onde nenhum não visto
+  mostra cor ou olho.
 
 **CC-07 · Aba Conquistas** · impl + ui · M · ✅ feito
 
@@ -1290,7 +1325,8 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 - Música por fase (o plano pede só efeitos agora).
 - Modo infinito depois do chefe, ou dificuldade extra por fase vencida.
 - Itens equipáveis guardados entre partidas, ou uma loja dentro da partida.
-- Habilidade ativa por herói (um botão), pensando no controle de um polegar.
+- Habilidade ativa por herói (um botão), pensando no controle de um polegar. Na Revisão 2026-11-09 o game-director
+  propôs antes um traço passivo por herói (ND-02), que não pede botão.
 - Objetivos na fase (proteger a fonte da cripta, escoltar algo na Estrada), quebrando o loop de 10 minutos.
 - Desafios e conquistas que liberam armas novas.
 - Novas fases do Capítulo 1 do original (Pasto do Vau, Vau do Corvo, caminho para Erukh), com lore do Daniel.
@@ -1298,14 +1334,14 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 
 Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Daniel):
 
-- **Dificuldade por fase vencida** (01-balance D8: com a Loja inteira o veterano vence 47 de 48): um nível extra por
+- **Dificuldade por fase vencida** (promovida a ND-01 na Revisão 2026-11-09) (01-balance D8: com a Loja inteira o veterano vence 47 de 48): um nível extra por
   fase depois de vencê-la, com curva mais dura e mais ouro. O próximo sistema grande para o pilar 4; nome e
   apresentação com o Daniel.
 - **Revelação pausada do Elo formado** (05-ui #5): só se, depois do RF-04, o Daniel sentir que o Elo ainda passa
   despercebido. Baú comum continua sem pausa.
-- **Pausa como ficha da build** (05-ui #4): reaproveita o `buildPanel` do RU-04, com DPS por arma e estado do Elo.
-- **Setas na borda para baú e elite** (05-ui #6).
-- **Loja com ícones, grupos e pips** (05-ui #10), com 4 ícones novos.
+- **Pausa como ficha da build** (atributos promovidos a NU-03 na Revisão 2026-11-09) (05-ui #4): reaproveita o `buildPanel` do RU-04, com DPS por arma e estado do Elo.
+- **Setas na borda para baú e elite** (05-ui #6). Promovida a NU-01 na Revisão 2026-11-09 (regressão).
+- **Loja com ícones, grupos e pips** (05-ui #10), com 4 ícones novos. Ícones e grupos feitos; os pips viraram NU-09 na Revisão 2026-11-09.
 - **Joystick fixo como opção** (05-ui #13).
 - **Efeitos menores** (06-vfx): Fogos-Fátuos com rastro, sinos balançando, rastro e faísca de gema coletada,
   Tempestade escurecendo a tela.
@@ -1322,9 +1358,603 @@ com slots preenchidos e vida/nível maiores; **6** Noite Sem Fim. Extra: o jogo 
 
 Para o Daniel decidir ou revisar:
 
-- Andilla venceu 36/36 no sim depois dos Elos mais fortes (antes 33/36). Vale um ajuste nela ou nos Elos dela?
+- Andilla venceu 36/36 no sim depois dos Elos mais fortes (antes 33/36). Vale um ajuste nela ou nos Elos dela? (Revisão 2026-11-09:
+  ND-02 propõe trocar o `greed` dela por um traço.)
 - Com os Elos mais fortes o chefe cai em 28 s (mediana): `bossFast` (40 s) sai em 73% e `hit120` (100) em 60% das
-  vitórias; a meta era cerca de metade. Subir para 30 s e 130?
+  vitórias; a meta era cerca de metade. Subir para 30 s e 130? (Revisão 2026-11-09: hoje a mediana é 13 s; ver NE-05.)
 - As 12 frases da tela de Elo (`t.elo.lines`) foram escritas para o Survivors, sem fatos novos de lore: revisar.
 - Nome da conquista da vigília: "Até o Amanhecer" (do texto do menu), título "Vigia da Noite".
 - "Dano por segundo" na celebração é o valor de tabela da arma (dano × golpes ÷ recarga), não o medido na partida.
+
+---
+
+## Revisão 2026-11-09
+
+Origem: revisão completa de `3b9939c` (`docs/reviews/2026-11-09/00` a `06`). Triagem, conflitos, leitura de design e as
+decisões que só o Daniel pode tomar em `docs/reviews/2026-11-09/07-direcao.md`. **Todos os itens abaixo estão
+`· proposto`**: esperam a aprovação do Daniel. Achados repetidos em vários relatórios viraram um item só.
+
+Prefixos novos: **NB** bug, **NT** técnico (código, sem efeito de jogo), **NE** equilíbrio, **NF** efeitos visuais,
+**NU** interface, **NA** arte e polimento, **ND** direção (sistemas novos). Itens antigos reabertos mantêm o ID e têm o
+escopo novo no próprio item, mais acima: **RB-05**, **A-04**, **RF-04**, **CC-06** e **D-06** (decisão do Daniel).
+
+Regras (as mesmas da Revisão 2026-11-08): cada passo com `npm test`, `npm run lint`, `npm run build` verdes, jogo
+rodando, um commit e push; lógica nova no core com teste em `tests/core/`; equilíbrio medido com
+`SIM_SEEDS=16 SIM_SHOP=all npm run sim` antes e depois (tabelas em `docs/balance-baseline.md`); render medido no F4
+(420x820, CPU 4x) antes e depois, sem alocação por quadro, modo calmo respeitado. **Todo verbo de Elo tocado aqui ganha
+um teste dentro da multidão** (não só com um inimigo sozinho).
+
+### Próximos 5 (sugestão do game-director, não substitui a lista do topo até o Daniel aprovar)
+
+1. **NB-01** Quebra-Junta trava todos os inimigos (herói imortal na vigília)
+2. **NB-02** Tela final sempre cabe, ações presas no rodapé
+3. **NB-03** Desistir na Noite Sem Fim grava o que a vigília rendeu
+4. **NB-04 + NE-02** Rajadas completas e Tempestade medida de novo
+5. **NF-01 + NF-02** Multidão legível sob os Elos de área
+
+### Ordem sugerida
+
+| Fase                  | Passos (um commit cada, nesta ordem)                                                                                               | Donos                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| **N1 Bugs**           | NB-01 · NB-02 · NB-03 · NB-04 · NB-05 · NB-06 · RB-05 · NB-07 · NB-08 · NB-09 · NB-10 · NB-11 · NB-12 · NB-13 · D-06 (se aprovado) | impl (ui confere NB-02, RB-05) |
+| **N2 Técnico**        | NT-01 · NT-02 · NT-03 · NT-04                                                                                                      | impl                           |
+| **N3 Equilíbrio**     | NE-02 · NE-01 · NE-03 + NE-04 · NE-05 · NE-06 · tabela final                                                                       | impl + bal                     |
+| **N4 Efeitos**        | NF-01 + NF-02 · A-04 · NF-03 · NF-04 · NF-05 · NF-06 · NF-07 · NF-08 · NF-09 · RF-04 · NF-10 · medição F4                          | vfx + impl                     |
+| **N5 Interface**      | NU-01 · NU-02 · NU-03 · NU-04 · NU-05 · NU-06 · NU-07 · NU-08 · NU-09 · NU-10                                                      | ui + impl                      |
+| **N6 Arte**           | NA-01 · NA-02 · CC-06 · NA-03 · NA-04 · NA-05 · NA-06 · NA-07 · NA-08 · capturas finais                                            | visual + impl                  |
+| **N7 Sistemas novos** | ND-01 · ND-02 (cada um só depois de N1 a N3 e com os nomes do Daniel)                                                              | impl + bal + ui                |
+
+### N1 · Bugs
+
+**NB-01 · Quebra-Junta trava todos os inimigos: herói imortal na Noite Sem Fim** · impl + bal · M · proposto
+
+- Por quê: 01-balance B1 (alta), 02-code #2 e #6. `slamHit` renova a tontura em todo acerto
+  (`core/weapons.ts:308-309`) e o Quebra-Junta acerta com a pancada, a onda (todo golpe, `waveEvery: 1`) e o tremor
+  0,3 s depois. Com Pressa e Alcance no máximo (recarga ~0,5 s, onda a ~250 px), nenhum inimigo chega ao herói:
+  `t/stunlock` dá **0,0 golpes por minuto** com 689 inimigos vivos (a Maça L7 dá 92,7); na vigília com Loja inteira,
+  **27 de 39** corridas com Quebra-Junta batem o teto de 30 min do sim, contra 0 de 34 sem ele. A causa é a tontura
+  (com `stun` 0 viram 108,7 golpes/min; com 0,3, ainda 0,0). Além disso a onda do mesmo golpe já encontra o centro
+  tonto e esmaga sempre (+21%, reproduzido: 131,2 contra 108,8), e a faísca de esmagamento não mostra isso.
+- O quê (decisão 6 em `07-direcao.md`): só a **pancada** atordoa; onda e tremor batem e empurram, sem atordoar nem
+  renovar; uma tontura em curso nunca é renovada (`slamHit`); o esmagamento (`crush`) conta só a tontura de antes deste
+  golpe (o tremor esmaga quem a pancada atordoou). Reajustar o dano do `jointBreaker` para continuar na faixa
+  (`bands.test.ts`) e ≥ 2,5x a maça. Documentar no CLAUDE.md que a tontura não interrompe a habilidade do chefe
+  (02 #6: rejeitado como código, `bossStun` é 0,1 s). Plano B, só se a vigília ainda travar: 1 s de imunidade depois de
+  sair da tontura.
+- Aceite: testes com inimigo **dentro** da pancada (sem esmagamento no mesmo golpe; esmagado pelo tremor) e de tontura
+  não renovada; `t/stunlock` (ou um teste equivalente no repo) com 60 golpes/min ou mais; `SIM_SHOP=full SIM_VIGIL=1`
+  com a vigília do Quebra-Junta parecida com a das outras armas (nenhuma no teto); lab na faixa.
+
+**NB-02 · Tela final maior que a tela: botões inalcançáveis** · impl + ui · P · proposto
+
+- Por quê: 03-qa #1 (alta), 05-ui #1 (alta). Numa vitória de primeira vez (6 armas, Elo, fase liberada, conquistas)
+  os botões ficam fora da tela em 820x420 e 360x640 (no toque, **trava**: só recarregando) e em 1000x680 e 1280x720
+  "Jogar de novo" e "Menu" saem (centro em 722 px). `EndScene.ts:99-102` só centra
+  (`offset = max(8, (height - total) / 2)`); o que cresce são as notas (`:214-266`) e o relatório de armas. Piora quando
+  o D-06 ligar a linha "Nova fase liberada". É o melhor momento para o "só mais uma" (pilar 4).
+- O quê: botões num rodapé fixo (safe-area), fora do bloco que recebe o `offset`; regra de encaixe pura e testável
+  aplicada em ordem até caber: (a) Elos novos numa linha ("Elos descobertos: Fúria, Tempestade (+80 de ouro)"),
+  (b) conquistas numa linha com a soma do ouro, (c) cofre e meta numa linha, (d) sem a coluna Tempo, (e) passivas na
+  linha do resumo; duas colunas sempre que a largura permitir (não só `isShort`). Textos em `pt-BR.ts` (`end`):
+  `elosFound`, `achievementsFound`, `bankedGoal`, `vigilShort: 'Vigília'` (esboço no 05-ui #1).
+- Aceite: teste da regra de encaixe; capturas de vitória cheia (6 armas, fase liberada, 2 Elos, 4 conquistas) em
+  360x640, 820x420, 640x360, 420x820 e 1000x680 com todos os botões inteiros e tocáveis; 420x820 sem mudança visível
+  numa vitória comum.
+
+**NB-03 · Desistir durante a Noite Sem Fim descarta o que a vigília rendeu** · impl · P · proposto
+
+- Por quê: 02-code #1, 03-qa #2 (alta, reproduzido: ouro fica em 600 em vez de 800, `records.aldo.vigil` vazio). O
+  SHUTDOWN chama `bank()`, que sai cedo porque a vitória já foi gravada (`GameScene.ts:357`, `:757`); `bankVigil` só
+  roda no evento `lost` (`:878`). Perde-se ouro, abates, Bestiário, Elos formados na vigília (e o ouro de descoberta),
+  o recorde de vigília e a conquista `vigil5`. Pausa e Desistir é o jeito natural de terminar uma vigília longa.
+- O quê: no SHUTDOWN, `endless ? bankVigil() : bank()`, com guarda própria (`vigilBanked`) para não gravar duas vezes
+  quando a vigília acaba em morte. Extrair a escolha "qual registro fazer" para uma função pura testável.
+- Aceite: teste da função; QA: vencer, continuar, ganhar ouro, Desistir: o ouro, o recorde de vigília e os abates
+  entram no save, uma vez só.
+
+**NB-04 · Rajadas de alvo aleatório param no meio** · impl + bal · P · proposto
+
+- Por quê: 01-balance B2. `randomEnemyNear` (`core/projectiles.ts:110-120`) sorteia 12 vezes na lista inteira e
+  desiste se nenhum está na tela; `fireStrike` e `fireZone` dão `break` na primeira falha (`core/weapons.ts:475-476`,
+  `495-496`). Com só 7% a 20% dos inimigos na tela, a Espada de Fogo solta 2,3 de 7 espadas, a Nevasca 1,3 de 5, a
+  Tempestade 6 de 19 acertos (com 300 fora da tela). Explica a **Tempestade com ELO X 1,2x** no sim (lab 4,2x).
+- O quê: quando os sorteios falham, varrer a lista a partir de um índice sorteado (pelo `Rng` da partida) até achar um
+  na tela, ou `continue` com mais tentativas; nunca alocar.
+- Aceite: teste com 20 inimigos na tela e 300 fora: a rajada sai inteira; sim de 16 sementes antes e depois (ver
+  NE-02).
+
+**NB-05 · Baú que forja um Elo apaga o momento da forja** · impl · P · proposto
+
+- Por quê: 02-code #4 (reproduzido: eventos `[eloForged(fury), chest(reward: blade nível 7)]`). O baú troca o ícone
+  do Elo pelo da Lâmina, zera `moments.elo` e anuncia "ganhou Lâmina de Valmor nível 7", uma arma que nem existe mais.
+  O momento mais importante da partida aparece como um nível comum.
+- O quê: em `openChest`, quando o nível aplicado forja um Elo, o evento `chest` sai sem anunciar o nível (ou o
+  GameScene ignora ícone e texto do baú quando houve `eloForged` no mesmo quadro); preferir a correção no core.
+- Aceite: teste de core com a ordem e o conteúdo dos eventos quando o baú completa a receita; QA: baú que forja mostra
+  só o momento do Elo.
+
+**NB-06 · Herói com 0 de vida curado no mesmo passo não morre** · impl · P · proposto
+
+- Por quê: 02-code #3 (reproduzido: herói com 1 de vida, mordida letal e Luz Sagrada matando no mesmo passo termina
+  `playing` com vida 1). A morte só é decidida no fim do `step` e toda cura faz `min(maxHp, hp + x)`. Com a Luz Sagrada
+  (até 4 curas por segundo) o Teo ganha "salvos da morte" grátis, e isso entra nos números do sim.
+- O quê: `heal(p, amount)` em `core/player.ts` que não faz nada com `p.hp <= 0`, usado por todas as curas (Luz
+  Sagrada, comida, baú, Banquete, level-up).
+- Aceite: teste: mordida letal e cura no mesmo passo terminam em `lost` (ou `revived` com Segunda Chance).
+
+**NB-07 · A investida da Vigília quase nunca acontece** · impl · P · proposto
+
+- Por quê: 01-balance B3. `sweepOrbit` mira no mais próximo e, se ele está dentro do círculo, `aimReach` = 0
+  (`core/weapons.ts:437-443`); na multidão sempre há alguém a menos de 105 px. Investida em **6%** dos passos com o
+  bot e 0% parado. O teste (`eloEffects.test.ts:186`) usa um inimigo sozinho fora do círculo.
+- O quê: mirar no inimigo mais próximo **fora** do círculo (entre `orbitR` e `orbitR + reach`), como diz o texto.
+- Aceite: teste com multidão dentro e um alvo fora: as espadas avançam; no sim, investida em pelo menos 30% dos passos
+  com inimigos nessa faixa; Vigília ainda na faixa do lab.
+
+**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · proposto
+
+- Por quê: 03-qa #9, 05-ui #2. O toast de conquista já iniciado e o aviso grande (`announce`: "Um inimigo poderoso se
+  aproxima!", "Ganhou: X") continuam animando sobre o título, a 1ª carta, a linha da receita e o Trocar
+  (`HudScene.ts:217-267`; `l-06-levelup.png`, `p-15-banner-levelup.png`, `shots/m-35-pause-elo.png`). A tela de
+  decisão tem que ser só da decisão (pilar 2).
+- O quê: `HudScene.quiet()` que mata os tweens de toast, aviso e dica, zera o alfa e devolve o toast em curso ao início
+  da fila; chamado no `create` da `LevelUpScene` e da `PauseScene`. Sem alocação por quadro.
+- Aceite: capturas de level-up e Pausa logo depois de forjar um Elo e de abrir um baú, sem nada do HUD sobre o título
+  ou as cartas; o toast aparece depois de fechar.
+
+**NB-09 · Liberar herói com um toque, e o toque duplo já começa a partida** · impl · P · proposto
+
+- Por quê: 03-qa #6 (`t6.js`: ouro 900 → 100 e a partida começou). A Loja pede dois passos e ignora toques por 250 ms
+  (RB-06); a Preparação gasta 800 de ouro num toque e o segundo cai no botão novo "Partir" (`SelectScene.ts:117-126`,
+  `263-277`). Hoje está escondido pelo `unlockAllHeroes`; vira bug real com o D-06.
+- O quê: segundo passo "Confirmar: 800 ouro" (como o Desistir da Pausa) e o mesmo `ready` de 250 ms da Loja depois da
+  compra; Enter num herói trancado também pede confirmação.
+- Aceite: QA com `unlockAllHeroes` falso: toque duplo compra e não começa a partida; um toque só não compra.
+
+**NB-10 · Textos com o ritmo errado ("a cada três" com `every: 2`)** · impl · P · proposto
+
+- Por quê: 01-balance B5, 02-code #7, 03-qa #5, 04-visual #16. Lâmina "A cada três golpes, uma estocada"
+  (`pt-BR.ts:551`) e Fúria "a cada terceiro golpe" (`:577`) com `every: 2` (`data/weapons.ts:190`, `:442`); o jogador
+  lê isso na carta, na Pausa e na página do Livro. Comentários em `weapons.ts:186`, `:439` e o nome do teste
+  `eloEffects.test.ts:40` repetem "third". `config.weapons.slamImpact` (`config.ts:126`) não é lido desde o
+  retrabalho da maça.
+- O quê: "A cada dois golpes, uma estocada longa" e "a cada segundo golpe, solta uma onda cortante"; comentários e
+  nome do teste corrigidos; `slamImpact` removido. Um teste que confere o número citado no texto contra o `every` dos
+  dados evita a volta (se der para fazer simples; senão, só os textos).
+- Aceite: textos e comentários batem com os dados; `grep slamImpact src` vazio.
+
+**NB-11 · Só cartas de Recompensa: Trocar gasta carga à toa e Banir não faz nada** · impl · P · proposto
+
+- Por quê: 03-qa #7 (`t19.js`, `t20.js`). Trocar devolve as mesmas três cartas em outra ordem e gasta a carga; Banir
+  fica ativo e não faz nada (o `canBanish` não deixa ficar com menos de 3) sem dizer por quê (`LevelUpScene.ts:182`,
+  `core/world.ts:216`). Escolha que engana quebra o pilar 2.
+- O quê: Trocar desabilitado quando `candidates(world).length <= choices`; Banir desabilitado quando nenhuma carta
+  passa no `canBanish` (o estado desabilitado de B-03).
+- Aceite: teste de core (sem candidatos novos, `reroll` não gasta carga); QA: os dois botões apagados nesse caso.
+
+**NB-12 · `applyDot`: o dano contínuo mais forte herda a duração mais longa** · impl · P · proposto
+
+- Por quê: 02-code #5 (reproduzido: sangramento 5/s por 3 s seguido de queimadura 20/s por 0,5 s vira queimadura
+  20/s por 3 s). Acontece com Leque de Facas e Espada de Fogo juntos.
+- O quê: ao trocar pelo mais forte, `e.dot = duration` (`core/enemies.ts:81-95`).
+- Aceite: teste com dois danos contínuos de força e duração diferentes.
+
+**NB-13 · Loja: o selo "Completo" vaza um retângulo por seleção** · impl · P · proposto
+
+- Por quê: 03-qa #8 (`t8.js`: 5 retângulos 62x16 depois de 10 movimentos). `ShopScene.ts:286` guarda só o texto do
+  `seal`; a caixa (`render/ui.ts:131`) nunca é destruída.
+- O quê: `seal` devolve texto e caixa e os dois entram em `this.detail`.
+- Aceite: andar 20 vezes entre itens completos não deixa nenhum objeto a mais na cena.
+
+### N2 · Técnico
+
+**NT-01 · Alocação por quadro que sobrou no render** · impl · P · proposto
+
+- Por quê: 02-code #10. `this.forest.forEach((f, i) => …)` em `placeView` (`GameScene.ts:410`) cria uma closure por
+  quadro na Estrada; `for…of` sobre pools no render (`GameScene.ts` faíscas, `render/fx.ts:239-419`) e em `wardReady`
+  (`core/elos.ts:118`, por contato). Regra de desempenho do projeto.
+- O quê: `for` indexado em todos.
+- Aceite: `grep -n "forEach\|for (const" ` nos laços por quadro de `GameScene.ts`, `render/fx.ts` e `core/elos.ts` sem
+  ocorrência; F4 igual ou melhor.
+
+**NT-02 · Teste do `playtest.unlockAll`** · impl · P · proposto
+
+- Por quê: 02-code #9. Os testes "playtest switch opens every hero/stage" (`characters.test.ts:30`, `:47`) testam
+  `config.unlockAll*`, não o interruptor do `?dev` (`core/meta.ts:444`), que não tem teste.
+- O quê: teste que liga e desliga `playtest.unlockAll` (restaurando no `finally`) e confere heróis e fases; renomear
+  os testes antigos para o que testam. Vai junto com o D-06.
+- Aceite: teste novo verde; com o D-06 aprovado, os dois `skipIf` da progressão passam a rodar.
+
+**NT-03 · Código morto, comentários soltos e um ponto frágil** · impl · P · proposto
+
+- Por quê: 02-code #7, #8, #10; 04-visual #16. `unlockedTitles`, `weaponsCompletedBy` e `elementOf` sem uso no jogo;
+  docs órfãs (`world.ts:74`, `meta.ts:496`, `ShopScene.ts:180`, `buildPanel.ts:29-31`); `addLink` pega o último raio do
+  pool (`effects.ts:89-95`); `thrust` e `wave` dividem `w.swings` (`core/weapons.ts:183`, `:194`); aspas da frase do
+  Elo no código (`collection/elos.ts:146`).
+- O quê: remover o morto (ou mover o que só o teste usa para o teste), corrigir as docs, `addBolt` devolve o `Bolt`,
+  contadores separados ou um comentário, `t.elos.quote(line)` no `pt-BR.ts`.
+- Aceite: lint e testes verdes; nenhum texto de jogador fora do `pt-BR.ts`.
+
+**NT-04 · `?dev` divide as opções com o jogo real** · impl · P · proposto
+
+- Por quê: 03-qa #10. As opções (`render/settings.ts:4`) são as mesmas, inclusive `gasparMet`: abrir a Loja no `?dev`
+  gasta a saudação do Gaspar do jogo real.
+- O quê: `gasparMet` (e qualquer marca de "primeira vez") com chave própria no `?dev`, como o save; mudo, números e
+  tela calma continuam compartilhados.
+- Aceite: abrir a Loja no `?dev` não muda as opções do jogo real (teste em `settings.test.ts` se a chave for pura).
+
+### N3 · Equilíbrio
+
+**NE-02 · Tempestade medida de novo depois das rajadas** · bal + impl · P · proposto
+
+- Por quê: 01-balance: Tempestade com ELO X **1,2x** no sim (Raio L7 813, Tempestade 854), a única Elo abaixo de
+  2,5x; com a varredura de reserva (mock) a Tempestade vai de 716 para 1199 e a Espada de Fogo de 615 para 1361.
+- O quê: depois do NB-04, sim de 16 sementes; se a Tempestade ficar abaixo de 2x, `storm` `chain.count` 2 → 3; se a
+  faixa `auto` passar do teto no sim, reajustar no lab.
+- Aceite: todas as Elos ≥ 2,5x no sim; bandas verdes; metas de fase dentro.
+
+**NE-01 · Maça de Ferro: mais alcance, menos dano** · impl + bal · P · proposto (decisão 4 do Daniel)
+
+- Por quê: 01-balance. A maça nova rende **87** de DPS real no máximo (antes 129; outras `aimed` 208 a 650); o bot
+  acerta alguém em 62% das pancadas; o Teo, que começa com ela, caiu de 56% para **31%** em Valmor com meia Loja. A
+  pancada cobre 33 px atrás e ~93 px à frente: falta alcance, não dano.
+- O quê (`data/weapons.ts`, `mace`): `radius` L1 a L7 48/48/52/52/56/56/60 → **60/60/65/65/70/70/75**; `damage`
+  27/34/34/43/43/54/70 → **20/26/26/32/32/41/53** (x0,75). Conferir o Quebra-Junta depois do NB-01.
+- Aceite: lab da maça em 85% a 100% da melhor `aimed` (medido: 455, 91%); Teo em Valmor meia Loja a ±20 pontos da
+  fase; Quebra-Junta ≥ 2,5x a maça.
+
+**NE-03 · Martelo e Chama de Yah empurram como prometem** · impl + bal · P · proposto
+
+- Por quê: 01-balance B4 (`t/push`): o Martelo L7 (`knockback` 260) empurra **26 px** e o texto diz "atravessa e
+  empurra longe" (`pt-BR.ts:567`); a onda da Chama de Yah (`pulse.knockback` 320) empurra **31 px** (Esqueleto ~12) e
+  o texto diz "empurra tudo para longe" (`:585`). Regra: um empurrão viaja ~knockback / 10 px.
+- O quê: `hammer` `knockback` 260 → **500** (~50 px); `yahFlame` `pulse.knockback` 320 → **650** (~60 px).
+- Aceite: `t/push` (ou teste equivalente) com ~50 e ~60 px; bandas verdes; sim sem queda de vitórias fora do ruído.
+
+**NE-04 · Badalada mata o básico até o fim da partida** · impl + bal · P · proposto
+
+- Por quê: 01-balance: 250 de dano fixo; a partir das 8:00 o Encapuzado tem 253 a 304 de vida, o Esqueleto 450 a 540,
+  a Gosma 608 a 729. O item some de importância justo quando a tela enche.
+- O quê: `config.pickups.bombDamage` 250 → **600**.
+- Aceite: teste/lab: a Badalada mata básico e rápido das três fases até as 10:00; sim sem mudança fora do ruído.
+
+**NE-05 · Luta do chefe de 30 a 45 s** · bal + impl · P · proposto (decisão 5 do Daniel)
+
+- Por quê: 01-balance: mediana de **13 s** com Loja inteira e 16 s com meia (a meta da R2 era 45 a 90 s; ontem ~28 s);
+  o clímax da partida é uma corrida de DPS. Em Valmor com meia Loja, 18 de 49 corridas que chegam ao chefe morrem 4 a
+  22 s depois, com a onda das 9:00 em campo, por isso não peço 90 s. Pergunta aberta na "Rodada UI e features".
+- O quê: subir `hp` de `blackKnight` (20000), `bellRinger` (14000) e `oldWolf` (18000) pelo sim até a mediana dar 30 a
+  45 s com a Loja inteira (ponto de partida: x2,5); recalibrar `bossFast` (40 s) e `hit120` para cerca de metade das
+  vitórias.
+- Aceite: mediana da luta 30 a 45 s (Loja inteira); as nove metas de fase x Loja continuam dentro; `bossFast` em 40% a
+  60% das vitórias.
+
+**NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · proposto (decisão 3 do Daniel)
+
+- Por quê: 01-balance: Escudos de Valmor e Muralha com DPS real **24** e **184**, os menores do jogo; o empurrão custa
+  ~20% do DPS e compra pouca sobrevivência (Cripta Loja inteira 53 → 52 de 64 com 150 → 600). Dobrar o dano dá +3 a
+  +4 vitórias em 24, mas o lab marca 92%, fora da faixa, porque os bonecos não se mexem: o lab não mede arma que
+  empurra. Hoje os escudos não matam nem salvam: carta morta (pilar 3).
+- O quê: no `tests/lab/weapons.test.ts`, um modo "multidão viva": bonecos imortais que sofrem knockback e voltam
+  andando à velocidade de um básico; as bandas de `area` e `aimed` passam a usar esse número para as armas com
+  knockback ≥ 200 (Escudos, Muralha, Martelo, Fúria da Forja, Chama de Yah, Maça e Quebra-Junta) ou para todas, se a
+  diferença das outras for pequena. Depois, ajustar o dano dos escudos dentro da faixa nova.
+- Aceite: `npm run lab` com a coluna nova; `bands.test.ts` usando-a; Escudos e Muralha com DPS real no sim perto das
+  outras `area`; Cripta Loja inteira com escudos sem queda.
+
+### N4 · Efeitos visuais (dono: vfx-director)
+
+**NF-01 · Flash branco só em acerto de alvo único** · vfx + impl · P · proposto
+
+- Por quê: 04-visual #3 (alto), 06-vfx #1 (parte 4). `AREA_HIT` só cobre `aura` e `zone` (`GameScene.ts:53-58`);
+  todo o resto pinta o inimigo de branco (`setTintFill`, `:333`). Os verbos novos acertam dezenas de uma vez:
+  Estrela de Lyra e Tempestade fazem uma nuvem branca de ~200 px sobre a Lyra (`10-elos-b-420x820.png`); Quebra-Junta,
+  Muralha e Espada de Fogo uma faixa branca sem forma de inimigo (`10-elos-d-*`). O jogador perde justamente o que está
+  mais perto (pilar 5).
+- O quê (conflito 3 em `07-direcao.md`): flash branco só para acerto de alvo único (projétil, arremesso, homing, raio
+  sem corrente); todo acerto de área ou de vários alvos (`arc`, `slam`, `aura`, `zone`, `strike` em rajada e os verbos
+  split, chain, wave, ricochet, ward, ground) usa só squash e faísca. O vfx-director escolhe o desenho (pode ser o
+  clarão de topo do 04-visual).
+- Aceite: capturas de Quebra-Junta, Estrela de Lyra, Tempestade e Espada de Fogo com 400 inimigos onde dá para contar
+  os inimigos dentro do golpe.
+
+**NF-02 · Chão somado e tintas que apagam o inimigo** · vfx · P · proposto
+
+- Por quê: 06-vfx #1 (alto), #6, #7. A Espada de Fogo deixa 21 a 28 chãos em brasa somados: um tapete laranja, e
+  `TINT.burn 0xffa070` deixa a multidão inteira laranja chapada (`sheet-fireSword-p.png`); a Nevasca, ~15 zonas a 0,22,
+  lava a tela de azul (`sheet-blizzard-p.png`); o sangramento (`TINT.bleed 0x8ef0b4`) pinta esqueletos de verde de
+  Gosma (`sheet-fan-p.png`). No F4, Espada de Fogo e Nevasca estão entre as mais caras de desenhar.
+- O quê: recheio das zonas com alfa `x min(1, k / n)` (n = zonas ativas do tipo, contado uma vez por quadro; k = 6 na
+  brasa, 5 na Nevasca), bordas como estão; chamas por zona 7 → 3 acima de 8 zonas; borda da Nevasca 3 px a 0,6 com
+  mais de 8; `TINT.burn` ~`0xffd8c0`, `TINT.bleed` ~`0xe0f4e8` (o "queima" e o "sangra" ficam nas brasas e gotas que já
+  existem, mais uma gotinha sobre a cabeça do que sangra, com o teto das estrelas de atordoado).
+- Aceite: capturas das três armas sobre multidão com esqueleto, morcego e elite reconhecíveis; F4 igual ou melhor.
+
+**NF-03 · Maça que aparece, pousa com o dano e anuncia a onda** · vfx · P · proposto
+
+- Por quê: 06-vfx #3 (alto) e #10, 04-visual #16, feedback do Daniel sobre a maça. A pancada é uma sombra e depois uma
+  meia-lua bege: a maça nunca aparece e o dano chega ~70 ms antes do impacto desenhado; nada avisa qual golpe traz a
+  onda; o Quebra-Junta lê como a maça maior, bege (o âmbar `earth` fica por baixo da borda a 0,95); as faíscas da Fúria
+  e do Quebra-Junta não usam a cor do elemento (`GameScene.ts:76-78`).
+- O quê: depois do NE-01 (raio novo): cabeça da maça cravada no ponto de impacto no quadro 0 (squash e some em
+  ~0,15 s), impacto começando junto com o dano, sem a sombra de descida; anel de impacto escuro no raio; 2 pontinhos
+  âmbar sob o herói que acendem com `w.swings % waveEvery` e a cabeça branca no golpe da onda ("pá, pá, BUM"); no
+  Quebra-Junta, borda principal âmbar e bege só como fio interno; faíscas na cor do elemento. Sem rachaduras no chão.
+- Aceite: captura a 0,1x mostrando a maça no quadro do dano; o Daniel reconhece o golpe da onda antes dele.
+
+**NF-04 · Empurrão com forma** · vfx · P · proposto
+
+- Por quê: 06-vfx #2 (alto). O empurrão acontece (escudos limpam um anel, o Quebra-Junta esvazia a tela), mas o golpe
+  que empurra tem a cara de qualquer acerto; parado, o inimigo empurrado parece só ter andado.
+- O quê: enquanto `hypot(e.kbx, e.kby)` > ~250, 2 riscos curtos de poeira atrás do inimigo, contra a direção do
+  empurrão, e um puff nos pés no quadro em que ele começa; teto de ~40 por quadro; juntar com `drawStuns` e
+  `drawCharges` num laço só.
+- Aceite: captura dos escudos e da onda da maça onde o empurrão se lê parado; F4 igual.
+
+**NF-05 · Herói ferido não perde a cor** · vfx + visual · P · proposto
+
+- Por quê: 04-visual #7. `heroHurt: 0xff9090` (`fx.ts:169`) deixa a Lyra com cara de Andilla e o Teo um boneco
+  vermelho sob multidão (`08-crowd-crypt-1000x680.png`, `16-teo-crypt-420x820.png`).
+- O quê: dano no contorno e no anel (piscar `UI.danger` 0,12 s) e na barrinha; se ficar tinta, `0xffd0d0` só no
+  primeiro décimo de segundo.
+- Aceite: captura dos quatro heróis cercados, cada um reconhecível pela roupa.
+
+**NF-06 · O acerto diz quão forte foi; crítico visível** · vfx + impl · P · proposto
+
+- Por quê: 06-vfx #4. Um acerto de 13 e um de 161 têm a mesma faísca e o mesmo squash; o crítico de Adagas e Leque só
+  aparece pelo número e some com os números desligados.
+- O quê: `Enemy.hitAmount` em `damageEnemy` e `hitCrit` em `projectiles.ts:186` (core, com teste, sem alocação);
+  faixas no render: comum, forte (`>= config.effects.strongHit`: estrela 1,5x, squash 0,25, anelzinho) e crítico
+  (estrela dupla na cor da arma).
+- Aceite: teste dos campos; captura de Adagas/Leque com os números desligados onde o crítico se vê.
+
+**NF-07 · Projéteis no tamanho do acerto** · vfx · P · proposto
+
+- Por quê: 06-vfx #5. A onda da Fúria acerta ~68 px de largura e o sprite tem 36; nenhum projétil cresce com Área
+  (`GameScene.ts:258`, escala fixa).
+- O quê: `SPRITE_RADIUS` por `proj.*` e `setScale(ART_SCALE * p.radius / SPRITE_RADIUS[sprite])`; rastro `fury`.
+- Aceite: captura da Fúria com círculo de acerto desenhado batendo com a meia-lua.
+
+**NF-08 · Verbos dos Elos anunciados** · vfx · P · proposto
+
+- Por quê: 06-vfx #8, #11 e a tabela (Estrela). O pulso da Chama de Yah (a cada 10 ticks) chega sem aviso e as línguas
+  parecem velinhas; o acúmulo de almas da Procissão não aparece; as estrelinhas da Estrela de Lyra voam retas, sem
+  "cair".
+- O quê: Chama: borda esquenta com `w.swings % pulse.every` e um círculo fino no raio do pulso no tick anterior; 10
+  línguas maiores (base 9, altura 16 a 30) no lugar de 16 pequenas. Procissão: `w.stacks` luzinhas girando junto ao
+  herói. Estrela: pulinho em arco (`sin(pi * k)`) no y das estrelinhas.
+- Aceite: capturas mostrando o aviso antes do pulso e as almas acumuladas; custo por quadro igual.
+
+**NF-09 · Estocada e Fogo pousam com o dano** · vfx · P · proposto
+
+- Por quê: 06-vfx #9. A estocada leva ~54 ms para chegar à ponta depois do dano; o Fogo cai ~55 ms depois; o comentário
+  da estocada diz que ela recolhe e o código não recolhe.
+- O quê: estocada a 80% do comprimento no quadro 0 e recolhendo até ~70% no fim; queda do Fogo em 0,12 da vida.
+- Aceite: captura a 0,1x com a lâmina e a bola de fogo no alvo no quadro do flash.
+
+**NF-10 · Formas de 100 pontos que sobraram** · vfx · P · proposto
+
+- Por quê: 06-vfx #13. `drawShield` (`fx.ts:1401, 1407`: a Muralha monta 12 caminhos de 100 pontos por quadro), luz
+  do herói (`:233-235`) e baú (`:340-342`) ainda usam os círculos do Phaser.
+- O quê: `ring`/`disc` de `render/shapes.ts` e um `ellipseRing` com a mesma tabela.
+- Aceite: F4 com a Muralha igual ou melhor.
+
+### N5 · Interface (dono: ui-designer)
+
+**NU-01 · Setas na borda para o baú no chão e a elite fora da tela** · ui + impl · P · proposto
+
+- Por quê: 05-ui #3 (regressão: `eliteArrows` saiu em `fb215a6`). A elite solta o baú onde morre (`world.ts:271`) e
+  com armas automáticas ela morre fora da tela; o jogador não sabe que há um baú (ouro, cura e às vezes o nível que
+  forja o Elo). Um baú perdido é uma decisão perdida (pilar 2).
+- O quê: no máximo 3 setas na moldura entre `hud.bottom` e a safe-area de baixo: baú (dourada, ícone `pickup.chest`
+  16 px) com prioridade sobre elite viva (coral, `UI.danger`); somem quando o alvo entra na vista; sem pulsar no modo
+  calmo; seta assada em textura, varredura O(n) sem alocar. Base: `68ac386`.
+- Aceite: captura com baú e elite fora da tela; F4 igual; não cobre pausa nem joystick.
+
+**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · proposto (decisão 2 do Daniel)
+
+- Por quê: 05-ui #4. `LevelUpScene.ts:155` destrói a linha da receita quando a descrição tem 3 linhas (a Maça de Ferro
+  em 420x820 perde a dica, `p-06-levelup.png`), justamente na carta que abre uma receita. E o nome do Elo é "???" no
+  Livro e na tela final, mas aparece inteiro na carta e na Pausa (`describe.ts:62-72`).
+- O quê: a linha da receita reserva seu espaço antes da descrição (descrição com no máximo 2 linhas na carta, ou uma
+  frase curta `t.weapons[id].short` escrita pelo game-director na implementação); recomendação: nome do Elo secreto
+  até a primeira forja em todas as telas, passiva sempre visível: `progressUnknown` = "Elo de Maça de Ferro: arma 3/7 ·
+  Armadura 1/3" (`recipeProgress` recebe a lista de Elos conhecidos).
+- Aceite: captura da Maça de Ferro como arma nova em 420x820 e 360x640 com a receita; a mesma regra de nome na carta,
+  na Pausa, no Livro e na tela final.
+
+**NU-03 · Pausa: build em qualquer celular, interruptores numa linha e atributos** · ui + impl · M · proposto
+
+- Por quê: 05-ui #5 (e #6 do diagnóstico), 04-visual #15. Em 360x640 a Pausa esconde a build inteira
+  (`PauseScene.ts:59-69`) e sobram ~200 px vazios (`s-07-pause.png`); os três interruptores ocupam três linhas; a lista
+  (360) e os botões (320) têm larguras diferentes; a Pausa não mostra atributos. Promove a ideia "Pausa como ficha da
+  build".
+- O quê: lista compacta de uma linha por arma quando aperta; Som, Números e Calma numa linha de 44 px com selo; mesma
+  largura `min(360, width - 32)` para lista e botões; `StatSheet` embaixo quando houver altura. Textos:
+  `pause.stats: 'Atributos'`, `options.soundShort: 'Som'`, `options.numbersShort: 'Números'`,
+  `options.calmShort: 'Calma'`.
+- Aceite: capturas em 360x640, 420x820, 640x360 e 1000x680 com a build visível e Desistir inteiro.
+
+**NU-04 · A carta mostra toda a melhora** · ui + impl · P · proposto
+
+- Por quê: 05-ui #6 (carta de passiva sem o total quando não há painel, 360x640: só "Vida máxima +20") e 02-code #10
+  (Fogos-Fátuos nível 4 muda `lifetime`, que não tem rótulo em `t.weaponStats`).
+- O quê: sem painel, a carta de passiva mostra "(180 → 200)" via `statPreview`; rótulo para `lifetime`
+  (`levelUp.after`, `weaponStats.lifetime`).
+- Aceite: captura em 360x640 com o total; teste de `describe` cobrindo os 91 níveis sem mudança escondida.
+
+**NU-05 · "Faltou pouco" diz o que faltou** · ui + impl · P · proposto
+
+- Por quê: 05-ui #9. `almostElo` sabe se falta arma ou passiva (`report.ts:51-59`), mas a frase só diz "Faltou um nível
+  para o Elo de Lâmina de Valmor!". Dizer a peça transforma o lamento em plano (pilar 4).
+- O quê: `report.ts` devolve `missing: 'weapon' | 'passive'` (teste); `almostPiece: (piece, elo) => "Faltou 1 nível de
+${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
+- Aceite: teste; captura da tela final com a peça.
+
+**NU-06 · Segunda Chance visível no HUD** · ui + impl · P · proposto
+
+- Por quê: 05-ui #8. Quem comprou a Segunda Chance (2.000 de ouro) só descobre que tem ao morrer; saber da rede muda o
+  quanto o jogador arrisca.
+- O quê: ícone `icon.revive` 16 px com o número à direita da barra de vida; some quando `revives` chega a 0; texto só
+  quando muda.
+- Aceite: captura em 360x640 e 420x820 sem invadir o centro do HUD.
+
+**NU-07 · Categoria na carta de arma nova** · ui + impl · P · proposto
+
+- Por quê: 05-ui #7. Toda arma tem `category` com faixa testada, mas o jogador não vê; no celular de um polegar,
+  saber "precisa mirar andando" contra "acerta sozinha" pesa na escolha da 3ª e 4ª arma (pilar 3).
+- O quê: etiqueta ao lado de "Nova arma": `levelUp.category: { aimed: 'Mira', auto: 'Automática', area: 'Em volta' }`
+  (não "Sozinha", que lê como sem companhia; não "Área", que é nome de atributo); também na página do Livro de Elos.
+- Aceite: captura das três categorias na carta.
+
+**NU-08 · Página do Elo com painel, um Voltar só e Esc que volta ao Livro** · ui + visual · P · proposto
+
+- Por quê: 04-visual #10, 03-qa #11. A página flutua sem painel com dois "Voltar" (`collection/elos.ts:107-160`) e Esc
+  sai da Coleção inteira.
+- O quê: painel do tamanho do conteúdo, centrado, borda na cor do elemento; o Voltar de baixo volta ao Livro enquanto a
+  página estiver aberta; Esc idem.
+- Aceite: captura em 420x820 e 820x420; Esc na página volta ao Livro.
+
+**NU-09 · Loja: nível nos cartões** · ui + visual · P · proposto
+
+- Por quê: 05-ui #11, 04-visual #16. No jogo real em 420x820 os cartões compactos mostram nome e preço; o nível só no
+  detalhe. Promove os pips da ideia "Loja com ícones, grupos e pips".
+- O quê: pips sob o nome (barra contínua quando `maxLevel > 5`), 12 px, dentro do card de 40 px do RB-05.
+- Aceite: captura sem `?dev` em 360x740 e 420x820 com o nível de todos os itens.
+
+**NU-10 · Preparação: cartão deitado sem transbordar e vitórias por herói** · ui + visual · P · proposto
+
+- Por quê: 05-ui #10/#11/#12. Em 820x400 a descrição do herói passa da borda e encosta em "Fase" (`SelectScene.ts:69-71`,
+  `171-176`); a Preparação não mostra o que cada herói já venceu, que é o convite para "agora com a Lyra" (pilar 4).
+- O quê: sem descrição quando `hh < 80`; três marcas de fase (douradas = vencida) no cartão, as mesmas da aba Heróis.
+- Aceite: captura em 820x400 sem transbordo; marcas batendo com a aba Heróis.
+
+### N6 · Arte e polimento (dono: visual-director)
+
+**NA-01 · Costura do tile em Valmor e na Estrada** · visual · P · proposto
+
+- Por quê: 04-visual #1 (alto). Manchas cortadas na borda do tile desenham uma grade a cada 128 px de mundo
+  (`tiles.ts:22-35`, `:70-78`; `06-start-valmor-1000x680.png`). É a primeira tela de todo jogador novo.
+- O quê: `wrapEllipse` em `tiles.ts` que redesenha a mancha em `x ± SIZE`, `y ± SIZE` quando cruza a borda; nos laços
+  de manchas, pedrinhas e pontos de neve dos dois tiles. Custo por quadro zero.
+- Aceite: captura em 1000x680 sem nenhuma linha reta no chão.
+
+**NA-02 · Estrada do Sul com cara de estrada no celular** · visual · P · proposto
+
+- Por quê: 04-visual #4. Com 480 px de mundo na vista e a estrada de 520, a floresta nunca aparece em pé, e o tile da
+  estrada é quase o de Valmor (`06-start-southRoad-420x820.png`); as miniaturas da Preparação de Valmor e da Estrada são
+  iguais e a da Cripta é um quadrado escuro.
+- O quê: tile de neve pisada mais clara e quente no meio, sulcos norte-sul mais frequentes; banco de neve contínuo
+  (~16 px, sem contorno) a `width / 2` do centro, sempre desenhado; miniaturas com lápide, pilar e pinheiros. **Sem**
+  mudar `width` (rejeitado: mexe no equilíbrio de uma fase no limite da meta).
+- Aceite: capturas em 420x820 da Estrada e de Valmor que se distinguem sem inimigos; miniaturas diferentes.
+
+**NA-03 · A corrente do Elo na faixa da build parece um "8"** · visual · P · proposto
+
+- Por quê: 04-visual #6 (`crop-strip.png`: um "8" vermelho sob a Fúria, ao lado dos números de nível). Lê como "nível
+  8", não como corrente; é a marca permanente do Elo forjado.
+- O quê: com menos de ~14 px de espaço, um elo só (anel deitado na cor do elemento cruzando as bordas) ou a corrente em
+  diagonal; ou 4 px a mais entre as linhas quando houver Elo.
+- Aceite: recorte 4x sem nenhum algarismo.
+
+**NA-04 · Aranha Tumular e Rato Gigante na mesma cor** · visual · P · proposto
+
+- Por quê: 04-visual #12. Na Cripta o básico e o rápido são dois marrons do mesmo tamanho: o jogador não separa quem vai
+  alcançá-lo (pilar 5).
+- O quê: aranha quase preta (~`0x2e2a30`), pernas longas, olhos brancos maiores (r 2,4); rato como está. Fora de roxo,
+  ciano e verde.
+- Aceite: captura de multidão da Cripta com os dois distinguíveis.
+
+**NA-05 · Fogos-Fátuos e Procissão fora do ciano das gemas** · visual · P · proposto
+
+- Por quê: 04-visual #13. `proj.wisps` (`0xe8ffff`/`0x40e0d8`) e `ELEMENT_COLOR.soul` (`0x7af0dc`) estão no ciano da
+  gema; a regra do A-05 é a gema ser o único ciano saturado.
+- O quê: fogo-fátuo branco-esverdeado quente (núcleo `0xf4ffe0`, aro `0xa8e0a0`) ou dourado de vela; `soul` ~`0x9ad8c0`.
+- Aceite: folha de texturas com fogo-fátuo e gema claramente diferentes.
+
+**NA-06 · Nenhum texto de 11 px** · visual · P · proposto
+
+- Por quê: 04-visual #9. A receita na Pausa (`buildList.ts:75`) e as dicas da Loja (`ShopScene.ts:284`, `:336`) em
+  11 px, justamente a informação que a Pausa existe para mostrar.
+- O quê: 12 px no mínimo; na Pausa, `UI.muted` com a parte que falta em `UI.gold`.
+- Aceite: `grep "11px"` nas cenas vazio.
+
+**NA-07 · Acabamento de cor e largura** · visual · P · proposto
+
+- Por quê: 04-visual #14 e #16. O olho das Ossadas é `0xe86a7a`, a cor da Andilla, em centenas de pontinhos
+  (`art/enemies.ts:155`); o selo "Desligado" quase some (`ui.ts:136-143`); na Coleção em 1000x680 os cartões vão de
+  borda a borda e os cards de Elo espremem a receita.
+- O quê: olho das Ossadas ~`0xff5a6a`; texto do selo desligado em `UI.muted`; conteúdo das abas com
+  `min(960, width - 2 x gutter)` centrado e ícones de 28 px nos cards de Elo largos.
+- Aceite: capturas de Valmor, Opções e Coleção em 1000x680.
+
+**NA-08 · Selo "MODO DEV" fora dos botões** · visual · P · proposto
+
+- Por quê: 04-visual #11, 03-qa #10, 05-ui. Em 420x820 o selo cobre o Voltar da Preparação e da Loja e encosta na dica
+  do menu.
+- O quê: no retrato, no canto de cima à direita, abaixo da safe-area; deitado, onde está.
+- Aceite: capturas `?dev` em 420x820 de Menu, Preparação e Loja sem sobreposição.
+
+### N7 · Sistemas novos (proposta do game-director)
+
+**ND-01 · Perigo por fase vencida** · impl + bal + ui · M · proposto (nome com o Daniel)
+
+- Por quê: pilar 4. Com a Loja inteira o sim vence **98%** em Valmor e 81% na Cripta (01-balance, 16 sementes); a
+  Andilla vence 100% na Cripta. Depois de ~57 corridas a Loja acaba e o veterano não tem mais escada. Era o primeiro
+  item das ideias da Revisão 2026-11-08. Gênero: os níveis de dificuldade por personagem/fase do Brotato e as maldições
+  dos survivors-likes, sempre com recompensa maior.
+- O quê: vencer uma fase no perigo N abre o perigo N+1 dessa fase (até 3). O perigo multiplica o `mult` da fase na
+  criação do `World` (nenhum sistema de onda novo):
+
+  ```ts
+  // data/config.ts
+  danger: {
+    maxLevel: 3,
+    /** Per level, multiplied into the stage mult. */
+    hp: 0.3,
+    damage: 0.15,
+    spawn: 0.1,
+    gold: 0.35,
+  },
+  ```
+
+  `RunSetup.danger` (0 a 3), `MetaSave.danger[stage]` (o maior vencido, com migração em `sanitizeSave`), seletor na
+  Preparação (marcas 0 a 3 sob a fase, como as de vitória), recorde por herói x fase x perigo na aba Heróis, uma
+  conquista por fase no perigo 3. A vigília herda o perigo. Textos (rótulo de trabalho, o nome é do Daniel):
+  `select.danger: (n: number) => n === 0 ? 'Normal' : \`Perigo ${n}\``, `select.dangerLocked: 'Vença o perigo anterior'`,
+`end.dangerUnlocked: (stage: string, n: number) => \`${stage}: Perigo ${n} liberado!\``.
+
+- Riscos: nenhum custo por quadro (só multiplicadores na criação); tela final ganha uma linha (depende do NB-02).
+- Aceite: testes de meta (abrir, salvar, migrar); sim com `SIM_DANGER`: com a Loja inteira, Valmor perigo 1 em 60% a
+  75%, perigo 3 em 15% a 30%; ouro por corrida no perigo 3 cerca de 2x o normal; F4 igual.
+
+**ND-02 · Um traço por herói que muda uma regra** · impl + bal + ui · G · proposto (regras e nomes com o Daniel)
+
+- Por quê: pilar 3. Os quatro heróis só diferem por números (`characters.ts`) e pela arma inicial, que nem os
+  prende (toda arma é oferecida a todos). No gênero, o personagem que muda uma regra é o que mais multiplica builds
+  sem conteúdo novo (Brotato). Aqui, sem botão novo (um polegar).
+- O quê: `trait` opcional em `CharacterDef`, com um gancho por `kind` no core (um `switch`, sem abstração). Proposta
+  de partida, mecânica de gênero, sem lore nova (os papéis vêm do original: Aldo guerreiro, Lyra maga, Teo aprendiz do
+  Templo, Andilla ladina):
+
+  ```ts
+  aldo: { ..., trait: { kind: 'grit', might: 0.04, stacks: 5, duration: 4 } },
+  lyra: { ..., trait: { kind: 'insight', choices: 4 } },
+  teo: { ..., trait: { kind: 'devotion', healOnLevel: 0.1 } },
+  andilla: { ..., trait: { kind: 'pickpocket', chestChoices: 3 } },
+  ```
+
+  Textos (`pt-BR.ts`, `characters.<id>.trait`; nomes de trabalho):
+  - Aldo, "Sangue Quente": "Cada golpe que leva dá +4% de dano por 4 s, até 5 vezes." (puxa para dentro da multidão,
+    combina com a Lâmina e a Armadura)
+  - Lyra, "Estudiosa": "Escolhe entre 4 cartas ao subir de nível." (mais decisão, compensa a vida menor)
+  - Teo, "Devoto": "Cada subida de nível cura 10% da vida." (sustento sem regen passivo; trocaria parte do `regen` 0,4)
+  - Andilla, "Mão Leve": "Ao abrir um baú, escolhe 1 de 3 recompensas." (decisão a mais; por ser o teto do sim, trocaria
+    o `greed` 0,25)
+
+- Custo: `characters.ts`, `core/world.ts` (gancho por traço), `core/upgrades.ts` (`choices`, escolha do baú),
+  `LevelUpScene` (4 cartas e o modo baú, reaproveitando as cartas), Preparação e aba Heróis mostram o traço.
+- Riscos: 4 cartas em 360x640 (depende do RB-05); o baú com escolha é uma tela a mais (só para a Andilla); equilíbrio
+  por herói no sim antes de ligar.
+- Aceite: teste por traço; sim de 16 sementes com cada herói a ±20 pontos da fase; pick rates por herói diferentes
+  entre si (o traço muda a build).
