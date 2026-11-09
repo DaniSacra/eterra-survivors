@@ -106,17 +106,20 @@ const PUFF_SHADE = 0xb8c0d8;
 /** Death puffs this big are bosses (radius 30 and up; elites are 18 to 26). */
 export const BOSS_PUFF = 30;
 export const ELITE_PUFF = 18;
-const GEM_GLINT = 0x8adcff;
+const GEM_GLINT = UI.xp;
 const ITEM_GLINT = 0xffd870;
 const HP_OK = 0x7cd860;
 const HP_LOW = 0xd83a4a;
-/** Tints of enemies: hit (a white fill), frozen by Sopro de Geada, slowed by frost. And the hero's hurt wash. */
+/**
+ * Tints of enemies: hit (a white fill), frozen by Sopro de Geada, slowed by frost (white-lilac frost on top, never
+ * the gems' cyan). And the hero's hurt wash.
+ */
 export const TINT = {
   hit: 0xffffff,
-  frozen: 0x80c8ff,
+  frozen: 0xd0cae8,
   /** Top of a frozen enemy (the frost on it): the bottom gets `frozen`. */
   frost: 0xf4f6ff,
-  slowed: 0xb8e0ff,
+  slowed: 0xe2def2,
   heroHurt: 0xff9090,
   /** The hero's outline while invulnerable, and the snow under the menu's party. */
   blink: 0xffffff,

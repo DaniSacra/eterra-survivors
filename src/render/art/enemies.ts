@@ -121,7 +121,7 @@ export const ENEMY_ART: Record<string, ArtDef> = {
   },
 
   // ---- Cripta da Igreja Velha ----
-  'enemy.bones': skeleton(0xa4b8da, 0xe86a7a),
+  'enemy.bones': skeleton(0xb8b4cc, 0xe86a7a), // grey-lilac bones: the gems keep the blue
   'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
   'enemy.ghost': {
     w: 30,
@@ -130,15 +130,16 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.shadow(15, 31, 14, 4);
       p.poly(
         [4, 27, 4, 13, 8, 5, 15, 2, 22, 5, 26, 13, 26, 27, 22, 24, 19, 28, 15, 24, 11, 28, 8, 24],
-        0xcbe4f4,
+        0xe4e0f2,
       );
-      p.inkColor = 0x2a4a6a;
+      p.inkColor = 0x3a3458;
       p.ink();
       p.inkColor = INK;
-      p.fill(0x8ac0f0, 0.5).fillEllipse(17, 21, 16, 8);
-      p.fill(0x2a4a6a).fillEllipse(12.5, 12.5, 4.5, 6).fillEllipse(19.5, 12.5, 4.5, 6);
-      p.glow(13, 13, 1, 0x80ffff).glow(20, 13, 1, 0x80ffff);
-      p.fill(0x2a4a6a).fillEllipse(16, 19.5, 4, 3);
+      p.fill(0xb0a8d8, 0.5).fillEllipse(17, 21, 16, 8);
+      p.fill(0x3a3458).fillEllipse(12.5, 12.5, 4.5, 6).fillEllipse(19.5, 12.5, 4.5, 6);
+      // Pale gold eyes: serious, and never the gems' cyan glint.
+      p.glow(13, 13, 1, 0xfff0b0).glow(20, 13, 1, 0xfff0b0);
+      p.fill(0x3a3458).fillEllipse(16, 19.5, 4, 3);
       p.shine(10, 7, 5, 3, 0.6);
     },
   },

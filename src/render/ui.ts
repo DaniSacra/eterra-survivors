@@ -16,7 +16,7 @@ export const UI = {
   dangerDark: 0x8a3a48,
   /** Bars: life (hero and boss) and experience (same light blue as the gems). */
   hp: 0xd83a4a,
-  xp: 0x8adcff,
+  xp: 0x7ae6ff,
   /** Dark outline around HUD text so it reads over any ground. */
   stroke: '#0b0d14',
   debug: '#9fffa0',

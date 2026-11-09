@@ -124,9 +124,9 @@ export const DECAL_ART: Record<string, ArtDef> = {
     draw(p) {
       for (let k = 0; k < 5; k++) {
         const a = (k * Math.PI * 2) / 5;
-        p.fill(0x9ad8ff, 0.55).fillEllipse(8 + Math.cos(a) * 3.5, 8 + Math.sin(a) * 3.5, 5, 5);
+        p.fill(0xe8e2f4, 0.35).fillEllipse(8 + Math.cos(a) * 3.5, 8 + Math.sin(a) * 3.5, 5, 5);
       }
-      p.fill(0xe8f6ff, 0.8).fillCircle(8, 8, 2);
+      p.fill(0xf4f2fa, 0.5).fillCircle(8, 8, 2);
     },
   },
   // ---- Cripta da Igreja Velha ----
@@ -181,8 +181,9 @@ export const DECAL_ART: Record<string, ArtDef> = {
     w: 32,
     h: 14,
     draw(p) {
-      p.fill(0x6a8ab8, 0.45).fillEllipse(16, 7, 30, 11);
-      p.fill(0xcbe4f4, 0.35).fillEllipse(12, 5, 12, 3);
+      // Neutral grey-blue, like the road's own drifts: water never reads as a gem.
+      p.fill(0x4a5470, 0.8).fillEllipse(16, 7, 30, 11);
+      p.fill(0x8a94a8, 0.3).fillEllipse(12, 5, 12, 3);
     },
   },
   'decal.bush': {

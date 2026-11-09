@@ -271,7 +271,7 @@ depois e registra em `docs/balance-baseline.md`.
   novo: captura de Quebra-Junta e Espada de Fogo em 420x820 sem pilha de números sobre o herói; nenhum número abaixo
   de 12 px de tela.
 
-**A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+**A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
 - Por quê: plano do Daniel; visual-director: gemas dominam a tela no limite de 250.
 - O quê: cor única (verde ou dourado com brilho) que contraste com neve, pedra azul e estrada; três tamanhos claros;
@@ -289,6 +289,11 @@ depois e registra em `docs/balance-baseline.md`.
      pálido).
 - Aceite novo: captura de Valmor com Geada e da Cripta com 400 inimigos em 420x820: dá para apontar todas as gemas em
   menos de 2 s e nenhuma flor de gelo é confundida com gema; nenhum verde nas gemas.
+- Feito na R5: gema `0x3ed4ff` (corpo) e `0xd4f8ff` (luz), XP do HUD, brilho de coleta e favicon em `0x7ae6ff`/
+  `0x3ed4ff`; tamanhos `gem(1.25)` e `gem(1.6)`; cintilar de escala e alfa no `gemMirror` (mais forte na gema grande).
+  Gelo: tinta `slowed 0xe2def2`, `frozen 0xd0cae8`, flor de gelo `0xe8e2f4` a 0.35, poça `0x4a5470`, halo do Sopro
+  de Geada branco-lilás, fantasma branco-lilás com olho dourado pálido, Ossadas em cinza-lilás `0xb8b4cc`, pontas do
+  ímã brancas. F4: Lâmina ~58, 6 Elos ~49 (igual à R4).
 
 **A-06 · Golpes e zonas com acabamento** · visual · M · ✅ feito
 

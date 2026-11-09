@@ -63,9 +63,12 @@ const wisp = (core: number, halo: number, s: number): ArtDef => ({
   },
 });
 
-/** XP gems: one bright light blue that stands out on the dark ground of every stage; size tells the value. */
-const GEM_BODY = 0x5ccbff;
-const GEM_LIGHT = 0xd4f2ff;
+/**
+ * XP gems: the only saturated, twinkling cyan on screen (the ice family is white and white-lilac, never this), a
+ * light blue that stands out on the dark ground of every stage; size and twinkle tell the value.
+ */
+const GEM_BODY = 0x3ed4ff;
+const GEM_LIGHT = 0xd4f8ff;
 const gem = (s: number): ArtDef => ({
   w: Math.round(12 * s),
   h: Math.round(14 * s),
@@ -97,8 +100,8 @@ export const ITEM_ART: Record<string, ArtDef> = {
 
   // ---- XP gems ----
   'gem.small': gem(0.9),
-  'gem.medium': gem(1.35),
-  'gem.large': gem(1.9),
+  'gem.medium': gem(1.25),
+  'gem.large': gem(1.6),
 
   // ---- On the ground ----
   'pickup.chest': {
@@ -151,7 +154,7 @@ export const ITEM_ART: Record<string, ArtDef> = {
       p.rrect(3, 2, 6, 5, 1, 0xd8e0ec).rrect(15, 2, 6, 5, 1, 0xd8e0ec);
       p.ink();
       p.fill(0xffffff, 0.45).fillRect(4.5, 8, 2, 5);
-      p.fill(0x8ac0f0).fillCircle(6, 0.5, 1.2).fillCircle(18, 0.5, 1.2);
+      p.fill(0xffffff).fillCircle(6, 0.5, 1.2).fillCircle(18, 0.5, 1.2);
     },
   },
   'pickup.bomb': {
@@ -179,7 +182,7 @@ export const ITEM_ART: Record<string, ArtDef> = {
     w: 24,
     h: 24,
     draw(p) {
-      p.fill(0x8ac0f0, 0.3).fillCircle(12, 12, 11);
+      p.fill(0xd8d2f0, 0.3).fillCircle(12, 12, 11); // white-lilac: the ice family
       for (let k = 0; k < 3; k++) {
         const a = (k * Math.PI) / 3;
         const dx = Math.cos(a) * 9;

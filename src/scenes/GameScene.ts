@@ -143,7 +143,13 @@ export class GameScene extends Phaser.Scene {
       (img, g) => {
         const key = gemSprite(g.value);
         if (img.texture.key !== key) img.setTexture(key);
-        img.setPosition(g.x, g.y);
+        // Gems twinkle (nothing else on screen does), each out of phase; bigger ones twinkle harder.
+        const tw = Math.sin(this.world.time * 6 + g.x * 0.37 + g.y * 0.23);
+        const amp = key === 'gem.large' ? 0.14 : key === 'gem.small' ? 0.06 : 0.1;
+        img
+          .setPosition(g.x, g.y)
+          .setScale(ART_SCALE * (1 + amp * tw))
+          .setAlpha(0.82 + 0.18 * tw * tw);
       },
     );
     this.pickupMirror = new Mirror(
