@@ -10,7 +10,8 @@ na Etapa 6 (lançamento) ou em "Ideias para depois". Quando o plano do Daniel e 
 
 Como ler: cada item tem ID, por quê (com a evidência), o quê mudar, dono, tamanho (P = horas, M = um dia,
 G = vários dias) e critério de aceite. Dentro de cada etapa, a ordem é impacto sobre esforço.
-Donos: **impl** (implementador), **visual** (visual-director), **bal** (balance-tester, verifica com sim e lab).
+Donos: **impl** (implementador), **visual** (visual-director), **bal** (balance-tester, verifica com sim e lab),
+**vfx** (vfx-director), **ui** (ui-designer).
 
 ## Princípio de estilo (vale para tudo)
 
@@ -31,17 +32,20 @@ com tom sombrio.
 
 ## Próximos 5
 
-1. **S-01** Simulador `npm run sim`
-2. **S-02** Linha de base em `docs/balance-baseline.md`
-3. **B-01** Leque de Facas sem ponto cego
-4. **B-02** "Arma própria" sobreposta na Preparação
-5. **B-03** Cargas zeradas e itens da Loja com estado visual claro
+Plano da noite de 2026-11-08 (aprovado): ver a seção "Revisão 2026-11-08" no fim das etapas.
+
+1. **RB-01** Vitória e derrota no mesmo passo (a fase não é liberada)
+2. **RB-02** Fantasma esmaecido come projéteis e atrai a mira
+3. **RU-02** Faixa da build no HUD
+4. **RF-02** Acerto em flash branco; herói ferido com rosto visível
+5. **RE-01** Aldo em Valmor, a primeira partida, justa
 
 ---
 
 ## Etapa 0: Simulador (medir antes de mexer)
 
 **S-01 · Simulador de partidas completas** · impl · M · ✅ feito
+
 - Por quê: o bot atual do balance-tester é fraco (corridas de 4 a 6 min, "ler como relativo"); sem um bot
   estável, cada ajuste vira chute.
 - O quê: `tests/lab/sim.test.ts` (pulado no `npm test`, como o lab) e script `"sim"` no `package.json`.
@@ -55,6 +59,7 @@ com tom sombrio.
   `npm test` continua sem rodá-lo.
 
 **S-02 · Linha de base** · bal · P · ✅ feito
+
 - Por quê: Forma de trabalho, item 3.
 - O quê: criar `docs/balance-baseline.md` com a saída do sim e do `npm run lab` no commit atual, antes de qualquer
   mudança de dados.
@@ -63,18 +68,21 @@ com tom sombrio.
 ## Etapa 1: Bugs
 
 **B-01 · Leque de Facas com ponto cego à frente** · impl · P · ✅ feito
+
 - Por quê: balance-tester: count 10 par, nenhuma faca no centro (±18°); DPS solo 0, esqueleto a 100 px nunca morre.
 - O quê: decisão do Daniel: quando o leque cobre o círculo inteiro, rotacionar meio passo (`core/weapons.ts`, fogo
   `thrown`), em vez de mudar para count 11. Teste em `tests/core/weapons.test.ts`: alvo logo à frente é atingido.
 - Aceite: teste novo verde; no lab, Leque mata o esqueleto parado a 100 px.
 
 **B-02 · "Arma própria" sobrepõe a descrição na Preparação** · impl + visual · P · ✅ feito
+
 - Por quê: visual-director: cards de Aldo e Andilla em 1000x680; quebra de linha não contada, label sem
   alinhamento à esquerda, fonte 11px (`SelectScene.ts`).
 - O quê: posicionar o label pela altura real do texto da descrição, alinhar à esquerda, fonte mínima 12px.
 - Aceite: nada sobreposto em desktop (1000x680 e 1920x1080) e no celular 390x844, nos quatro heróis.
 
 **B-03 · Estados desabilitados: cargas e Loja** · impl + visual · P · ✅ feito
+
 - Por quê: plano do Daniel (Trocar/Pular/Banir com 0 cargas parecem clicáveis) e visual-director (Loja com 0 ouro:
   `card.setAlpha(0.55)` deixa o painel translúcido e não distingue caro de esgotado, `ShopScene.ts`).
 - O quê: um estilo único de "desabilitado" em `render/ui.ts` (painel opaco, texto e borda em tom apagado), usado
@@ -83,20 +91,26 @@ com tom sombrio.
   vista comprável, caro e completo.
 
 **B-04 · Raio e Geada miram fora da tela no retrato** · impl · P · ✅ feito
+
 - Por quê: balance-tester: `viewReach = max(w,h)/2` (`core/weapons.ts`) deixa alvos nas laterais fora da tela no
   celular em pé. Baixa severidade, mas é o caso de uso principal do Daniel.
 - O quê: usar a meia-largura e a meia-altura da vista separadamente (retângulo visível).
 - Aceite: teste com vista 390x844: todo alvo escolhido está dentro do retângulo visível.
 
 **B-05 · Lâmina com 2 golpes acerta duas vezes quem está sobre o herói** · impl · P · ✅ feito
+
 - Por quê: balance-tester (`core/weapons.ts`, fogo `arc`). Menor.
 - O quê: um inimigo recebe no máximo um acerto por disparo, mesmo com frente e costas.
 - Aceite: teste com inimigo sobreposto ao herói recebe um acerto por disparo.
 
-**B-06 · Dica "F3 depuração" aparece em produção** · impl · P · ✅ feito
-- Por quê: visual-director: o menu mostra a dica de depuração para jogadores.
-- O quê: `t.menu.controlsDesktop` sem o F3; mostrar a dica de F3 só em build de desenvolvimento.
-- Aceite: no GitHub Pages a dica não cita F3.
+**B-06 · Dica "F3 depuração" aparece em produção** · impl · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+
+- Por quê: visual-director: o menu mostra a dica de depuração para jogadores. Revisão 2026-11-08 (02-code #6, 03-qa
+  #8): só a dica saiu; o atalho F4 continua ativo no GitHub Pages e gera 100 inimigos por toque (`HudScene.ts:75-76`),
+  dá para farmar XP.
+- O quê: `t.menu.controlsDesktop` sem o F3 (feito). Novo: registrar o F4 só com `import.meta.env.DEV`; o F3 (painel
+  de FPS) fica em produção para a medição do L-01.
+- Aceite: no GitHub Pages a dica não cita F3 e o F4 não faz nada; no `npm run dev` o F4 segue gerando inimigos.
 
 ## Etapa 2: Balanceamento (corrida justa até o chefe)
 
@@ -105,6 +119,7 @@ sobrevive em média 6 min ou mais em Valmor, sem herói muito acima dos outros. 
 depois e registra em `docs/balance-baseline.md`.
 
 **E-01 · Suavizar a curva das 3:00 às 10:00** · impl + bal · P · ✅ feito
+
 - Por quê: balance-tester: HP inimigo por segundo em Valmor 382, 625, 1330, 2125 contra 1000 a 1800 de DPS de boa
   build, com 500 a 580 vivos; o pico das 4:00 tira os básicos e dobra o HP.
 - O quê (`data/waves.ts`, `CURVE`): 240 s mantém básicos na mistura (`{ basic: 2, fast: 3, tank: 2 }`) e hpMult
@@ -112,12 +127,14 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: no sim, tempo médio de sobrevivência sobe em todas as fases; nenhum snapshot passa de 600 inimigos ativos.
 
 **E-02 · Inimigos rápidos mais lentos que o herói** · impl + bal · P · ✅ feito
+
 - Por quê: balance-tester: corvo 140, morcego 135 e aranha 125 contra herói 150 causam 42%, 55% e 65% do dano
   recebido. Com a curva nova, a Estrada vai de 0/24 para 5/24 corridas que chegam às 10:00.
 - O quê (`data/enemies.ts`): crow 126, bat 126, spider 120.
 - Aceite: no sim, a fatia de dano dos rápidos cai abaixo de 40% em todas as fases.
 
 **E-03 · Armas fracas na multidão** · impl + bal · M · ✅ feito
+
 - Por quê: DPS em multidão (plano do Daniel): Luz de Elun 216, Adagas 278, Fogos-Fátuos 131, contra Lâmina 1984.
   balance-tester: Adagas é a pior heroína (187 s), Luz real 32, Martelo 57, Aura 77, Chama de Yah solo 38.
 - O quê (`data/weapons.ts`), começando pelas assinaturas:
@@ -130,6 +147,7 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: no lab, nenhuma arma base abaixo de metade da mediana de DPS em multidão no nível máximo.
 
 **E-04 · Adagas miram no inimigo mais próximo** · impl · P · ✅ feito
+
 - Por quê: decisão do Daniel. Hoje são lançadas para onde Andilla anda, o que pune a heroína de fuga. O Martelo
   mantém a direção do movimento (é a arma de "mirar andando").
 - O quê: nova opção por arma `thrown` (`aim: 'nearest' | 'facing'`, no `ThrownLevel` ou na entrada da arma) em
@@ -137,6 +155,7 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: teste: com o herói andando para a direita e um inimigo à esquerda, a adaga vai para a esquerda.
 
 **E-05 · Lyra: primeiro raio no mais próximo, vida -10** · impl + bal · P · ✅ feito
+
 - Por quê: decisão do Daniel. balance-tester: Raio solo cresce só 2.5x de L1 a Lmax e Lyra é a mais lenta contra o
   chefe; ele propunha L7 damage 38 para 50.
 - O quê: no fogo `strike`, o primeiro raio de cada disparo vai no inimigo visível mais próximo, os demais ao acaso.
@@ -144,12 +163,14 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: teste do primeiro alvo; no sim, tempo de Lyra contra o chefe dentro de 25% dos outros heróis.
 
 **E-06 · Chefes muito acima das elites** · impl + bal · P · ✅ feito
+
 - Por quê: balance-tester: o Golem às 9:30 tem 4050 HP (900 x hpMult), mais que o chefe (3500 a 4000).
 - O quê: decisão do Daniel: chefes com 12 a 15 mil HP, ajustado pelo sim (ponto de partida: blackKnight 14000,
   bellRinger 13000, oldWolf 12000). Golem hp 900 para 650 (também ajuda E-08).
 - Aceite: no sim, luta de chefe entre 45 e 90 s para builds que chegam às 10:00.
 
 **E-07 · Uma mecânica telegrafada por chefe** · impl + visual + bal · G · ✅ feito
+
 - Por quê: plano do Daniel: hoje os chefes são só perseguidores grandes. Cada um ganha um padrão simples,
   legível no celular, em `src/core` com teste. Nomes vêm das habilidades do jogo original (`src/data.js`).
 - O quê:
@@ -160,33 +181,51 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: testes em `tests/core/` para tempo de aviso e dano; no sim, a mecânica causa dano mas não mata sozinha
   um herói com vida cheia.
 
-**E-08 · Elos mais cedo** · impl + bal · P · ✅ feito
+**E-08 · Elos mais cedo** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 (aceite não cumprido) · aprovado
+
 - Por quê: balance-tester: 0.1 a 0.8 Elos por corrida, chegando aos 8 a 9 min; só 0.8 a 2.4 baús das 6 elites.
 - O quê: `config.xp.step` 9 para 7; golem 650 (E-06); Elos pouco acima da base: fury damage 60, vigil damage 28.
   Elites da Cripta: hoje só Golem; ver pergunta 1 ao Daniel.
 - Aceite: no sim, média de pelo menos 1 Elo por corrida que passa dos 6 min, o primeiro antes das 7:00.
+- Revisão 2026-11-08 (01-balance D9): sim de 12 sementes, 1º Elo em média entre **7:33 e 8:19** e só 29 de 144
+  corridas formam um Elo antes das 7:00. Aceite não cumprido. Novo O quê: `ELITE_TIMES` (`data/stages.ts:15`) de
+  `[100, 220, 330, 420, 500, 570]` para `[90, 200, 300, 390, 480, 560]`. Reserva, só se o aceite ainda falhar:
+  `config.xp.step` 7 para 6.5. Medir com `SIM_SEEDS=12`.
 
-**E-09 · Armadura não pode zerar o dano** · impl + bal · P · ✅ feito
+**E-09 · Armadura não pode zerar o dano** · impl + bal · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+
 - Por quê: balance-tester: armadura 5 corta 68% do dano e todo inimigo comum passa a dar 1.
 - O quê: passiva `armor` maxLevel 5 para 3 (`data/upgrades.ts`), ou `config.player.minDamage` 2. Escolher pelo sim
   (sugestão: maxLevel 3, mais simples de entender no card).
 - Aceite: no sim, build com armadura máxima ainda recebe dano relevante dos comuns depois das 6:00.
+- Revisão 2026-11-08 (01-balance D8): com a Loja inteira, Aldo chega a armadura 7 (herói 1 + passiva 3 + Loja 3),
+  todo comum dá 1 de dano e a regeneração empata: o veterano vence 47 de 48 levando 0 a 5,6 de dano por minuto. Novo
+  O quê: `config.player.minDamage` 1 para **2** (regra única para herói, passiva e Loja; `SHOP.armor` fica como está).
+  Aceite novo: no sim veterano (`bal/veteran.test.ts` do balance-tester), dano recebido por minuto acima de 10 em
+  pelo menos metade das corridas, e o sim normal sem queda de mais de 2 vitórias em 48.
 
-**E-10 · Renda de ouro cerca de 2.5x** · impl + bal · P · ✅ feito
+**E-10 · Renda de ouro cerca de 2.5x** · impl + bal · P · ✅ feito (valores corrigidos no texto em 2026-11-08)
+
 - Por quê: balance-tester: 9.6 de ouro por minuto; Loja completa (21.650) mais heróis (1.100) pede 115 a 360
   corridas.
-- O quê (`data/config.ts`, `gold`): dropChance 0.05, coin 5, chest 50.
-- Aceite: no sim, 25 a 40 de ouro por minuto; a Loja completa em torno de 40 a 80 corridas.
+- O quê (`data/config.ts`, `gold`): proposto dropChance 0.05, coin 5, chest 50. **Aplicado na Etapa 2:
+  dropChance 0.03, coin 3, chest 25** (decisão registrada em `docs/balance-baseline.md`, junto com a curva mais dura e
+  os preços novos dos heróis). Revisão 2026-11-08 (05-ui, achado lateral) apontou a diferença; o balance-tester
+  (01-balance, "Economia") confirmou que os valores aplicados cumprem o aceite: 461 de ouro por corrida, Loja e
+  heróis (24.450) em ~53 corridas. Nenhuma mudança de dados.
+- Aceite: no sim, 25 a 40 de ouro por minuto; a Loja completa em torno de 40 a 80 corridas. Cumprido.
 
 ## Etapa 3: Legibilidade e arte (dono principal: visual-director)
 
 **A-01 · Tokens de cor únicos** · visual + impl · P · ✅ feito
+
 - Por quê: visual-director: `#ffd870` e `#ff8090` repetidos em ~12 lugares, `UI.accent` é outro dourado, o HUD
   inventa cores (XP ciano, dois vermelhos).
 - O quê: `UI.gold`, `UI.danger` (e o que faltar) em `render/ui.ts`, trocando todos os hexadecimais soltos.
 - Aceite: `grep` não encontra cor hexadecimal de UI fora dos tokens nas cenas.
 
 **A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito
+
 - Por quê: plano do Daniel (o herói some na multidão do chefe) e visual-director (Lyra some na Cripta: roxo igual a
   morcegos e aranhas; chão da cripta com contraste alto, `tiles.ts`).
 - O quê: contorno claro permanente e anel mais forte sob o herói. O roxo da Lyra é canônico no original
@@ -196,37 +235,61 @@ depois e registra em `docs/balance-baseline.md`.
   quatro heróis.
 
 **A-03 · HUD legível no celular** · visual + impl · P · ✅ feito
+
 - Por quê: plano do Daniel (barrinha de vida abaixo do herói) e visual-director (HP sem número, textos sem
   contorno, nome do chefe colado à barra, sem safe-area para notch).
 - O quê: barrinha de vida sob o herói; número de HP na barra do HUD; contorno nos textos; respiro no nome do chefe;
   margens com `env(safe-area-inset-*)`.
 - Aceite: em 390x844 e em paisagem, nenhum texto do HUD cortado pelo notch; vida legível sem olhar para o canto.
 
-**A-04 · Números de dano que não poluem** · impl + visual · M · ✅ feito
+**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · aprovado
+
 - Por quê: plano do Daniel e visual-director: sans-serif, todos brancos e iguais, empilham sobre a multidão.
 - O quê: menores, somados por inimigo num intervalo curto (~0.25 s), cor própria para golpe forte, ocultos para
   aura e órbita. Opção na Pausa para desligar (localStorage com try/catch). Sem alocação: pool atual de números.
 - Aceite: com 500 inimigos, no máximo `maxDamageNumbers` na tela e nenhum bloco ilegível; a opção sobrevive ao
   recarregar a página.
+- Revisão 2026-11-08 (04-visual #3): caso não coberto: golpes de área (Quebra-Junta, Maça, Fogo) empilham "124 166"
+  em ~15 camadas sobre o herói, e a fonte de 13 px no mundo vira 11,4 px no celular (zoom 0.875). Novo O quê: para
+  `arc` e `strike` (e o golpe do chefe), só os 4 maiores números de cada disparo; desvio determinístico por `uid`
+  (vem de RT-01); fonte `Math.ceil(14 / zoom)` ou `setScale(1 / zoom)` na criação, sem alocar por quadro. Aceite
+  novo: captura de Quebra-Junta e Espada de Fogo em 420x820 sem pilha de números sobre o herói; nenhum número abaixo
+  de 12 px de tela.
 
-**A-05 · Gemas que contrastam com os três chãos** · visual · P · ✅ feito
+**A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+
 - Por quê: plano do Daniel; visual-director: gemas dominam a tela no limite de 250.
 - O quê: cor única (verde ou dourado com brilho) que contraste com neve, pedra azul e estrada; três tamanhos claros;
   avaliar `gems.maxActive` 250 para 150 com o sim (a fusão já existe).
 - Aceite: captura nas três fases: gemas visíveis e sem cobrir inimigos.
+- Revisão 2026-11-08 (04-visual #1 e #15): as gemas azul-claras (escolha explícita do Daniel em a957868) leem bem no
+  chão vazio, mas dividem a família de cor com o gelo: flor de gelo do tamanho de uma gema, poça da Estrada, tinta de
+  lento e congelado, Geada, olho ciano do fantasma, ossadas da Cripta. A gema grande (`gem(1.9)`) é maior que um
+  morcego. **Regra: a gema continua azul-clara, nunca volta a verde; quem muda é o gelo.** Novo O quê:
+  1. A gema vira a única coisa ciano saturada e cintilante da tela: tom puxado levemente para ciano (o visual-director
+     escolhe o hex, partindo de `0x5ccbff`), cintilar de alfa ou escala por `sin(world.time * 6 + g.x)` no
+     `gemMirror` (sem alocação), tamanhos `gem(1.25)` e `gem(1.6)`.
+  2. Família do gelo em branco, branco-lilás e cinza-azulado dessaturado: flor de gelo `~0xe8e2f4` a 0.35, poça
+     `~0x4a5470`, tinta `slowed ~0xd8e4f0` e `frozen ~0xc8d8f0`, olho do fantasma sem ciano (branco ou dourado
+     pálido).
+- Aceite novo: captura de Valmor com Geada e da Cripta com 400 inimigos em 420x820: dá para apontar todas as gemas em
+  menos de 2 s e nenhuma flor de gelo é confundida com gema; nenhum verde nas gemas.
 
 **A-06 · Golpes e zonas com acabamento** · visual · M · ✅ feito
+
 - Por quê: plano do Daniel; visual-director: slash é uma fatia branca, raio é uma linha de 4 px, sem contorno.
 - O quê: arco da Lâmina com rastro e gradiente; Geada com borda e cristais; raio com contorno e brilho.
 - Aceite: revisão do visual-director aprova as capturas; FPS no stress test (F4) igual ao anterior.
 
 **A-07 · Elos com visual próprio** · visual · M · ✅ feito
+
 - Por quê: visual-director: Vigília, Dobre Fúnebre e Nevasca quase iguais à base. O Elo é a recompensa máxima da
   partida e precisa parecer um.
 - O quê: cada Elo com cor, tamanho ou forma que o diferencie da base (10 entradas em `render/assets.ts`).
 - Aceite: num teste cego de capturas, dá para dizer base ou Elo em todos os 10 pares.
 
 **A-08 · Arte dos chefes** · visual · M · ✅ feito
+
 - Por quê: visual-director: Cavaleiro Negro sem luz de baixo, some no chão; Lobo Velho é recolor 2x do Lobo da Geada
   com contorno de 4 px.
 - O quê: luz de recorte no Cavaleiro (contraste, não tom sombrio); Lobo Velho com desenho próprio (pelagem velha,
@@ -234,36 +297,47 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: os três chefes se destacam do chão e da escolta em 390x844.
 
 **A-09 · Itens do chão distintos** · visual · P · ✅ feito
+
 - Por quê: visual-director: a Badalada (bomba) é um sino igual aos Sinos de Bronze, o ímã parece bomba, o freeze
   está sem `ink()`.
 - O quê: silhuetas diferentes para Badalada, Pedra-Ímã e Sopro de Geada; todas com tinta.
 - Aceite: os seis itens do chão são distintos em miniatura (32 px).
 
-**A-10 · Chãos com decalques** · visual · M · ✅ feito
+**A-10 · Chãos com decalques** · visual · M · ↩ reaberto na Revisão 2026-11-08 · aprovado
+
 - Por quê: plano do Daniel: repetição visível do tile.
 - O quê: decalques determinísticos por posição: Valmor com lápides fofas, montinhos de neve, galhos, flores de gelo;
   Cripta e Estrada com elementos próprios. Sem custo por frame (desenhados por tile).
 - Aceite: nenhuma repetição óbvia numa tela; FPS inalterado no stress test.
+- Revisão 2026-11-08 (04-visual #7): caso não coberto: o tile da Estrada tem sulcos de largura total (listras a cada
+  46/82 px, `tiles.ts:68`) e pedras claras repetidas em grade que competem com gemas e Encapuzados; o musgo da Cripta
+  repete a cada 128 px. Novo O quê: sulcos fora do tile (ou decal curto e curvo); pedras do tile sem brilho, em tom
+  próximo do chão (`~0x4e566e`), volume só no `decal.stones`; musgo da Cripta com metade dos pontos e alfa 0.15.
+  Aceite novo: captura da luta do Lobo Velho em 420x820 e 1000x680 sem listras nem grade de pedras visíveis.
 
 **A-11 · Subida de nível com ícone e receita de Elo** · visual + impl · M · ✅ feito
+
 - Por quê: plano do Daniel; visual-director: cards de 84 px meio vazios, sem ícone, e a tela cobre as barras do HUD.
 - O quê: ícone da arma ou passiva em cada carta; dica curta de receita ("Forma Elo com Força"), reaproveitando
   `t.levelUp.evolvesWith`; layout que não cobre HP e XP.
 - Aceite: em 390x844, as três cartas com ícone e a barra de HP visível durante a escolha.
 
 **A-12 · Preparação com herói em destaque** · visual + impl · M · ✅ feito
+
 - Por quê: plano do Daniel; visual-director: faixa vazia de ~150 px, heróis pequenos, fases sem arte nem cadeado.
 - O quê: metade inferior mostra o herói selecionado grande, atributos e o ícone da arma própria; fases com
   miniatura do chão e cadeado quando trancadas.
 - Aceite: nada sobreposto em desktop e 390x844; dá para ver qual fase está trancada sem ler.
 
 **A-13 · Menu com ilustração intencional** · visual · P · ✅ feito
+
 - Por quê: plano do Daniel (o Cavaleiro semitransparente parece erro) e visual-director (marca d'água atrapalha o
   título; sempre o chão de Valmor).
 - O quê: tirar a marca d'água; ilustração do grupo dos quatro heróis no espaço vazio.
 - Aceite: título limpo; revisão do visual-director aprova em desktop e celular.
 
 **A-14 · Juice de combate e transições** · impl + visual · M · ✅ feito
+
 - Por quê: visual-director: morte de inimigo sem efeito, coleta sem retorno, level-up sem animação, cortes secos
   entre cenas.
 - O quê: puff de morte em `Pool` (sem alocar), brilho curto na coleta de gema e item, pulso no level-up, fade de
@@ -273,6 +347,7 @@ depois e registra em `docs/balance-baseline.md`.
 ## Etapa 4: Som
 
 **SND-01 · Módulo de som com mapa único** · impl · M · ✅ feito
+
 - Por quê: plano do Daniel; visual-director: zero áudio.
 - O quê: módulo em `src/render` que reage a `world.events`; efeitos curtos e fofos gerados por Web Audio; um mapa
   único de sons (como `assets.ts`) para trocar por arquivos depois: golpe, acerto, gema, subir de nível, baú,
@@ -281,6 +356,7 @@ depois e registra em `docs/balance-baseline.md`.
   áudio no celular.
 
 **SND-02 · Mudo salvo** · impl · P · ✅ feito
+
 - Por quê: plano do Daniel.
 - O quê: botão de mudo no menu e na pausa, salvo no localStorage com try/catch; textos em `pt-BR.ts`.
 - Aceite: o mudo sobrevive ao recarregar e a uma localStorage bloqueada (aba anônima) sem erro.
@@ -288,35 +364,43 @@ depois e registra em `docs/balance-baseline.md`.
 ## Etapa 5: Profundidade e retenção (fora do plano atual, propor depois da Etapa 4)
 
 **D-01 · Limite de passivas por partida** · impl + bal · P · ✅ feito
+
 - Por quê: hoje as armas têm limite (6) mas as passivas não; no fim da partida o jogador pega todas e a escolha
   perde peso (pilar 2).
 - O quê: `config.weapons.maxPassives` 6 em `core/upgrades.ts` `candidates()`.
 - Aceite: teste de candidatos; no sim, builds diferentes por semente (passivas finais variam).
 
 **D-02 · Tela final com "só mais uma"** · impl · P · ✅ feito
+
 - Por quê: pilar 4: a derrota precisa mostrar o que avançou.
 - O quê: no EndScene, ouro ganho contra o próximo item da Loja ao alcance e Elos descobertos nesta partida.
 - Aceite: toda tela de fim mostra pelo menos uma meta próxima.
 
 **D-03 · Livro de Elos** · impl + visual · M · ✅ feito
+
 - Por quê: descobrir Elos é o objetivo de longo prazo do gênero; o jogo original já tem a ideia de Elos conhecidos
   com dica (`src/elos.js`).
 - O quê: tela que lista os 10 Elos, com receita revelada após a primeira descoberta (salvo em `core/meta.ts`).
 - Aceite: descobrir um Elo o marca no livro e o save antigo continua válido (`sanitizeSave`).
 
 **D-04 · Um inimigo com comportamento novo por fase** · impl + bal · G · ✅ feito
+
 - Por quê: todos os inimigos só perseguem; falta variedade que peça movimento (pilar 2).
 - O quê: um comportamento simples, data-driven: Encapuzado que investe em linha; Espectro que atravessa e some.
   Na Cripta, considerar o Rato Gigante (do elenco original da cripta, hoje sem uso).
 - Aceite: teste do comportamento; FPS no stress test inalterado.
 
-**D-05 · Mais armas no grupo compartilhado** · impl + bal · M · ✅ feito
+**D-05 · Mais armas no grupo compartilhado** · impl + bal · M · ✅ feito (aceite revisto em 2026-11-08)
+
 - Por quê: são só 6 armas compartilhadas; poucas builds por herói (pilar 3).
 - O quê: 2 a 3 armas novas de `kind` existentes e seus Elos, com nomes do original (pedir ao game-director uma
   proposta com dados prontos).
-- Aceite: no sim, nenhuma arma nova com pick rate acima de 40%.
+- Aceite: no sim, nenhuma arma nova com pick rate acima de 40%. Revisão 2026-11-08 (01-balance): com 8 armas
+  compartilhadas e o bot pegando 4, a média esperada é ~50%; aceite trocado por "nenhuma arma compartilhada 15
+  pontos acima ou abaixo da média do PICKS". Maça 49% e Fogo 48%: cumprido.
 
 **D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito
+
 - Por quê: com a renda de E-10, comprar heróis vira uma meta curta e boa.
 - O quê: `config.unlockAllHeroes` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
 - Aceite: um jogador novo libera o segundo herói em 3 a 5 corridas no sim.
@@ -324,33 +408,532 @@ depois e registra em `docs/balance-baseline.md`.
 ## Etapa 6: Lançamento
 
 **L-01 · Medição em celular real** · bal + impl · P
+
 - Por quê: tudo das Etapas 3 e 4 custa render; a meta é 500+ inimigos a 60 FPS no celular.
 - O quê: rodar F4 no celular do Daniel e no Chrome com CPU 4x; registrar no `docs/balance-baseline.md`.
 - Aceite: 60 FPS com 500 inimigos depois do juice e do som.
 
 **L-02 · Versão do save** · impl · P · ✅ feito
+
 - Por quê: Livro de Elos e novas metas mudam o save; o jogador não pode perder ouro.
 - O quê: campo `version` no `MetaSave` com migração em `sanitizeSave`.
 - Aceite: teste carrega um save atual e um sem versão sem perder nada.
 
 **L-03 · Tela de opções mínima** · impl + visual · P · ✅ feito
+
 - Por quê: as opções de A-04, A-14 e SND-02 ficam espalhadas pela Pausa.
 - O quê: um painel de opções (menu e pausa) com números de dano, tremor e flash, som.
 - Aceite: todas as opções num lugar só, salvas.
 
 ---
 
+## Revisão 2026-11-08
+
+Origem: revisão completa de `16d126a` (`docs/reviews/2026-11-08/00` a `07`). Triagem, conflitos e leitura de design
+em `docs/reviews/2026-11-08/07-direcao.md`. **Aprovado pelo Daniel para implementar esta noite, de forma autônoma**:
+ele testa tudo junto de manhã e diz o que não gostou. Por isso, exceção à "Forma de trabalho" item 1: não parar entre
+fases para pedir aprovação; commit e push ao fim de cada passo.
+
+Prefixos novos: **RB** bug, **RT** técnico (código, sem efeito de jogo), **RE** equilíbrio, **RF** efeitos visuais,
+**RU** interface, **RA** arte e polimento. Itens antigos reabertos mantêm o ID (B-06, E-08, E-09, A-04, A-05, A-10):
+o escopo novo está no próprio item, mais acima.
+
+Regras da noite:
+
+- Cada passo: `npm test`, `npm run lint`, `npm run build` verdes, jogo rodando, um commit (Conventional Commits, em
+  inglês) e push. Lógica nova no core com teste em `tests/core/`.
+- Sim com 12 sementes (`SIM_SEEDS=12 npm run sim`) no fim da R1 (nova linha de base) e depois de cada lote da R2;
+  tabelas antes e depois em `docs/balance-baseline.md`.
+- R3, R4 e R5 mexem em render: medir F4 (420x820, CPU 4x) antes da R3 e no fim de cada fase; nenhuma alocação por
+  quadro; efeitos trocam desenho em vez de somar sempre que possível; modo calmo respeitado.
+- Ao terminar um item, marcar `✅ feito` aqui. Se um item travar (mais de ~45 min sem saída), anotar o motivo no
+  item, deixar `⏸ adiado` e seguir para o próximo.
+
+### Plano da noite
+
+| Fase                      | Passos (um commit cada, nesta ordem)                                                                                                             | Donos                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| **R1 Bugs e integridade** | RB-01 · RB-02 + RB-03 · B-06 · RB-04 · RB-08 · RB-06 + RB-07 · RB-05 · RT-01 · RT-02 · RT-03 · RT-04 · RT-05 + RT-06 · nova linha de base do sim | impl (ui confere RB-05) |
+| **R2 Balanceamento**      | lote 1: RE-01 + RE-02 + RE-05 · lote 2: RE-03 + RE-04 + RE-07 · lote 3: E-08 + RE-06 · lote 4: E-09 · RE-08 (só se o sim pedir) · tabela final   | impl + bal              |
+| **R3 Efeitos (VFX)**      | RF-01 · RF-02 · RF-03 · RF-04 · RF-05 · RF-06 · RF-07 · RF-08 · RF-09 · RF-10 · RF-11 · medição F4                                               | vfx + impl              |
+| **R4 Interface**          | RU-01 · RU-02 · RU-03 · RU-04 · RU-05 · RU-06 · RU-07 · RU-08                                                                                    | ui + impl               |
+| **R5 Arte e polimento**   | A-05 · A-04 · A-10 · RA-01 · RA-02 + RA-03 · RA-04 · RA-05 · RA-06 · capturas finais                                                             | visual + impl           |
+
+Meta da R2 (sim de 12 sementes, 4 heróis x 3 fases): todo herói entre 55% e 85% de vitórias; Aldo em Valmor pelo
+menos 7 de 12; vitórias Valmor ≥ Cripta ≥ Estrada (folga de 3); 1º Elo em média antes das 7:00; luta de chefe com
+mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
+
+### R1 · Bugs e integridade
+
+**RB-01 · Vitória e derrota no mesmo passo viram derrota** · impl · P · aprovado
+
+- Por quê: 02-code #2 (reproduzido): herói com 1 de HP mordido no mesmo passo em que a Aura mata o chefe termina com
+  `state = 'lost'` e eventos `['playerHit', 'won', 'lost']`; o `bank()` lê `lost`, a fase **não** é liberada, a tela de
+  fim abre duas vezes e tocam os dois sons. Acontece justamente na luta do chefe.
+- O quê: `end()` sai cedo se o estado já for `won` ou `lost`; a checagem de morte no fim do `step` só roda com
+  `state === 'playing'`. A vitória tem prioridade (o chefe caiu). Teste em `world.test.ts` com o cenário acima.
+- Aceite: teste novo verde; no cenário, `state === 'won'`, um só evento de fim, fase gravada como vencida.
+
+**RB-02 · Fantasma esmaecido come projéteis e atrai a mira** · impl · P · aprovado
+
+- Por quê: 02-code #1 e 01-balance B1 (reproduzido nos dois): com o Espectro esmaecido, `damageEnemy` ignora o golpe
+  mas o projétil registra o acerto e gasta a perfuração (`projectiles.ts:121-137`); Adagas L1 contra fantasma e dois
+  esqueletos perde metade do dano. `nearestEnemy` e `randomEnemyNear` escolhem fantasmas intocáveis; a órbita grava
+  `orbitReady` antes do dano.
+- O quê: em `updateProjectiles`, pular `isFaded(e)` como `e.dead`; excluir esmaecidos em `nearestEnemy` e
+  `randomEnemyNear`; em `sweepOrbit`, checar `isFaded` antes de gravar `orbitReady`. Testes: projétil atravessa o
+  fantasma esmaecido e acerta quem está atrás; mira ignora esmaecido; teste de pierce > 0 (02-code #13).
+- Aceite: testes verdes; no cenário do balance-tester, o esqueleto 1 e o 2 levam dano com o fantasma esmaecido.
+
+**RB-03 · Sopro de Geada deixa o fantasma intocável por 6 s** · impl · P · aprovado
+
+- Por quê: 01-balance B2 (reproduzido): com o mundo congelado o `behaviourStep` não roda e o fantasma esmaecido fica
+  imune os 6 s inteiros; o item de limpar a tela protege justamente ele.
+- O quê: ao congelar (`core/pickups.ts`), todo fantasma esmaecido volta a sólido (`act = Idle`). Teste.
+- Aceite: fantasma esmaecido dentro da Aura leva dano durante o congelamento.
+
+**RB-04 · Som some no iPhone depois de trocar de app** · impl · P · aprovado
+
+- Por quê: 02-code #3: `unlock` é registrado com `{ once: true }` (`render/sound.ts:112-119`); quando o iOS suspende o
+  `AudioContext` (troca de app, tela bloqueada), ninguém chama `resume()` de novo e o jogo fica mudo. É o celular, o
+  caso de uso principal.
+- O quê: listeners sem `once` em `pointerdown`, `pointerup` e `keydown` que chamam `resume()` sempre que
+  `ctx.state !== 'running'`; voltar a escutar em `visibilitychange` e no `statechange` do contexto.
+- Aceite: no Chromium, `ctx.suspend()` seguido de um toque volta a tocar; Daniel confere no iPhone (trocar de app e
+  voltar).
+
+**RB-05 · Celular deitado: botões e cartas fora da tela** · impl + ui · M · aprovado
+
+- Por quê: 03-qa #1, #2, #4, #5, #6 (820x420): Trocar/Pular/Banir abaixo da tela no level-up (`LevelUpScene.ts:39-40`,
+  77); Loja corta Paciência e Bênção do Templo (`ShopScene.ts:38-41`); Livro de Elos esconde a última linha
+  (`EloBookScene.ts:26-30`); fases com 22 px na Preparação e dica do menu fora da tela; Pausa com o cronômetro sobre o
+  título e chão sem redesenhar depois de girar.
+- O quê: level-up com cargas numa coluna ao lado das cartas (ou cartas sem a linha da receita) quando faltar altura;
+  Loja e Livro com 3 colunas quando `width >= 780` e a lista não couber; mínimo de altura nos cards de fase e dica do
+  menu reposicionada; Pausa com `top` abaixo do HUD; no resize do GameScene pausado, centralizar câmera e chão.
+- Aceite: capturas em 820x420 e 640x360 de level-up, Loja, Livro, Preparação, Menu e Pausa sem nada fora da tela nem
+  sobreposto; 420x820 e 1000x680 sem regressão.
+
+**RB-06 · Toque duplo na Loja compra dois níveis** · impl · P · aprovado
+
+- Por quê: 03-qa #3: dois toques rápidos em Sopa Quente compram 0 para 2 (760 para 460 de ouro); `buy()` recria a cena
+  e o segundo toque cai no botão novo.
+- O quê: ignorar compras por ~250 ms depois de uma compra (cards armados com `delayedCall`, como o `bindKeys`).
+- Aceite: duplo toque e duplo clique compram um nível só.
+
+**RB-07 · Teclado da Loja pula para o card errado** · impl · P · aprovado
+
+- Por quê: 02-code #4: o `keyNav` recebe só os cards compráveis com `cols = 2`, então ↓ anda na diagonal.
+- O quê: passar todos os cards ao `keyNav` (que já pula desabilitados) e Voltar numa linha própria.
+- Aceite: com A comprável, B caro, C e D compráveis, ↓ a partir de A vai para C.
+
+**RB-08 · Estado que vaza entre partidas e level-up lançado duas vezes** · impl · P · aprovado
+
+- Por quê: 02-code #9 e #10: `controls`, `gemStreak` e `lastGem` não são zerados no `create()` do GameScene (o tom da
+  gema continua subindo da partida anterior); com level-ups em fila, a LevelUpScene reinicia duas vezes.
+- O quê: zerar os três no início do `create()`; lançar a LevelUp só se `!this.scene.isActive(SCENES.levelUp)`.
+- Aceite: segunda partida começa com o tom de gema base; com 3 level-ups em fila, um restart por escolha.
+
+**RT-01 · Efeitos não consomem o `Rng` da partida; semente registrada** · impl · P · aprovado
+
+- Por quê: 02-code #7: `addDamageNumber` sorteia o deslocamento com `world.rng`; qualquer ajuste visual muda todas as
+  sementes do sim e a linha de base deixa de ser comparável. Partidas reais não guardam a semente. 04-visual #3: os
+  números empilham na mesma coluna.
+- O quê: deslocamento do número determinístico pelo `uid` do inimigo (ex.: `(uid * 7919 % 11) - 5`); o GameScene gera
+  a semente (`Date.now() >>> 0`), passa ao `World` e a mostra no painel F3 e no `window.game` de dev.
+- Aceite: teste: mudar `maxDamageNumbers` não muda o resultado de uma corrida com a mesma semente; a semente aparece
+  no F3. **Depois deste passo, rodar o sim de 12 sementes e gravar a nova linha de base** (início da R2).
+
+**RT-02 · Alocação por quadro no GameScene** · impl · P · aprovado
+
+- Por quê: 02-code #5: `tiers.find(...)` cria uma closure por gema por quadro (até 250) e `String(Math.round(...))`
+  uma string por número por quadro; viola a regra de desempenho.
+- O quê: `gemSprite(value)` de módulo com `for`; guardar o último valor arredondado por número e só converter quando
+  mudar; laços `for...of` sobre pools do core (`zones.ts`, `xp.ts`, `effects.ts`, `pickups.ts`) viram `for` indexado.
+- Aceite: nenhum `find`/closure/`String()` por entidade no `update` do GameScene (revisão do diff).
+
+**RT-03 · Save aceita `Infinity` e rebaixa versão futura** · impl · P · aprovado
+
+- Por quê: 02-code #8: `r.gold >= 0` aceita `Infinity` (vira `null` e 0 na leitura seguinte); um save de versão maior
+  que `SAVE_VERSION` perde os campos novos ao ser regravado por um build antigo em cache.
+- O quê: `Number.isFinite`; save de versão futura preserva as chaves desconhecidas ao regravar. Testes em
+  `meta.test.ts` para os dois casos.
+- Aceite: testes verdes; nenhum save atual perde dados (teste do L-02 continua verde).
+
+**RT-04 · Textos fora do i18n, ícone de pausa e dica por dispositivo** · impl · P · aprovado
+
+- Por quê: 02-code #11, 03-qa #7, 04-visual #19, 05-ui #3 (extra): unidades e separadores em `describe.ts`,
+  `EndScene.ts`, `SelectScene.ts`; "II" como texto (`HudScene.ts:70`); a dica do level-up fala de toque no desktop e
+  de teclas no celular, e o celular mostra "1." "2." "3." sem teclado.
+- O quê: `t.units` e `t.sep` em `pt-BR.ts`; ícone de pausa desenhado (`icon.pause` ou duas barras em `Graphics`);
+  `t.levelUp.hintTouch` ("Toque numa opção") e `hintKeys` ("Clique ou use 1, 2, 3") por `device.input.touch`, sem
+  numeração no toque.
+- Aceite: `grep` não acha texto de jogador fora do `pt-BR.ts` nesses arquivos; dica certa em 420x820 (toque) e
+  1000x680.
+
+**RT-05 · Código morto e duplicação** · impl · P · aprovado
+
+- Por quê: 02-code #12: `normalizeInto` e `distSq` só usados em teste; `fireOrbit` é stub; `isEvolved` repete `isElo`.
+- O quê: remover os dois helpers e o teste deles; tirar `orbit` do mapa `FIRE` pelo tipo; ficar só com `isElo`.
+- Aceite: testes, lint e typecheck verdes.
+
+**RT-06 · Favicon** · impl · P · aprovado
+
+- Por quê: 03-qa #10: 404 de `/favicon.ico` gera 2 erros de console no Chromium com janela.
+- O quê: um favicon pequeno (SVG inline no `index.html`, desenhado no estilo do jogo, sem asset externo pesado).
+- Aceite: console limpo ao abrir o jogo no Chromium com janela.
+
+### R2 · Balanceamento
+
+Todos os números vêm do `01-balance.md` (sim de 12 sementes e variantes medidas). Aplicar por lote, rodar o sim de 12
+sementes depois de cada lote e registrar.
+
+**RE-01 · Aldo em Valmor, a primeira partida, justa** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D3: Aldo vence 18 de 36 (o pior); Aldo em Valmor 5 de 12, nível médio 33,5, a primeira partida
+  de todo jogador novo. Na corrida a Lâmina L7 rende 67 DPS e a Fúria 59 contra 166 a 171 da Nevasca e da Luz
+  Sagrada: o golpe corpo a corpo perde alcance quando o herói foge.
+- O quê (`data/weapons.ts`): `blade` `range` +10 em todos os níveis (L1 95 ... L7 122); `fury` `range` 125 para 150.
+  Reserva, se o lote não levar Aldo em Valmor a 7 de 12: Aldo `maxHp` +20 para +30 (`characters.ts`).
+- Aceite: Aldo em Valmor pelo menos 7 de 12; Aldo entre 55% e 85% no total.
+
+**RE-02 · Cada fase pelo menos tão difícil quanto a anterior** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D6: Cripta 38/48 e nível 43,6 contra Valmor 29/48 e 37,9. Em Valmor o Goblin (440 HP,
+  velocidade 100) chega às 1:40 e mata builds fracas; o Rato Gigante dá 0,125 XP por HP (Ossos 0,083) e passa metade
+  do tempo parado.
+- O quê: Valmor `elites('golem', 'goblin')` (`data/stages.ts:25`); `rat.xp` 2 para 1 (`data/enemies.ts`). Medido
+  separado: Valmor 29 para 33/48; Cripta 38 para 36/48.
+- Aceite: vitórias Valmor ≥ Cripta ≥ Estrada, com folga de 3.
+
+**RE-05 · Parede dos 6:30** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D5: 18 das 47 derrotas entre 6 e 8 min; o segmento de 390 s multiplica o HP gerado por segundo
+  por 1,8 de uma vez (300 s 18,0; 390 s 32,7), os outros degraus ficam em 1,3 a 1,5.
+- O quê: `CURVE` (`data/waves.ts`) 390 s `hpMult` 2.8 para 2.5. Medido: Estrada 30 para 35/48; mortes entre 6 e 8 min
+  em Valmor de 9 para 6.
+- Aceite: mortes entre 6 e 8 min abaixo de 12 nas 144 corridas; nenhum snapshot novo acima de 650 vivos.
+
+**RE-03 · Elos corpo a corpo e de aura na altura dos outros** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D4: DPS real no sim (144 corridas): Chama de Yah 34, Fúria 59, Quebra-Junta 59, Vigília 73
+  contra Luz Sagrada 171, Nevasca 166, Tempestade 163, Espada de Fogo 155; Maça L7 rende 37, a pior base no máximo.
+- O quê (`data/weapons.ts`): `yahFlame` `radius` 125 para 150; `jointBreaker` `range` 120 para 145 e `arc` 2.6 para
+  3.0; `mace` `range` L1 78 para 88, L5 88 para 100, L7 96 para 110 (níveis intermediários interpolados). A Chama a
+  150 px pede o disco grande com alfa baixo (RF-06).
+- Aceite: no relatório de armas do sim, nenhum Elo abaixo de 90 de DPS real e Maça L7 acima de 55.
+
+**RE-04 · Leque de Facas melhor que as Adagas contra um alvo** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D1: o Elo da Andilla rende 81 DPS no chefe a 60 px e 27 a 90 px (0,18x da base), contra Adagas
+  L7 152; ela é a mais lenta contra o chefe (107 s). Num anel de 10 facas só uma pega o alvo. Conflito com B-01
+  resolvido em `07-direcao.md` (conflito 1).
+- O quê: `fan` `spread` de `TAU/10` para 0.16 (leque de ~85° à frente, mirando no mais próximo), dano 15 mantido. A
+  rotação de meio passo do B-01 continua no core e no teste para qualquer arremesso que cubra o círculo. Medido: chefe
+  243 / 135 / 79 DPS a 60 / 90 / 140 px; multidão 1175 (igual).
+- Aceite: no lab de chefe, Leque acima de 1,5x as Adagas L7 a 60 e a 90 px; multidão do lab sem queda.
+
+**RE-07 · Pequenos acertos de curva** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D10: Fogo solo cresce só 2,7x de L1 a Lmax (a menor DPS solo no máximo); D11: Mãos Ligeiras
+  (+1 de quantidade em todas as armas, +25% a +100% de DPS) custa 2000 contra 1500 da Recarga inteira.
+- O quê: `fire` L7 `damage` 32 para 38; `SHOP.amount` `baseCost` 2000 para 3000.
+- Aceite: lab: Fogo solo Lmax perto de 23; economia do sim: Loja e heróis ainda dentro de 40 a 80 corridas.
+
+**E-08 (reaberto) · Elos mais cedo** · lote 3. Ver o item na Etapa 2.
+
+**RE-06 · Armas de alvo aleatório miram o chefe** · impl + bal · P · aprovado
+
+- Por quê: 01-balance D7: a Estrada tem 7 das 12 derrotas na luta do chefe e a Lyra perdeu 3 por tempo esgotado (20
+  a 30 DPS no chefe); Raio, Fogo e Geada caem na escolta e o Lobo Velho nunca fica numa zona. Lab de chefe: Fogo L7
+  19 DPS (388 s para 14 mil), Geada 24, Raio 23.
+- O quê: em `fireStrike` e `fireZone` (`core/weapons.ts`), o primeiro raio, chama ou mancha de cada disparo vai no
+  chefe quando ele estiver no retângulo visível (`world.boss` vivo e dentro da vista do B-04); senão, a regra atual
+  (Raio e Fogo no mais próximo, Geada ao acaso). Teste em `weapons.test.ts`. Reserva: `oldWolf` `hp` 12000 para 10500
+  se a Estrada ainda tiver mais de 3 mortes por tempo.
+- Aceite: teste verde; Lyra sem derrota por tempo esgotado na Estrada; mediana da luta de chefe de 45 a 90 s.
+
+**E-09 (reaberto) · Armadura não pode zerar o dano** · lote 4. Ver o item na Etapa 2.
+
+**RE-08 · Andilla como teto, não como regra** · bal · P · aprovado (condicional)
+
+- Por quê: 01-balance D2: Andilla vence 32 de 36 (89%) e ganha 687 de ouro por corrida contra 364 a 410; o Daniel pediu
+  a Andilla forte no começo (E-03), então não se nerfa antes de subir os outros.
+- O quê: só se, depois dos lotes 1 a 4, a Andilla tiver 34 de 36 vitórias ou mais: Adagas L1 `cooldown` 0.8 para 0.9.
+  Caso contrário, nada e o item fecha como "não necessário".
+- Aceite: Andilla dentro da meta da R2 (55% a 85%) ou, se acima, a mudança aplicada e medida.
+
+### R3 · Efeitos visuais (dono: vfx-director)
+
+Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que o core já expõe (`OwnedWeapon.timer`,
+`z.tick`, `slash.ttl`, `bolt.ttl`, `world.freeze`, `act`/`aimX`/`aimY`, `p.angle`). Nada novo no core além do opcional
+`Enemy.hitKind`. Captura antes e depois de cada item em 420x820.
+
+**RF-01 · Aviso do chefe em coral listrado** · vfx · P · aprovado
+
+- Por quê: 06-vfx #9: `WARN_COLOR 0xff8a4a` é quase o laranja do Fogo (`0xff8a3a`) e da Chama (`0xff6a3a`); com fogo
+  na build, o aviso do chefe se confunde com o ataque do próprio jogador.
+- O quê: perigo de inimigo em rosa-coral (o `UI.danger`) com listras e borda branca tracejada; fogo do jogador fica
+  laranja-dourado.
+- Aceite: captura do Corte Brutal com Espada de Fogo ativa: aviso e fogo distintos à primeira vista.
+
+**RF-02 · Acerto em flash branco; herói ferido com rosto visível** · vfx + impl · P · aprovado
+
+- Por quê: 06-vfx #1 e 04-visual #4: a tinta `TINT.hit 0xff7070` deixa a multidão inteira vermelha quando aura, geada
+  ou Fúria batem (parece sangue, apaga o tom fofo e cobre o azul do lento), e é o vermelho da Andilla; o herói ferido
+  vira silhueta vermelha chapada (`setTintFill(TINT.heroHurt)`, `GameScene.ts:312`).
+- O quê: inimigo atingido com `setTintFill(0xffffff)` nos primeiros ~0.05 s do `flash`, depois a tinta de status;
+  squash (escala ~1.15 x 0.85 decaindo com `flash`) no lugar do tremor de rotação; herói ferido com `setTint(0xff9090)`
+  (multiplica) e o contorno piscando branco que já existe.
+- Aceite: capturas com Aura L7 e com Andilla cercada: nenhuma massa vermelha; o rosto do herói ferido é visível.
+
+**RF-03 · Chefes e elites por cima, elite e baú com cara de recompensa** · vfx + visual · P · aprovado
+
+- Por quê: 04-visual #5: todo inimigo na profundidade 5, o Cavaleiro aparece só pela capa e o Sineiro some sob as
+  próprias Ossadas; 04-visual #6 e 06-vfx #17: o Goblin Lanceiro não se distingue de uma Gosma e ninguém sabe que ele
+  solta o baú; o baú no chão não brilha.
+- O quê: `setDepth(boss ? 7 : elite ? 6 : 5)` no `if` de troca de textura do `enemyMirror` (custo zero por quadro);
+  anel dourado no chão das elites desenhado na própria textura (no lugar da sombra preta); brilho em estrela piscando no
+  baú caído.
+- Aceite: capturas dos três chefes com escolta em 420x820: chefe inteiro visível; elite reconhecível numa multidão.
+
+**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · aprovado
+
+- Por quê: 06-vfx #5 e #12: o baú (`cameras.main.flash`, `GameScene.ts:331`) pinta a tela de amarelo opaco num quadro e
+  não mostra o que veio, justamente o momento do Elo; Badalada e Sopro de Geada idem; o fim do congelamento chega sem
+  aviso e o inimigo lento anda na mesma cadência.
+- O quê: baú: raios de luz girando atrás do herói (6 triângulos, alfa baixo), o ícone da recompensa (`ICON_ART`)
+  subindo do herói e um anel na cor do herói; Elo com raios duplos e estrelas; se o flash ficar, véu de 25% por 120 ms.
+  Badalada: anel dourado de som do herói até as bordas em ~0.3 s. Sopro de Geada: onda de gelo até as bordas, tinta de
+  4 cantos nos congelados, piscar no último 1 s (`world.freeze < 1`). Lento: cadência de passos `time * 4`.
+  Modo calmo: sem tremor e sem véu.
+- Aceite: nenhum `cameras.main.flash` opaco no jogo; captura do baú com Elo mostra o ícone do Elo; o congelamento pisca
+  antes de acabar.
+
+**RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · aprovado
+
+- Por quê: 06-vfx (infraestrutura), #1 e #8: nenhum acerto diz qual arma bateu nem quão forte; a morte é uma bolha de
+  sabão cinza; elite e chefe morrem igual a um morcego; a vitória não tem momento. Gema e item dividem o teto de puffs
+  com as mortes e somem nas ondas grandes.
+- O quê: `render/sparks.ts`, array fixo de ~96 entradas criado uma vez, teto rígido (metade no modo calmo), máximo de
+  ~24 faíscas novas por quadro, desenhado no `fxTop`; alimentado só lendo estado (flash recém-posto, puff novo, raio
+  novo). Faísca por tipo: estrela branca (corte), cruz dourada (luz), floco (gelo), brasa (fogo); opcional
+  `Enemy.hitKind` no core com teste. Morte: 3 nuvenzinhas, "pop" branco e 2 a 3 estrelinhas; elite com confete dourado;
+  chefe com anéis de luz, estrelas e tremor forte (sem câmera lenta). Reservar 10 do teto de puffs para gema e item.
+- Aceite: F4 com 700 inimigos sem queda maior que 10% contra a medição do início da R3; capturas de morte comum, de
+  elite e do chefe aprovadas pelo vfx-director.
+
+**RF-06 · Aura e Chama de Yah pulsando no ritmo do dano** · vfx · P · aprovado
+
+- Por quê: 06-vfx #2: o alfa oscila por `sin(time * 6)`, desligado do tick (período ~1 s contra ticks de 0.35 a 0.5
+  s); no L1 o único sinal de dano é a turma ficar vermelha; a Chama lê como serra.
+- O quê: fase pelo `OwnedWeapon.timer`; núcleo em 3 discos concêntricos de alfa baixo; onda que sai até exatamente o
+  raio a cada tick; borda que acende no tick; 5 a 8 motes determinísticos. Chama: núcleo branco-quente, línguas de fogo
+  arredondadas e brasas, disco grande a ~0.06 (o raio vai a 150 em RE-03).
+- Aceite: num vídeo curto dá para contar os ticks; a Chama não esconde os inimigos dentro dela.
+
+**RF-07 · Golpes que varrem (Lâmina, Fúria, Maça, Quebra-Junta, Corte Brutal)** · vfx · M · aprovado
+
+- Por quê: 06-vfx #3 e 04-visual #2: o golpe aparece inteiro e desbota (não se lê a direção); a Fúria é um disco bege
+  parado; a Maça é um disco cinza de ~300° com preenchimento 0.6 por cima dos inimigos que parece neblina; o
+  Quebra-Junta cobre quase o círculo; o Corte Brutal é uma fatia branca parada.
+- O quê: borda brilhante que varre de `a0` a `a1` com rastro em gradiente (2 fatias, não 3), borda âmbar de Aldo na
+  Lâmina; Fúria como lâmina que dá uma volta com rastro dourado e centro vazio; Maça sem fatia cheia (faixa grossa na
+  borda, preenchimento no máximo 0.15, anel de choque no chão e lascas); Quebra-Junta em cobre com rachaduras e
+  faíscas; Corte Brutal com o mesmo varrer, poeira e tremor curto.
+- Aceite: inimigos visíveis através de qualquer golpe; direção do golpe legível numa captura; custo igual ou menor.
+
+**RF-08 · Golpes do céu: bola de fogo, Espada de Fogo cravando, raio de Lyra** · vfx · M · aprovado
+
+- Por quê: 06-vfx #4 e #7, 04-visual #2: o Fogo é um risco reto ("palito") e dois discos no `top` que escondem os
+  inimigos (laranja a 0.4 sobre azul vira marrom); a Espada de Fogo não tem espada; o Raio tem sempre o mesmo
+  zigue-zague, um disco cáqui por cima e é amarelo, não da Lyra.
+- O quê: Fogo: gota de fogo caindo, explosão de pétalas no `ground` até o raio exato, brasas que somem com o `ttl`.
+  Espada de Fogo: `drawSword` em cores de fogo caindo de ponta e cravando. Raio: 3 a 4 vértices por hash de `b.x`/`b.y`,
+  clarão branco e faíscas no primeiro quadro, marca queimada no `ground`, contorno roxo de Lyra; Tempestade com 1 a 2
+  galhos e sombra de nuvem. Nenhum disco opaco no `top`.
+- Aceite: capturas de Fogo, Espada de Fogo, Raio e Tempestade no quadro do impacto com os inimigos visíveis.
+
+**RF-09 · Projéteis e órbitas com rastro e a cor do dono** · vfx · M · aprovado
+
+- Por quê: 06-vfx #6, #10, #14, #18: Luz de Elun branca some entre esqueletos brancos; órbitas sem rastro somem na
+  multidão; o halo da Vigília é um disco marrom maior que o hitbox; o Martelo voa parado; Adagas sem rastro; as armas
+  próprias não têm a cor do herói.
+- O quê: Luz de Elun com rastro curto e halo verde-dourado de Teo (Luz Sagrada com estrelinha); Adagas com traço de
+  velocidade vermelho de Andilla; Martelo girando (`SPIN` por sprite, pré-calculado); Espadas com arco de rastro
+  (~0.6 rad); Vigília sem disco, brilho do tamanho do hitbox e anel dourado com 4 marcas.
+- Aceite: captura em L7 com 100 inimigos: todos os projéteis e espadas achados; nenhum halo maior que o hitbox.
+
+**RF-10 · Investidas legíveis e chegada das Ossadas** · vfx + visual · P · aprovado
+
+- Por quê: 04-visual #8 e 06-vfx #13: o preparo da investida de Encapuzado, Rato e Goblin é o tremor de rotação,
+  invisível em 24 px; com 6 na tela não se sabe quem vai investir nem para onde; as Ossadas do Sineiro surgem do nada; a
+  Mordida Funda não deixa rastro.
+- O quê: no `Windup` de inimigos sem `ability`, agachar (escala 1.15 x 0.8) e uma seta curta no chão na direção
+  `aimX`/`aimY`; esticão na arrancada; puff de terra nas marcas das Ossadas na troca Windup para Idle do Sineiro; 3
+  linhas de velocidade atrás do Lobo Velho e poeira no fim.
+- Aceite: captura de 6 Encapuzados em preparo: dá para dizer a direção de cada um.
+
+**RF-11 · Geada com pouso e tick visíveis** · vfx · P · aprovado
+
+- Por quê: 06-vfx #11: a mancha surge pronta e o tick só aparece pelos inimigos tingidos; a Nevasca a 0.34 lava a
+  tela com 4 zonas de 75 px.
+- O quê: pouso (anel que abre e 6 lascas), anel de geada no tick (`z.tick`), borda que se parte no fim; Nevasca com
+  flocos determinísticos e fundo a 0.22. Cores na família nova do gelo (A-05: branco e branco-lilás), sem o ciano da
+  gema.
+- Aceite: captura com Nevasca e gemas no chão: gemas visíveis dentro da zona.
+
+### R4 · Interface (dono: ui-designer)
+
+**RU-01 · Escolha segura, receita com estado e level-up sem faixa clara** · ui + impl · P · aprovado
+
+- Por quê: 05-ui #3: com o joystick flutuante, um toque novo logo depois de abrir a escolha pega a carta de baixo; a
+  receita não diz se o jogador já tem a passiva; a carta de passiva cita só a primeira arma (Cota de Malha esquece a
+  Vigília). 04-visual #9: o escuro deixa uma faixa de 44 px no topo cortando ouro e abates. 06-vfx #16: o pulso de nível
+  some sob o overlay.
+- O quê: cartas e botões de carga entram com fade de ~300 ms e ignoram `pointerdown` nesse tempo (não repetir no
+  restart de Trocar/Banir); receita com mini-ícone da passiva e "(você tem)", "(falta)" ou "Elo pronto: pegue um
+  baú"; carta de passiva lista todas as armas possuídas que completa (função pura em `core/upgrades.ts`, testada);
+  escuro na tela inteira e `bringToTop(SCENES.hud)` na LevelUp e na Pausa. Textos em `pt-BR.ts` conforme o `05-ui.md`.
+- Aceite: toque 100 ms depois de abrir não escolhe; teste da lista de armas; captura sem faixa clara e com o pulso
+  visível.
+
+**RU-02 · Faixa da build no HUD** · ui + impl · M · aprovado
+
+- Por quê: 05-ui #1 e referência do Daniel (`docs/design/ui-references/hud-active-weapons.png`): o jogador não vê a
+  build durante a corrida, nem slots livres, nem que só falta um baú para o Elo. É o item que mais leva a profundidade
+  de build (pilar 3) para dentro da partida.
+- O quê: canto superior esquerdo abaixo do ouro: até 6 slots de arma (24 px, pips de nível) e 6 de passiva (20 px);
+  slot vazio com borda apagada; arma no máximo com barra dourada; "Elo pronto" com moldura dourada pulsando (um tween
+  criado na mudança); Elo formado com moldura fixa. `world.buildRev` incrementado em `applyUpgrade()` e
+  `eloReady(world, weaponId)` puro em `core/upgrades.ts`, ambos testados; o HUD só redesenha quando `buildRev` muda. A
+  faixa não é interativa (não rouba toque do joystick).
+- Aceite: em 360x640, 420x820 e 1000x680 a faixa cabe com safe-area e não cobre o herói; zero alocação por quadro;
+  "Elo pronto" acende quando arma no máximo + passiva.
+
+**RU-03 · Barra do chefe no topo e HUD mais limpo** · ui + impl · P · aprovado
+
+- Por quê: 05-ui #8: a barra do chefe fica a 40 px do rodapé, sob o polegar, na luta mais importante; #9: nível longe
+  da barra de XP, botão de pausa abaixo de 44 px, ouro e abates espalhados.
+- O quê: barra do chefe logo abaixo da faixa da build (largura máxima 420 px); "Nv" na ponta da barra de XP; pausa de
+  44 px no canto real; ouro e abates numa linha à direita com ícone.
+- Aceite: 420x820 com chefe: barra e nome visíveis no terço superior; alvo da pausa com 44 px; nada sobreposto em
+  360x640 e paisagem.
+
+**RU-04 · Painel de build e atributos na subida de nível** · ui + impl · M · aprovado
+
+- Por quê: 05-ui #2 e referência do Daniel (`levelup-stats-panel.png`): o jogador vê "Dano +10%" mas não quanto Dano
+  já tem nem se há slot livre; no celular sobram ~200 px vazios abaixo das cargas.
+- O quê: `render/buildPanel.ts` com `buildSlots` (reusado pela faixa do RU-02) e `statSheet` em três grupos
+  (Sobreviver, Ataque, Coleta), "-" no valor base, prévia `atual → novo` em dourado para a carta em foco;
+  `formatStatValue` em `describe.ts`; ícone `icon.greed`. Desktop: painel à direita das cartas; altura abaixo de 700
+  ou sobra menor que 170 px: só os slots.
+- Aceite: 420x820 e 1000x680 com o painel completo; 360x640 só com slots; nada sobreposto; prévia certa para uma
+  passiva (teste do formatador).
+
+**RU-05 · Tela final com ícones, "faltou pouco" e Próxima fase** · ui + impl · P · aprovado
+
+- Por quê: 05-ui #7: a tabela de DPS é boa, mas sem ícones nem o Elo que ficou a um passo, o melhor gancho de "só
+  mais uma" (pilar 4); 03-qa (sugestão): depois de liberar uma fase, "Jogar de novo" repete a antiga.
+- O quê: ícone de 20 px e barra de dano por arma; passivas com pips; linha "Faltou um baú para formar X!" (ou "o Elo
+  de Y" se o Elo for desconhecido, sem revelar o nome) quando `eloReady` no fim, ou "estava a um nível do Elo"; botão
+  "Próxima fase" quando a vitória liberou fase nova.
+- Aceite: fim com Lâmina no máximo + Força mostra a linha de "faltou pouco"; vitória em Valmor oferece a Cripta num
+  toque.
+
+**RU-06 · Pausa com Desistir protegido** · ui + impl · P · aprovado
+
+- Por quê: 04-visual #10 e 03-qa: Desistir logo abaixo de Continuar, mesmo peso, sem confirmação; larguras
+  desalinhadas, título branco.
+- O quê: Continuar no topo, depois as opções, Desistir por último em `UI.danger`; o primeiro toque em Desistir troca o
+  rótulo para "Confirmar desistir" por 2 s; todos com a mesma largura; título em `UI.gold`.
+- Aceite: um toque acidental em Desistir não encerra a partida; capturas em 420x820 e 1000x680 alinhadas.
+
+**RU-07 · Lembrar herói e fase escolhidos** · impl · P · aprovado
+
+- Por quê: 03-qa #9: a escolha vive só no `registry`; depois de recarregar, a Preparação volta para Aldo e Valmor
+  mesmo com a Cripta liberada (pilar 1: do menu ao jogo em menos de 10 s).
+- O quê: `lastHero` e `lastStage` no `MetaSave` (`core/meta.ts`), validados em `sanitizeSave` (herói comprado, fase
+  aberta; senão o padrão), com teste.
+- Aceite: escolher Lyra na Cripta, recarregar: a Preparação abre em Lyra e Cripta; save antigo continua válido.
+
+**RU-08 · Joystick do tamanho da tela** · impl · P · aprovado
+
+- Por quê: 05-ui #13: `config.joystick.radius` 56 fixo é ~16% da largura em 360 px e pequeno em tablet.
+- O quê: raio `min(64, max(48, menorLado * 0.13))`.
+- Aceite: 360x640 e 820x1180 com joystick proporcional.
+
+### R5 · Arte e polimento (dono: visual-director)
+
+Começa pelos reabertos **A-05** (gemas x gelo, o mais visível), **A-04** (números em golpe de área) e **A-10** (chão
+da Estrada), descritos nos próprios itens.
+
+**RA-01 · Rato com corpo de verdade, aranha com olhos fofos** · visual · P · aprovado
+
+- Por quê: 04-visual #8: o rato tem corpo 18 x 11 para um raio de 12 e parece morcego; #14: a aranha comum tem olho
+  vermelho brilhante, reservado a Ossadas, Encapuzados e chefes na escada de ameaça.
+- O quê: rato `ellipse(15, 13, 22, 14)`, cabeça maior, olho r 2.4; aranha com dois `pen.eye` brancos (r 2) e um
+  olhinho menor.
+- Aceite: na folha de texturas, rato maior que morcego; nenhum comum com olho brilhante.
+
+**RA-02 · Vida numa cor só** · visual · P · aprovado
+
+- Por quê: 04-visual #12: barrinha verde sob o herói e barra vermelha no HUD parecem duas coisas.
+- O quê: `UI.hp` nas duas, barrinha piscando em `UI.danger` abaixo de 35%.
+- Aceite: captura com as duas barras na mesma cor.
+
+**RA-03 · Tremor sem borda vazia** · visual · P · aprovado
+
+- Por quê: 04-visual #13: o chão cobre a vista com 2 px de margem e o tremor mostra uma faixa escura de ~7 px.
+- O quê: margem de 24 px de mundo no `ground` e nos decals.
+- Aceite: captura no pico do tremor de dano sem borda escura.
+
+**RA-04 · Opções com selo de ligado e desligado** · visual · P · aprovado
+
+- Por quê: 04-visual #11: "Som: ligado" só em texto; título branco fora do padrão.
+- O quê: rótulo à esquerda e selo à direita (ligado como o "Completo" da Loja; desligado em `UI.textOff`); título em
+  `UI.gold`; o mesmo selo nas opções da Pausa.
+- Aceite: dá para ver o estado das três opções sem ler.
+
+**RA-05 · Livro de Elos com silhueta e base visível** · visual · P · aprovado
+
+- Por quê: 04-visual #16 e 05-ui #11: `setTintFill(UI.borderOff)` apaga o ícone e sobram sete discos iguais; o mistério
+  precisa de forma para dar vontade de descobrir.
+- O quê: Elo desconhecido com o ícone da arma base colorido, "+ ?" para a passiva, "=" e a silhueta do Elo em
+  `UI.border`; descoberto, os três coloridos. Sem revelar a passiva antes da descoberta.
+- Aceite: captura em 420x820 e 1000x680: cada card desconhecido mostra de qual arma o Elo nasce.
+
+**RA-06 · Preparação: botão principal à esquerda, herói maior, fase vencida** · visual · P · aprovado
+
+- Por quê: 04-visual #17: Partir à direita contra o padrão (principal à esquerda, como na tela final); herói de ~18 px
+  no cartão; 05-ui #12: o jogador não vê quais fases já venceu.
+- O quê: Partir à esquerda, Voltar à direita; herói do cartão a `ART_SCALE * 1.2`; selo "Vencida" (`t.select.cleared`)
+  com o estilo do "Completo" da Loja, lendo `save.cleared`.
+- Aceite: captura com Valmor vencida e Cripta aberta mostra o selo; nada sobreposto em 420x820 e 1000x680.
+
+### Rejeitados nesta revisão
+
+- `rat.hp` 24 (01-balance D6): medido, não resolve (Cripta 39/48).
+- `SHOP.armor` `maxLevel` 1 (01-balance D8): trocado por `minDamage` 2 (E-09), regra única.
+- Nerf direto da Andilla (01-balance D2): só condicional (RE-08).
+- Câmera lenta na morte do chefe (06-vfx #8): o mundo já para; explosão e tremor bastam.
+- `oldWolf` 10500 e `xp.step` 6.5 como primeira opção: ficam como reserva de RE-06 e E-08.
+
+---
+
 ## Decisões já tomadas pelo plano do Daniel
 
-| Tema | Relatório propôs | Plano do Daniel decide |
-| --- | --- | --- |
-| Leque de Facas | count 11, spread TAU/11 | rotacionar meio passo quando cobre o círculo (B-01) |
-| Adagas | só pierce, damage e count | mirar no inimigo mais próximo; Martelo segue o movimento (E-04); buffs numéricos depois, pelo sim |
-| Lyra | Raio L7 damage 38 para 50 | primeiro raio no mais próximo e vida -20 para -10 (E-05); L7 50 só se o sim pedir |
-| Chefes | golem 650 para não passar do chefe | chefes com 12 a 15 mil HP e uma mecânica telegrafada cada (E-06, E-07); golem 650 mantido pelos Elos |
-| Lâmina | não citada | pode ser reduzida um pouco se seguir dominante (E-03) |
-| Estilo | "Cavaleiro sem luz de baixo, se mistura" | resolver com contraste e luz, nunca tornando o jogo sombrio |
-| Meta de balanceamento | 2/96 chegam às 10:00 | média de 6 min ou mais em Valmor por herói, sem herói muito acima |
+| Tema                        | Relatório propôs                         | Plano do Daniel decide                                                                               |
+| --------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Leque de Facas              | count 11, spread TAU/11                  | rotacionar meio passo quando cobre o círculo (B-01)                                                  |
+| Adagas                      | só pierce, damage e count                | mirar no inimigo mais próximo; Martelo segue o movimento (E-04); buffs numéricos depois, pelo sim    |
+| Lyra                        | Raio L7 damage 38 para 50                | primeiro raio no mais próximo e vida -20 para -10 (E-05); L7 50 só se o sim pedir                    |
+| Chefes                      | golem 650 para não passar do chefe       | chefes com 12 a 15 mil HP e uma mecânica telegrafada cada (E-06, E-07); golem 650 mantido pelos Elos |
+| Lâmina                      | não citada                               | pode ser reduzida um pouco se seguir dominante (E-03)                                                |
+| Estilo                      | "Cavaleiro sem luz de baixo, se mistura" | resolver com contraste e luz, nunca tornando o jogo sombrio                                          |
+| Meta de balanceamento       | 2/96 chegam às 10:00                     | média de 6 min ou mais em Valmor por herói, sem herói muito acima                                    |
+| Gemas (2026-11-08)          | visual: gema azul se confunde com o gelo | gema segue azul-clara por escolha do Daniel; o gelo muda de cor (A-05)                               |
+| Leque de Facas (2026-11-08) | balance: leque à frente (`spread` 0.16)  | aceito pelo game-director (RE-04); o Daniel confere de manhã e pode voltar ao anel do B-01           |
 
 ## Perguntas para o Daniel (respondidas em 2026-11-08: "tudo bem para tudo")
 
@@ -376,3 +959,19 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 - Desafios e conquistas que liberam armas novas.
 - Novas fases do Capítulo 1 do original (Pasto do Vau, Vau do Corvo, caminho para Erukh), com lore do Daniel.
 - Tabela de recordes local por herói e fase.
+
+Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Daniel):
+
+- **Dificuldade por fase vencida** (01-balance D8: com a Loja inteira o veterano vence 47 de 48): um nível extra por
+  fase depois de vencê-la, com curva mais dura e mais ouro. O próximo sistema grande para o pilar 4; nome e
+  apresentação com o Daniel.
+- **Revelação pausada do Elo formado** (05-ui #5): só se, depois do RF-04, o Daniel sentir que o Elo ainda passa
+  despercebido. Baú comum continua sem pausa.
+- **Pausa como ficha da build** (05-ui #4): reaproveita o `buildPanel` do RU-04, com DPS por arma e estado do Elo.
+- **Setas na borda para baú e elite** (05-ui #6).
+- **Loja com ícones, grupos e pips** (05-ui #10), com 4 ícones novos.
+- **Joystick fixo como opção** (05-ui #13).
+- **Efeitos menores** (06-vfx): Fogos-Fátuos com rastro, sinos balançando, rastro e faísca de gema coletada,
+  Tempestade escurecendo a tela.
+- **Menu e Loja usando o espaço que sobra** (04-visual #18).
+- **Tamanho do bundle** (00-checks: 1,30 MB num chunk, 357 kB gzip): medir o tempo até o menu em 4G antes de mexer.
