@@ -1031,13 +1031,16 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 Começa pelos reabertos **A-05** (gemas x gelo, o mais visível), **A-04** (números em golpe de área) e **A-10** (chão
 da Estrada), descritos nos próprios itens.
 
-**RA-01 · Rato com corpo de verdade, aranha com olhos fofos** · visual · P · aprovado
+**RA-01 · Rato com corpo de verdade, aranha com olhos fofos** · visual · P · ✅ feito
 
 - Por quê: 04-visual #8: o rato tem corpo 18 x 11 para um raio de 12 e parece morcego; #14: a aranha comum tem olho
   vermelho brilhante, reservado a Ossadas, Encapuzados e chefes na escada de ameaça.
 - O quê: rato `ellipse(15, 13, 22, 14)`, cabeça maior, olho r 2.4; aranha com dois `pen.eye` brancos (r 2) e um
   olhinho menor.
 - Aceite: na folha de texturas, rato maior que morcego; nenhum comum com olho brilhante.
+- Feito: rato com corpo 22 x 14, cabeça e orelha maiores, olho r 2.4; aranha com dois olhos brancos e um olhinho.
+  O esqueleto comum de Valmor também tinha olho brilhante (azul): ganhou olhinhos brancos nas órbitas; o brilho
+  ficou só nas Ossadas, no fantasma, nos Encapuzados, nas elites e nos chefes.
 
 **RA-02 · Vida numa cor só** · visual · P · aprovado
 

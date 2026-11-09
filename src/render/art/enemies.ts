@@ -6,7 +6,8 @@ import type { ArtDef } from './types';
  * bosses are big and menacing (light from below).
  */
 
-function skeleton(bone: number, eyes: number, w = 26, h = 30): ArtDef {
+/** `eyes`: the glow color of a story skeleton, or null for a common one's funny cartoon eyes. */
+function skeleton(bone: number, eyes: number | null, w = 26, h = 30): ArtDef {
   return {
     w,
     h,
@@ -21,7 +22,8 @@ function skeleton(bone: number, eyes: number, w = 26, h = 30): ArtDef {
       p.ink();
       p.fill(d).fillRect(9.5, 14, 8, 1.2).fillRect(9.5, 16.5, 8, 1.2).fillRect(13, 12.5, 1.4, 7);
       p.fill(INK).fillEllipse(12.2, 8, 3.6, 4).fillEllipse(17.4, 8, 3.6, 4).fillRect(12, 12.6, 6, 1);
-      p.glow(12.6, 8.2, 0.9, eyes).glow(17.8, 8.2, 0.9, eyes);
+      if (eyes === null) p.eye(12.4, 8, 1.5).eye(17.6, 8, 1.5);
+      else p.glow(12.6, 8.2, 0.9, eyes).glow(17.8, 8.2, 0.9, eyes);
       p.shine(11, 5, 4, 2.5, 0.35);
     },
   };
@@ -82,7 +84,7 @@ function wolf(fur: number, belly: number, eyes: number, scale: number, scar = fa
 
 export const ENEMY_ART: Record<string, ArtDef> = {
   // ---- Arredores de Valmor ----
-  'enemy.skeleton': skeleton(0xe8e0c8, 0x8ac0f0),
+  'enemy.skeleton': skeleton(0xe8e0c8, null),
   'enemy.spider': {
     w: 30,
     h: 24,
@@ -99,7 +101,8 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.ellipse(12, 13, 15, 12, 0x6e4a32).circle(21, 13, 5.5, 0x8a5e3e);
       p.ink();
       p.fill(0xa87a52).fillEllipse(10, 12, 6, 4);
-      p.glow(22, 11.5, 1, 0xe86a7a).glow(24.5, 12.5, 0.9, 0xe86a7a).glow(20.5, 14, 0.7, 0xe86a7a);
+      // A common enemy: big funny eyes (glowing ones belong to the story enemies), plus a little third one.
+      p.eye(19.6, 11.6, 2).eye(23.8, 12, 2).eye(22.6, 15.6, 1.1);
     },
   },
   'enemy.slime': {
@@ -152,15 +155,15 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.shadow(17, 21, 22, 5);
       p.line(6, 15, 1, 9, 2.6, INK).line(6, 15, 1, 9, 1.2, 0xe8a0a8); // tail
       p.rrect(9, 16, 4, 5, 2, fur).rrect(19, 16, 4, 5, 2, fur); // legs
-      p.ellipse(15, 13, 18, 11, fur); // body
-      p.poly([21, 8, 31, 12, 30, 15, 21, 17], fur); // snout
-      p.circle(21, 6, 3.5, fur); // ear
+      p.ellipse(15, 13, 22, 14, fur); // body: about 2 x radius, so it reads bigger than a bat
+      p.poly([20, 6, 32, 11, 31.5, 15, 20, 19], fur); // head and snout
+      p.circle(21, 5, 4.2, fur); // ear
       p.ink();
-      p.fill(0xe8a0a8).fillCircle(21, 6, 1.8).fillCircle(31, 13, 1.4);
-      p.fill(shade(fur, 1.25)).fillEllipse(14, 16, 11, 4);
-      p.eye(25, 11, 2);
-      p.fill(0xffffff).fillRect(28.5, 15, 1.4, 2);
-      p.shine(11, 10, 5, 2.5, 0.3);
+      p.fill(0xe8a0a8).fillCircle(21, 5, 2.2).fillCircle(32, 12.5, 1.5);
+      p.fill(shade(fur, 1.25)).fillEllipse(14, 17, 14, 4.5);
+      p.eye(25, 10.5, 2.4);
+      p.fill(0xffffff).fillRect(29, 15, 1.5, 2.2);
+      p.shine(10, 9, 6, 3, 0.3);
     },
   },
 
