@@ -61,12 +61,12 @@ const GEM_GLINT = 0x8adcff;
 const ITEM_GLINT = 0xffd870;
 const HP_OK = 0x7cd860;
 const HP_LOW = 0xd83a4a;
-/** Tints of enemies: hit, frozen by Sopro de Geada, slowed by frost. And the hero's flash when hurt. */
+/** Tints of enemies: hit (a white fill), frozen by Sopro de Geada, slowed by frost. And the hero's hurt wash. */
 export const TINT = {
-  hit: 0xff7070,
+  hit: 0xffffff,
   frozen: 0x80c8ff,
   slowed: 0xb8e0ff,
-  heroHurt: 0xff4050,
+  heroHurt: 0xff9090,
   /** The hero's outline while invulnerable, and the snow under the menu's party. */
   blink: 0xffffff,
   snow: 0xe8eff8,

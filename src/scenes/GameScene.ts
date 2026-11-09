@@ -30,6 +30,10 @@ import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
+/** How long a hit lasts on an enemy, and the part of it (from the start) shown as a white flash. */
+const HIT_FLASH = config.enemies.hitFlash;
+const HIT_WHITE = 0.5;
+
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
 
@@ -71,6 +75,8 @@ export class GameScene extends Phaser.Scene {
   private gemStreak = 0;
   private lastGem = 0;
   private choice!: RunChoice;
+  /** The calm-screen option, read once per frame. */
+  private calm = false;
 
   constructor() {
     super(SCENES.game);
@@ -152,21 +158,17 @@ export class GameScene extends Phaser.Scene {
         const w = this.world;
         if (img.texture.key !== e.def.sprite) img.setTexture(e.def.sprite);
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
-        // wobble when hit. Frozen enemies stand still.
+        // squash when hit. Frozen enemies stand still.
         const a = w.freeze > 0 ? 0 : Math.sin(w.time * 9 + e.uid * 1.7) * 0.06;
+        const hit = e.flash / HIT_FLASH; // 1 -> 0 after a hit
         img
           .setPosition(e.x, e.y)
-          .setScale(ART_SCALE * (1 + a), ART_SCALE * (1 - a))
+          .setScale(ART_SCALE * (1 + a + 0.15 * hit), ART_SCALE * (1 - a - 0.15 * hit))
           .setFlipX(w.player.x < e.x)
-          .setRotation(
-            e.act === BossAct.Windup
-              ? Math.sin(w.time * 18) * 0.18 // a boss winding up shakes, rings or crouches: the cue
-              : e.flash > 0
-                ? Math.sin(w.time * 70) * 0.15
-                : 0,
-          );
-        if (e.flash > 0) img.setTint(TINT.hit);
-        else if (this.world.freeze > 0) img.setTint(TINT.frozen);
+          .setRotation(e.act === BossAct.Windup ? Math.sin(w.time * 18) * 0.18 : 0); // a boss winding up shakes
+        // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
+        if (hit > 1 - HIT_WHITE && !this.calm) img.setTintFill(TINT.hit);
+        else if (w.freeze > 0) img.setTint(TINT.frozen);
         else if (e.slow > 0) img.setTint(TINT.slowed);
         else img.clearTint();
         img.setAlpha(isFaded(e) ? 0.3 : 1); // a fading ghost: harmless and untouchable for a moment
@@ -233,6 +235,7 @@ export class GameScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     if (!this.controls) return;
     const w = this.world;
+    this.calm = settings().calm;
     this.hud.joystick.setEnabled(w.state === 'playing');
     w.step(delta / 1000, this.controls.read());
 
@@ -335,8 +338,9 @@ export class GameScene extends Phaser.Scene {
         case 'playerHit':
           sound.play('hurt');
           this.shake(120, 0.006);
-          this.playerSprite.setTintFill(TINT.heroHurt);
-          this.time.delayedCall(90, () => this.playerSprite.clearTint());
+          // A red wash (multiplied, so the face stays visible) while the outline blinks white.
+          this.playerSprite.setTint(TINT.heroHurt);
+          this.time.delayedCall(140, () => this.playerSprite.clearTint());
           break;
         case 'bossSpawned':
           sound.play('boss');

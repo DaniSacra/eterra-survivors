@@ -745,7 +745,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Funda) e borda branca tracejada que marcha mais rápido conforme o golpe chega; Fogo, Espada de Fogo e Chama passaram
   para laranja-dourado (`fx.ts`).
 
-**RF-02 · Acerto em flash branco; herói ferido com rosto visível** · vfx + impl · P · aprovado
+**RF-02 · Acerto em flash branco; herói ferido com rosto visível** · vfx + impl · P · ✅ feito
 
 - Por quê: 06-vfx #1 e 04-visual #4: a tinta `TINT.hit 0xff7070` deixa a multidão inteira vermelha quando aura, geada
   ou Fúria batem (parece sangue, apaga o tom fofo e cobre o azul do lento), e é o vermelho da Andilla; o herói ferido
@@ -754,6 +754,10 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   squash (escala ~1.15 x 0.85 decaindo com `flash`) no lugar do tremor de rotação; herói ferido com `setTint(0xff9090)`
   (multiplica) e o contorno piscando branco que já existe.
 - Aceite: capturas com Aura L7 e com Andilla cercada: nenhuma massa vermelha; o rosto do herói ferido é visível.
+- Feito: inimigo atingido pisca branco (`setTintFill`) só na primeira metade do `flash` (~0.05 s) e depois volta a
+  tinta de lento ou congelado; squash 1.15 x 0.85 que decai com o `flash` no lugar do tremor de rotação; modo calmo
+  sem o branco (só o squash). Herói ferido com `setTint(0xff9090)` (multiplica, o rosto aparece) por 140 ms, com o
+  contorno piscando branco. Tintas de lento e congelado ficam para a A-05 (família branco-lilás).
 
 **RF-03 · Chefes e elites por cima, elite e baú com cara de recompensa** · vfx + visual · P · aprovado
 
