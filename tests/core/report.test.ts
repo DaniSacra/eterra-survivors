@@ -15,7 +15,7 @@ describe('end-of-run report', () => {
     for (let i = 0; i < 120; i++) w.step(1 / 60, still);
     const [aura, daggers] = weaponReport(w);
     expect(e.dead || e.poolIndex === -1).toBe(true);
-    expect(aura!.damage + daggers!.damage).toBe(e.maxHp);
+    expect(aura!.damage + daggers!.damage).toBeCloseTo(e.maxHp);
   });
 
   it('credits projectiles and frost to the weapon that made them', () => {

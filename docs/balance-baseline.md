@@ -527,3 +527,53 @@ ELO X    fury 2.3x · holyLight 2.8x · yahFlame 10.3x · fan 2.4x · vigil 5.8x
 Antes 267/288, depois 271/288: os Elos ficaram mais fracos, mas as armas automáticas cresceram. O DPS real das
 partidas não acompanha o lab: as teleguiadas (Luz Sagrada 946, Procissão 723) passam longe das que dependem da
 mira do bot (Lâmina 85, Fúria 136). A Etapa 6 calibra pelo DPS real; o lab segura a ordem entre categorias.
+
+## Etapa 2 · armas iniciais temáticas
+
+Mudanças: Lâmina com estocada a cada 3 golpes (1,6x de alcance, 2,2x de dano, arco estreito); Cajado de Lyra
+(orbe para onde ela anda, explode no primeiro inimigo; Elo Estrela de Lyra com Sabedoria); Maça de Ferro do Teo
+vira `slam` (fenda retangular à frente, tremor 0,8 s depois no ponto de impacto, atordoa 0,4 s, chefes 0,1 s);
+Adagas para onde Andilla anda, sem atravessar, 20% de crítico 2x (Leque: 30% de crítico 3x); Raio e Luz de Elun
+viram armas gerais. Código do arco com mira, combo e onda de choque removido (nenhuma arma usa mais).
+
+### Lab depois
+
+```
+cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base
+aimed  hammer                62    450        117    100%  85-100%  | forgeFury        1854   412    96%  4.1x
+aimed  daggers               42    449        449    100%  85-100%  | fan              1875  1875    97%  4.2x
+aimed  mace                  59    447        104     99%  85-100%  | jointBreaker     1853   266    96%  4.1x
+aimed  staff                 37    443        221     98%  85-100%  | lyraStar         1853   296    96%  4.2x
+aimed  blade                 43    439         80     98%  85-100%  | fury             1934   121   100%  4.4x
+area   bells                 16    231         16     51%  40-55%  | funeralToll       953    80    49%  4.1x
+area   frost                  8    231         24     51%  40-55%  | blizzard          957    28    49%  4.1x
+area   paladinSwords         26    223         28     49%  40-55%  | vigil             958   165    50%  4.3x
+area   yahAura                0    220         28     49%  40-55%  | yahFlame          960    48    50%  4.4x
+auto   fire                   8    281         25     63%  50-65%  | fireSword        1178    33    61%  4.2x
+auto   wisps                 23    278        117     62%  50-65%  | soulProcession   1175   365    61%  4.2x
+auto   lightning             23    277         59     62%  50-65%  | storm            1152    45    60%  4.2x
+auto   elunLight             13    274        106     61%  50-65%  | holyLight        1166   397    60%  4.3x
+
+```
+
+### Vitórias por fase e perfil de loja (depois)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  25/32 78%        10.2 min       560  aldo 88% · lyra 38%! · teo 100%! · andilla 88%
+         valmor    half  27/32 84%        10.2 min       692  aldo 100% · lyra 75% · teo 88% · andilla 75%
+         valmor    full  32/32 100%              -       884  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         crypt     none  23/32 72%         3.5 min       445  aldo 75% · lyra 75% · teo 100%! · andilla 38%!
+         crypt     half  32/32 100%              -       697  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         crypt     full  30/32 94%        12.6 min       879  aldo 100% · lyra 75% · teo 100% · andilla 100%
+         southRoad none  24/32 75%        10.2 min       532  aldo 88% · lyra 50%! · teo 100%! · andilla 63%
+         southRoad half  31/32 97%        10.2 min       702  aldo 100% · lyra 88% · teo 100% · andilla 100%
+         southRoad full  32/32 100%              -       866  aldo 100% · lyra 100% · teo 100% · andilla 100%
+
+REAL DPS blade:max 112 (123) · elunLight:max 351 (69) · yahAura:max 17 (78) · daggers:max 280 (105) · staff:max 256 (135) · paladinSwords:max 25 (71) · frost:max 181 (70) · lightning:max 265 (74) · hammer:max 148 (80) · wisps:max 356 (74) · bells:max 52 (83) · mace:max 85 (126) · fire:max 193 (75) · fury 169 (83) · holyLight 954 (49) · yahFlame 118 (48) · fan 789 (66) · vigil 109 (33) · blizzard 282 (37) · storm 352 (43) · jointBreaker 253 (46) · fireSword 359 (21) · forgeFury 487 (34) · soulProcession 877 (34) · funeralToll 201 (25) · lyraStar 518 (51)
+ELO X    fury 1.6x · holyLight 3.1x · yahFlame 8.7x · fan 3.2x · vigil 4.7x · blizzard 1.7x · storm 1.4x · jointBreaker 2.9x · fireSword 1.9x · forgeFury 3.9x · soulProcession 2.7x · funeralToll 3.4x · lyraStar 3.1x
+```
+
+259/288 (antes 271). Teo com a Maça vence tudo sem loja (100%); Lyra cai a 38–50% sem loja, quase sempre por
+não derrubar o chefe até o limite (chega aos 10 min em 8 de 8). Andilla na Cripta sem loja 3/8: as facas param
+no primeiro inimigo. A Etapa 6 equilibra os heróis.

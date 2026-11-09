@@ -180,7 +180,7 @@ describe('checkAchievements', () => {
       won: true,
       time: 630,
       hpLeft: 0.08,
-      weapons: ['elunLight'],
+      weapons: ['mace'],
     });
     const got = recordRun(s, won).achievements;
     expect(got).toEqual(expect.arrayContaining(['soloWin', 'closeWin', 'winTeo', 'bossFast', 'survive10']));

@@ -95,7 +95,11 @@ const input = { x: 0, y: 0 };
 function aimingSoon(w: World): boolean {
   for (const o of w.weapons) {
     const kind = WEAPONS[o.id].kind;
-    if ((kind === 'arc' || (kind === 'thrown' && !aimsItself(o.id))) && o.timer <= DT * 1.5) return true;
+    if (
+      (kind === 'arc' || kind === 'slam' || (kind === 'thrown' && !aimsItself(o.id))) &&
+      o.timer <= DT * 1.5
+    )
+      return true;
   }
   return false;
 }

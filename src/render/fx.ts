@@ -1,12 +1,19 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
-import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data/weapons';
+import {
+  WEAPONS,
+  type AuraLevel,
+  type OrbitLevel,
+  type SlamLevel,
+  type WeaponDef,
+  type WeaponId,
+} from '../data/weapons';
 import { isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW } from '../core/bosses';
 import { CHARGE } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
-import type { Bolt } from '../core/effects';
+import type { Bolt, Slash } from '../core/effects';
 import type { Projectile } from '../core/projectiles';
 import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
@@ -37,8 +44,6 @@ const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fil
 const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
   blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none' },
   fury: { fill: 0xfff0b0, edge: 0xffa040, band: 0.62, fillAlpha: 0.45, mark: 'none' },
-  mace: { fill: 0xb8b0a4, edge: 0x6a6458, band: 0.7, fillAlpha: 0.45, mark: 'shock' },
-  jointBreaker: { fill: 0xe8b890, edge: 0xc86a3a, band: 0.66, fillAlpha: 0.45, mark: 'crack' },
 };
 /** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
 const CLEAVE_STYLE: SwingStyle = {
@@ -83,6 +88,8 @@ interface BoltStyle {
   fire: boolean;
   sword: boolean;
   branches: number;
+  /** Not from the sky: an orb bursting where it struck (Cajado de Lyra). */
+  burst?: boolean;
 }
 const BOLT_PLAIN: BoltStyle = {
   color: 0xc890ff,
@@ -96,7 +103,33 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false, sword: false, branches: 2 },
   fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true, sword: false, branches: 0 },
   fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
+  staff: { color: 0xb070f0, core: 0xf4e8ff, width: 3, fire: false, sword: false, branches: 0, burst: true },
+  lyraStar: {
+    color: 0xd8a0ff,
+    core: 0xfff6c0,
+    width: 4,
+    fire: false,
+    sword: false,
+    branches: 0,
+    burst: true,
+  },
 };
+/** Slam fissures: the crack's dark, the dust thrown along it, and the Elo's glow inside the crack. */
+const CRACK = 0x2a1e1a;
+const DUST_LIGHT = 0xe8dcc8;
+const CRACK_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: 0xff9a40 };
+/** Reused corners of a fissure's strip (no allocation per frame). */
+const QUAD = [
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+  { x: 0, y: 0 },
+];
+function setCorner(i: number, x: number, y: number): void {
+  const c = QUAD[i] as { x: number; y: number };
+  c.x = x;
+  c.y = y;
+}
 /** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
 const FIRE_SWORD: OrbitStyle = { color: 0xffd890, dark: 0xff6a20, blade: true };
 /** Part of a strike's life spent falling, before the burst on the ground. */
@@ -197,6 +230,15 @@ export function drawFx(
         w.level,
         isElo(w.id),
       );
+    } else if (kind === 'slam' && w.combo > 0) {
+      // Where the tremor will burst: a ring tightening on the impact point while it waits.
+      const s = weaponStats(w) as SlamLevel;
+      const r = s.tremorRadius * p.stats.area;
+      const k = 1 - w.combo / ((WEAPONS[w.id] as WeaponDef).combo ?? 1);
+      g.lineStyle(2, DUST_LIGHT, 0.25 + 0.45 * k);
+      ring(g, w.comboX, w.comboY, r * (1.15 - 0.15 * k));
+      g.fillStyle(CRACK, 0.12 + 0.18 * k);
+      disc(g, w.comboX, w.comboY, r * 0.3 * k);
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
       const count = s.count + p.stats.amount;
@@ -311,6 +353,16 @@ export function drawFx(
   // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
   if (world.state === 'won' || world.state === 'lost') return;
   for (const s of world.slashes.active) {
+    if (s.form === 'fissure') {
+      drawFissure(ground, top, s, 1 - s.ttl / config.effects.fissureTtl);
+      continue;
+    }
+    if (s.form === 'tremor') {
+      // The impact's crater and ring, from the moment it bursts.
+      const k = 1 - s.ttl / config.effects.tremorTtl;
+      drawImpact(ground, s.x, s.y, s.shock, s.angle, SWEEP * 0.7 + k * (1 - SWEEP * 0.7));
+      continue;
+    }
     const t = 1 - s.ttl / config.effects.slashTtl;
     drawSwing(
       g,
@@ -323,15 +375,6 @@ export function drawFx(
       t,
       SWING_STYLE[s.weapon] ?? SWING_PLAIN,
     );
-    if (s.shock > 0)
-      drawImpact(
-        ground,
-        p.x + Math.cos(s.angle) * s.range,
-        p.y + Math.sin(s.angle) * s.range,
-        s.shock,
-        s.angle,
-        t,
-      );
   }
   for (const b of world.bolts.active) drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
 }
@@ -405,6 +448,21 @@ function drawBolt(
   const st = BOLT_STYLE[b.weapon] ?? BOLT_PLAIN;
   const fade = 1 - u;
   const r = b.radius;
+  if (st.burst) {
+    // An orb bursting: a flash, a soft disc filling the blast, and a bright ring running out to its edge.
+    const grow = 1 - (1 - u) * (1 - u);
+    g.fillStyle(st.color, 0.3 * fade);
+    disc(g, b.x, b.y, r * grow);
+    top.lineStyle(st.width * fade + 1, st.core, 0.9 * fade);
+    ring(top, b.x, b.y, r * grow);
+    top.lineStyle(2, st.color, 0.8 * fade);
+    ring(top, b.x, b.y, r * grow * 0.75);
+    if (u < 0.3) {
+      top.fillStyle(0xffffff, 0.9 * (1 - u / 0.3));
+      disc(top, b.x, b.y, 5 + r * 0.35 * (u / 0.3));
+    }
+    return;
+  }
   if (st.fire) {
     if (u < FALL) {
       // The fall: a fireball (or the sword, point first) coming down from up and to the left.
@@ -551,6 +609,70 @@ function drawSwing(
       under.lineBetween(x, y, nx, ny);
       x = nx;
       y = ny;
+    }
+  }
+}
+
+/**
+ * A slam's fissure, from (x, y) along `angle`: it tears open from the hero outward in the first quarter, a jagged
+ * dark crack down the middle of a dusty strip exactly as long and wide as what it hits; chips jump along its
+ * edges, and it closes as it fades. The Elo's crack glows from inside.
+ */
+function drawFissure(
+  under: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  s: Slash,
+  t: number,
+): void {
+  const ux = Math.cos(s.angle);
+  const uy = Math.sin(s.angle);
+  const open = Math.min(1, t / 0.25);
+  const len = s.range * (1 - (1 - open) * (1 - open));
+  const fade = t < 0.5 ? 1 : 1 - (t - 0.5) / 0.5;
+  const half = s.width / 2;
+  // The strip it hits: a dusty band.
+  under.fillStyle(DUST_LIGHT, 0.28 * fade);
+  setCorner(0, s.x - uy * half, s.y + ux * half);
+  setCorner(1, s.x + ux * len - uy * half, s.y + uy * len + ux * half);
+  setCorner(2, s.x + ux * len + uy * half, s.y + uy * len - ux * half);
+  setCorner(3, s.x + uy * half, s.y - ux * half);
+  under.fillPoints(QUAD, true);
+  // The crack: a zig-zag down the middle, thick near the hero, thinning out.
+  const glow = CRACK_GLOW[s.weapon];
+  const n = 7;
+  let px = s.x;
+  let py = s.y;
+  for (let i = 1; i <= n; i++) {
+    const f = i / n;
+    if (f * s.range > len) break;
+    const side = (hash(s.x, s.y, i) - 0.5) * half * 0.9;
+    const x = s.x + ux * s.range * f - uy * side;
+    const y = s.y + uy * s.range * f + ux * side;
+    const w = (1 - f * 0.6) * Math.max(3, half * 0.35);
+    if (glow) {
+      under.lineStyle(w + 4, glow, 0.5 * fade);
+      under.lineBetween(px, py, x, y);
+    }
+    under.lineStyle(w, CRACK, 0.85 * fade);
+    under.lineBetween(px, py, x, y);
+    // A side crack every other joint.
+    if (i % 2 === 0) {
+      const sx = (hash(s.x, s.y, i + 9) > 0.5 ? 1 : -1) * half * 0.8;
+      under.lineStyle(w * 0.5, CRACK, 0.7 * fade);
+      under.lineBetween(x, y, x + ux * 10 - uy * sx, y + uy * 10 + ux * sx);
+    }
+    px = x;
+    py = y;
+  }
+  // Chips thrown up along the edges while it opens.
+  if (t < 0.35) {
+    const k = t / 0.35;
+    top.fillStyle(DUST_LIGHT, 0.9 * (1 - k));
+    for (let i = 0; i < 6; i++) {
+      const f = (i + 0.5) / 6;
+      if (f * s.range > len) break;
+      const side = (i % 2 ? 1 : -1) * (half + 6 * k);
+      disc(top, s.x + ux * s.range * f - uy * side, s.y + uy * s.range * f + ux * side - 14 * k, 2.5);
     }
   }
 }

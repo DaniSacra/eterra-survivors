@@ -5,11 +5,11 @@ import { WEAPONS } from '../../src/data/weapons';
 import { bareWorld, still } from './helpers';
 
 describe('Leque de Facas', () => {
-  it('throws a forward fan at the nearest enemy, most knives on one target', () => {
+  it('throws a forward fan where the hero faces, most knives on one target ahead', () => {
     const w = bareWorld();
     w.addWeapon('fan');
-    w.player.facing.x = 1; // facing away from the target: the fan aims, it does not follow the facing
-    w.player.facing.y = 0;
+    w.player.facing.x = 0;
+    w.player.facing.y = 1;
     const e = spawnEnemy(w, 'blackKnight', 0, 90);
     e.def = { ...e.def, speed: 0, knockbackResist: 1 };
     rebuildEnemyHash(w);
@@ -19,7 +19,7 @@ describe('Leque de Facas', () => {
     expect(w.projectiles.size).toBe(s.count);
     for (const p of w.projectiles.active) expect(Math.abs(p.angle - Math.PI / 2)).toBeLessThanOrEqual(half);
     for (let i = 0; i < 30; i++) w.step(1 / 60, still);
-    // At 90 px at least 3 knives of the first volley land (a ring of 10 landed one).
+    // At 90 px at least 3 knives of the first volley land.
     expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(3 * s.damage);
   });
 

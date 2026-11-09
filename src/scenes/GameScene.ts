@@ -65,8 +65,8 @@ const FORGE = 'proj.forgeFury';
 /** Sparks a swing throws when it starts: [color, size, count]. */
 const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> = {
   fury: [0xffd870, 6, 6],
-  mace: [0xd8d0c4, 4, 4],
-  jointBreaker: [0xffa060, 5, 6],
+  mace: [0xd8cbb4, 4, 5],
+  jointBreaker: [0xffa060, 5, 7],
 };
 
 /**
@@ -448,19 +448,33 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Swings that start this frame kick up their sparks: gold for Fúria, chips for the maces. */
+  /** Swings that start this frame kick up their sparks (gold for Fúria); slams shake the ground and throw dust. */
   private swingSparks(): void {
     if (this.stepDt <= 0) return;
-    const fresh = config.effects.slashTtl - this.stepDt - 1e-6;
+    const fx = config.effects;
     const sp = this.sparks;
     const p = this.world.player;
     let thud = false;
     for (const s of this.world.slashes.active) {
-      if (s.ttl < fresh) continue;
-      // A heavy blow (one with a shock wave) gives the screen a small thud.
-      if (s.shock > 0 && !thud) {
-        thud = true;
-        this.shake(90, s.weapon === 'mace' ? 0.003 : 0.005);
+      const ttl = s.form === 'fissure' ? fx.fissureTtl : s.form === 'tremor' ? fx.tremorTtl : fx.slashTtl;
+      if (s.ttl < ttl - this.stepDt - 1e-6) continue;
+      if (s.form !== 'swing') {
+        // The ground gives: a thud on the blow, a stronger one when the tremor bursts, and dust.
+        if (!thud) {
+          thud = true;
+          this.shake(s.form === 'tremor' ? 140 : 90, s.form === 'tremor' ? 0.006 : 0.003);
+        }
+        const spark = SWING_SPARK[s.weapon];
+        if (!spark) continue;
+        const n = spark[2];
+        for (let i = 0; i < n; i++) {
+          const a = s.angle + (i - (n - 1) / 2) * (s.form === 'tremor' ? 1.2 : 0.25);
+          const d = s.form === 'tremor' ? s.shock * 0.5 : s.range * ((i + 0.5) / n);
+          const x = s.x + Math.cos(a) * d;
+          const y = s.y + Math.sin(a) * d;
+          sp.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 60, 0.4, spark[1], spark[0], SPARK.star);
+        }
+        continue;
       }
       const spark = SWING_SPARK[s.weapon];
       if (!spark) continue;
@@ -468,7 +482,7 @@ export class GameScene extends Phaser.Scene {
         const a = s.angle - s.arc / 2 + s.arc * ((i + 0.5) / spark[2]);
         const x = p.x + Math.cos(a) * s.range;
         const y = p.y + Math.sin(a) * s.range;
-        // Fúria flings its sparks along the turn; the maces knock chips outward.
+        // Fúria flings its sparks along the turn.
         const out = s.weapon === 'fury' ? a + Math.PI / 2 : a;
         sp.add(x, y, Math.cos(out) * 150, Math.sin(out) * 150, 0.35, spark[1], spark[0], SPARK.star);
       }

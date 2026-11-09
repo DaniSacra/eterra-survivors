@@ -20,6 +20,14 @@ export function expire<T extends Timed>(pool: Pool<T>, dt: number): void {
 
 /** A sword swing drawn around the player for a moment (purely visual). */
 export interface Slash extends Timed {
+  /**
+   * `swing`: an arc around the hero (follows them). `fissure`: a crack of length `range` and width `width` running
+   * from (x, y) along `angle`. `tremor`: a burst of radius `shock` at (x, y).
+   */
+  form: 'swing' | 'fissure' | 'tremor';
+  x: number;
+  y: number;
+  width: number;
   angle: number;
   arc: number;
   range: number;
@@ -31,6 +39,10 @@ export interface Slash extends Timed {
 export const createSlash = (): Slash => ({
   poolIndex: -1,
   ttl: 0,
+  form: 'swing',
+  x: 0,
+  y: 0,
+  width: 0,
   angle: 0,
   arc: 0,
   range: 0,

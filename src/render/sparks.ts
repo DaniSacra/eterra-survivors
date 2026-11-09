@@ -56,6 +56,8 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   yahFlame: [SPARK.ember, 0xff9a30],
   forgeFury: [SPARK.ember, 0xffa040],
   jointBreaker: [SPARK.star, 0xffc890],
+  staff: [SPARK.cross, 0xd8b0ff],
+  lyraStar: [SPARK.cross, 0xfff0c0],
 };
 const HIT_PLAIN: readonly [SparkKind, number] = [SPARK.star, 0xffffff];
 

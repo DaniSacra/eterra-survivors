@@ -32,66 +32,86 @@ describe('weapon data', () => {
   });
 });
 
-describe('Maça de Ferro (aimed arc, shock wave, combo)', () => {
+describe('Maça de Ferro (slam: fissure, tremor, stun)', () => {
   const mace = WEAPONS.mace;
+  const l = mace.levels[0]!;
 
-  it('swings at the nearest enemy, even behind the way the hero walks', () => {
+  it('opens a fissure where the hero faces: a long strip, nothing beside it or behind', () => {
     const w = prepared('mace');
     w.player.facing.x = 1;
-    const back = spawnEnemy(w, 'slime', -50, 0);
+    const tip = spawnEnemy(w, 'blackKnight', l.length - 10, 0);
+    const beside = spawnEnemy(w, 'blackKnight', l.length / 2, l.width / 2 + 60);
+    const back = spawnEnemy(w, 'blackKnight', -60, 0);
     updateWeapons(w, 1 / 60);
-    expect(back.hp).toBeLessThan(back.maxHp);
-  });
-
-  it('waits (no swing, short retry) while nobody is within reach', () => {
-    const w = prepared('mace');
-    spawnEnemy(w, 'slime', 400, 0);
-    updateWeapons(w, 1 / 60);
-    expect(w.slashes.size).toBe(0);
-    expect(w.weapons[0]!.timer).toBeCloseTo(config.weapons.idleRetry);
-  });
-
-  it('the blow sends a shock wave from the tip of its reach that hurts what the swing missed, for less', () => {
-    const w = prepared('mace');
-    const l = mace.levels[0]!;
-    const near = spawnEnemy(w, 'blackKnight', l.range * 0.5, 0);
-    // Past the reach but inside the wave around the tip.
-    const far = spawnEnemy(w, 'blackKnight', l.range + near.def.radius + l.shockRadius! * 0.5, 0);
-    updateWeapons(w, 1 / 60);
-    const crush = near.maxHp - near.hp;
-    const wave = far.maxHp - far.hp;
-    expect(crush).toBeCloseTo(l.damage);
-    expect(wave).toBeCloseTo(l.damage * l.shock!);
-  });
-
-  it('an enemy crushed by the swing is not hit again by the wave', () => {
-    const w = prepared('mace');
-    const l = mace.levels[0]!;
-    const e = spawnEnemy(w, 'blackKnight', l.range - 5, 0);
-    updateWeapons(w, 1 / 60);
-    expect(e.maxHp - e.hp).toBeCloseTo(l.damage);
-  });
-
-  it('from level 3 the second blow lands in the same direction a moment later, not behind', () => {
-    const w = prepared('mace');
-    w.weapons[0]!.level = 3;
-    const front = spawnEnemy(w, 'blackKnight', 60, 0);
-    const back = spawnEnemy(w, 'blackKnight', -130, 0); // outside the reach: only a back swing could hit it
-    updateWeapons(w, 1 / 60);
-    const one = front.maxHp - front.hp;
-    expect(one).toBeGreaterThan(0);
-    expect(w.slashes.size).toBe(1);
-    for (let t = 0; t < mace.combo! + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
-    expect(front.maxHp - front.hp).toBeCloseTo(one * 2);
+    expect(tip.maxHp - tip.hp).toBeCloseTo(l.damage);
+    expect(beside.hp).toBe(beside.maxHp);
     expect(back.hp).toBe(back.maxHp);
+    expect(w.slashes.active.some((s) => s.form === 'fissure')).toBe(true);
   });
 
-  it('the Lâmina still swings where the hero faces', () => {
+  it('a moment later the ground shakes at the impact point, for part of the damage', () => {
+    const w = prepared('mace');
+    w.player.facing.x = 1;
+    const d = config.weapons.slamImpact;
+    // Beside the impact point, off the fissure: only the tremor reaches it.
+    const e = spawnEnemy(w, 'skeleton', d, l.tremorRadius - 5);
+    e.hp = e.maxHp = 1e6;
+    updateWeapons(w, 1 / 60);
+    expect(e.hp).toBe(e.maxHp);
+    for (let t = 0; t < mace.combo! + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage * l.tremor);
+    expect(w.slashes.active.some((s) => s.form === 'tremor')).toBe(true);
+  });
+
+  it("stuns: the enemy hit stops and can't bite; a boss only for a moment", () => {
+    const w = prepared('mace');
+    w.player.facing.x = 1;
+    const e = spawnEnemy(w, 'skeleton', 40, 0);
+    e.hp = e.maxHp = 1e6;
+    const boss = spawnEnemy(w, 'blackKnight', 130, 0);
+    updateWeapons(w, 1 / 60);
+    expect(e.stun).toBeCloseTo(l.stun);
+    expect(boss.stun).toBeCloseTo(config.weapons.bossStun);
+    e.kbx = e.kby = 0;
+    const x = e.x;
+    w.step(0.1, still);
+    expect(e.x).toBeCloseTo(x); // it doesn't walk while stunned
+    e.x = w.player.x;
+    e.y = w.player.y;
+    e.kbx = e.kby = 0;
+    const hp = w.player.hp;
+    w.step(1 / 60, still);
+    expect(w.player.hp).toBe(hp);
+  });
+
+  it('the Elo opens two fissures in a fan and hits an enemy where they cross only once', () => {
+    const w = prepared('jointBreaker');
+    const j = WEAPONS.jointBreaker.levels[0]!;
+    w.player.facing.x = 1;
+    const near = spawnEnemy(w, 'blackKnight', 30, 0);
+    updateWeapons(w, 1 / 60);
+    expect(w.slashes.active.filter((s) => s.form === 'fissure')).toHaveLength(2);
+    expect(near.maxHp - near.hp).toBeCloseTo(j.damage);
+  });
+});
+
+describe('Lâmina de Valmor: the thrust', () => {
+  const blade = WEAPONS.blade;
+
+  it('every third blow is a long, narrow thrust that hits harder', () => {
     const w = prepared('blade');
     w.player.facing.x = 1;
-    const back = spawnEnemy(w, 'slime', -40, 0);
+    const l = blade.levels[0]!;
+    const far = spawnEnemy(w, 'blackKnight', l.range * blade.thrust.range - 20, 0);
+    far.hp = far.maxHp = 1e6;
+    for (let i = 0; i < 2; i++) {
+      w.weapons[0]!.timer = 0;
+      updateWeapons(w, 1 / 60);
+    }
+    expect(far.hp).toBe(far.maxHp); // beyond a normal swing
+    w.weapons[0]!.timer = 0;
     updateWeapons(w, 1 / 60);
-    expect(back.hp).toBe(back.maxHp);
+    expect(far.maxHp - far.hp).toBeCloseTo(l.damage * blade.thrust.damage);
   });
 });
 

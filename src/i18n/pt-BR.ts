@@ -109,12 +109,13 @@ export const t = {
       fan: 'Andilla abre a mão, e as facas se abrem em leque.',
       vigil: 'Quatro espadas, quatro paladinos, nenhuma brecha.',
       blizzard: 'O frio do sul desce inteiro sobre o campo.',
-      storm: 'Lyra chama o céu, e o céu responde.',
+      storm: 'O céu inteiro responde de uma vez.',
       forgeFury: 'Da forja do Gaspar, martelos que não param.',
       soulProcession: 'As luzes seguem em fila, como velas numa procissão.',
       funeralToll: 'Os sinos dobram, e os mortos sabem que é por eles.',
-      jointBreaker: 'Ferro contra osso: as juntas cedem primeiro.',
+      jointBreaker: 'Ferro contra osso: o chão se abre duas vezes.',
       fireSword: 'Aço e chama caem juntos do céu.',
+      lyraStar: 'O cajado de Lyra acende uma estrela, e ela não cabe numa só.',
     } as Partial<Record<WeaponId, string>>,
   },
 
@@ -515,10 +516,20 @@ export const t = {
   },
 
   weapons: {
-    blade: { name: 'Lâmina de Valmor', desc: 'Golpe em arco à frente de Aldo.' },
+    blade: {
+      name: 'Lâmina de Valmor',
+      desc: 'Golpe em arco à frente. A cada três golpes, uma estocada longa e mais forte.',
+    },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },
-    daggers: { name: 'Adagas de Andilla', desc: 'Facas rápidas lançadas no inimigo mais próximo.' },
+    daggers: {
+      name: 'Adagas de Andilla',
+      desc: 'Facas rápidas para onde você anda. Param no primeiro inimigo, e às vezes acertam em cheio.',
+    },
+    staff: {
+      name: 'Cajado de Lyra',
+      desc: 'Um orbe disparado para onde você anda, que explode no primeiro inimigo.',
+    },
     paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta do herói.' },
     frost: { name: 'Geada de Valmor', desc: 'Manchas de gelo que ferem e atrasam os inimigos.' },
     hammer: {
@@ -527,13 +538,13 @@ export const t = {
     },
     wisps: { name: 'Fogos-Fátuos', desc: 'Luzes lentas que perseguem os mortos por muito tempo.' },
     bells: { name: 'Sinos de Bronze', desc: 'Sinos pesados girando largo em volta do herói.' },
-    lightning: { name: 'Raio de Lyra', desc: 'Raios caem sobre inimigos ao acaso.' },
+    lightning: { name: 'Raio', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
     holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
     yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
     fan: {
       name: 'Leque de Facas',
-      desc: 'Um leque de facas no inimigo mais próximo, que atravessa fileiras.',
+      desc: 'Um leque largo de facas, mais rápido, e acertos em cheio que cortam fundo.',
     },
     vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta do herói.' },
     blizzard: { name: 'Nevasca', desc: 'O inverno cobre o campo inteiro.' },
@@ -543,14 +554,15 @@ export const t = {
     funeralToll: { name: 'Dobre Fúnebre', desc: 'Os sinos dobram por tudo o que chega perto.' },
     mace: {
       name: 'Maça de Ferro',
-      desc: 'Uma maça pesada que esmaga o inimigo mais próximo e faz o chão tremer em volta.',
+      desc: 'O golpe abre uma fenda à frente e, logo depois, o chão treme onde a maça bateu. Quem é atingido fica tonto.',
     },
     fire: { name: 'Fogo', desc: 'Chamas caem sobre os inimigos e queimam uma área larga.' },
     jointBreaker: {
       name: 'Quebra-Junta',
-      desc: 'Mira nas juntas: duas pancadas enormes que racham o chão.',
+      desc: 'Duas fendas de uma vez, e um tremor que sacode toda a frente.',
     },
     fireSword: { name: 'Espada de Fogo', desc: 'Uma chuva de espadas em chamas sobre o campo.' },
+    lyraStar: { name: 'Estrela de Lyra', desc: 'Três orbes grandes de cada vez, com explosões largas.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {
@@ -629,5 +641,10 @@ export const t = {
     pierce: 'Perfuração',
     speed: 'Velocidade',
     radius: 'Raio',
+    blast: 'Explosão',
+    length: 'Fenda',
+    width: 'Largura',
+    tremorRadius: 'Tremor',
+    stun: 'Tontura',
   } as Record<string, string>,
 } as const;

@@ -18,22 +18,48 @@ function updateWeapons(w: World, dt: number) {
   rawUpdate(w, dt);
 }
 
-describe('Adagas de Andilla (thrown, aimed)', () => {
-  it('throws at the nearest enemy, whatever way Andilla walks', () => {
+describe('Adagas de Andilla (thrown where she walks)', () => {
+  it('throws where Andilla walks, not at the nearest enemy, and each knife stops in the first one', () => {
     const w = prepared('daggers');
-    w.player.facing.x = 1; // walking right...
+    w.weapons[0]!.level = 2; // two knives
+    w.player.facing.x = 1;
     w.player.facing.y = 0;
-    const far = spawnEnemy(w, 'blackKnight', 200, 0);
-    const near = spawnEnemy(w, 'blackKnight', -100, 0); // ...with the nearest enemy on the left
-    for (const e of [far, near]) e.def = { ...e.def, speed: 0 };
+    const first = spawnEnemy(w, 'blackKnight', 100, 0);
+    const second = spawnEnemy(w, 'blackKnight', 200, 0); // right behind the first
+    const near = spawnEnemy(w, 'blackKnight', -60, 0); // nearer, on the other side
+    for (const e of [first, second, near]) e.def = { ...e.def, speed: 0, knockbackResist: 1 };
     w.step(1 / 60, still);
-    const s = WEAPONS.daggers.levels[0]!;
-    expect(w.projectiles.size).toBe(s.count);
     expect(w.projectiles.active[0]!.sprite).toBe('proj.daggers');
-    for (const p of w.projectiles.active) expect(Math.cos(p.angle)).toBeLessThan(0);
-    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
-    expect(near.hp).toBeLessThan(near.maxHp);
-    expect(far.hp).toBe(far.maxHp);
+    for (const p of w.projectiles.active) expect(Math.cos(p.angle)).toBeGreaterThan(0.9);
+    for (let i = 0; i < 20; i++) w.step(1 / 60, still);
+    expect(first.hp).toBeLessThan(first.maxHp);
+    expect(second.hp).toBe(second.maxHp);
+    expect(near.hp).toBe(near.maxHp);
+  });
+
+  it('some knives hit critically, for double damage', () => {
+    const w = prepared('daggers');
+    const s = WEAPONS.daggers.levels[0]!;
+    const crit = WEAPONS.daggers.crit;
+    const e = spawnEnemy(w, 'blackKnight', 80, 0);
+    e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+    e.hp = e.maxHp = 1e9;
+    let hits = 0;
+    let crits = 0;
+    for (let i = 0; i < 60 * 60; i++) {
+      const hp = e.hp;
+      w.step(1 / 60, still);
+      const dealt = hp - e.hp;
+      if (dealt > 0) {
+        hits++;
+        if (dealt > s.damage * 1.5) {
+          crits++;
+          expect(dealt).toBeCloseTo(s.damage * crit.mult);
+        }
+      }
+    }
+    expect(crits / hits).toBeGreaterThan(crit.chance - 0.08);
+    expect(crits / hits).toBeLessThan(crit.chance + 0.08);
   });
 
   it('with nobody around, throws where Andilla faces', () => {
@@ -144,5 +170,26 @@ describe('Raio de Lyra (strike)', () => {
       expect(nearest.hp).toBeLessThan(nearest.maxHp);
       for (const e of others) expect(e.hp).toBe(e.maxHp);
     }
+  });
+});
+
+describe('Cajado de Lyra (thrown, bursts)', () => {
+  it('fires where Lyra looks; the orb bursts on the first enemy and hurts everyone around it', () => {
+    const w = prepared('staff');
+    const s = WEAPONS.staff.levels[0]!;
+    w.player.facing.x = 1;
+    w.player.facing.y = 0;
+    const first = spawnEnemy(w, 'skeleton', 120, 0);
+    const beside = spawnEnemy(w, 'skeleton', 120 + first.def.radius, s.blast! - 4);
+    const far = spawnEnemy(w, 'skeleton', 120, s.blast! + 60);
+    for (const e of [first, beside, far]) {
+      e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+      e.hp = e.maxHp = 1e6;
+    }
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    expect(first.maxHp - first.hp).toBeCloseTo(s.damage);
+    expect(beside.maxHp - beside.hp).toBeCloseTo(s.damage);
+    expect(far.hp).toBe(far.maxHp);
+    expect(w.projectiles.size).toBe(0);
   });
 });

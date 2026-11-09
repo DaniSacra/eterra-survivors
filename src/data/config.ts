@@ -111,9 +111,17 @@ export const config = {
     seekRange: 420,
     /** Retry delay when a weapon had nothing to shoot at. */
     idleRetry: 0.2,
+    /** Longest stun a boss takes from a slam (seconds). */
+    bossStun: 0.1,
+    /** How far in front of the hero a slam lands (its tremor's centre), world px before the area stat. */
+    slamImpact: 45,
   },
   effects: {
     slashTtl: 0.18,
+    /** A slam's fissure stays open a little longer than a swing (the crack must be read). */
+    fissureTtl: 0.45,
+    /** A slam's tremor burst. */
+    tremorTtl: 0.35,
     boltTtl: 0.22,
     damageNumberTtl: 0.6,
     damageNumberRise: 40, // px per second

@@ -2,6 +2,7 @@ import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { isFaded } from './behaviours';
 import { damageEnemy, type Enemy } from './enemies';
+import { addBolt } from './effects';
 import { angleDiff } from './math';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
@@ -19,6 +20,11 @@ export interface Projectile extends Poolable {
   radius: number;
   pierce: number;
   ttl: number;
+  /** Bursts on the first enemy it meets, hurting everything within this radius (0 = a plain hit). */
+  blast: number;
+  /** Chance of a critical hit, and its damage multiplier. */
+  critChance: number;
+  critMult: number;
   /** Asset key (one per weapon). */
   sprite: string;
   /** The weapon credited with its damage. */
@@ -42,6 +48,9 @@ export const createProjectile = (): Projectile => ({
   radius: 0,
   pierce: 0,
   ttl: 0,
+  blast: 0,
+  critChance: 0,
+  critMult: 1,
   sprite: '',
   source: null,
   target: null,
@@ -134,7 +143,13 @@ export function updateProjectiles(world: World, dt: number): void {
       const dx = e.x - p.x;
       const dy = e.y - p.y;
       if (dx * dx + dy * dy > r * r) continue;
-      damageEnemy(world, e, p.damage, cos, sin, p.knockback, p.source);
+      if (p.blast > 0) {
+        burst(world, p);
+        p.dead = true;
+        break;
+      }
+      const crit = p.critChance > 0 && world.rng.next() < p.critChance;
+      damageEnemy(world, e, crit ? p.damage * p.critMult : p.damage, cos, sin, p.knockback, p.source);
       p.hits.push(e.uid);
       if (--p.pierce < 0) {
         p.dead = true;
@@ -146,3 +161,22 @@ export function updateProjectiles(world: World, dt: number): void {
 }
 
 const isDead = (p: Projectile): boolean => p.dead;
+
+/** A bursting shot: everything within `blast` of where it struck is hit, pushed out from the centre. */
+function burst(world: World, p: Projectile): void {
+  const list = world.enemies.active;
+  const ids = world.enemyHash.query(p.x, p.y, p.blast + MAX_ENEMY_RADIUS, world.targetsScratch);
+  if (p.source) addBolt(world, p.x, p.y, p.blast, p.source.id);
+  world.numberBudget = config.effects.strikeNumbers;
+  for (let i = 0; i < ids.length; i++) {
+    const e = list[ids[i] as number] as Enemy;
+    if (e.dead || isFaded(e)) continue;
+    const dx = e.x - p.x;
+    const dy = e.y - p.y;
+    const r = p.blast + e.def.radius;
+    if (dx * dx + dy * dy > r * r) continue;
+    const d = Math.hypot(dx, dy) || 1;
+    damageEnemy(world, e, p.damage, dx / d, dy / d, p.knockback, p.source);
+  }
+  world.numberBudget = Infinity;
+}

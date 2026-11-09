@@ -25,6 +25,8 @@ export interface Enemy extends Poolable {
   hitBy: WeaponId | null;
   /** Seconds left slowed by frost. */
   slow: number;
+  /** Seconds left stunned (a slam): it can't move or bite. */
+  stun: number;
   /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
   orbitReady: number[];
   /** Bosses only (core/bosses.ts): ability phase, seconds left in it, and the direction it aimed. */
@@ -49,6 +51,7 @@ export const createEnemy = (): Enemy => ({
   flash: 0,
   hitBy: null,
   slow: 0,
+  stun: 0,
   orbitReady: new Array<number>(config.weapons.maxOwned).fill(0),
   act: 0,
   actT: 0,
@@ -69,7 +72,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.x = x;
   e.y = y;
   e.maxHp = e.hp = def.hp * hpMult;
-  e.kbx = e.kby = e.flash = e.slow = 0;
+  e.kbx = e.kby = e.flash = e.slow = e.stun = 0;
   e.hitBy = null;
   e.orbitReady.fill(0);
   e.act = 0;
@@ -166,6 +169,10 @@ export function updateEnemies(world: World, dt: number): void {
     // A boss using its ability moves on its own (or stands still) instead of walking to the hero.
     const acting = e.def.boss && updateBoss(world, e, dt);
     let speed = frozen || acting ? 0 : e.def.speed * dt;
+    if (e.stun > 0) {
+      e.stun -= dt;
+      speed = 0;
+    }
     if (e.slow > 0) {
       e.slow -= dt;
       speed *= config.zones.slowFactor;
@@ -228,7 +235,12 @@ export function updateEnemies(world: World, dt: number): void {
     const minD = config.player.radius + e.def.radius;
     const cx = p.x - e.x;
     const cy = p.y - e.y;
-    if (cx * cx + cy * cy < minD * minD && !isFaded(e) && hurtPlayer(p, e.def.damage * world.enemyDamage)) {
+    if (
+      cx * cx + cy * cy < minD * minD &&
+      !isFaded(e) &&
+      e.stun <= 0 &&
+      hurtPlayer(p, e.def.damage * world.enemyDamage)
+    ) {
       world.events.push({ type: 'playerHit' });
       break;
     }

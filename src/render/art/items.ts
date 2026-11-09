@@ -98,6 +98,8 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.elunLight': glowOrb(0xfff6c0, 0xa8e060, 4), // Teo's green-gold
   'proj.holyLight': glowOrb(0xffffff, 0xffe070, 5),
   'proj.daggers': blade(0xe8eff8, 0x55555e, 16),
+  'proj.staff': glowOrb(0xf4e8ff, 0xb070f0, 5), // Lyra's purple
+  'proj.lyraStar': glowOrb(0xfff6c0, 0xd8a0ff, 7),
   'proj.fan': blade(0xffd8e0, 0xa8323e, 18),
   'proj.hammer': hammer(0xc4cede, false),
   'proj.forgeFury': hammer(0xffa040, true),

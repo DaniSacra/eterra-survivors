@@ -72,7 +72,7 @@ describe('summarizeRun', () => {
       maxed: 2,
       hpLeft: 0.25,
     });
-    expect(s.weapons).toEqual(['lightning', 'blade', 'frost']);
+    expect(s.weapons).toEqual(['staff', 'blade', 'frost']);
     expect(s.elos).toEqual(['fury']);
   });
 

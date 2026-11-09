@@ -9,6 +9,7 @@ import {
   type HomingLevel,
   type LevelsByKind,
   type OrbitLevel,
+  type SlamLevel,
   type StrikeLevel,
   type ThrownLevel,
   type WeaponDef,
@@ -33,9 +34,13 @@ export interface OwnedWeapon {
   damage: number;
   /** Match time when it was picked up. */
   since: number;
-  /** Seconds until a combo weapon's second blow (0 = none pending), and where it goes. */
+  /** Seconds until a combo weapon's second blow or a slam's tremor (0 = none pending), and where it goes. */
   combo: number;
   comboAngle: number;
+  comboX: number;
+  comboY: number;
+  /** Attacks made so far (a thrust comes every `thrust.every`). */
+  swings: number;
   /** When the current level (or Elo) started, and `damage` at that moment: the damage per second at this level. */
   levelAt: number;
   levelDamage: number;
@@ -79,6 +84,7 @@ type Fire<K extends WeaponKind> = (world: World, s: LevelsByKind[K], w: OwnedWea
  */
 const FIRE: { [K in Exclude<WeaponKind, 'orbit'>]: Fire<K> } = {
   arc: fireArc,
+  slam: fireSlam,
   homing: fireHoming,
   aura: fireAura,
   thrown: fireThrown,
@@ -100,7 +106,7 @@ export function updateWeapons(world: World, dt: number): void {
       w.combo -= dt;
       if (w.combo <= 0) {
         w.combo = 0;
-        swingArc(world, weaponStats(w) as ArcLevel, w, w.comboAngle, true);
+        tremor(world, weaponStats(w) as SlamLevel, w);
       }
     }
     w.timer -= dt;
@@ -122,6 +128,7 @@ export function weaponPower(id: WeaponId, level = 1): number {
   const s = def.levels[level - 1] as LevelsByKind[WeaponKind];
   let hits = 1;
   if ('swings' in s) hits = s.swings;
+  else if (def.kind === 'slam' && 'tremor' in s) hits = s.count + s.tremor;
   else if (def.kind === 'zone' && 'duration' in s) hits = s.count * (s.duration / config.zones.tick);
   else if ('count' in s) hits = s.count;
   return (s.damage * hits) / s.cooldown;
@@ -146,6 +153,9 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   shot.target = null;
   shot.targetUid = 0;
   shot.turnRate = 0;
+  shot.blast = 0;
+  shot.critChance = 0;
+  shot.critMult = 1;
   shot.hits.length = 0;
   shot.dead = false;
   return shot;
@@ -153,69 +163,158 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
 
 function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
   const p = world.player;
-  const range = s.range * p.stats.area;
   const def = WEAPONS[w.id] as WeaponDef;
-  let facing = Math.atan2(p.facing.y, p.facing.x);
-  if (def.aim === 'nearest') {
-    // Aimed swings go for the boss when it is within reach, else the nearest enemy; with nobody in reach they wait.
-    const b = world.boss;
-    const t =
-      b && !b.dead && Math.hypot(b.x - p.x, b.y - p.y) <= range + b.def.radius
-        ? b
-        : nearestEnemy(world, p.x, p.y, range + MAX_ENEMY_RADIUS);
-    if (!t) return false;
-    facing = Math.atan2(t.y - p.y, t.x - p.x);
+  const facing = Math.atan2(p.facing.y, p.facing.x);
+  // Every few blows, a thrust instead: long, narrow and harder.
+  const th = def.kind === 'arc' ? def.thrust : undefined;
+  if (th && ++w.swings % th.every === 0) {
+    THRUST.damage = s.damage * th.damage;
+    THRUST.range = s.range * th.range;
+    THRUST.arc = th.arc;
+    THRUST.knockback = s.knockback;
+    swingArc(world, THRUST, w, facing, true);
+    return true;
   }
-  for (let k = 0; k < s.swings; k++) {
-    if (k > 0 && def.combo) {
-      w.combo = def.combo;
-      w.comboAngle = facing;
-    } else swingArc(world, s, w, k === 0 ? facing : facing + k * Math.PI, k === 0);
+  for (let k = 0; k < s.swings; k++) swingArc(world, s, w, facing + k * Math.PI, k === 0);
+  return true;
+}
+
+/** The level a thrust swings with (filled from the weapon's level and `thrust` on each one). */
+const THRUST: ArcLevel = { damage: 0, cooldown: 0, range: 0, arc: 0, knockback: 0, swings: 1 };
+
+/**
+ * A slam: one fissure per `count`, fanned by `spread`, from the hero along where they face; the tremor follows
+ * `combo` seconds later at the impact point (in front of the hero, where it stood).
+ */
+function fireSlam(world: World, s: SlamLevel, w: OwnedWeapon): boolean {
+  const p = world.player;
+  const def = WEAPONS[w.id] as WeaponDef;
+  const facing = Math.atan2(p.facing.y, p.facing.x);
+  const area = p.stats.area;
+  const length = s.length * area;
+  const half = (s.width * area) / 2;
+  const list = world.enemies.active;
+  const hit = world.targetsScratch;
+  hit.length = 0;
+  world.numberBudget = config.effects.arcNumbers;
+  for (let k = 0; k < s.count; k++) {
+    const a = facing + (k - (s.count - 1) / 2) * s.spread;
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+    const slash = world.slashes.acquire();
+    slash.form = 'fissure';
+    slash.x = p.x;
+    slash.y = p.y;
+    slash.angle = a;
+    slash.range = length;
+    slash.width = half * 2;
+    slash.arc = 0;
+    slash.shock = 0;
+    slash.weapon = w.id;
+    slash.ttl = config.effects.fissureTtl;
+    const mx = p.x + (ux * length) / 2;
+    const my = p.y + (uy * length) / 2;
+    const ids = world.enemyHash.query(mx, my, length / 2 + half + MAX_ENEMY_RADIUS, world.scratch);
+    for (let i = 0; i < ids.length; i++) {
+      const e = list[ids[i] as number] as Enemy;
+      if (e.dead) continue;
+      const dx = e.x - p.x;
+      const dy = e.y - p.y;
+      const along = dx * ux + dy * uy;
+      const across = Math.abs(dx * -uy + dy * ux);
+      const r = e.def.radius;
+      if (along < -r || along > length + r || across > half + r) continue;
+      // Two fissures may cross the same enemy near the hero: it is hit once.
+      if (s.count > 1) {
+        if (hit.includes(e.uid)) continue;
+        hit.push(e.uid);
+      }
+      slamHit(world, e, s, dmg(world, s.damage), ux, uy, s.knockback, w);
+    }
+  }
+  world.numberBudget = Infinity;
+  if (def.combo) {
+    const d = config.weapons.slamImpact * area;
+    w.combo = def.combo;
+    w.comboX = p.x + Math.cos(facing) * d;
+    w.comboY = p.y + Math.sin(facing) * d;
+    w.comboAngle = facing;
   }
   return true;
 }
 
+/** The slam's tremor: a burst at the impact point, a fraction of the damage, stunning again. */
+function tremor(world: World, s: SlamLevel, w: OwnedWeapon): void {
+  const r = s.tremorRadius * world.player.stats.area;
+  const x = w.comboX;
+  const y = w.comboY;
+  const slash = world.slashes.acquire();
+  slash.form = 'tremor';
+  slash.x = x;
+  slash.y = y;
+  slash.angle = w.comboAngle;
+  slash.range = 0;
+  slash.width = 0;
+  slash.arc = 0;
+  slash.shock = r;
+  slash.weapon = w.id;
+  slash.ttl = config.effects.tremorTtl;
+  const list = world.enemies.active;
+  const hit = dmg(world, s.damage) * s.tremor;
+  world.numberBudget = config.effects.arcNumbers;
+  const ids = world.enemyHash.query(x, y, r + MAX_ENEMY_RADIUS, world.scratch);
+  for (let i = 0; i < ids.length; i++) {
+    const e = list[ids[i] as number] as Enemy;
+    if (e.dead) continue;
+    const dx = e.x - x;
+    const dy = e.y - y;
+    const reach = r + e.def.radius;
+    if (dx * dx + dy * dy > reach * reach) continue;
+    const d = Math.hypot(dx, dy) || 1;
+    slamHit(world, e, s, hit, dx / d, dy / d, s.knockback * 0.5, w);
+  }
+  world.numberBudget = Infinity;
+}
+
+/** A slam's hit: damage, a push, and a stun (short on bosses). */
+function slamHit(
+  world: World,
+  e: Enemy,
+  s: SlamLevel,
+  amount: number,
+  kx: number,
+  ky: number,
+  knockback: number,
+  w: OwnedWeapon,
+): void {
+  const stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
+  if (e.stun < stun) e.stun = stun;
+  damageEnemy(world, e, amount, kx, ky, knockback, w);
+}
+
 /**
  * One swing at `angle`. `touch`: enemies hugging the hero are hit even outside the cone (only on the first
- * swing, so a front-and-back slash hits a hugging enemy once). A swing with `shock` then sends a wave from where
- * it lands (the tip of the reach), hurting what the swing itself missed.
+ * swing, so a front-and-back slash hits a hugging enemy once).
  */
 function swingArc(world: World, s: ArcLevel, w: OwnedWeapon, angle: number, touch: boolean): void {
   const p = world.player;
   const range = s.range * p.stats.area;
   const list = world.enemies.active;
   const slash = world.slashes.acquire();
+  slash.form = 'swing';
   slash.angle = angle;
   slash.arc = s.arc;
   slash.range = range;
   slash.weapon = w.id;
-  slash.shock = s.shock ? (s.shockRadius ?? 0) * p.stats.area : 0;
+  slash.shock = 0;
   slash.ttl = config.effects.slashTtl;
   world.numberBudget = config.effects.arcNumbers;
-  let ids = world.enemyHash.query(p.x, p.y, range + MAX_ENEMY_RADIUS, world.scratch);
+  const ids = world.enemyHash.query(p.x, p.y, range + MAX_ENEMY_RADIUS, world.scratch);
   for (let i = 0; i < ids.length; i++) {
     const e = list[ids[i] as number] as Enemy;
     if (e.dead || !inSwing(p.x, p.y, e, range, angle, s.arc, touch)) continue;
     const d = Math.hypot(e.x - p.x, e.y - p.y) || 1;
     damageEnemy(world, e, dmg(world, s.damage), (e.x - p.x) / d, (e.y - p.y) / d, s.knockback, w);
-  }
-  if (slash.shock > 0) {
-    const r = slash.shock;
-    const x = p.x + Math.cos(angle) * range;
-    const y = p.y + Math.sin(angle) * range;
-    const shock = dmg(world, s.damage) * (s.shock as number);
-    ids = world.enemyHash.query(x, y, r + MAX_ENEMY_RADIUS, world.scratch);
-    for (let i = 0; i < ids.length; i++) {
-      const e = list[ids[i] as number] as Enemy;
-      if (e.dead) continue;
-      const dx = e.x - x;
-      const dy = e.y - y;
-      const reach = r + e.def.radius;
-      if (dx * dx + dy * dy > reach * reach) continue;
-      if (inSwing(p.x, p.y, e, range, angle, s.arc, touch)) continue; // already crushed by this swing
-      const d = Math.hypot(dx, dy) || 1;
-      damageEnemy(world, e, shock, dx / d, dy / d, s.knockback * 0.5, w);
-    }
   }
   world.numberBudget = Infinity;
 }
@@ -276,6 +375,9 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   // A fan that covers the whole circle spreads evenly from the facing, so one knife always flies straight
   // ahead (an even count centred on the facing would leave a blind spot right in front).
   const ring = count * s.spread >= TAU - 1e-6;
+  const def = WEAPONS[w.id] as WeaponDef;
+  const crit = def.kind === 'thrown' ? def.crit : undefined;
+  const blast = (s.blast ?? 0) * p.stats.area;
   for (let i = 0; i < count; i++) {
     const offset = ring ? (i * TAU) / count : (i - (count - 1) / 2) * s.spread;
     const shot = launch(world, w, facing + offset);
@@ -285,6 +387,11 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
     shot.radius = s.radius * p.stats.area;
     shot.pierce = s.pierce;
     shot.ttl = s.lifetime;
+    shot.blast = blast;
+    if (crit) {
+      shot.critChance = crit.chance;
+      shot.critMult = crit.mult;
+    }
   }
   return true;
 }

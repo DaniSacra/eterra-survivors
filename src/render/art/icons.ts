@@ -87,6 +87,23 @@ const knife =
     }
     p.ink();
   };
+/** A wooden staff with a glowing orb on top (Cajado de Lyra); the Elo's orb is a star. */
+const staff =
+  (glow: number, star = false) =>
+  (p: Pen): void => {
+    p.outline = 1.2;
+    p.poly([7, 22, 9, 24, 17, 12, 15, 10], 0x9a6232);
+    p.ink();
+    p.fill(glow, 0.5).fillCircle(18.5, 8.5, 6.5);
+    if (star) {
+      p.outline = 1;
+      p.poly([18.5, 2.5, 20, 7, 24.5, 8.5, 20, 10, 18.5, 14.5, 17, 10, 12.5, 8.5, 17, 7], 0xfff6c0);
+      p.ink();
+    } else {
+      p.circle(18.5, 8.5, 3.8, 0xf4e8ff);
+      p.ink();
+    }
+  };
 const flake =
   (c: number, big = false) =>
   (p: Pen): void => {
@@ -212,6 +229,7 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.paladinSwords': weapon(twoSwords(0xcbd8ec)),
   'icon.frost': weapon(flake(0xd8d2f0)), // white-lilac, like its frost patches
   'icon.lightning': weapon(bolt(0xfff6a0)),
+  'icon.staff': weapon(staff(0xb070f0)),
   'icon.hammer': weapon(hammer(0x8a8a96)),
   'icon.wisps': weapon(wisp(0x40e0d8, 2)),
   'icon.bells': weapon(bell(0xc89040)),
@@ -230,6 +248,7 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.funeralToll': elo(bell(0xe8b860, true)),
   'icon.jointBreaker': elo(mace(0xc86a3a, 0xffe8a0)),
   'icon.fireSword': elo(flame(0xff5a2a, 0xffe080, true)),
+  'icon.lyraStar': elo(staff(0xd8a0ff, true)),
   // Passives
   'icon.vigor': passive(0x8a2a3a, (p) => {
     p.outline = 1.2;

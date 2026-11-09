@@ -21,6 +21,25 @@ export interface ArcLevel extends BaseLevel {
   shockRadius?: number;
 }
 
+/**
+ * A heavy blow that splits the ground: a fissure (a long rectangle) runs out in front of the hero, and a moment
+ * later (the weapon's `combo` seconds) a tremor bursts where the blow landed. Everything it hits is stunned.
+ */
+export interface SlamLevel extends BaseLevel {
+  /** Length and width of each fissure, world px. */
+  length: number;
+  width: number;
+  knockback: number;
+  /** Fissures per blow, fanned out by `spread` radians. */
+  count: number;
+  spread: number;
+  /** The tremor: a fraction of `damage`, and its radius. */
+  tremor: number;
+  tremorRadius: number;
+  /** Seconds the enemies hit can't move or bite (bosses: config.weapons.bossStun at most). */
+  stun: number;
+}
+
 export interface HomingLevel extends BaseLevel {
   speed: number;
   count: number;
@@ -46,6 +65,8 @@ export interface ThrownLevel extends BaseLevel {
   radius: number;
   spread: number;
   knockback: number;
+  /** The shot bursts on the first enemy it meets, hurting everything within this radius (0 or absent: none). */
+  blast?: number;
 }
 
 /** Blades circling the hero; each hurts what it touches, then waits `cooldown` before hitting that enemy again. */
@@ -74,6 +95,7 @@ export interface StrikeLevel extends BaseLevel {
 
 export interface LevelsByKind {
   arc: ArcLevel;
+  slam: SlamLevel;
   homing: HomingLevel;
   aura: AuraLevel;
   thrown: ThrownLevel;
@@ -99,15 +121,16 @@ export type WeaponDef = {
   [K in WeaponKind]: {
     kind: K;
     levels: LevelsByKind[K][];
-    /**
-     * Thrown and arc weapons: 'nearest' aims at the boss or the closest enemy (an aimed arc waits until someone is
-     * within reach); 'facing' (default) goes where the hero walks.
-     */
+    /** Thrown weapons: 'nearest' aims at the boss or the closest enemy; 'facing' (default) goes where the hero walks. */
     aim?: 'nearest' | 'facing';
     /** Strength band (base weapons only; an Elo inherits its base's, see `weaponCategory`). */
     category?: WeaponCategory;
-    /** Arc weapons: the second swing is a second blow in the same direction this many seconds later, not behind. */
+    /** Slam weapons: the seconds until the tremor. */
     combo?: number;
+    /** Arc weapons: every `every`-th swing is a thrust instead, longer (x`range`), narrow (`arc`) and harder (x`damage`). */
+    thrust?: { every: number; range: number; arc: number; damage: number };
+    /** Thrown weapons: the chance of a critical hit, and its damage multiplier. */
+    crit?: { chance: number; mult: number };
   };
 }[WeaponKind];
 
@@ -119,10 +142,11 @@ function levels<L>(first: L, ...changes: Partial<L>[]): L[] {
 }
 
 export const WEAPONS = {
-  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front. */
+  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front and, every third blow, a long thrust. */
   blade: {
     kind: 'arc',
     category: 'aimed',
+    thrust: { every: 3, range: 1.6, arc: 0.45, damage: 2.2 },
     levels: levels<ArcLevel>(
       { damage: 11, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
       { damage: 15, range: 98 },
@@ -133,13 +157,14 @@ export const WEAPONS = {
       { damage: 40, range: 122, arc: 3 },
     ),
   },
+
   /** Luz de Elun: seeking motes of holy light. */
   elunLight: {
     kind: 'homing',
     category: 'auto',
     levels: levels<HomingLevel>(
       {
-        damage: 8.2,
+        damage: 7.9,
         cooldown: 1.3,
         speed: 280,
         count: 2,
@@ -152,9 +177,9 @@ export const WEAPONS = {
       { cooldown: 1 },
       { damage: 11, cooldown: 0.8 },
       { count: 3 },
-      { pierce: 1, damage: 14 },
+      { pierce: 1, damage: 13 },
       { count: 5 },
-      { damage: 18, pierce: 2 },
+      { damage: 17, pierce: 2 },
     ),
   },
   /** Aura de Yah: a burning halo that hurts everything close. */
@@ -162,53 +187,80 @@ export const WEAPONS = {
     kind: 'aura',
     category: 'area',
     levels: levels<AuraLevel>(
-      { damage: 4, cooldown: 0.5, radius: 55 },
+      { damage: 4.2, cooldown: 0.5, radius: 55 },
       { radius: 65 },
-      { damage: 6 },
+      { damage: 6.3 },
       { radius: 75, cooldown: 0.45 },
-      { damage: 8 },
+      { damage: 8.4 },
       { radius: 90 },
-      { damage: 11, cooldown: 0.35 },
+      { damage: 10, cooldown: 0.35 },
     ),
   },
-  /** Adagas de Andilla: quick knives thrown at the nearest enemy, passing through the first ones. */
+  /** Adagas de Andilla: quick knives thrown where she runs, in a narrow fan; each stops in the first enemy, and some crit. */
   daggers: {
     kind: 'thrown',
     category: 'aimed',
-    aim: 'nearest',
+    aim: 'facing',
+    crit: { chance: 0.2, mult: 2 },
     levels: levels<ThrownLevel>(
       {
-        damage: 19,
-        cooldown: 0.9,
-        speed: 460,
-        count: 2,
-        pierce: 1,
-        lifetime: 1.1,
+        damage: 18,
+        cooldown: 0.5,
+        speed: 520,
+        count: 1,
+        pierce: 0,
+        lifetime: 0.9,
         radius: 7,
-        spread: 0.14,
-        knockback: 30,
+        spread: 0.08,
+        knockback: 25,
       },
+      { count: 2 },
+      { damage: 22 },
+      { cooldown: 0.42 },
       { count: 3 },
-      { damage: 23 },
-      { pierce: 2, cooldown: 0.7 },
-      { count: 4 },
       { damage: 28 },
-      { damage: 33, pierce: 3 },
+      { count: 4, damage: 33, cooldown: 0.36 },
     ),
   },
 
+  /** Cajado de Lyra: an orb of arcane light fired where Lyra looks; it bursts on the first enemy it meets. */
+  staff: {
+    kind: 'thrown',
+    category: 'aimed',
+    aim: 'facing',
+    levels: levels<ThrownLevel>(
+      {
+        damage: 39,
+        cooldown: 1.1,
+        speed: 340,
+        count: 1,
+        pierce: 0,
+        lifetime: 1.3,
+        radius: 8,
+        spread: 0.25,
+        knockback: 60,
+        blast: 34,
+      },
+      { damage: 51 },
+      { blast: 42 },
+      { count: 2 },
+      { damage: 63, cooldown: 0.9 },
+      { blast: 50 },
+      { damage: 82, cooldown: 0.75 },
+    ),
+  },
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
   paladinSwords: {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 6.7, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
+      { damage: 6.8, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
       { count: 2 },
-      { damage: 9.4 },
+      { damage: 9.6 },
       { count: 3, spin: 3.5 },
       { orbitRadius: 82, radius: 14 },
       { count: 4 },
-      { damage: 13, spin: 4 },
+      { damage: 12, spin: 4 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
@@ -216,27 +268,27 @@ export const WEAPONS = {
     kind: 'zone',
     category: 'area',
     levels: levels<ZoneLevel>(
-      { damage: 4.1, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
+      { damage: 3.9, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
       { radius: 52 },
       { count: 2 },
-      { damage: 6.2, duration: 3 },
+      { damage: 5.9, duration: 3 },
       { radius: 60 },
       { count: 3 },
-      { damage: 8.3, cooldown: 2.5, duration: 3.5 },
+      { damage: 7.9, cooldown: 2.5, duration: 3.5 },
     ),
   },
-  /** Raio de Lyra: lightning on random enemies. */
+  /** Raio: lightning on random enemies. */
   lightning: {
     kind: 'strike',
     category: 'auto',
     levels: levels<StrikeLevel>(
-      { damage: 49, cooldown: 2.2, count: 1, radius: 32 },
+      { damage: 46, cooldown: 2.2, count: 1, radius: 32 },
       { count: 2 },
-      { damage: 65 },
+      { damage: 62 },
       { count: 3, cooldown: 2 },
       { radius: 36 },
-      { count: 4, damage: 82 },
-      { damage: 105, radius: 40, cooldown: 1.7 },
+      { count: 4, damage: 78 },
+      { damage: 99, radius: 40, cooldown: 1.7 },
     ),
   },
   /** Martelo do Gaspar: the smith's heavy hammer, thrown ahead; it ploughs through rows. */
@@ -245,7 +297,7 @@ export const WEAPONS = {
     category: 'aimed',
     levels: levels<ThrownLevel>(
       {
-        damage: 29,
+        damage: 28,
         cooldown: 1.8,
         speed: 260,
         count: 1,
@@ -255,12 +307,12 @@ export const WEAPONS = {
         spread: 0.3,
         knockback: 260,
       },
-      { damage: 36 },
+      { damage: 35 },
       { count: 2 },
       { pierce: 5 },
-      { damage: 47, cooldown: 1.6 },
+      { damage: 45, cooldown: 1.6 },
       { count: 3 },
-      { damage: 62, radius: 15 },
+      { damage: 60, radius: 15 },
     ),
   },
   /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
@@ -280,11 +332,11 @@ export const WEAPONS = {
         knockback: 10,
       },
       { count: 3 },
-      { damage: 16 },
+      { damage: 15 },
       { pierce: 3, lifetime: 5 },
       { count: 4 },
-      { damage: 22 },
-      { count: 5, damage: 27, cooldown: 1.1 },
+      { damage: 21 },
+      { count: 5, damage: 26, cooldown: 1.1 },
     ),
   },
   /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
@@ -292,38 +344,39 @@ export const WEAPONS = {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 7.2, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
-      { damage: 9.1 },
+      { damage: 6.7, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
+      { damage: 8.5 },
       { count: 2 },
       { orbitRadius: 125, radius: 20 },
-      { damage: 12, cooldown: 0.7 },
+      { damage: 11, cooldown: 0.7 },
       { count: 3 },
-      { damage: 17, spin: 2 },
+      { damage: 16, spin: 2 },
     ),
   },
-  /** Maça de Ferro: a heavy iron mace, slow and wide, that crushes what is in front and throws it back. */
+  /** Maça de Ferro: the blow splits the ground ahead, the ground shakes where it landed, and whoever is hit reels. */
   mace: {
-    kind: 'arc',
+    kind: 'slam',
     category: 'aimed',
-    aim: 'nearest',
-    combo: 0.2,
-    levels: levels<ArcLevel>(
+    combo: 0.8,
+    levels: levels<SlamLevel>(
       {
-        damage: 18,
-        cooldown: 1.4,
-        range: 105,
-        arc: 2.1,
-        knockback: 120,
-        swings: 1,
-        shock: 0.5,
-        shockRadius: 40,
+        damage: 24,
+        cooldown: 1.5,
+        length: 150,
+        width: 34,
+        knockback: 80,
+        count: 1,
+        spread: 0.5,
+        tremor: 0.8,
+        tremorRadius: 55,
+        stun: 0.4,
       },
-      { damage: 24 },
-      { swings: 2 },
-      { damage: 31, cooldown: 1.25 },
-      { range: 115, arc: 2.4, shockRadius: 46 },
-      { damage: 41 },
-      { damage: 63, cooldown: 1, range: 125 },
+      { damage: 31 },
+      { length: 175, tremorRadius: 62 },
+      { damage: 40, cooldown: 1.35 },
+      { width: 42 },
+      { damage: 50 },
+      { damage: 66, cooldown: 1.15, length: 200, tremorRadius: 72 },
     ),
   },
 
@@ -332,13 +385,13 @@ export const WEAPONS = {
     kind: 'strike',
     category: 'auto',
     levels: levels<StrikeLevel>(
-      { damage: 16, cooldown: 2, count: 1, radius: 40 },
-      { damage: 21 },
+      { damage: 15, cooldown: 2, count: 1, radius: 40 },
+      { damage: 20 },
       { count: 2 },
       { radius: 48, cooldown: 1.8 },
-      { damage: 28 },
+      { damage: 26 },
       { count: 3 },
-      { damage: 44, radius: 56 },
+      { damage: 42, radius: 56 },
     ),
   },
 
@@ -347,7 +400,7 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 60, cooldown: 0.5, range: 138, arc: Math.PI * 2, knockback: 160, swings: 1 }],
+    levels: [{ damage: 62, cooldown: 0.5, range: 134, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -371,21 +424,22 @@ export const WEAPONS = {
     kind: 'aura',
     levels: [{ damage: 15, cooldown: 0.3, radius: 150 }],
   },
-  /** Leque de Facas: Andilla's fan of knives, a wide spread thrown at the nearest enemy. */
+  /** Leque de Facas: a wider fan of knives, faster, and crits that cut deeper. */
   fan: {
     kind: 'thrown',
-    aim: 'nearest',
+    aim: 'facing',
+    crit: { chance: 0.3, mult: 3 },
     levels: [
       {
-        damage: 28,
-        cooldown: 0.45,
-        speed: 480,
-        count: 12,
-        pierce: 5,
-        lifetime: 1.2,
-        radius: 7,
-        spread: 0.1,
-        knockback: 40,
+        damage: 52,
+        cooldown: 0.3,
+        speed: 560,
+        count: 7,
+        pierce: 0,
+        lifetime: 1,
+        radius: 8,
+        spread: 0.12,
+        knockback: 30,
       },
     ],
   },
@@ -407,21 +461,22 @@ export const WEAPONS = {
     kind: 'strike',
     levels: [{ damage: 36, cooldown: 0.8, count: 8, radius: 52 }],
   },
-  /** Quebra-Junta: the mace aims at the joints, two huge blows that crack the ground. */
+  /** Quebra-Junta: two fissures fanned out at once, and a tremor that shakes the whole front. */
   jointBreaker: {
-    kind: 'arc',
-    aim: 'nearest',
-    combo: 0.2,
+    kind: 'slam',
+    combo: 0.8,
     levels: [
       {
-        damage: 61,
-        cooldown: 0.8,
-        range: 160,
-        arc: 3.4,
-        knockback: 160,
-        swings: 2,
-        shock: 0.6,
-        shockRadius: 72,
+        damage: 118,
+        cooldown: 0.9,
+        length: 240,
+        width: 46,
+        knockback: 110,
+        count: 2,
+        spread: 0.45,
+        tremor: 1,
+        tremorRadius: 95,
+        stun: 0.5,
       },
     ],
   },
@@ -470,6 +525,25 @@ export const WEAPONS = {
     kind: 'orbit',
     levels: [
       { damage: 42, cooldown: 0.5, count: 6, orbitRadius: 140, radius: 26, spin: 2.2, knockback: 320 },
+    ],
+  },
+  /** Estrela de Lyra: three big orbs at a time, bursting wide. */
+  lyraStar: {
+    kind: 'thrown',
+    aim: 'facing',
+    levels: [
+      {
+        damage: 58,
+        cooldown: 0.6,
+        speed: 380,
+        count: 3,
+        pierce: 0,
+        lifetime: 1.4,
+        radius: 11,
+        spread: 0.3,
+        knockback: 90,
+        blast: 80,
+      },
     ],
   },
 } satisfies Record<string, WeaponDef>;
