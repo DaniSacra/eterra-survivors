@@ -960,3 +960,19 @@ desta rodada. O lab é a medida estável.
 Sim (16 sementes): Valmor 13% / 48% / 98%, Cripta 0% / 17% / 81%, Estrada 0% / 0% / 52%; 1º Elo 5,7–5,8 min.
 Nas partidas do bot a maça nova rende menos que a antiga (DPS real ~80 contra ~130): a pancada é curta e o bot anda
 de costas para os inimigos. Vale sentir na mão.
+
+## Revisão 2026-11-09: bugs e quick wins
+
+`SIM_SEEDS=16 SIM_SHOP=all npm run sim` depois da N1 (Quebra-Junta sem trava de tontura, rajadas completas, investida da
+Vigília, cura que não levanta herói caído) e dos ajustes NE-03 (Martelo 500, onda da Chama de Yah 650) e NE-04
+(Badalada 600).
+
+| Fase    | Sem Loja | Meia Loja | Loja inteira | Meta               |
+| ------- | -------- | --------- | ------------ | ------------------ |
+| Valmor  | 13%      | 56%       | 94%          | 0–15 / 40–60 / 85+ |
+| Cripta  | 0%       | 23%       | 86%          | 0 / 15–35 / 70–85  |
+| Estrada | 0%       | 2%        | 45%          | 0 / 0–10 / 35–55   |
+
+Todas dentro, exceto a Cripta com a Loja inteira, 1 ponto acima (ruído). ELO X: Tempestade 1,6x (antes 1,2x), ainda abaixo
+de 2,5x (NE-02, proposto); as outras de 2,6x (Fúria) a 17,8x. Vigília com Loja inteira (8 sementes): média de 353 s e
+nenhuma travada pelo Quebra-Junta. Primeiro Elo aos 5,6 min com a Loja inteira; Loja inteira em 57 corridas.
