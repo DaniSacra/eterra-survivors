@@ -43,8 +43,9 @@ export const t = {
 
   hud: {
     level: (n: number) => `Nv ${n}`,
-    kills: (n: number) => `${n} abates`,
-    gold: (n: number) => `${n} ouro`,
+    /** Shown beside a skull and a coin icon. */
+    kills: (n: number) => `${n}`,
+    gold: (n: number) => `${n}`,
     hp: (hp: number, max: number) => `${hp}/${max}`,
   },
 

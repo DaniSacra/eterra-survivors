@@ -176,6 +176,19 @@ export const ICON_ART: Record<string, ArtDef> = {
       p.fill(0xffffff, 0.35).fillRect(5, 10.5, 3, 7);
     },
   },
+  /** A small cartoon skull, for the kill counter in the HUD. */
+  'icon.kills': {
+    w: 16,
+    h: 16,
+    draw(p) {
+      p.outline = 1.5;
+      p.circle(8, 7, 6, 0xe8e2d0).rrect(4.5, 9, 7, 5, 2, 0xe8e2d0);
+      p.ink();
+      p.fill(0xb8b0a0).fillRect(5.5, 12.4, 5, 1.6);
+      p.fill(INK).fillCircle(5.8, 7.6, 1.8).fillCircle(10.2, 7.6, 1.8).fillTriangle(7.2, 11, 8.8, 11, 8, 9.6);
+      p.fill(0xffffff, 0.6).fillCircle(5.4, 4.4, 1.2);
+    },
+  },
   // Weapons
   'icon.blade': weapon(sword(0xe8eff8, 0x9a6232)),
   'icon.elunLight': weapon(orb(0xfff6c0, 0xf0d860)),

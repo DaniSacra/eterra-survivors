@@ -5,11 +5,10 @@ import { t } from '../i18n/pt-BR';
 import { describeUpgrade } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
 import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
+import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
 const CHARGES: ChargeKey[] = ['reroll', 'skip', 'banish'];
-/** Height of the HUD's XP and life bars, kept clear of the cards (the HUD is drawn on top). */
-const HUD_BARS = 44;
 /**
  * When the choice opens, the overlay fades in and ignores touches for this long: a finger that taps again to
  * dodge (floating joystick) must not pick whatever card is under it. Also lets the level pulse show through.
@@ -44,19 +43,24 @@ export class LevelUpScene extends Phaser.Scene {
     const opts = w.upgradeOptions;
     // Phones have no number keys: no "1." on the cards and a hint about touching.
     const touch = this.sys.game.device.input.touch;
-    // The HUD bars (XP and life) stay visible above the dimmed area.
-    const keep = safeArea().top + HUD_BARS;
+    // The HUD (bars, counters, build strip) is drawn on top: the cards stay clear of it.
+    const hud = this.scene.get(SCENES.hud) as HudScene;
     const n = opts.length;
     // Short screens (phone lying down): the charge buttons go in a column beside the cards.
-    const side = height < keep + 480 && width >= 440 + 150 + 32;
+    const side = height < hud.barsBottom + 480 && width >= 440 + 150 + 32;
     const cardW = side ? Math.min(440, width - 32 - 150) : Math.min(440, width - 24);
     const gap = side ? 10 : 12;
     const bw = side ? 138 : Math.min(130, (cardW - 16) / 3);
+    // Lying down, cards and charges fit to the right of the build strip when wide enough; else below it.
+    const besideStrip = side && hud.stripRight + 10 + cardW + 12 + bw + 10 <= width - safeArea().right;
+    const keep = besideStrip ? hud.barsBottom : hud.bottom;
     const cardH = side
       ? Math.max(60, Math.min(100, (height - keep - 88) / n - gap))
-      : Math.max(76, Math.min(100, (height - keep - 250) / n - 12));
-    const top = side ? keep + 54 : Math.max(keep + 80, height / 2 - ((cardH + gap) * n) / 2 - 10);
-    const cx = side ? width / 2 - (bw + 12) / 2 : width / 2;
+      : Math.max(76, Math.min(100, (height - keep - 190) / n - gap));
+    const top = side ? keep + 54 : Math.max(keep + 62, height / 2 - ((cardH + gap) * n) / 2 - 10);
+    const cx = besideStrip ? hud.stripRight + 10 + cardW / 2 : side ? width / 2 - (bw + 12) / 2 : width / 2;
+    // The charge column starts under the gold and kills line.
+    const chargeTop = Math.max(top, hud.countersBottom + 8);
 
     // The whole screen dims; the HUD (bars, timer, build) is brought above the overlay.
     dim(this, 0.72);
@@ -67,7 +71,7 @@ export class LevelUpScene extends Phaser.Scene {
       this.tweens.add({ targets: this.cameras.main, alpha: 1, duration: ARM_DELAY });
       this.time.delayedCall(ARM_DELAY, () => (this.input.enabled = true));
     }
-    label(this, width / 2, side ? top - 28 : top - 44, t.levelUp.title, side ? 26 : 30, {
+    label(this, besideStrip ? cx : width / 2, side ? top - 28 : top - 40, t.levelUp.title, side ? 26 : 30, {
       bold: true,
       color: UI.gold,
       stroke: true,
@@ -91,15 +95,18 @@ export class LevelUpScene extends Phaser.Scene {
         align: 'left',
         wrap: textW,
       });
-      if (d.recipe && desc.y + desc.height + 24 <= y + cardH / 2) {
+      if (d.recipe) {
         const ry = y + cardH / 2 - 7;
         // The recipe's passive as a mini icon, then its state ("você tem", "falta" or "Elo pronto").
         const rx = d.recipeIcon ? left + 18 : left;
-        if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
-        label(this, rx, ry, d.recipe, 12, {
+        const recipe = label(this, rx, ry, d.recipe, 12, {
           color: d.recipeMissing ? UI.muted : UI.gold,
           align: 'left',
+          wrap: left + textW - rx,
         }).setOrigin(0, 1);
+        // Only when it fits under the description (short cards drop it).
+        if (ry - recipe.height < desc.y + desc.height + 3) recipe.destroy();
+        else if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
       }
       return card;
     });
@@ -113,16 +120,23 @@ export class LevelUpScene extends Phaser.Scene {
     CHARGES.forEach((key, i) => {
       const c = w.charges[key];
       const x = side ? bx : width / 2 + (i - 1) * (bw + 8);
-      const y = side ? top + 22 + i * 52 : bottom + 54;
+      const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
       const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
       if (c <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
     if (!touch)
-      label(this, side ? bx : width / 2, side ? top + 22 + 3 * 52 : bottom + 90, t.levelUp.chargeKeys, 12, {
-        color: UI.muted,
-        wrap: side ? bw : undefined,
-      });
+      label(
+        this,
+        side ? bx : width / 2,
+        side ? chargeTop + 22 + 3 * 52 : bottom + 90,
+        t.levelUp.chargeKeys,
+        12,
+        {
+          color: UI.muted,
+          wrap: side ? bw : undefined,
+        },
+      );
     this.highlight();
 
     bindKeys(this, (kb) => kb.on('keydown', this.onKey, this));

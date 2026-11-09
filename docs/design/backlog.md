@@ -954,7 +954,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Aceite: em 360x640, 420x820 e 1000x680 a faixa cabe com safe-area e não cobre o herói; zero alocação por quadro;
   "Elo pronto" acende quando arma no máximo + passiva.
 
-**RU-03 · Barra do chefe no topo e HUD mais limpo** · ui + impl · P · aprovado
+**RU-03 · Barra do chefe no topo e HUD mais limpo** · ui + impl · P · ✅ feito
 
 - Por quê: 05-ui #8: a barra do chefe fica a 40 px do rodapé, sob o polegar, na luta mais importante; #9: nível longe
   da barra de XP, botão de pausa abaixo de 44 px, ouro e abates espalhados.
