@@ -106,3 +106,12 @@ export function favoriteWeapon(rec: HeroRecord): WeaponId | null {
   }
   return best;
 }
+
+/**
+ * What a run still has to record when it ends (death, victory or quitting): a Noite Sem Fim records what the vigil
+ * brought on top of the victory already banked; a plain run records itself. Each once (`null` once done).
+ */
+export function bankOnEnd(endless: boolean, banked: boolean, vigilBanked: boolean): 'run' | 'vigil' | null {
+  if (endless) return vigilBanked ? null : 'vigil';
+  return banked ? null : 'run';
+}

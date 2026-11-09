@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, spawnEnemy } from '../../src/core/enemies';
 import { dropPickup } from '../../src/core/pickups';
-import { favoriteWeapon, newRunSummary, summarizeRun } from '../../src/core/records';
+import { bankOnEnd, favoriteWeapon, newRunSummary, summarizeRun } from '../../src/core/records';
 import { newHeroRecord } from '../../src/core/meta';
 import { maxLevel } from '../../src/core/weapons';
 import { World } from '../../src/core/world';
@@ -98,5 +98,16 @@ describe('hero records (Coleção, Heróis)', () => {
     expect(favoriteWeapon(rec)).toBe('blade');
     rec.weaponRuns.frost = 5;
     expect(favoriteWeapon(rec)).toBe('frost');
+  });
+});
+
+describe('bankOnEnd', () => {
+  it('quitting a Noite Sem Fim records the vigil, once', () => {
+    expect(bankOnEnd(true, true, false)).toBe('vigil');
+    expect(bankOnEnd(true, true, true)).toBeNull();
+  });
+  it('a plain run records itself, once', () => {
+    expect(bankOnEnd(false, false, false)).toBe('run');
+    expect(bankOnEnd(false, true, false)).toBeNull();
   });
 });

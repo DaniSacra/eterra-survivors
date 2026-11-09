@@ -14,7 +14,7 @@ import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, recordRun, recordVigil } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
-import { newRunSummary, summarizeRun, type RunSummary } from '../core/records';
+import { bankOnEnd, newRunSummary, summarizeRun, type RunSummary } from '../core/records';
 import { liveAchievements } from '../core/achievements';
 import type { MetaSave } from '../core/meta';
 import type { AchievementId } from '../data/achievements';
@@ -131,6 +131,8 @@ export class GameScene extends Phaser.Scene {
   private fx!: Phaser.GameObjects.Graphics;
   private fxTop!: Phaser.GameObjects.Graphics;
   private banked = false;
+  /** The Noite Sem Fim was recorded (it ends once: death or quitting). */
+  private vigilBanked = false;
   /** The run as the boss fell, when the player went on into the Noite Sem Fim; and whether it set a record. */
   private vigilBefore: RunSummary | null = null;
   private vigilRecord = false;
@@ -191,6 +193,7 @@ export class GameScene extends Phaser.Scene {
     this.vigilRecord = false;
     this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
     this.banked = false;
+    this.vigilBanked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.decals = new Decals(this, this.world.stageId);
@@ -354,7 +357,10 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, this.pauseGame, this);
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.bank();
+      // Quitting from the pause: a Noite Sem Fim records what the vigil brought, a plain run the run.
+      const record = bankOnEnd(this.world.endless, this.banked, this.vigilBanked);
+      if (record === 'vigil') this.bankVigil();
+      else if (record === 'run') this.bank();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
       this.game.events.off(Phaser.Core.Events.BLUR, this.pauseGame, this);
       for (const k of [SCENES.hud, SCENES.levelUp, SCENES.pause, SCENES.end]) this.scene.stop(k);
@@ -778,6 +784,8 @@ export class GameScene extends Phaser.Scene {
 
   /** The end of a Noite Sem Fim: records the vigil on top of the victory already banked. */
   private bankVigil(): null {
+    if (this.vigilBanked) return null;
+    this.vigilBanked = true;
     const w = this.world;
     const save = loadSave();
     const best = save.records[w.character]?.vigil[w.stageId] ?? 0;
