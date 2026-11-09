@@ -52,6 +52,13 @@ const AREA_HIT = Object.fromEntries(
   WEAPON_IDS.map((id) => [id, WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone']),
 ) as Record<WeaponId, boolean>;
 
+/** Sparks a swing throws when it starts: [color, size, count]. */
+const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> = {
+  fury: [0xffd870, 6, 6],
+  mace: [0xd8d0c4, 4, 4],
+  jointBreaker: [0xffa060, 5, 6],
+};
+
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
 
@@ -103,6 +110,8 @@ export class GameScene extends Phaser.Scene {
   /** Match time last frame: hits and puffs are only new on frames where the world moved. */
   private lastTime = 0;
   private stepDt = 0;
+  /** The boss's ability phase last frame, to catch the moment it lands. */
+  private bossAct = 0;
 
   constructor() {
     super(SCENES.game);
@@ -142,6 +151,7 @@ export class GameScene extends Phaser.Scene {
     this.moments = newMoments();
     this.sparks = new Sparks();
     this.lastTime = 0;
+    this.bossAct = 0;
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
@@ -276,6 +286,8 @@ export class GameScene extends Phaser.Scene {
     this.lastTime = w.time;
     this.sparks.frame(this.calm);
     this.deathSparks();
+    this.swingSparks();
+    this.bossMoments();
 
     this.placeView();
     // The hero bounces while walking and turns to where it goes.
@@ -349,6 +361,48 @@ export class GameScene extends Phaser.Scene {
         sp.burst(f.x, f.y - f.r * 0.5, 3, 170, 7, 0xffffff, SPARK.star, 0.5);
       } else if (sp.room)
         sp.burst(f.x, f.y - f.r * 0.3, 2 + (f.poolIndex & 1), 110, 5, 0xffffff, SPARK.star, 0.35, false);
+    }
+  }
+
+  /** Swings that start this frame kick up their sparks: gold for Fúria, chips for the maces. */
+  private swingSparks(): void {
+    if (this.stepDt <= 0) return;
+    const fresh = config.effects.slashTtl - this.stepDt - 1e-6;
+    const sp = this.sparks;
+    const p = this.world.player;
+    for (const s of this.world.slashes.active) {
+      if (s.ttl < fresh) continue;
+      const spark = SWING_SPARK[s.weapon];
+      if (!spark) continue;
+      for (let i = 0; i < spark[2]; i++) {
+        const a = s.angle - s.arc / 2 + s.arc * ((i + 0.5) / spark[2]);
+        const x = p.x + Math.cos(a) * s.range;
+        const y = p.y + Math.sin(a) * s.range;
+        // Fúria flings its sparks along the turn; the maces knock chips outward.
+        const out = s.weapon === 'fury' ? a + Math.PI / 2 : a;
+        sp.add(x, y, Math.cos(out) * 150, Math.sin(out) * 150, 0.35, spark[1], spark[0], SPARK.star);
+      }
+    }
+  }
+
+  /** The boss's ability landing: Corte Brutal shakes the screen and throws dust along its arc. */
+  private bossMoments(): void {
+    const b = this.world.boss;
+    const act = b ? b.act : 0;
+    const was = this.bossAct;
+    this.bossAct = act;
+    const ab = b?.def.ability;
+    if (!b || !ab || act === was || was !== BossAct.Windup) return;
+    if (ab.kind === 'cleave' && act === BossAct.Active) {
+      this.shake(150, 0.008);
+      const aim = Math.atan2(b.aimY, b.aimX);
+      const half = (ab.arc ?? 1) / 2;
+      for (let i = 0; i < 6; i++) {
+        const a = aim - half + (half * 2 * (i + 0.5)) / 6;
+        const x = b.x + Math.cos(a) * ab.range;
+        const y = b.y + Math.sin(a) * ab.range;
+        this.sparks.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 30, 0.45, 6, 0xe8e2d0, SPARK.star, true);
+      }
     }
   }
 

@@ -3,7 +3,7 @@ import type { World } from '../core/world';
 import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponId } from '../data/weapons';
 import { isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
-import { BossAct } from '../core/bosses';
+import { BossAct, CLEAVE_SHOW } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
 import { INK } from './art/pen';
 import { UI } from './ui';
@@ -17,15 +17,34 @@ export const HERO_COLOR: Record<CharacterId, number> = {
   teo: 0x4ad08a,
   andilla: 0xe86a7a,
 };
-const SLASH_COLOR = 0xe8f0ff;
-const SLASH_EDGE = 0x9ad8ff;
-/** Swings: [fill, edge]. Steel by default; Elos get warmer, brighter versions. */
-const SLASH_PLAIN: readonly [number, number] = [SLASH_COLOR, SLASH_EDGE];
-const SLASH_STYLE: Partial<Record<WeaponId, readonly [number, number]>> = {
-  fury: [0xffe8a0, 0xffa040],
-  mace: [0xd8d0c4, 0x8a8478],
-  jointBreaker: [0xf0e0c8, 0xc86a3a],
+/**
+ * How each swing looks: blade color, edge color, the inner radius of its crescent (a fraction of the reach: the
+ * middle stays clear so enemies near the hero show), and its ground mark after the hit.
+ */
+interface SwingStyle {
+  fill: number;
+  edge: number;
+  band: number;
+  fillAlpha: number;
+  mark: 'none' | 'shock' | 'crack';
+}
+const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fillAlpha: 0.4, mark: 'none' };
+const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
+  blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none' },
+  fury: { fill: 0xfff0b0, edge: 0xffa040, band: 0.62, fillAlpha: 0.45, mark: 'none' },
+  mace: { fill: 0xd8d0c4, edge: 0x8a8478, band: 0.78, fillAlpha: 0.15, mark: 'shock' },
+  jointBreaker: { fill: 0xf0c8a0, edge: 0xc86a3a, band: 0.74, fillAlpha: 0.15, mark: 'crack' },
 };
+/** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
+const CLEAVE_STYLE: SwingStyle = {
+  fill: 0xffffff,
+  edge: UI.dangerHex,
+  band: 0.35,
+  fillAlpha: 0.4,
+  mark: 'shock',
+};
+/** Fraction of a swing's life spent sweeping; the rest the trail catches up and fades. */
+const SWEEP = 0.55;
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = 0xff9a30;
@@ -227,30 +246,18 @@ export function drawFx(
   // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
   if (world.state === 'won' || world.state === 'lost') return;
   for (const s of world.slashes.active) {
-    // A sweeping blade: a wide soft band, a bright band near the edge and a crisp edge line, trailing off.
-    const t = s.ttl / config.effects.slashTtl;
-    const a0 = s.angle - s.arc / 2;
-    const a1 = s.angle + s.arc / 2;
-    const style = SLASH_STYLE[s.weapon] ?? SLASH_PLAIN;
-    const fill = style[0];
-    const edge = style[1];
-    g.fillStyle(edge, 0.25 * t)
-      .slice(p.x, p.y, s.range, a0, a1, false)
-      .fillPath();
-    g.fillStyle(fill, 0.6 * t)
-      .slice(p.x, p.y, s.range, a0, a1, false)
-      .fillPath();
-    g.fillStyle(edge, 0.3 * t)
-      .slice(p.x, p.y, s.range * 0.6, a0, a1, false)
-      .fillPath();
-    g.lineStyle(3, 0xffffff, 0.9 * t)
-      .beginPath()
-      .arc(p.x, p.y, s.range, a0, a1)
-      .strokePath();
-    g.lineStyle(2, edge, 0.8 * t)
-      .beginPath()
-      .arc(p.x, p.y, s.range + 3, a0, a1)
-      .strokePath();
+    const t = 1 - s.ttl / config.effects.slashTtl;
+    drawSwing(
+      g,
+      ground,
+      p.x,
+      p.y,
+      s.range,
+      s.angle - s.arc / 2,
+      s.angle + s.arc / 2,
+      t,
+      SWING_STYLE[s.weapon] ?? SWING_PLAIN,
+    );
   }
   for (const b of world.bolts.active) {
     const t = b.ttl / config.effects.boltTtl;
@@ -277,6 +284,106 @@ export function drawFx(
     g.fillStyle(c, 0.4 * t).fillCircle(b.x, b.y, b.radius);
     g.lineStyle(2, 0xffffff, 0.8 * t).strokeCircle(b.x, b.y, b.radius * (1.2 - t * 0.2));
   }
+}
+
+/**
+ * A swing that sweeps from `a0` to `a1` around (cx, cy): a crescent band trailing behind a bright edge, so the
+ * direction reads in a single frame. `t` goes 0 -> 1 over the swing's life. Heavy swings leave a mark on the
+ * ground (`under`): a shock ring opening out along the arc, or cracks at its ends.
+ */
+function drawSwing(
+  g: Phaser.GameObjects.Graphics,
+  under: Phaser.GameObjects.Graphics,
+  cx: number,
+  cy: number,
+  range: number,
+  a0: number,
+  a1: number,
+  t: number,
+  st: SwingStyle,
+): void {
+  const span = a1 - a0;
+  const sk = Math.min(1, t / SWEEP);
+  const lead = a0 + span * (1 - (1 - sk) * (1 - sk));
+  const tail = Math.max(a0, lead - span * 0.7, a0 + span * Math.max(0, (t - SWEEP) / (1 - SWEEP)));
+  const fade = t < SWEEP ? 1 : 1 - (t - SWEEP) / (1 - SWEEP);
+  const inner = range * st.band;
+  const mid = (range + inner) / 2;
+  if (lead > tail + 0.01) {
+    // The trail: a soft wide band, then a brighter one close behind the edge.
+    g.fillStyle(st.fill, st.fillAlpha * fade);
+    band(g, cx, cy, inner, range, tail, lead);
+    g.fillStyle(st.edge, 0.3 * fade);
+    band(g, cx, cy, mid, range, lead - (lead - tail) * 0.35, lead);
+    g.lineStyle(3, 0xffffff, 0.95 * fade)
+      .beginPath()
+      .arc(cx, cy, range, tail, lead)
+      .strokePath();
+    g.lineStyle(2.5, st.edge, 0.9 * fade)
+      .beginPath()
+      .arc(cx, cy, range + 2.5, tail, lead)
+      .strokePath();
+  }
+  if (t < SWEEP) {
+    // The blade itself, leading the sweep.
+    const ux = Math.cos(lead);
+    const uy = Math.sin(lead);
+    g.lineStyle(5, st.edge, 0.8).lineBetween(
+      cx + ux * inner,
+      cy + uy * inner,
+      cx + ux * (range + 2),
+      cy + uy * (range + 2),
+    );
+    g.lineStyle(2.5, 0xffffff, 1).lineBetween(
+      cx + ux * inner,
+      cy + uy * inner,
+      cx + ux * range,
+      cy + uy * range,
+    );
+  }
+  if (st.mark === 'none' || t < SWEEP * 0.8) return;
+  const mk = (t - SWEEP * 0.8) / (1 - SWEEP * 0.8);
+  // A shock ring opening out along the arc: "it shoves".
+  under
+    .lineStyle(5 * (1 - mk) + 1, 0xf0e8d8, 0.55 * (1 - mk))
+    .beginPath()
+    .arc(cx, cy, range * (0.95 + 0.25 * mk), a0, a1)
+    .strokePath();
+  if (st.mark !== 'crack') return;
+  // Cracks in the ground at both ends of the swing.
+  under.lineStyle(2.5, 0x3a2a24, 0.7 * (1 - mk * mk));
+  for (let e = 0; e < 2; e++) {
+    const a = e ? a1 : a0;
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+    let x = cx + ux * range * 0.75;
+    let y = cy + uy * range * 0.75;
+    for (let i = 1; i <= 3; i++) {
+      const side = (i % 2 ? 1 : -1) * 6;
+      const nx = cx + ux * range * (0.75 + i * 0.12) - uy * side;
+      const ny = cy + uy * range * (0.75 + i * 0.12) + ux * side;
+      under.lineBetween(x, y, nx, ny);
+      x = nx;
+      y = ny;
+    }
+  }
+}
+
+/** Fills the ring sector between radii `r0` and `r1`, angles `a0` to `a1` (current fill style). */
+function band(
+  g: Phaser.GameObjects.Graphics,
+  cx: number,
+  cy: number,
+  r0: number,
+  r1: number,
+  a0: number,
+  a1: number,
+): void {
+  g.beginPath();
+  g.arc(cx, cy, r1, a0, a1);
+  g.arc(cx, cy, r0, a1, a0, true);
+  g.closePath();
+  g.fillPath();
 }
 
 /** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
@@ -480,13 +587,11 @@ function drawBossWarning(
   if (!ab || e.act === BossAct.Idle) return;
   const aim = Math.atan2(e.aimY, e.aimX);
   if (e.act === BossAct.Active) {
-    // The cleave landing: a quick white slash over everything.
+    // The cleave landing: the same sweep as the hero's blades, in the danger colors.
     if (ab.kind === 'cleave') {
       const half = (ab.arc ?? 1) / 2;
-      top
-        .fillStyle(SLASH_COLOR, 0.6)
-        .slice(e.x, e.y, ab.range, aim - half, aim + half, false)
-        .fillPath();
+      const t = 1 - Math.max(0, e.actT) / CLEAVE_SHOW;
+      drawSwing(top, g, e.x, e.y, ab.range, aim - half, aim + half, t, CLEAVE_STYLE);
     }
     return;
   }

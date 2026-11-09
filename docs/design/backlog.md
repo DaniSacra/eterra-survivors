@@ -827,7 +827,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   aura e de Geada não pintam o inimigo de branco (a turma inteira virava uma bolha branca a cada tick); o tick aparece
   pela onda, pelas cruzes douradas e pelo squash.
 
-**RF-07 · Golpes que varrem (Lâmina, Fúria, Maça, Quebra-Junta, Corte Brutal)** · vfx · M · aprovado
+**RF-07 · Golpes que varrem (Lâmina, Fúria, Maça, Quebra-Junta, Corte Brutal)** · vfx · M · ✅ feito
 
 - Por quê: 06-vfx #3 e 04-visual #2: o golpe aparece inteiro e desbota (não se lê a direção); a Fúria é um disco bege
   parado; a Maça é um disco cinza de ~300° com preenchimento 0.6 por cima dos inimigos que parece neblina; o
@@ -837,6 +837,14 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   borda, preenchimento no máximo 0.15, anel de choque no chão e lascas); Quebra-Junta em cobre com rachaduras e
   faíscas; Corte Brutal com o mesmo varrer, poeira e tremor curto.
 - Aceite: inimigos visíveis através de qualquer golpe; direção do golpe legível numa captura; custo igual ou menor.
+- Feito: um só `drawSwing` para todos os golpes e o Corte Brutal: a lâmina (linha branca com a borda colorida) varre
+  de `a0` a `a1` na primeira metade da vida do golpe, puxando um rastro em lua crescente (2 faixas de anel, o miolo
+  perto do herói fica livre) que depois alcança a ponta e some. Lâmina com borda âmbar de Aldo; Fúria uma volta
+  inteira com rastro dourado e faíscas pela tangente; Maça com preenchimento 0.15, faixa estreita na borda, anel de
+  choque no chão abrindo para fora e lascas; Quebra-Junta em cobre com rachaduras no chão nas duas pontas e faíscas;
+  Corte Brutal com o mesmo varrer em branco e coral, poeira na borda e tremor curto (fora do modo calmo). As faixas
+  são setores de anel preenchidos (sem as listras que o arco grosso fazia). `CLEAVE_SHOW` passou a ser exportado de
+  `core/bosses.ts`.
 
 **RF-08 · Golpes do céu: bola de fogo, Espada de Fogo cravando, raio de Lyra** · vfx · M · aprovado
 

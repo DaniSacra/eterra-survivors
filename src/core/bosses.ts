@@ -10,7 +10,7 @@ import type { World } from './world';
 export const BossAct = { Idle: 0, Windup: 1, Active: 2 } as const;
 
 /** How long the cleave stays visible after it lands, seconds. */
-const CLEAVE_SHOW = 0.25;
+export const CLEAVE_SHOW = 0.25;
 
 /**
  * Runs a boss's telegraphed ability (data/enemies.ts `ability`). Returns true while the boss moves on its own
