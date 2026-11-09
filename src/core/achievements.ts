@@ -160,17 +160,21 @@ export function liveAchievements(
   return out ?? NONE;
 }
 
-/** The locked achievement closest to done (50% to 99%), for the end screen's "Perto". Null if none. */
+/**
+ * The locked achievement closest to done, from `min` of the way (50% by default) to 99%, for the end screen's
+ * "Perto". Null if none.
+ */
 export function closestAchievement(
   save: MetaSave,
+  min = 0.5,
 ): { id: AchievementId; value: number; goal: number } | null {
   let found: { id: AchievementId; value: number; goal: number } | null = null;
-  let bestShare = 0.5;
+  let bestShare = min;
   for (const id of ACHIEVEMENT_IDS) {
     if (save.achievements.includes(id)) continue;
     const p = progress(save, id);
     const share = p.value / p.goal;
-    if (share >= bestShare && share < 1 && (!found || share > bestShare)) {
+    if (share > 0 && share >= bestShare && share < 1 && (!found || share > bestShare)) {
       found = { id, ...p };
       bestShare = share;
     }

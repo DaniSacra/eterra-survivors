@@ -1,5 +1,6 @@
 import { ACHIEVEMENTS, type AchievementId } from '../data/achievements';
 import { config, type StatKey } from '../data/config';
+import { formatTime } from '../core/format';
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { WEAPONS, type WeaponId } from '../data/weapons';
@@ -187,4 +188,11 @@ export function describeAchievement(id: AchievementId): {
     reward: t.achievements.reward(def.gold),
     title: t.achievements.titles[id] ?? null,
   };
+}
+
+/** "8.240 de 10.000" (times as minutes: "4:10 de 5:00"). */
+export function achievementProgress(id: AchievementId, value: number, goal: number): string {
+  const metric = ACHIEVEMENTS[id].metric;
+  const f = metric === 'bestTime' || metric === 'untouched' ? formatTime : t.int;
+  return t.achievements.progress(f(value), f(goal));
 }

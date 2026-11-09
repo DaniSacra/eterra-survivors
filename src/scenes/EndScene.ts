@@ -5,9 +5,11 @@ import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
 import { nextGoal } from '../core/meta';
+import { closestAchievement } from '../core/achievements';
+import type { AchievementId } from '../data/achievements';
 import { loadSave } from '../render/save';
 import { t } from '../i18n/pt-BR';
-import { formatCompact, formatDecimal } from '../render/describe';
+import { achievementProgress, describeAchievement, formatCompact, formatDecimal } from '../render/describe';
 import { UI, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { PASSIVES } from '../data/upgrades';
@@ -19,15 +21,22 @@ export class EndScene extends Phaser.Scene {
   private world!: World;
   private unlocked: StageId | null = null;
   private newElos: WeaponId[] = [];
+  private newAchievements: AchievementId[] = [];
 
   constructor() {
     super(SCENES.end);
   }
 
-  init(data: { world: World; unlocked?: StageId | null; newElos?: WeaponId[] }): void {
+  init(data: {
+    world: World;
+    unlocked?: StageId | null;
+    newElos?: WeaponId[];
+    newAchievements?: AchievementId[];
+  }): void {
     this.world = data.world;
     this.unlocked = data.unlocked ?? null;
     this.newElos = data.newElos ?? [];
+    this.newAchievements = data.newAchievements ?? [];
   }
 
   create(): void {
@@ -199,7 +208,10 @@ export class EndScene extends Phaser.Scene {
     return y + Math.ceil(list.length / perRow) * 30 + 6;
   }
 
-  /** The next stage, the Elo that almost formed, new Elos, the bank and the next thing to buy. Centred on cx. */
+  /**
+   * The next stage, the Elo that almost formed, new Elos, new achievements (or the closest one), the bank and the
+   * next thing to buy. Centred on cx.
+   */
   private notes(cx: number, y: number, w: number): number {
     const line = (text: string, size: number, color: string, bold = false) => {
       const l = label(this, cx, y, text, size, { bold, color, wrap: w }).setOrigin(0.5, 0);
@@ -220,6 +232,20 @@ export class EndScene extends Phaser.Scene {
       line(text, 15, UI.gold, true);
     }
     for (const id of this.newElos) line(t.end.newElo(t.weapons[id].name), 15, UI.gold, true);
+    // Achievements: up to three new ones; with none, the one closest to done (the next "one more run").
+    const fresh = this.newAchievements;
+    for (const id of fresh.slice(0, 3)) {
+      const a = describeAchievement(id);
+      line(t.end.achievement(a.name, a.reward), 15, UI.gold, true);
+    }
+    if (fresh.length > 3) line(t.end.moreAchievements(fresh.length - 3), 14, UI.gold);
+    const near = fresh.length === 0 ? (closestAchievement(save) ?? closestAchievement(save, 0)) : null;
+    if (near)
+      line(
+        t.end.near(describeAchievement(near.id).name, achievementProgress(near.id, near.value, near.goal)),
+        14,
+        UI.text,
+      );
     const goal = nextGoal(save);
     line(t.end.banked(save.gold), 14, UI.text);
     if (goal) {

@@ -26,6 +26,9 @@ export interface SimResult {
   level: number;
   kills: number;
   gold: number;
+  /** Total weapon damage, and the biggest single weapon hit (achievement calibration). */
+  damage: number;
+  bestHit: number;
   /** Fraction of the boss HP left (null if it never spawned). */
   bossHpLeft: number | null;
   /** Seconds from boss spawn to the end of the run (null if it never spawned). */
@@ -189,6 +192,8 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     level: 1,
     kills: 0,
     gold: 0,
+    damage: 0,
+    bestHit: 0,
     bossHpLeft: null,
     bossTime: null,
     elos: [],
@@ -240,6 +245,8 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
   res.level = w.level;
   res.kills = w.kills;
   res.gold = w.gold;
+  res.damage = w.weapons.reduce((a, o) => a + o.damage, 0);
+  res.bestHit = w.bestHit;
   if (bossAt >= 0) {
     res.bossTime = Math.round(w.time - bossAt);
     res.bossHpLeft = w.boss ? w.boss.hp / w.boss.maxHp : 0;

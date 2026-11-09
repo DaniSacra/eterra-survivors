@@ -31,7 +31,7 @@ import { ENEMY_IDS } from '../../src/data/enemies';
 import { EVOLVED_IDS } from '../../src/data/evolutions';
 import { STAGE_IDS } from '../../src/data/stages';
 import { t } from '../../src/i18n/pt-BR';
-import { describeAchievement } from '../../src/render/describe';
+import { achievementProgress, describeAchievement } from '../../src/render/describe';
 
 const run = (over: Partial<RunSummary> = {}): RunSummary => ({ ...newRunSummary(), ...over });
 
@@ -247,6 +247,22 @@ describe('live check and the closest one', () => {
     expect(closestAchievement(s)?.id).toBe('killsRun1k');
     s.achievements.push('killsRun1k');
     expect(closestAchievement(s)?.id).toBe('killsTotal10k');
+  });
+
+  it('below 50%, the end screen can still ask for the closest one with any progress', () => {
+    const s = newSave();
+    expect(closestAchievement(s, 0)).toBeNull();
+    s.records.aldo = { ...newHeroRecord(), bestTime: 60 };
+    expect(closestAchievement(s)).toBeNull();
+    expect(closestAchievement(s, 0)).toEqual({ id: 'survive5', value: 60, goal: 300 });
+  });
+
+  it('progress reads as numbers with dots, times as minutes', () => {
+    expect(achievementProgress('killsTotal10k', 8240, 10_000)).toBe(
+      t.achievements.progress('8.240', '10.000'),
+    );
+    expect(achievementProgress('damageTotal', 1_234_567, 1e6)).toContain('1.234.567');
+    expect(achievementProgress('survive5', 250, 300)).toBe(t.achievements.progress('04:10', '05:00'));
   });
 });
 

@@ -6,6 +6,7 @@ import {
   type MetaSave,
   type RunRecorded,
 } from '../core/meta';
+import { checkAchievements } from '../core/achievements';
 import type { RunSummary } from '../core/records';
 import type { CharacterId } from '../data/characters';
 import type { StageId } from '../data/stages';
@@ -44,4 +45,10 @@ export function rememberChoice(character: CharacterId, stage: StageId): void {
   save.lastHero = character;
   save.lastStage = stage;
   writeSave(save);
+}
+
+/** Unlocks achievements an older save already earned (once, at the menu); written only if something changed. */
+export function checkStoredAchievements(): void {
+  const save = loadSave();
+  if (checkAchievements(save).length > 0) writeSave(save);
 }

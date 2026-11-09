@@ -15,6 +15,7 @@ import { loadSave, recordRun } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
 import { summarizeRun } from '../core/records';
+import type { AchievementId } from '../data/achievements';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
@@ -112,6 +113,7 @@ export class GameScene extends Phaser.Scene {
   private banked = false;
   /** Elos this run formed for the first time ever (shown on the end screen). */
   private newElos: WeaponId[] = [];
+  private newAchievements: AchievementId[] = [];
   /** world.tally as of the last frame, to turn new attacks, hits, kills and gems into sounds. */
   private heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
   /** Gems picked in a row (each chime a bit higher), and when the last one was. */
@@ -550,7 +552,9 @@ export class GameScene extends Phaser.Scene {
     const won = w.state === 'won';
     const next = STAGE_IDS[STAGE_IDS.indexOf(w.stageId) + 1];
     const opens = won && next !== undefined && !stageUnlocked(loadSave(), next) ? next : null;
-    this.newElos = recordRun(summarizeRun(w)).elos;
+    const recorded = recordRun(summarizeRun(w));
+    this.newElos = recorded.elos;
+    this.newAchievements = recorded.achievements;
     return opens;
   }
 
@@ -615,7 +619,12 @@ export class GameScene extends Phaser.Scene {
           sound.play(e.type);
           const unlocked = this.bank();
           this.time.delayedCall(900, () =>
-            this.scene.launch(SCENES.end, { world: w, unlocked, newElos: this.newElos }),
+            this.scene.launch(SCENES.end, {
+              world: w,
+              unlocked,
+              newElos: this.newElos,
+              newAchievements: this.newAchievements,
+            }),
           );
           break;
         }

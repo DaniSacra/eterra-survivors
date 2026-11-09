@@ -4,6 +4,7 @@ import { UI, button, isShort, keyNav, label, restartOnResize } from '../render/u
 import { ART_SCALE } from '../render/art/pen';
 import { CHARACTERS, CHARACTER_IDS } from '../data/characters';
 import { HERO_COLOR, TINT } from '../render/fx';
+import { checkStoredAchievements } from '../render/save';
 import { SCENES } from './keys';
 
 export class MenuScene extends Phaser.Scene {
@@ -12,6 +13,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Saves from before the achievements earn the ones they already deserve.
+    checkStoredAchievements();
     const { width, height } = this.scale;
     // Phone lying down: the title and the party on the left, the buttons on the right.
     const side = isShort(this) && width >= 600;

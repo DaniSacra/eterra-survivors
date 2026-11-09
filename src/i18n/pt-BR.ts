@@ -173,6 +173,11 @@ export const t = {
     almostElo: (elo: string) => `Faltou um baú para formar ${elo}!`,
     almostEloUnknown: (weapon: string) => `Faltou um baú para o Elo de ${weapon}!`,
     almostLevel: (weapon: string) => `${weapon} estava a um nível do Elo.`,
+    /** An achievement this run unlocked, with its reward ("+50 ouro"). */
+    achievement: (name: string, reward: string) => `Conquista: ${name} (${reward})`,
+    moreAchievements: (n: number) => (n === 1 ? '+1 conquista' : `+${n} conquistas`),
+    /** The locked achievement closest to done, with its progress ("8.240 de 10.000"). */
+    near: (name: string, progress: string) => `Perto: ${name} (${progress})`,
   },
 
   /** Conquistas (docs/design/conquistas.md). The four hero ones are each hero's victory line in the original. */
