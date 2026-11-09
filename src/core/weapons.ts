@@ -223,7 +223,10 @@ function fireZone(world: World, s: ZoneLevel, w: OwnedWeapon): boolean {
   const count = amount(world, s.count);
   const radius = s.radius * world.player.stats.area;
   for (let i = 0; i < count; i++) {
-    const e = randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
+    // The first patch of each cast goes on the boss when it is on screen; the rest fall at random.
+    const e =
+      (i === 0 ? bossOnScreen(world) : null) ??
+      randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!e) break;
     targets.push(e.uid);
     addZone(world, e.x, e.y, radius, s.duration, dmg(world, s.damage), w);
@@ -238,10 +241,12 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
   const count = amount(world, s.count);
   const radius = s.radius * world.player.stats.area;
   for (let i = 0; i < count; i++) {
-    // The first bolt of each volley strikes the nearest enemy (the one that matters); the rest fall at random.
+    // The first bolt of each volley strikes the boss when it is on screen, otherwise the nearest enemy (the one
+    // that matters); the rest fall at random.
     const t =
-      (i === 0 ? nearestEnemy(world, world.player.x, world.player.y, onScreen(world)) : null) ??
-      randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
+      (i === 0
+        ? (bossOnScreen(world) ?? nearestEnemy(world, world.player.x, world.player.y, onScreen(world)))
+        : null) ?? randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!t) break;
     targets.push(t.uid);
     const x = t.x;
@@ -260,6 +265,14 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
 
 /** A distance that always stays inside the visible area. */
 const onScreen = (world: World): number => Math.min(world.view.w, world.view.h) / 2;
+
+/** The boss while it is alive and inside the visible rectangle, else null. */
+function bossOnScreen(world: World): Enemy | null {
+  const b = world.boss;
+  const p = world.player;
+  if (!b || b.dead) return null;
+  return Math.abs(b.x - p.x) <= world.view.w / 2 && Math.abs(b.y - p.y) <= world.view.h / 2 ? b : null;
+}
 
 function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
   const p = world.player;

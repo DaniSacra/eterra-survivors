@@ -674,7 +674,7 @@ sementes depois de cada lote e registrar.
 
 **E-08 (reaberto) · Elos mais cedo** · lote 3. Ver o item na Etapa 2.
 
-**RE-06 · Armas de alvo aleatório miram o chefe** · impl + bal · P · aprovado
+**RE-06 · Armas de alvo aleatório miram o chefe** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D7: a Estrada tem 7 das 12 derrotas na luta do chefe e a Lyra perdeu 3 por tempo esgotado (20
   a 30 DPS no chefe); Raio, Fogo e Geada caem na escolta e o Lobo Velho nunca fica numa zona. Lab de chefe: Fogo L7
@@ -684,6 +684,11 @@ sementes depois de cada lote e registrar.
   (Raio e Fogo no mais próximo, Geada ao acaso). Teste em `weapons.test.ts`. Reserva: `oldWolf` `hp` 12000 para 10500
   se a Estrada ainda tiver mais de 3 mortes por tempo.
 - Aceite: teste verde; Lyra sem derrota por tempo esgotado na Estrada; mediana da luta de chefe de 45 a 90 s.
+- Feito (lote 3): `bossOnScreen` em `core/weapons.ts`; o primeiro raio, chama ou mancha de cada disparo vai no chefe
+  vivo dentro do retângulo visível. Testes em `weapons.test.ts` (Raio, Fogo e Geada miram o chefe na tela e ignoram o
+  chefe fora dela). Sim: Lyra sem derrota por tempo esgotado na Estrada (**0**, era 1); tempo esgotado em toda a
+  Estrada 2 para **1**; mediana da luta de chefe 64 para **57 s** (Estrada 74 para 49 s); derrotas na luta de chefe 5
+  para 2. Reserva do `oldWolf` não foi necessária.
 
 **E-09 (reaberto) · Armadura não pode zerar o dano** · lote 4. Ver o item na Etapa 2.
 

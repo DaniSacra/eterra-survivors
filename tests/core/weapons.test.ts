@@ -151,3 +151,34 @@ describe('damage numbers', () => {
     }
   });
 });
+
+describe('random-target weapons and the boss (RE-06)', () => {
+  /** A boss far inside the view plus a crowd of escorts closer to the hero. */
+  function bossFight(id: WeaponId, bossX: number) {
+    const w = prepared(id);
+    w.setView(1000, 700);
+    const boss = spawnEnemy(w, 'oldWolf', bossX, 0);
+    w.boss = boss;
+    const escorts = [];
+    for (let i = 0; i < 30; i++)
+      escorts.push(spawnEnemy(w, 'hooded', -60 - (i % 6) * 40, -100 + Math.floor(i / 6) * 40));
+    for (const e of [boss, ...escorts]) e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+    return { w, boss };
+  }
+
+  it.each(['lightning', 'fire', 'frost'] as const)(
+    '%s: the first strike of each volley goes on the boss on screen',
+    (id) => {
+      const { w, boss } = bossFight(id, 300);
+      updateWeapons(w, 1 / 60);
+      for (let i = 0; i < 30; i++) w.step(1 / 60, still); // zones tick after landing
+      expect(boss.hp).toBeLessThan(boss.maxHp);
+    },
+  );
+
+  it.each(['lightning', 'fire', 'frost'] as const)('%s: a boss off screen is not aimed at', (id) => {
+    const { w, boss } = bossFight(id, 700);
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    expect(boss.hp).toBe(boss.maxHp);
+  });
+});
