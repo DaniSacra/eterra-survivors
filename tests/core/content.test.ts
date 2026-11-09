@@ -7,7 +7,13 @@ import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { STAGES, STAGE_IDS } from '../../src/data/stages';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
-import { describeUpgrade, formatCompact, formatDecimal, formatStatDelta } from '../../src/render/describe';
+import {
+  describeUpgrade,
+  formatCompact,
+  formatDecimal,
+  formatStatDelta,
+  formatStatValue,
+} from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
 
 /** Guards the data-driven contract: every content entry has its text and its asset. */
@@ -70,6 +76,22 @@ describe('upgrade descriptions', () => {
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).icon).toBe('icon.blade');
     expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['blade']).recipe).toContain('Lâmina');
     expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['frost']).recipe).toBe('');
+  });
+
+  it('stat sheet values: "-" at base, percent changes, plain numbers, and the preview pair', () => {
+    expect(formatStatValue('might', 1, 1)).toBe('-');
+    expect(formatStatValue('might', 1.2, 1)).toBe('+20%');
+    expect(formatStatValue('cooldown', 0.92, 1)).toBe('−8%');
+    expect(formatStatValue('armor', 0, 0)).toBe('-');
+    expect(formatStatValue('armor', 2, 0)).toBe('2');
+    expect(formatStatValue('maxHp', 100, 100)).toBe('100');
+    expect(formatStatValue('regen', 0.3, 0)).toBe('0,3/s');
+    expect(formatStatValue('amount', 1, 0)).toBe('+1');
+    expect(formatStatValue('magnet', 100, 70)).toBe('100');
+    // Força 1 → 2 on the sheet: "+10% → +20%".
+    const from = formatStatValue('might', 1.1, 1);
+    const to = formatStatValue('might', 1.1 + 0.1, 1);
+    expect(t.levelUp.preview(from, to)).toBe('+10% → +20%');
   });
 
   it('recipes tell whether the passive is owned, and when the Elo is ready', () => {

@@ -963,7 +963,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Aceite: 420x820 com chefe: barra e nome visíveis no terço superior; alvo da pausa com 44 px; nada sobreposto em
   360x640 e paisagem.
 
-**RU-04 · Painel de build e atributos na subida de nível** · ui + impl · M · aprovado
+**RU-04 · Painel de build e atributos na subida de nível** · ui + impl · M · ✅ feito
 
 - Por quê: 05-ui #2 e referência do Daniel (`levelup-stats-panel.png`): o jogador vê "Dano +10%" mas não quanto Dano
   já tem nem se há slot livre; no celular sobram ~200 px vazios abaixo das cargas.

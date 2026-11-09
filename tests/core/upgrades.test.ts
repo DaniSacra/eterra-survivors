@@ -5,6 +5,7 @@ import {
   rollUpgrades,
   weaponLevelDiff,
   eloReady,
+  statPreview,
   weaponsCompletedBy,
 } from '../../src/core/upgrades';
 import { addXp, xpToNext } from '../../src/core/xp';
@@ -146,5 +147,16 @@ describe('passive limit', () => {
     applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
     expect(eloReady(w, 'blade')).toBe(false);
     expect(eloReady(w, 'fury')).toBe(false);
+  });
+
+  it('statPreview: a passive shows its stat from now to after the pick', () => {
+    const w = quietWorld();
+    applyUpgrade(w, { kind: 'passive', id: 'reach', level: 1 });
+    const p = statPreview(w, { kind: 'passive', id: 'reach', level: 2 });
+    expect(p?.stat).toBe('area');
+    expect(p?.from).toBeCloseTo(w.player.stats.area);
+    expect(p?.to).toBeCloseTo(w.player.stats.area + PASSIVES.reach.perLevel);
+    expect(statPreview(w, { kind: 'weapon', id: 'frost', level: 1 })).toBeNull();
+    expect(statPreview(w, { kind: 'heal' })).toBeNull();
   });
 });

@@ -274,4 +274,11 @@ export const ICON_ART: Record<string, ArtDef> = {
     p.poly(pts, 0xffd870);
     p.ink();
   }),
+  /** Not a passive (only the shop raises it): a little stack of coins, for the stat sheet. */
+  'icon.greed': passive(0x6a5420, (p) => {
+    p.outline = 1.2;
+    p.ellipse(C, 18, 13, 6, 0xc89c38).ellipse(C, 14.5, 13, 6, 0xe8b840).ellipse(C, 11, 13, 6, 0xf0d860);
+    p.ink();
+    p.fill(0xffffff, 0.7).fillEllipse(C - 2.5, 10, 4, 2);
+  }),
 };

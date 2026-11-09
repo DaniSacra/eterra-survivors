@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import type { World } from '../core/world';
 import type { ChargeKey } from '../data/shop';
 import { t } from '../i18n/pt-BR';
+import { statPreview } from '../core/upgrades';
+import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
 import { describeUpgrade } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
 import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
@@ -14,12 +16,17 @@ const CHARGES: ChargeKey[] = ['reroll', 'skip', 'banish'];
  * dodge (floating joystick) must not pick whatever card is under it. Also lets the level pulse show through.
  */
 const ARM_DELAY = 300;
+/** The build panel: width beside the cards, inner padding. */
+const PANEL_W = 250;
+const PANEL_PAD = 12;
 
 /** Overlay with the upgrade choices. The world is frozen (state 'levelup') while it is open. */
 export class LevelUpScene extends Phaser.Scene {
   private world!: World;
   private cards: Phaser.GameObjects.Rectangle[] = [];
   private selected = 0;
+  private slots: BuildSlots | null = null;
+  private sheet: StatSheet | null = null;
   /** After pressing Banir, the next card picked is banished instead of taken. */
   private banishing = false;
 
@@ -53,12 +60,39 @@ export class LevelUpScene extends Phaser.Scene {
     const bw = side ? 138 : Math.min(130, (cardW - 16) / 3);
     // Lying down, cards and charges fit to the right of the build strip when wide enough; else below it.
     const besideStrip = side && hud.stripRight + 10 + cardW + 12 + bw + 10 <= width - safeArea().right;
-    const keep = besideStrip ? hud.barsBottom : hud.bottom;
+    // The build and stats panel: beside the cards when wide, under the charges on tall phones, else none (the
+    // HUD's build strip stays). With the panel, the HUD strip hides (the panel repeats it, with the preview).
+    const slotSize = width >= 700 ? 28 : 24;
+    const belowH = BuildSlots.heightFor(slotSize) + 10 + StatSheet.heightFor(true) + PANEL_PAD * 2;
+    const belowKeep = hud.countersBottom;
+    const belowCardH = (height - belowKeep - 62 - (touch ? 80 : 100) - belowH - 8) / n - gap;
+    const panel: 'right' | 'below' | null = side
+      ? null
+      : width >= cardW + 16 + PANEL_W + 32 && height >= 560
+        ? 'right'
+        : height >= 700 && belowCardH >= 76
+          ? 'below'
+          : null;
+    hud.setBuildVisible(!panel);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => hud.setBuildVisible(true));
+    const keep = panel ? hud.countersBottom : besideStrip ? hud.barsBottom : hud.bottom;
     const cardH = side
       ? Math.max(60, Math.min(100, (height - keep - 88) / n - gap))
-      : Math.max(76, Math.min(100, (height - keep - 190) / n - gap));
-    const top = side ? keep + 54 : Math.max(keep + 62, height / 2 - ((cardH + gap) * n) / 2 - 10);
-    const cx = besideStrip ? hud.stripRight + 10 + cardW / 2 : side ? width / 2 - (bw + 12) / 2 : width / 2;
+      : panel === 'below'
+        ? Math.min(100, belowCardH)
+        : Math.max(76, Math.min(100, (height - keep - 190) / n - gap));
+    const top = side
+      ? keep + 54
+      : panel === 'below'
+        ? keep + 62
+        : Math.max(keep + 62, height / 2 - ((cardH + gap) * n) / 2 - 10);
+    const cx = besideStrip
+      ? hud.stripRight + 10 + cardW / 2
+      : side
+        ? width / 2 - (bw + 12) / 2
+        : panel === 'right'
+          ? width / 2 - (PANEL_W + 16) / 2
+          : width / 2;
     // The charge column starts under the gold and kills line.
     const chargeTop = Math.max(top, hud.countersBottom + 8);
 
@@ -71,15 +105,27 @@ export class LevelUpScene extends Phaser.Scene {
       this.tweens.add({ targets: this.cameras.main, alpha: 1, duration: ARM_DELAY });
       this.time.delayedCall(ARM_DELAY, () => (this.input.enabled = true));
     }
-    label(this, besideStrip ? cx : width / 2, side ? top - 28 : top - 40, t.levelUp.title, side ? 26 : 30, {
-      bold: true,
-      color: UI.gold,
-      stroke: true,
-    });
+    label(
+      this,
+      besideStrip || panel === 'right' ? cx : width / 2,
+      side ? top - 28 : top - 40,
+      t.levelUp.title,
+      side ? 26 : 30,
+      {
+        bold: true,
+        color: UI.gold,
+        stroke: true,
+      },
+    );
     const owned = w.weapons.map((o) => o.id);
     this.cards = opts.map((opt, i) => {
       const y = top + i * (cardH + gap) + cardH / 2;
       const card = button(this, cx, y, cardW, cardH, () => this.choose(i));
+      // Pointing at a card (mouse) focuses it, so the panel previews it.
+      card.on('pointerover', () => {
+        this.selected = i;
+        this.highlight();
+      });
       const d = describeUpgrade(opt, owned, w.passives);
       const x0 = cx - cardW / 2;
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
@@ -119,28 +165,54 @@ export class LevelUpScene extends Phaser.Scene {
     const bx = cx + cardW / 2 + 12 + bw / 2;
     CHARGES.forEach((key, i) => {
       const c = w.charges[key];
-      const x = side ? bx : width / 2 + (i - 1) * (bw + 8);
+      const x = side ? bx : cx + (i - 1) * (bw + 8);
       const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
       const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
       if (c <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
     if (!touch)
-      label(
-        this,
-        side ? bx : width / 2,
-        side ? chargeTop + 22 + 3 * 52 : bottom + 90,
-        t.levelUp.chargeKeys,
-        12,
-        {
-          color: UI.muted,
-          wrap: side ? bw : undefined,
-        },
-      );
+      label(this, side ? bx : cx, side ? chargeTop + 22 + 3 * 52 : bottom + 90, t.levelUp.chargeKeys, 12, {
+        color: UI.muted,
+        wrap: side ? bw : undefined,
+      });
+    this.slots = null;
+    this.sheet = null;
+    if (panel === 'right') this.buildPanel(cx + cardW / 2 + 16, top, PANEL_W, slotSize, false);
+    else if (panel === 'below')
+      this.buildPanel(cx - cardW / 2, bottom + (touch ? 80 : 100), cardW, slotSize, true);
     this.highlight();
 
     bindKeys(this, (kb) => kb.on('keydown', this.onKey, this));
     restartOnResize(this);
+  }
+
+  /** The build slots and the stat sheet in a panel at (x, y), `w` wide. */
+  private buildPanel(x: number, y: number, w: number, slotSize: number, columns: boolean): void {
+    const bg = this.add.rectangle(x, y, w, 10, UI.panel, 0.9).setOrigin(0).setStrokeStyle(2, UI.border);
+    const inner = w - PANEL_PAD * 2;
+    const slots = (this.slots = new BuildSlots(this, slotSize));
+    slots.container.setPosition(x + PANEL_PAD + (columns ? 0 : (inner - slots.width) / 2), y + PANEL_PAD);
+    const sheetY = y + PANEL_PAD + slots.height + 10;
+    this.sheet = new StatSheet(this, x + PANEL_PAD, sheetY, inner, this.world, columns);
+    bg.setSize(w, sheetY + this.sheet.height + PANEL_PAD - y);
+  }
+
+  /** The slot the focused card fills (blinking; a star when it takes a new one) and its stat change. */
+  private preview(): void {
+    const opt = this.world.upgradeOptions[this.selected];
+    if (!this.slots || !this.sheet || !opt) return;
+    let focus: SlotFocus | null = null;
+    if (opt.kind === 'weapon') {
+      const i = this.world.weapons.findIndex((o) => o.id === opt.id);
+      focus = { kind: 'weapon', index: i < 0 ? this.world.weapons.length : i, fresh: i < 0 };
+    } else if (opt.kind === 'passive') {
+      const ids = Object.keys(this.world.passives);
+      const i = ids.indexOf(opt.id);
+      focus = { kind: 'passive', index: i < 0 ? ids.length : i, fresh: i < 0 };
+    }
+    this.slots.refresh(this.world, this.banishing ? null : focus);
+    this.sheet.setPreview(this.banishing ? null : statPreview(this.world, opt));
   }
 
   private onKey(e: KeyboardEvent): void {
@@ -167,6 +239,7 @@ export class LevelUpScene extends Phaser.Scene {
     this.cards.forEach((c, i) =>
       c.setStrokeStyle(i === this.selected ? 3 : 2, i === this.selected ? on : UI.border),
     );
+    this.preview();
   }
 
   private useCharge(key: ChargeKey): void {

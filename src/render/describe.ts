@@ -27,6 +27,20 @@ export function formatStatDelta(stat: StatKey, delta: number): string {
   return t.units.delta(t.stats[stat], sign, value);
 }
 
+/**
+ * A stat's current value for the stat sheet: "-" while it is still at `base`, percent stats as the change from
+ * base ("+20%", "−8%"), regen per second, amount as "+1", the rest as plain numbers. Max life always shows.
+ */
+export function formatStatValue(stat: StatKey, value: number, base: number): string {
+  const delta = value - base;
+  if (stat !== 'maxHp' && Math.abs(delta) < 1e-6) return t.levelUp.untouched;
+  const sign = delta > 0 ? t.units.plus : t.units.minus;
+  if (PERCENT_STATS.includes(stat)) return sign + t.units.percent(String(Math.round(Math.abs(delta) * 100)));
+  if (stat === 'regen') return t.units.perSecond(num(value));
+  if (stat === 'amount') return sign + num(Math.abs(delta));
+  return num(value);
+}
+
 export interface UpgradeText {
   title: string;
   tag: string;

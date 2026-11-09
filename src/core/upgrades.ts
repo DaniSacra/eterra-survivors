@@ -1,5 +1,5 @@
 import { SIGNATURE_OWNER } from '../data/characters';
-import { config } from '../data/config';
+import { config, type StatKey } from '../data/config';
 import { EVOLUTIONS, EVOLVED_IDS, evolutionOf } from '../data/evolutions';
 import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
@@ -68,6 +68,17 @@ export function readyEvolution(world: World): UpgradeOption | null {
 /** The owned base weapons whose Elo uses `passive` (a passive card lists them all). */
 export function weaponsCompletedBy(owned: readonly WeaponId[], passive: PassiveId): WeaponId[] {
   return owned.filter((id) => evolutionOf(id)?.evo.passive === passive);
+}
+
+/** What a passive choice would do to its stat (the level-up stat sheet shows `from → to`); null otherwise. */
+export function statPreview(
+  world: World,
+  opt: UpgradeOption,
+): { stat: StatKey; from: number; to: number } | null {
+  if (opt.kind !== 'passive') return null;
+  const def = PASSIVES[opt.id];
+  const from = world.player.stats[def.stat];
+  return { stat: def.stat, from, to: from + def.perLevel };
 }
 
 /** What a chest gives: an evolution if one is ready, else a level of something already owned, else a heal. */

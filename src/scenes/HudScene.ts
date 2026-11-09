@@ -156,6 +156,11 @@ export class HudScene extends Phaser.Scene {
     return Math.min(180, this.scale.width * 0.36);
   }
 
+  /** The level-up panel shows the build itself (with a preview): the strip hides meanwhile. */
+  setBuildVisible(visible: boolean): void {
+    this.build.container.setVisible(visible);
+  }
+
   /** Big centred message that fades out. Red warns; pass `good` for rewards. */
   announce(text: string, good = false): void {
     this.banner

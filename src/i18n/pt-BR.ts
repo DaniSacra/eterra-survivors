@@ -75,6 +75,12 @@ export const t = {
     /** Several weapons joined with `and` ("Maça de Ferro e Espadas dos Paladinos"). */
     recipeForMany: (weapons: string) => `Forma os Elos de ${weapons}`,
     and: ' e ',
+    /** The build and stats panel beside the choices. */
+    build: 'Sua build',
+    groups: { survive: 'Sobreviver', attack: 'Ataque', collect: 'Coleta' },
+    /** A stat still at its base value. */
+    untouched: '-',
+    preview: (from: string, to: string) => `${from} → ${to}`,
   },
 
   chest: {
@@ -303,6 +309,21 @@ export const t = {
     armor: 'Armadura',
     amount: 'Quantidade',
     growth: 'Experiência',
+    greed: 'Ouro',
+  } satisfies Record<StatKey, string>,
+
+  /** Short stat names for narrow stat sheets. */
+  statsShort: {
+    maxHp: 'Vida',
+    moveSpeed: 'Veloc.',
+    magnet: 'Ímã',
+    might: 'Dano',
+    cooldown: 'Recarga',
+    area: 'Área',
+    regen: 'Regen.',
+    armor: 'Armad.',
+    amount: 'Quant.',
+    growth: 'Exp.',
     greed: 'Ouro',
   } satisfies Record<StatKey, string>,
 

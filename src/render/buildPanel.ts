@@ -2,11 +2,13 @@ import type Phaser from 'phaser';
 import { eloReady } from '../core/upgrades';
 import { isElo } from '../core/weapons';
 import type { World } from '../core/world';
-import { config } from '../data/config';
-import { PASSIVES, type PassiveId } from '../data/upgrades';
+import { config, type StatKey } from '../data/config';
+import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { WEAPONS } from '../data/weapons';
+import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from './art/pen';
-import { UI } from './ui';
+import { formatStatValue } from './describe';
+import { UI, label } from './ui';
 
 /** Icon badges are drawn 28 world px wide (render/art/icons.ts). */
 const BADGE = 28;
@@ -70,7 +72,11 @@ export class BuildSlots {
   }
 
   get height(): number {
-    return this.size + this.small + 2 * (PIP_H + 4) + 6;
+    return BuildSlots.heightFor(this.size);
+  }
+
+  static heightFor(size: number): number {
+    return size + Math.round(size * 0.84) + 2 * (PIP_H + 4) + 6;
   }
 
   setSize(size: number): this {
@@ -188,4 +194,101 @@ function star(g: Phaser.GameObjects.Graphics, cx: number, cy: number, r: number)
     else g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
   }
   g.closePath().fillPath();
+}
+
+/** The stat sheet's groups, in reading order. */
+const GROUPS: { key: keyof typeof t.levelUp.groups; stats: StatKey[] }[] = [
+  { key: 'survive', stats: ['maxHp', 'regen', 'armor', 'moveSpeed'] },
+  { key: 'attack', stats: ['might', 'cooldown', 'area', 'amount'] },
+  { key: 'collect', stats: ['magnet', 'growth', 'greed'] },
+];
+
+/** Each stat shows the icon of the passive that raises it (gold has no passive: its own icon). */
+const STAT_ICON = Object.fromEntries(PASSIVE_IDS.map((id) => [PASSIVES[id].stat, `icon.${id}`])) as Partial<
+  Record<StatKey, string>
+>;
+
+const ROW = 18;
+const FONT = 13;
+
+/**
+ * The hero's stats in three groups (Sobreviver, Ataque, Coleta): "-" while a stat is at its base, and the focused
+ * passive card's change as `now → after` in gold. `columns`: the groups side by side (phones, under the cards),
+ * else stacked (desktop, beside them). Static: built once per level-up screen.
+ */
+export class StatSheet {
+  readonly height: number;
+
+  /** Height before building: columns (2 groups side by side, Coleta in 2 columns) or stacked. */
+  static heightFor(columns: boolean): number {
+    return columns ? 2 * (ROW + 2) + 4 * ROW + 6 + 2 * ROW : 3 * (ROW + 2) + 11 * ROW + 12;
+  }
+
+  private readonly values = new Map<StatKey, Phaser.GameObjects.Text>();
+  private previewed: StatKey | null = null;
+
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    w: number,
+    private readonly world: World,
+    columns: boolean,
+  ) {
+    // Columns (phones): Sobreviver and Ataque side by side, Coleta under them in the same two columns.
+    // Stacked (desktop): one group after the other.
+    const colW = columns ? w / 2 : w;
+    const names = colW < 150 ? t.statsShort : t.stats;
+    const row = (gx: number, gy: number, stat: StatKey) => {
+      scene.add
+        .image(gx + 7, gy + ROW / 2 - 1, STAT_ICON[stat] ?? 'icon.greed')
+        .setScale((ART_SCALE * 15) / BADGE);
+      label(scene, gx + 18, gy, names[stat], FONT, { align: 'left' });
+      const right = gx + colW - (columns ? 10 : 0);
+      this.values.set(stat, label(scene, right, gy, '', FONT, { bold: true }).setOrigin(1, 0));
+      this.show(stat, null);
+    };
+    const title = (gx: number, gy: number, key: keyof typeof t.levelUp.groups) =>
+      label(scene, gx, gy, t.levelUp.groups[key], FONT, { bold: true, color: UI.muted, align: 'left' });
+    let bottom = y;
+    GROUPS.forEach((group, gi) => {
+      if (columns && gi < 2) {
+        const gx = x + gi * colW;
+        title(gx, y, group.key);
+        group.stats.forEach((stat, k) => row(gx, y + ROW + 2 + k * ROW, stat));
+        bottom = Math.max(bottom, y + ROW + 2 + group.stats.length * ROW);
+      } else if (columns) {
+        const gy = bottom + 6;
+        title(x, gy, group.key);
+        group.stats.forEach((stat, k) =>
+          row(x + (k % 2) * colW, gy + ROW + 2 + Math.floor(k / 2) * ROW, stat),
+        );
+        bottom = gy + ROW + 2 + Math.ceil(group.stats.length / 2) * ROW;
+      } else {
+        const gy = bottom + (gi > 0 ? 6 : 0);
+        title(x, gy, group.key);
+        group.stats.forEach((stat, k) => row(x, gy + ROW + 2 + k * ROW, stat));
+        bottom = gy + ROW + 2 + group.stats.length * ROW;
+      }
+    });
+    this.height = bottom - y;
+  }
+
+  /** Shows `from → to` on one stat (the focused passive card), or nothing. */
+  setPreview(p: { stat: StatKey; from: number; to: number } | null): void {
+    if (this.previewed && this.previewed !== p?.stat) this.show(this.previewed, null);
+    this.previewed = p?.stat ?? null;
+    if (p) this.show(p.stat, p);
+  }
+
+  private show(stat: StatKey, p: { from: number; to: number } | null): void {
+    const base = config.player.stats[stat];
+    const text = this.values.get(stat);
+    if (!text) return;
+    const now = formatStatValue(stat, this.world.player.stats[stat], base);
+    if (p)
+      text.setText(t.levelUp.preview(formatStatValue(stat, p.from, base), formatStatValue(stat, p.to, base)));
+    else text.setText(now);
+    text.setColor(p ? UI.gold : now === t.levelUp.untouched ? UI.muted : UI.text);
+  }
 }
