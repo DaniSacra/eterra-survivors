@@ -118,7 +118,7 @@ export class LevelUpScene extends Phaser.Scene {
         stroke: true,
       },
     );
-    const owned = w.weapons.map((o) => o.id);
+    const owned = w.weapons;
     this.cards = opts.map((opt, i) => {
       const y = top + i * (cardH + gap) + cardH / 2;
       const card = button(this, cx, y, cardW, cardH, () => this.choose(i));

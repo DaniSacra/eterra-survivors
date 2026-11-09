@@ -60,12 +60,10 @@ function recipePassives(w: World): Set<PassiveId> {
 
 function score(w: World, o: UpgradeOption): number {
   switch (o.kind) {
-    case 'evolution':
-      return 100;
     case 'weapon':
       return o.level > 1 ? 50 : w.weapons.length < 4 ? 40 : 1;
     case 'passive': {
-      if (recipePassives(w).has(o.id)) return 30;
+      if (recipePassives(w).has(o.id)) return 55; // chases its Elo recipes, like a player
       const i = PASSIVE_PRIORITY.indexOf(o.id);
       return i >= 0 ? 20 - i : 5;
     }
@@ -248,8 +246,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
         }
         if (who && who.type === fastId) res.taken.fast += lost;
       } else if (ev.type === 'bossSpawned') bossAt = w.time;
-      else if (ev.type === 'chest' && ev.reward.kind === 'evolution')
-        res.elos.push(`${ev.reward.id}@${Math.round(w.time)}`);
+      else if (ev.type === 'eloForged') res.elos.push(`${ev.elo}@${Math.round(w.time)}`);
     }
     w.events.length = 0;
     res.maxEnemies = Math.max(res.maxEnemies, w.enemies.size);

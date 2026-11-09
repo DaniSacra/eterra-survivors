@@ -60,10 +60,11 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   of crowd DPS at max level, relative to the best `aimed` weapon (`CATEGORY_BANDS` in `data/weapons.ts`: aimed
   85–100%, auto 50–65%, area 40–55%; Elos against the best aimed Elo). `tests/core/bands.test.ts` enforces it and
   `npm run lab` shows it.
-  An evolution (Elo) is an evolved weapon entry
-  (one level) plus an `EVOLUTIONS` entry: base at max level, passive owned, then a chest. Elites drop chests.
-  The Elo moments: `eloReady` event (HUD notice, one-time tip, arrows to off-screen elites) and the `EloScene`
-  celebration when the chest forms it; the pause lists each weapon's `eloStatus`.
+  An evolution (Elo) is an evolved weapon entry (one level) plus an `EVOLUTIONS` entry. It forms on the spot
+  (`forgeElos`, `eloForged` event) when the base weapon and its recipe passive are both at max level; level-up
+  cards that move an owned recipe are `config.xp.recipeWeight` times likelier and show its progress
+  ("Elo Fúria: arma 6/7 · Força 5/5"); the pause lists each weapon's `eloStatus`. Elites drop chests: gold, a
+  level of something owned and a heal (`CHEST` in `data/pickups.ts`).
   When weapons and passives run short, `data/rewards.ts` cards (Bolsa de Ouro, Banquete, Bênção de Yah) keep the
   level-up at 3 cards; `canBanish` never lets Banir leave fewer.
   Each hero's starting weapon (`characters.ts` `weapon`) is only where they start: every weapon and Elo is offered

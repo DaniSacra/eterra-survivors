@@ -1,5 +1,6 @@
 import { config, type StatKey } from '../data/config';
-import { EVOLUTIONS, EVOLVED_IDS, evolutionOf } from '../data/evolutions';
+import { evolutionOf, type Evolution } from '../data/evolutions';
+import { CHEST } from '../data/pickups';
 import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { REWARDS, REWARD_IDS, type RewardDef, type RewardId } from '../data/rewards';
 import { addGold } from './pickups';
@@ -11,8 +12,6 @@ import type { World } from './world';
 export type UpgradeOption =
   | { kind: 'weapon'; id: WeaponId; level: number }
   | { kind: 'passive'; id: PassiveId; level: number }
-  /** Only from chests: `from` turns into `id`. */
-  | { kind: 'evolution'; id: WeaponId; from: WeaponId }
   /** Fills the choice when weapons and passives run short (data/rewards.ts). */
   | { kind: 'reward'; id: RewardId }
   /** The last resort, never banished: only if even the rewards were all banished. */
@@ -61,9 +60,33 @@ export function candidates(world: World, newThings = true): UpgradeOption[] {
  * if nothing at all is left (Banir keeps that from happening, see `canBanish`).
  */
 export function rollUpgrades(world: World, n = config.xp.choices): UpgradeOption[] {
-  const pool = world.rng.shuffle(candidates(world)).slice(0, n);
+  const pool = weightedPicks(world, candidates(world), n);
   if (pool.length < n) pool.push(...world.rng.shuffle(rewards(world)).slice(0, n - pool.length));
   return pool.length > 0 ? pool : [{ kind: 'heal' }];
+}
+
+/** Whether `opt` moves the Elo recipe of a weapon the hero owns. */
+export function movesRecipe(world: World, opt: UpgradeOption): boolean {
+  if (opt.kind === 'weapon') return opt.level > 1 && !!evolutionOf(opt.id);
+  if (opt.kind !== 'passive') return false;
+  return world.weapons.some((w) => evolutionOf(w.id)?.evo.passive === opt.id);
+}
+
+/** `n` distinct options, recipe pieces `config.xp.recipeWeight` times likelier. */
+function weightedPicks(world: World, list: UpgradeOption[], n: number): UpgradeOption[] {
+  const out: UpgradeOption[] = [];
+  while (out.length < n && list.length > 0) {
+    let total = 0;
+    for (const o of list) total += movesRecipe(world, o) ? config.xp.recipeWeight : 1;
+    let roll = world.rng.next() * total;
+    let i = 0;
+    for (; i < list.length - 1; i++) {
+      roll -= movesRecipe(world, list[i] as UpgradeOption) ? config.xp.recipeWeight : 1;
+      if (roll < 0) break;
+    }
+    out.push(...list.splice(i, 1));
+  }
+  return out;
 }
 
 /** How many different options are left (weapons, passives and reward cards). */
@@ -76,39 +99,60 @@ export function canBanish(world: World, opt: UpgradeOption, n = config.xp.choice
   return banishKey(opt) !== null && optionsLeft(world) - 1 >= n;
 }
 
-/** An owned base weapon's Elo recipe is complete (max level + its passive owned): the next chest forms it. */
+/**
+ * An owned base weapon's Elo recipe is complete: the weapon and its recipe passive both at max level. The Elo forms
+ * on the spot (`forgeElos`).
+ */
 export function eloReady(world: World, weaponId: WeaponId): boolean {
   const evolved = evolutionOf(weaponId);
   if (!evolved || world.hasWeapon(evolved.id)) return false;
   const base = world.weapons.find((w) => w.id === weaponId);
-  return !!base && base.level >= maxLevel(weaponId) && (world.passives[evolved.evo.passive] ?? 0) > 0;
+  const passive = evolved.evo.passive;
+  return (
+    !!base && base.level >= maxLevel(weaponId) && (world.passives[passive] ?? 0) >= PASSIVES[passive].maxLevel
+  );
 }
 
-/** Where an owned weapon stands on its Elo recipe (the pause screen shows it). */
+/** Where an owned weapon stands on its Elo recipe (pause screen, level-up cards). */
 export type EloStatus =
-  { kind: 'formed' | 'ready' | 'none' } | { kind: 'missing'; levels: number; passive: PassiveId | null };
+  | { kind: 'formed' | 'none' }
+  | {
+      kind: 'missing';
+      weapon: number;
+      weaponMax: number;
+      passive: PassiveId;
+      passiveLevel: number;
+      passiveMax: number;
+    };
 
 export function eloStatus(world: World, weaponId: WeaponId): EloStatus {
   if (isElo(weaponId)) return { kind: 'formed' };
   const evolved = evolutionOf(weaponId);
   if (!evolved || world.hasWeapon(evolved.id)) return { kind: 'none' };
-  if (eloReady(world, weaponId)) return { kind: 'ready' };
-  const level = world.weapons.find((w) => w.id === weaponId)?.level ?? 0;
   const passive = evolved.evo.passive;
   return {
     kind: 'missing',
-    levels: Math.max(0, maxLevel(weaponId) - level),
-    passive: (world.passives[passive] ?? 0) > 0 ? null : passive,
+    weapon: world.weapons.find((w) => w.id === weaponId)?.level ?? 0,
+    weaponMax: maxLevel(weaponId),
+    passive,
+    passiveLevel: world.passives[passive] ?? 0,
+    passiveMax: PASSIVES[passive].maxLevel,
   };
 }
 
-/** The first evolution whose recipe is complete: base weapon at max level + its passive owned. */
-export function readyEvolution(world: World): UpgradeOption | null {
-  for (const id of EVOLVED_IDS) {
-    const evo = EVOLUTIONS[id];
-    if (evo && eloReady(world, evo.from)) return { kind: 'evolution', id, from: evo.from };
+/** Turns every owned weapon whose recipe is complete into its Elo, right away (`eloForged` event). */
+export function forgeElos(world: World): void {
+  for (const owned of world.weapons) {
+    if (!eloReady(world, owned.id)) continue;
+    const { id, evo } = evolutionOf(owned.id) as { id: WeaponId; evo: Evolution };
+    markLevel(owned, world.time);
+    owned.id = id;
+    owned.level = 1;
+    owned.timer = 0;
+    owned.combo = 0;
+    world.buildRev++;
+    world.events.push({ type: 'eloForged', elo: id, from: evo.from, passive: evo.passive });
   }
-  return null;
 }
 
 /** The owned base weapons whose Elo uses `passive` (a passive card lists them all). */
@@ -127,13 +171,19 @@ export function statPreview(
   return { stat: def.stat, from, to: from + def.perLevel };
 }
 
-/** What a chest gives: an evolution if one is ready, else a level of something already owned, else a heal. */
-export function chestReward(world: World): UpgradeOption {
-  return (
-    readyEvolution(world) ??
-    world.rng.pick(candidates(world, false)) ??
-    world.rng.pick(rewards(world)) ?? { kind: 'heal' }
-  );
+/** An elite's chest (data CHEST): gold, a level of something owned (which may forge an Elo) and a heal. */
+export function openChest(world: World): void {
+  let reward: UpgradeOption | null = null;
+  for (let i = 0; i < CHEST.levels; i++) {
+    const opt = world.rng.pick(candidates(world, false));
+    if (!opt) break;
+    reward ??= opt;
+    applyUpgrade(world, opt);
+  }
+  addGold(world, CHEST.gold);
+  const p = world.player;
+  p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.maxHp * CHEST.heal);
+  world.events.push({ type: 'chest', reward });
 }
 
 /** Applies a choice or a chest reward. Anything that changes the build bumps `world.buildRev` (the HUD redraws). */
@@ -147,17 +197,6 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
         markLevel(owned, world.time);
         owned.level = opt.level;
       } else world.addWeapon(opt.id);
-      break;
-    }
-    case 'evolution': {
-      const owned = world.weapons.find((w) => w.id === opt.from);
-      if (owned) {
-        markLevel(owned, world.time);
-        owned.id = opt.id;
-        owned.level = 1;
-        owned.timer = 0;
-        owned.combo = 0;
-      }
       break;
     }
     case 'passive': {
@@ -181,16 +220,7 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
       p.hp = Math.min(p.stats.maxHp, p.hp + config.xp.healAmount);
       break;
   }
-  if (opt.kind === 'weapon' || opt.kind === 'passive') announceReadyElos(world);
-}
-
-/** Tells the renderer (once per weapon) that an Elo recipe has just become complete. */
-function announceReadyElos(world: World): void {
-  for (const w of world.weapons) {
-    if (world.eloAnnounced.includes(w.id) || !eloReady(world, w.id)) continue;
-    world.eloAnnounced.push(w.id);
-    world.events.push({ type: 'eloReady', weapon: w.id });
-  }
+  if (opt.kind === 'weapon' || opt.kind === 'passive') forgeElos(world);
 }
 
 /** Stats that change between a weapon's previous level and `level` (for the level-up card). */

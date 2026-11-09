@@ -79,15 +79,8 @@ export const t = {
     chargeKeys: 'R troca · X pula · B bane',
     /** Under Pular's label: what skipping gives. */
     skipGold: (gold: number) => `+${gold} ouro`,
-    evolution: 'Elo',
-    evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
-    recipeHave: (passive: string) => `Elo: + ${passive} (você tem)`,
-    recipeNeed: (passive: string) => `Elo: + ${passive}`,
-    eloReady: 'Elo pronto: pegue um baú',
-    recipeFor: (weapon: string) => `Forma o Elo de ${weapon}`,
-    /** Several weapons joined with `and` ("Maça de Ferro e Espadas dos Paladinos"). */
-    recipeForMany: (weapons: string) => `Forma os Elos de ${weapons}`,
-    and: ' e ',
+    /** Several recipe lines on one card. */
+    recipeSep: ' · ',
     /** The build and stats panel beside the choices. */
     build: 'Sua build',
     groups: { survive: 'Sobreviver', attack: 'Ataque', collect: 'Coleta' },
@@ -98,8 +91,9 @@ export const t = {
 
   /** The Elo moments in a run: ready (notice, tip, arrows) and formed (the celebration screen). */
   elo: {
-    ready: 'Elo pronto! Derrote uma elite para abrir o baú',
-    tip: 'Elo: arma no nível máximo + a passiva da receita. O próximo baú (as elites deixam um) transforma a arma.',
+    /** A recipe's progress, after the choice on a level-up card and live on the pause screen. */
+    progress: (elo: string, weapon: string, passive: string, passiveLevel: string) =>
+      `Elo ${elo}: arma ${weapon}${' · '}${passive} ${passiveLevel}`,
     formed: 'Elo formado!',
     power: (from: string, to: string) => `Dano por segundo: ${from} → ${to}`,
     close: 'Toque, Espaço ou Enter para continuar',
@@ -129,8 +123,9 @@ export const t = {
   } satisfies Record<RewardId, { name: string; desc: (n: number) => string }>,
 
   chest: {
-    evolved: (name: string) => `Elo: ${name}!`,
     gained: (name: string) => `Baú: ${name}`,
+    /** Nothing left to level: only the gold and the heal. */
+    plain: 'Baú: ouro e cura',
   },
 
   pickups: {
@@ -154,11 +149,7 @@ export const t = {
     level: (n: number, max: number) => `Nv ${n}/${max}`,
     /** Each weapon's Elo recipe status. */
     formed: 'Elo formado',
-    ready: 'Elo pronto: abra um baú',
     none: 'Sem Elo',
-    needLevels: (n: number) => (n === 1 ? 'falta 1 nível' : `faltam ${n} níveis`),
-    needPassive: (passive: string) => `falta ${passive}`,
-    eloOf: (elo: string) => `Elo ${elo}:`,
   },
 
   collection: {
@@ -272,7 +263,7 @@ export const t = {
   elos: {
     count: (n: number, total: number) => `${n} de ${total} Elos descobertos`,
     unknown: '???',
-    rule: 'Arma no nível máximo + a passiva certa, e depois um baú.',
+    rule: 'Arma e a passiva da receita no nível máximo: o Elo se forja na hora.',
     recipe: (weapon: string, passive: string) => `${weapon} + ${passive}`,
     hint: (weapon: string) => `Nasce de ${weapon}`,
     /** The recipe drawn as icons: weapon + passive = Elo, the passive a mystery until discovered. */
@@ -332,9 +323,8 @@ export const t = {
     next: 'Próxima fase',
     passives: 'Passivas',
     /** "Faltou pouco": the Elo closest to forming (an unknown Elo is named by its weapon, not revealed). */
-    almostElo: (elo: string) => `Faltou um baú para formar ${elo}!`,
-    almostEloUnknown: (weapon: string) => `Faltou um baú para o Elo de ${weapon}!`,
-    almostLevel: (weapon: string) => `${weapon} estava a um nível do Elo.`,
+    almostElo: (elo: string) => `Faltou um nível para forjar ${elo}!`,
+    almostEloUnknown: (weapon: string) => `Faltou um nível para o Elo de ${weapon}!`,
     /** An achievement this run unlocked, with its reward ("+50 ouro"). */
     achievement: (name: string, reward: string) => `Conquista: ${name} (${reward})`,
     moreAchievements: (n: number) => (n === 1 ? '+1 conquista' : `+${n} conquistas`),

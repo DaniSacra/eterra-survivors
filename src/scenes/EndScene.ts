@@ -254,12 +254,9 @@ export class EndScene extends Phaser.Scene {
     const almost = almostElo(this.world);
     if (almost) {
       const weapon = t.weapons[almost.weapon].name;
-      const text =
-        almost.kind === 'level'
-          ? t.end.almostLevel(weapon)
-          : save.elos.includes(almost.elo)
-            ? t.end.almostElo(t.weapons[almost.elo].name)
-            : t.end.almostEloUnknown(weapon);
+      const text = save.elos.includes(almost.elo)
+        ? t.end.almostElo(t.weapons[almost.elo].name)
+        : t.end.almostEloUnknown(weapon);
       line(text, 15, UI.gold, true);
     }
     for (const id of this.newElos) line(t.end.newElo(t.weapons[id].name), 15, UI.gold, true);

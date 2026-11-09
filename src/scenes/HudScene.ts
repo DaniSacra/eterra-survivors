@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
-import type { Enemy } from '../core/enemies';
 import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
 import { t } from '../i18n/pt-BR';
@@ -21,8 +20,6 @@ const XP_H = 16;
 const HP_H = 16;
 /** Pause button side: a full touch target. */
 const PAUSE = 44;
-/** Elite arrows sit this far in from the screen edge. */
-const ARROW_MARGIN = 30;
 
 /** Screen-space overlay (no camera zoom): bars, counters, joystick and the F3 debug panel. */
 export class HudScene extends Phaser.Scene {
@@ -235,41 +232,6 @@ export class HudScene extends Phaser.Scene {
     this.tweens.add({ targets: this.hintBox, alpha: 0, delay: 8000, duration: 500 });
   }
 
-  /**
-   * While an Elo is ready, a gold arrow on the screen edge points at each elite off screen (it carries the
-   * chest that forms the Elo). The camera keeps the hero in the middle.
-   */
-  private eliteArrows(g: Phaser.GameObjects.Graphics): void {
-    if (!this.build.ready) return;
-    const w = this.world;
-    const p = w.player;
-    const { width, height } = this.scale;
-    const k = width / w.view.w;
-    const hx = width / 2 - ARROW_MARGIN;
-    const hy = height / 2 - ARROW_MARGIN;
-    const list = w.enemies.active;
-    for (let i = 0; i < list.length; i++) {
-      const e = list[i] as Enemy;
-      if (!e.def.elite || e.dead) continue;
-      const dx = (e.x - p.x) * k;
-      const dy = (e.y - p.y) * k;
-      if (Math.abs(dx) <= width / 2 && Math.abs(dy) <= height / 2) continue;
-      const f = Math.min(hx / Math.abs(dx || 1e-6), hy / Math.abs(dy || 1e-6));
-      const x = width / 2 + dx * f;
-      const y = height / 2 + dy * f;
-      const a = Math.atan2(dy, dx);
-      const c = Math.cos(a);
-      const s = Math.sin(a);
-      // A gold triangle with a dark rim, its tip toward the elite.
-      g.fillStyle(UI.goldHex, 0.95).lineStyle(2, UI.dim, 1);
-      g.beginPath();
-      g.moveTo(x + c * 14, y + s * 14);
-      g.lineTo(x - c * 8 - s * 10, y - s * 8 + c * 10);
-      g.lineTo(x - c * 8 + s * 10, y - s * 8 - c * 10);
-      g.closePath().fillPath().strokePath();
-    }
-  }
-
   /** Big centred message that fades out. Red warns; pass `good` for rewards. */
   announce(text: string, good = false): void {
     this.banner
@@ -325,7 +287,6 @@ export class HudScene extends Phaser.Scene {
       this.shownRev = w.buildRev;
       this.build.refresh(w);
     }
-    this.eliteArrows(g);
 
     // Texts only change when their value does (setText re-renders a texture).
     const sec = Math.floor(w.time);

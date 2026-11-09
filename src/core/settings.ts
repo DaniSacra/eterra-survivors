@@ -6,8 +6,6 @@ export interface Settings {
   calm: boolean;
   /** All sound off. */
   muted: boolean;
-  /** The short "what is an Elo" tip was shown (it shows once, the first time an Elo is ready). */
-  eloTipSeen: boolean;
   /** Gaspar already greeted the player (his line shows on the first visit to the Loja). */
   gasparMet: boolean;
 }
@@ -16,7 +14,6 @@ export const defaultSettings = (): Settings => ({
   damageNumbers: true,
   calm: false,
   muted: false,
-  eloTipSeen: false,
   gasparMet: false,
 });
 

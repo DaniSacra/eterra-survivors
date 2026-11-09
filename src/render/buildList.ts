@@ -7,6 +7,7 @@ import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from './art/pen';
 import { UI, label } from './ui';
+import { recipeProgress } from './describe';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
 const BADGE = 28;
@@ -57,7 +58,7 @@ export function drawBuildList(
       label(scene, x + w - PAD, cy - 9, t.pause.level(o.level, maxLevel(o.id)), 12, {
         color: o.level >= maxLevel(o.id) ? UI.gold : UI.muted,
       }).setOrigin(1, 0.5);
-    // The recipe line: "Elo Fúria: falta 2 níveis · falta Força" (or ready / formed / none).
+    // The recipe line: "Elo Fúria: arma 6/7 · Força 3/5" (or formed / none).
     const st = eloStatus(world, o.id);
     const evo = evolutionOf(o.id);
     let text: string = t.pause.none;
@@ -65,15 +66,7 @@ export function drawBuildList(
     if (st.kind === 'formed') {
       text = t.pause.formed;
       color = UI.gold;
-    } else if (st.kind === 'ready') {
-      text = t.pause.ready;
-      color = UI.gold;
-    } else if (st.kind === 'missing' && evo) {
-      const parts: string[] = [];
-      if (st.levels > 0) parts.push(t.pause.needLevels(st.levels));
-      if (st.passive) parts.push(t.pause.needPassive(t.passives[st.passive]));
-      text = `${t.pause.eloOf(t.weapons[evo.id].name)} ${parts.join(t.sep)}`;
-    }
+    } else if (st.kind === 'missing') text = recipeProgress(o.id, st.weapon, st.passiveLevel);
     let lx = tx;
     if (evo && st.kind !== 'formed') {
       icon(tx + 7, cy + 9, `icon.${evo.evo.passive}`, 14);

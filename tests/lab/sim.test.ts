@@ -111,6 +111,22 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
             .padStart(8)}  ${per.join(' · ')}`,
       );
     }
+  const avgOf = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+  // Elos: median minute of the first one (runs that formed any; goal 5-7 min) and Elos per run, per Loja profile.
+  const firstElo = (r: SimResult) => Number((r.elos[0] ?? '').split('@')[1] ?? NaN) / 60;
+  out.push(
+    '\nELOS     ' +
+      profiles
+        .map((profile) => {
+          const rs = results.filter((r) => r.profile === profile);
+          const firsts = rs.map(firstElo).filter((m) => !Number.isNaN(m));
+          return (
+            `${profile}: first Elo median ${firsts.length ? median(firsts).toFixed(1) : '-'} min ` +
+            `(${pct(firsts.length / rs.length)} of runs), ${avgOf(rs.map((r) => r.elos.length)).toFixed(1)}/run`
+          );
+        })
+        .join(' · '),
+  );
   // Pick rate of the shared weapons: share of runs that ended owning it (or its Elo).
   const shared = WEAPON_IDS.filter((id) => !EVOLUTIONS[id]);
   out.push(
@@ -122,7 +138,6 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
   // Real DPS in the runs, measured only while at that level (at least MIN_LEVEL_TIME there): each base weapon at
   // max level (its own runs, or the minute before it became an Elo) and each Elo.
   const MIN_LEVEL_TIME = 30;
-  const avgOf = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
   const atMax = (id: WeaponId) =>
     results.flatMap((r) =>
       r.dps.flatMap((d) => {

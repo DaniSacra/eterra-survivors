@@ -7,7 +7,7 @@ export interface PickupDef {
 }
 
 export const PICKUPS = {
-  /** Dropped by elites: an evolution, or a level of something owned. */
+  /** Dropped by elites: gold, a level of something owned and a heal (CHEST). */
   chest: { sprite: 'pickup.chest', weight: 0 },
   /** A coin (its own drop chance: config.gold). */
   gold: { sprite: 'pickup.gold', weight: 0 },
@@ -20,6 +20,16 @@ export const PICKUPS = {
   /** Sopro de Geada: freezes every enemy for a while. */
   freeze: { sprite: 'pickup.freeze', weight: 1 },
 } satisfies Record<string, PickupDef>;
+
+/** What an elite's chest gives, all at once. */
+export const CHEST = {
+  /** Gold (before greed and the stage multiplier). */
+  gold: 25,
+  /** Levels of random owned weapons or passives (each a fresh roll; skipped when nothing can level). */
+  levels: 1,
+  /** Fraction of max HP healed. */
+  heal: 0.25,
+};
 
 export type PickupId = keyof typeof PICKUPS;
 export const PICKUP_IDS = Object.keys(PICKUPS) as PickupId[];

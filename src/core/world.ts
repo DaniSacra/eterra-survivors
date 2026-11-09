@@ -71,7 +71,6 @@ export class World {
   /** Upgrades removed from this run's level-up pool, as `banishKey`s. */
   readonly banished = new Set<string>();
   /** Base weapons whose ready Elo was already announced this run. */
-  readonly eloAnnounced: WeaponId[] = [];
   /** Noite Sem Fim: the run went on after the boss fell, from `vigilStart` (match time). */
   endless = false;
   vigilStart = 0;

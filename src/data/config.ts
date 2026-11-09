@@ -59,6 +59,11 @@ export const config = {
     base: 5,
     step: 6.5,
     choices: 3,
+    /**
+     * How much likelier a card is when it moves an owned weapon's Elo recipe (a level of that weapon, or of its
+     * recipe passive): chasing an Elo is the run's main goal (first one around minutes 5-7).
+     */
+    recipeWeight: 3,
     /** Fallback option when everything is maxed. */
     healAmount: 30,
   },
@@ -87,8 +92,6 @@ export const config = {
     /** Chance that a normal enemy drops a coin, and what it is worth (times greed). */
     dropChance: 0.03,
     coin: 3,
-    /** Extra gold in every chest. */
-    chest: 25,
   },
   /**
    * Achievements with a `charge` (Primeiro Elo, Bestiário Completo, Livro Completo) add one use per run of that

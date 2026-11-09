@@ -1,3 +1,6 @@
+import { applyUpgrade } from '../../src/core/upgrades';
+import { maxLevel } from '../../src/core/weapons';
+import { PASSIVES } from '../../src/data/upgrades';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 
@@ -18,3 +21,12 @@ export function bareWorld(seed = 1): World {
 }
 
 export const still = { x: 0, y: 0 };
+
+/** Forms Aldo's Fúria the way a run does: the last blade level taken with Força already at max. */
+export function forgeFury(w: World): void {
+  const blade = w.weapons.find((o) => o.id === 'blade');
+  if (!blade) throw new Error('aldo starts with the blade');
+  blade.level = maxLevel('blade') - 1;
+  w.passives.might = PASSIVES.might.maxLevel;
+  applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
+}

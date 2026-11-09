@@ -19,6 +19,7 @@ import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { CHARACTERS } from '../../src/data/characters';
 import { SHOP, SHOP_IDS } from '../../src/data/shop';
+import { CHEST } from '../../src/data/pickups';
 import { quietWorld, still } from './helpers';
 
 describe('shop', () => {
@@ -126,7 +127,7 @@ describe('gold', () => {
     expect(w.gold).toBe(config.gold.coin * 2);
     dropPickup(w, 'chest', w.player.x, w.player.y);
     w.step(1 / 60, still);
-    expect(w.gold).toBe((config.gold.coin + config.gold.chest) * 2);
+    expect(w.gold).toBe((config.gold.coin + CHEST.gold) * 2);
   });
 });
 

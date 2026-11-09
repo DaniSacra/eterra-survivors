@@ -2,8 +2,8 @@ import type { PassiveId } from './upgrades';
 import { WEAPONS, type WeaponCategory, type WeaponDef, type WeaponId } from './weapons';
 
 /**
- * Elos: a weapon at max level plus a passive (any level) turns into its evolved form
- * when Aldo opens a chest. Keyed by the evolved weapon. Names live in i18n under `weapons`.
+ * Elos: a weapon at max level with its recipe passive at max level turns into its evolved form on the spot
+ * (core/upgrades.ts `forgeElos`). Keyed by the evolved weapon. Names live in i18n under `weapons`.
  */
 export interface Evolution {
   from: WeaponId;

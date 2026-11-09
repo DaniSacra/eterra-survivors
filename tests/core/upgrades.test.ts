@@ -14,7 +14,7 @@ import { config } from '../../src/data/config';
 import { PASSIVES, PASSIVE_IDS } from '../../src/data/upgrades';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
 import { REWARDS } from '../../src/data/rewards';
-import { quietWorld, still } from './helpers';
+import { forgeFury, quietWorld, still } from './helpers';
 
 function maxedWorld() {
   const w = quietWorld();
@@ -197,23 +197,15 @@ describe('passive limit', () => {
     expect(w.buildRev).toBe(r0 + 2);
     applyUpgrade(w, { kind: 'heal' });
     expect(w.buildRev).toBe(r0 + 2);
-    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
-    expect(w.buildRev).toBe(r0 + 3);
+    const r1 = w.buildRev;
+    forgeFury(w);
+    expect(w.buildRev).toBe(r1 + 2); // the level, then the Elo
   });
 
-  it('eloReady: base at max level and the passive owned, until the Elo is formed', () => {
+  it('eloReady: base and passive at max level, until the Elo is formed', () => {
     const w = quietWorld();
-    const blade = w.weapons.find((o) => o.id === 'blade');
-    if (!blade) throw new Error('aldo starts with the blade');
-    blade.level = WEAPONS.blade.levels.length;
-    expect(eloReady(w, 'blade')).toBe(false);
-    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
-    expect(eloReady(w, 'blade')).toBe(true);
-    blade.level--;
-    expect(eloReady(w, 'blade')).toBe(false);
-    blade.level++;
     expect(eloReady(w, 'frost')).toBe(false); // not owned
-    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    forgeFury(w);
     expect(eloReady(w, 'blade')).toBe(false);
     expect(eloReady(w, 'fury')).toBe(false);
   });

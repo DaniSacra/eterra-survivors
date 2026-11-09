@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
 import { almostElo, passiveReport, weaponReport } from '../../src/core/report';
-import { applyUpgrade } from '../../src/core/upgrades';
+import { PASSIVES } from '../../src/data/upgrades';
 import { maxLevel } from '../../src/core/weapons';
 import { WEAPONS } from '../../src/data/weapons';
-import { bareWorld, quietWorld, still } from './helpers';
+import { bareWorld, forgeFury, quietWorld, still } from './helpers';
 
 describe('end-of-run report', () => {
   it('credits each weapon with the damage it dealt, never more than the enemy had', () => {
@@ -39,9 +39,8 @@ describe('end-of-run report', () => {
 
   it('keeps the damage through an evolution, under the evolved name', () => {
     const w = quietWorld();
-    w.weapons[0]!.level = maxLevel('blade');
     w.weapons[0]!.damage = 1234;
-    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    forgeFury(w);
     expect(weaponReport(w)[0]).toMatchObject({ id: 'fury', damage: 1234 });
   });
 
@@ -55,17 +54,20 @@ describe('end-of-run report', () => {
     ]);
   });
 
-  it('almostElo: a complete recipe missing only the chest, else one level short with the passive', () => {
+  it('almostElo: a recipe one level short, of the weapon or of the passive', () => {
     const w = quietWorld();
     const blade = w.weapons[0];
     if (!blade) throw new Error('aldo starts with the blade');
     expect(almostElo(w)).toBeNull();
-    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
+    w.passives.might = PASSIVES.might.maxLevel;
     blade.level = maxLevel('blade') - 1;
-    expect(almostElo(w)).toEqual({ kind: 'level', weapon: 'blade', elo: 'fury' });
+    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury' });
     blade.level = maxLevel('blade');
-    expect(almostElo(w)).toEqual({ kind: 'chest', weapon: 'blade', elo: 'fury' });
-    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    w.passives.might = PASSIVES.might.maxLevel - 1;
+    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury' });
+    w.passives.might = PASSIVES.might.maxLevel - 2;
+    expect(almostElo(w)).toBeNull();
+    forgeFury(w);
     expect(almostElo(w)).toBeNull();
   });
 });

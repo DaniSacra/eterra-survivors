@@ -1,8 +1,8 @@
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
-import { eloReady } from './upgrades';
-import { levelDps, maxLevel } from './weapons';
+import { eloStatus } from './upgrades';
+import { levelDps } from './weapons';
 import type { World } from './world';
 
 export interface WeaponReport {
@@ -45,18 +45,15 @@ export function passiveReport(world: World): { id: PassiveId; level: number }[] 
 }
 
 /**
- * The Elo the run came closest to, for the end screen's "faltou pouco": a recipe complete and only the chest
- * missing (`chest`), else a weapon one level short of max with its passive owned (`level`). Null otherwise.
+ * The Elo the run came closest to, for the end screen's "faltou pouco": a recipe one level short, of the weapon or
+ * of its passive. Null otherwise.
  */
-export function almostElo(world: World): { kind: 'chest' | 'level'; weapon: WeaponId; elo: WeaponId } | null {
+export function almostElo(world: World): { weapon: WeaponId; elo: WeaponId } | null {
   for (const o of world.weapons) {
-    const evo = evolutionOf(o.id);
-    if (evo && eloReady(world, o.id)) return { kind: 'chest', weapon: o.id, elo: evo.id };
-  }
-  for (const o of world.weapons) {
-    const evo = evolutionOf(o.id);
-    if (evo && o.level === maxLevel(o.id) - 1 && (world.passives[evo.evo.passive] ?? 0) > 0)
-      return { kind: 'level', weapon: o.id, elo: evo.id };
+    const st = eloStatus(world, o.id);
+    if (st.kind !== 'missing') continue;
+    const short = st.weaponMax - st.weapon + (st.passiveMax - st.passiveLevel);
+    if (short === 1) return { weapon: o.id, elo: (evolutionOf(o.id) as { id: WeaponId }).id };
   }
   return null;
 }

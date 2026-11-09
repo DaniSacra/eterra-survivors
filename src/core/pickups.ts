@@ -5,7 +5,7 @@ import { BossAct } from './bosses';
 import { addPuff } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import type { Poolable } from './pool';
-import { applyUpgrade, chestReward } from './upgrades';
+import { openChest } from './upgrades';
 import type { World } from './world';
 import { pullAllGems } from './xp';
 
@@ -41,10 +41,7 @@ export function addGold(world: World, amount: number): void {
 /** What each pickup does when collected. */
 const COLLECT: Record<PickupId, (world: World) => void> = {
   chest(world) {
-    const reward = chestReward(world);
-    applyUpgrade(world, reward);
-    addGold(world, config.gold.chest);
-    world.events.push({ type: 'chest', reward });
+    openChest(world);
   },
   gold(world) {
     addGold(world, config.gold.coin);

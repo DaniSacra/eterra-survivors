@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { eloReady } from '../core/upgrades';
 import { isElo } from '../core/weapons';
 import type { World } from '../core/world';
 import { config, type StatKey } from '../data/config';
@@ -27,7 +26,7 @@ export interface SlotFocus {
 
 /**
  * The build as two rows of slots: weapons on top (with a pip per level), passives under them (smaller). Empty
- * slots show how many still fit; a weapon at max level gets a gold bar, a ready Elo a pulsing gold frame and a
+ * slots show how many still fit; a weapon at max level gets a gold bar, a formed Elo a pulsing gold frame and a
  * formed Elo a fixed gold frame. Not interactive (it must not steal joystick touches). Draws only on `refresh`.
  */
 export class BuildSlots {
@@ -42,8 +41,6 @@ export class BuildSlots {
   private readonly mark: Phaser.GameObjects.Graphics;
   private readonly icons: Phaser.GameObjects.Image[] = [];
   private readonly glowTween: Phaser.Tweens.Tween;
-  /** Some weapon's Elo is ready (the HUD then points at elites off screen). */
-  ready = false;
   /** Empty slots show how many still fit (the level-up preview); the HUD shows only the filled ones. */
   showEmpty = true;
 
@@ -131,7 +128,7 @@ export class BuildSlots {
         .setScale((ART_SCALE * (S - 2)) / BADGE)
         .setVisible(true);
       if (!elo) this.pips(g, x, S + 2, S, o.level, WEAPONS[o.id].levels.length);
-      if (eloReady(world, o.id)) {
+      if (elo) {
         ready = true;
         glow.lineStyle(2.5, UI.goldHex, 1).strokeRoundedRect(x - 2, -2, S + 4, S + 4, 5);
       }
@@ -168,7 +165,6 @@ export class BuildSlots {
       src.generateTexture(key, tw, th);
       img.setTexture(key);
     }
-    this.ready = ready;
     if (ready) this.glowTween.resume();
     else this.glowTween.pause();
     this.glowTex.setAlpha(1);

@@ -76,8 +76,11 @@ describe('upgrade descriptions', () => {
     expect(describeUpgrade({ kind: 'heal' }).title).toBe(t.levelUp.heal);
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).recipe).toContain('Força');
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 7 }).icon).toBe('icon.blade');
-    expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['blade']).recipe).toContain('Lâmina');
-    expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, ['frost']).recipe).toBe('');
+    const blade = [{ id: 'blade', level: 4 }] as const;
+    expect(describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, blade).recipe).toContain('Fúria');
+    expect(
+      describeUpgrade({ kind: 'passive', id: 'might', level: 1 }, [{ id: 'frost', level: 2 }]).recipe,
+    ).toBe('');
   });
 
   it('stat sheet values: "-" at base, percent changes, plain numbers, and the preview pair', () => {
@@ -96,22 +99,25 @@ describe('upgrade descriptions', () => {
     expect(t.levelUp.preview(from, to)).toBe('+10% → +20%');
   });
 
-  it('recipes tell whether the passive is owned, and when the Elo is ready', () => {
-    const blade7 = { kind: 'weapon', id: 'blade', level: 7 } as const;
+  it('cards show the recipe progress after the choice, and whether it forges the Elo', () => {
     const blade3 = { kind: 'weapon', id: 'blade', level: 3 } as const;
-    expect(describeUpgrade(blade3, ['blade']).recipe).toBe(t.levelUp.recipeNeed(t.passives.might));
-    expect(describeUpgrade(blade3, ['blade']).recipeMissing).toBe(true);
-    expect(describeUpgrade(blade3, ['blade'], { might: 1 }).recipe).toBe(
-      t.levelUp.recipeHave(t.passives.might),
-    );
-    expect(describeUpgrade(blade7, ['blade'], { might: 2 }).recipe).toBe(t.levelUp.eloReady);
-    expect(describeUpgrade(blade7, ['blade']).recipeIcon).toBe('icon.might');
-    // Armor completes both the mace and the paladin swords: the card names both.
-    const armor = describeUpgrade({ kind: 'passive', id: 'armor', level: 1 }, ['mace', 'paladinSwords']);
+    const blade7 = { kind: 'weapon', id: 'blade', level: 7 } as const;
+    const owned = [{ id: 'blade', level: 2 }] as const;
+    expect(describeUpgrade(blade3, owned, { might: 5 }).recipe).toBe('Elo Fúria: arma 3/7 · Força 5/5');
+    expect(describeUpgrade(blade3, owned, { might: 5 }).recipeMissing).toBe(true);
+    expect(describeUpgrade(blade7, owned, { might: 5 }).recipeMissing).toBe(false);
+    expect(describeUpgrade(blade7, owned).recipe).toBe('Elo Fúria: arma 7/7 · Força 0/5');
+    expect(describeUpgrade(blade7, owned).recipeIcon).toBe('icon.might');
+    // Armor moves both the mace and the paladin swords: the card shows both recipes.
+    const armor = describeUpgrade({ kind: 'passive', id: 'armor', level: 3 }, [
+      { id: 'mace', level: 7 },
+      { id: 'paladinSwords', level: 5 },
+    ]);
     expect(armor.recipe).toBe(
-      t.levelUp.recipeForMany(`${t.weapons.mace.name}${t.levelUp.and}${t.weapons.paladinSwords.name}`),
+      `Elo ${t.weapons.jointBreaker.name}: arma 7/7 · ${t.passives.armor} 3/3${t.levelUp.recipeSep}` +
+        `Elo ${t.weapons.vigil.name}: arma 5/7 · ${t.passives.armor} 3/3`,
     );
-    expect(describeUpgrade({ kind: 'evolution', id: 'fury', from: 'blade' }).tag).toBe(t.levelUp.evolution);
+    expect(armor.recipeMissing).toBe(false);
   });
 });
 

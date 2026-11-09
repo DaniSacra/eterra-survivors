@@ -5,7 +5,7 @@ import { formatTime } from '../core/format';
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { WEAPONS, type WeaponId } from '../data/weapons';
-import { weaponLevelDiff, weaponsCompletedBy, type UpgradeOption } from '../core/upgrades';
+import { weaponLevelDiff, type UpgradeOption } from '../core/upgrades';
 import { t } from '../i18n/pt-BR';
 
 /** Stats that are multipliers show as percentages. */
@@ -50,12 +50,33 @@ export interface UpgradeText {
   desc: string;
   /** Asset key of the card's icon. */
   icon: string;
-  /** The Elo this option leads to, if any, and whether its passive is owned ("Forma Elo com Força (falta)"). */
+  /** The Elo recipes this option moves, with their progress after the choice ("Elo Fúria: arma 6/7 · Força 5/5"). */
   recipe: string;
   /** Icon of the recipe's passive (weapon cards), shown before the recipe; '' when none. */
   recipeIcon: string;
-  /** Weapon cards: the recipe's passive is missing (the recipe reads muted). */
+  /** The recipe is still incomplete after this choice (it reads muted); false when this choice forges the Elo. */
   recipeMissing: boolean;
+}
+
+/** One recipe's progress line, levels as they would be: "Elo Fúria: arma 6/7 · Força 5/5". */
+export function recipeProgress(base: WeaponId, weaponLevel: number, passiveLevel: number): string {
+  const evo = evolutionOf(base);
+  if (!evo) return '';
+  const passive = evo.evo.passive;
+  return t.elo.progress(
+    t.weapons[evo.id].name,
+    t.units.of(String(weaponLevel), WEAPONS[base].levels.length),
+    t.passives[passive],
+    t.units.of(String(passiveLevel), PASSIVES[passive].maxLevel),
+  );
+}
+
+/** Whether these levels complete the recipe of `base`. */
+function completes(base: WeaponId, weaponLevel: number, passiveLevel: number): boolean {
+  const evo = evolutionOf(base);
+  return (
+    !!evo && weaponLevel >= WEAPONS[base].levels.length && passiveLevel >= PASSIVES[evo.evo.passive].maxLevel
+  );
 }
 
 /** Icon of each reward card. */
@@ -66,12 +87,12 @@ const REWARD_ICON: Record<RewardId, string> = {
 };
 
 /**
- * Texts and icon of a level-up card. `owned`: the hero's weapons, to tell which Elos a passive completes;
- * `passives`: the hero's passives, to tell whether a weapon's recipe is complete.
+ * Texts and icon of a level-up card. `owned`: the hero's weapons and levels, `passives`: the hero's passives, for
+ * the progress of the Elo recipes the choice moves.
  */
 export function describeUpgrade(
   opt: UpgradeOption,
-  owned: readonly WeaponId[] = [],
+  owned: readonly { id: WeaponId; level: number }[] = [],
   passives: Partial<Record<PassiveId, number>> = {},
 ): UpgradeText {
   switch (opt.kind) {
@@ -79,19 +100,10 @@ export function describeUpgrade(
       const w = t.weapons[opt.id];
       const evo = evolutionOf(opt.id);
       const max = WEAPONS[opt.id].levels.length;
-      let recipe = '';
-      if (evo) {
-        const name = t.passives[evo.evo.passive];
-        const have = (passives[evo.evo.passive] ?? 0) > 0;
-        recipe =
-          have && opt.level >= max
-            ? t.levelUp.eloReady
-            : have
-              ? t.levelUp.recipeHave(name)
-              : t.levelUp.recipeNeed(name);
-      }
+      const passiveLevel = evo ? (passives[evo.evo.passive] ?? 0) : 0;
+      const recipe = recipeProgress(opt.id, opt.level, passiveLevel);
       const recipeIcon = evo ? `icon.${evo.evo.passive}` : '';
-      const recipeMissing = !!evo && !passives[evo.evo.passive];
+      const recipeMissing = !!evo && !completes(opt.id, opt.level, passiveLevel);
       const icon = `icon.${opt.id}`;
       if (opt.level === 1)
         return {
@@ -123,35 +135,17 @@ export function describeUpgrade(
         recipeMissing,
       };
     }
-    case 'evolution': {
-      const w = t.weapons[opt.id];
-      const icon = `icon.${opt.id}`;
-      return {
-        title: w.name,
-        tag: t.levelUp.evolution,
-        desc: w.desc,
-        icon,
-        recipe: '',
-        recipeIcon: '',
-        recipeMissing: false,
-      };
-    }
     case 'passive': {
       const def = PASSIVES[opt.id];
-      const names = weaponsCompletedBy(owned, opt.id).map((id) => t.weapons[id].name);
+      const moved = owned.filter((o) => evolutionOf(o.id)?.evo.passive === opt.id);
       return {
         title: t.passives[opt.id],
         tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
         icon: `icon.${opt.id}`,
-        recipe:
-          names.length > 1
-            ? t.levelUp.recipeForMany(names.join(t.levelUp.and))
-            : names.length === 1
-              ? t.levelUp.recipeFor(names[0] as string)
-              : '',
+        recipe: moved.map((o) => recipeProgress(o.id, o.level, opt.level)).join(t.levelUp.recipeSep),
         recipeIcon: '',
-        recipeMissing: false,
+        recipeMissing: !moved.some((o) => completes(o.id, o.level, opt.level)),
       };
     }
     case 'reward': {

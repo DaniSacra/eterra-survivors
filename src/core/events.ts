@@ -1,4 +1,5 @@
 import type { PickupId } from '../data/pickups';
+import type { PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
 import type { UpgradeOption } from './upgrades';
 
@@ -8,9 +9,10 @@ export type GameEvent =
   | { type: 'bossSpawned' }
   | { type: 'eliteSpawned' }
   | { type: 'levelUp' }
-  | { type: 'chest'; reward: UpgradeOption }
-  /** A weapon's Elo recipe just became complete (once per weapon per run): the next chest forms it. */
-  | { type: 'eloReady'; weapon: WeaponId }
+  /** An elite's chest: the level it gave (null if nothing could level), with its gold and heal (data CHEST). */
+  | { type: 'chest'; reward: UpgradeOption | null }
+  /** A recipe was completed (weapon and passive at max level): `from` just turned into the Elo `elo`. */
+  | { type: 'eloForged'; elo: WeaponId; from: WeaponId; passive: PassiveId }
   | { type: 'pickup'; id: PickupId }
   /** Segunda Chance: the hero fell and got up again. */
   | { type: 'revived' }

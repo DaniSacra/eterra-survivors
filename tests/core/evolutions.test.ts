@@ -1,23 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
 import { dropPickup } from '../../src/core/pickups';
-import { applyUpgrade, candidates, chestReward, eloStatus, readyEvolution } from '../../src/core/upgrades';
+import {
+  applyUpgrade,
+  candidates,
+  eloReady,
+  eloStatus,
+  movesRecipe,
+  openChest,
+  rollUpgrades,
+} from '../../src/core/upgrades';
 import { maxLevel, weaponPower } from '../../src/core/weapons';
 import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
 import { newRunSummary } from '../../src/core/records';
 import { EVOLUTIONS, EVOLVED_IDS } from '../../src/data/evolutions';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
 import { WEAPONS } from '../../src/data/weapons';
+import { CHEST } from '../../src/data/pickups';
+import { PASSIVES } from '../../src/data/upgrades';
 import { STAGES } from '../../src/data/stages';
 
 const ELITES = STAGES.valmor.elites;
 import { quietWorld, still } from './helpers';
-
-function maxBlade() {
-  const w = quietWorld();
-  w.weapons[0]!.level = maxLevel('blade');
-  return w;
-}
 
 describe('evolution data', () => {
   it('evolves from a non-evolved weapon, and evolved forms have one level', () => {
@@ -31,51 +35,101 @@ describe('evolution data', () => {
 });
 
 describe('evolutions', () => {
-  it('need the base weapon at max level and the passive', () => {
+  it('need the base weapon and the recipe passive both at max level', () => {
     const w = quietWorld();
-    w.passives.might = 1;
-    expect(readyEvolution(w)).toBeNull();
+    w.passives.might = PASSIVES.might.maxLevel - 1;
     w.weapons[0]!.level = maxLevel('blade');
-    expect(readyEvolution(w)).toEqual({ kind: 'evolution', id: 'fury', from: 'blade' });
-    delete w.passives.might;
-    expect(readyEvolution(w)).toBeNull();
+    expect(eloReady(w, 'blade')).toBe(false);
+    w.passives.might = PASSIVES.might.maxLevel;
+    expect(eloReady(w, 'blade')).toBe(true);
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    expect(eloReady(w, 'blade')).toBe(false);
+  });
+
+  it('form on the spot when the last piece is taken, either order, with one eloForged event', () => {
+    const w = quietWorld();
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    w.passives.might = PASSIVES.might.maxLevel - 1;
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: PASSIVES.might.maxLevel });
+    expect(w.weapons[0]!.id).toBe('blade');
+    applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
+    expect(w.weapons[0]).toMatchObject({ id: 'fury', level: 1 });
+    expect(w.events.filter((e) => e.type === 'eloForged')).toEqual([
+      { type: 'eloForged', elo: 'fury', from: 'blade', passive: 'might' },
+    ]);
+    // The other order: weapon first, then the passive.
+    const v = quietWorld();
+    v.weapons[0]!.level = maxLevel('blade');
+    v.passives.might = PASSIVES.might.maxLevel - 1;
+    applyUpgrade(v, { kind: 'passive', id: 'might', level: PASSIVES.might.maxLevel });
+    expect(v.weapons[0]!.id).toBe('fury');
   });
 
   it('are never offered on level-up, and the base is not offered again once evolved', () => {
-    const w = maxBlade();
-    w.passives.might = 1;
+    const w = quietWorld();
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    w.passives.might = PASSIVES.might.maxLevel;
     expect(candidates(w).some((o) => o.kind === 'weapon' && EVOLVED_IDS.includes(o.id))).toBe(false);
-    dropPickup(w, 'chest', w.player.x, w.player.y);
-    w.step(1 / 60, still);
-    expect(w.weapons[0]).toMatchObject({ id: 'fury', level: 1 });
-    expect(candidates(w).some((o) => o.kind === 'weapon' && o.id === 'blade')).toBe(false);
+    applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
+    expect(candidates(w).some((o) => o.kind === 'weapon' && (o.id === 'blade' || o.id === 'fury'))).toBe(
+      false,
+    );
+  });
+});
+
+describe('level-up offers', () => {
+  it('recipe pieces (a level of an owned weapon with an Elo, or its passive) come up more often', () => {
+    const w = quietWorld();
+    w.weapons[0]!.level = 2;
+    expect(movesRecipe(w, { kind: 'weapon', id: 'blade', level: 3 })).toBe(true);
+    expect(movesRecipe(w, { kind: 'passive', id: 'might', level: 1 })).toBe(true);
+    expect(movesRecipe(w, { kind: 'passive', id: 'reach', level: 1 })).toBe(false);
+    expect(movesRecipe(w, { kind: 'weapon', id: 'frost', level: 1 })).toBe(false);
+    let might = 0;
+    let reach = 0;
+    for (let i = 0; i < 2000; i++)
+      for (const o of rollUpgrades(w)) {
+        if (o.kind === 'passive' && o.id === 'might') might++;
+        if (o.kind === 'passive' && o.id === 'reach') reach++;
+      }
+    expect(might / reach).toBeGreaterThan(1.8);
   });
 });
 
 describe('chests', () => {
-  it('evolve when a recipe is ready and announce it', () => {
-    const w = maxBlade();
-    w.passives.might = 1;
+  it('give gold, a level of something owned and a heal, never an Elo by themselves', () => {
+    const w = quietWorld();
+    w.player.hp = 10;
+    const level = w.weapons[0]!.level;
     dropPickup(w, 'chest', w.player.x + 5, w.player.y);
     w.step(1 / 60, still);
     expect(w.pickups.size).toBe(0);
+    expect(w.gold).toBe(CHEST.gold);
+    expect(w.player.hp).toBeCloseTo(
+      Math.min(w.player.stats.maxHp, 10 + w.player.stats.maxHp * CHEST.heal),
+      0,
+    );
+    expect(w.weapons[0]!.level).toBe(level + 1);
     expect(w.events).toContainEqual({
       type: 'chest',
-      reward: { kind: 'evolution', id: 'fury', from: 'blade' },
+      reward: { kind: 'weapon', id: 'blade', level: level + 1 },
     });
   });
 
-  it('otherwise level up something already owned (never a new weapon)', () => {
+  it('the level it gives can complete a recipe, and then the Elo forms', () => {
     const w = quietWorld();
-    for (let i = 0; i < 20; i++) {
-      const r = chestReward(w);
-      expect(r.kind === 'weapon' ? r.id === 'blade' && r.level > 1 : r.kind !== 'passive').toBe(true);
-    }
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    w.passives.might = PASSIVES.might.maxLevel;
+    openChest(w);
+    expect(w.weapons[0]!.id).toBe('fury');
   });
 
-  it('a reward card when nothing can be levelled', () => {
-    const w = maxBlade();
-    expect(chestReward(w).kind).toBe('reward');
+  it('only gold and the heal when nothing can be levelled', () => {
+    const w = quietWorld();
+    w.weapons[0]!.level = maxLevel('blade');
+    openChest(w);
+    expect(w.events).toContainEqual({ type: 'chest', reward: null });
+    expect(w.gold).toBe(CHEST.gold);
   });
 
   it('stay on the ground until touched', () => {
@@ -108,17 +162,6 @@ describe('elites', () => {
 });
 
 describe('Elo moments', () => {
-  it('announces a ready Elo once, when the last piece of the recipe is taken', () => {
-    const w = quietWorld();
-    w.weapons[0]!.level = maxLevel('blade') - 1;
-    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
-    expect(w.events.filter((e) => e.type === 'eloReady')).toEqual([]);
-    applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
-    expect(w.events.filter((e) => e.type === 'eloReady')).toEqual([{ type: 'eloReady', weapon: 'blade' }]);
-    applyUpgrade(w, { kind: 'passive', id: 'might', level: 2 });
-    expect(w.events.filter((e) => e.type === 'eloReady')).toHaveLength(1);
-  });
-
   it('weapon power: damage x hits per cast / cooldown, and every Elo beats its base at max level', () => {
     const blade = WEAPONS.blade.levels[0]!;
     expect(weaponPower('blade')).toBeCloseTo((blade.damage * blade.swings) / blade.cooldown);
@@ -138,18 +181,30 @@ describe('Elo moments', () => {
 });
 
 describe('Elo status (pause screen)', () => {
-  it('tells what is missing, ready or formed', () => {
+  it('tells the weapon and passive levels, or formed', () => {
     const w = quietWorld();
     expect(eloStatus(w, 'blade')).toEqual({
       kind: 'missing',
-      levels: maxLevel('blade') - 1,
+      weapon: 1,
+      weaponMax: maxLevel('blade'),
       passive: 'might',
+      passiveLevel: 0,
+      passiveMax: PASSIVES.might.maxLevel,
     });
-    w.passives.might = 1;
-    expect(eloStatus(w, 'blade')).toEqual({ kind: 'missing', levels: maxLevel('blade') - 1, passive: null });
-    w.weapons[0]!.level = maxLevel('blade');
-    expect(eloStatus(w, 'blade')).toEqual({ kind: 'ready' });
-    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    w.passives.might = 3;
+    expect(eloStatus(w, 'blade')).toMatchObject({ passiveLevel: 3 });
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    w.passives.might = PASSIVES.might.maxLevel - 1;
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: PASSIVES.might.maxLevel });
+    applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
     expect(eloStatus(w, 'fury')).toEqual({ kind: 'formed' });
+    expect(eloStatus(w, 'frost')).toEqual({
+      kind: 'missing',
+      weapon: 0,
+      weaponMax: maxLevel('frost'),
+      passive: 'reach',
+      passiveLevel: 0,
+      passiveMax: PASSIVES.reach.maxLevel,
+    });
   });
 });

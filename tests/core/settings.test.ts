@@ -14,10 +14,8 @@ describe('settings', () => {
       damageNumbers: false,
       calm: false,
       muted: true,
-      eloTipSeen: false,
       gasparMet: false,
     });
-    expect(sanitizeSettings({ eloTipSeen: true }).eloTipSeen).toBe(true);
     expect(sanitizeSettings({ gasparMet: true }).gasparMet).toBe(true);
   });
 });
