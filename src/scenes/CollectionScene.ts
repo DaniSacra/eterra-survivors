@@ -103,7 +103,10 @@ export class CollectionScene extends Phaser.Scene {
     });
     content.bindFocus?.((i) => nav.focus(n + i));
     bindKeys(this, (kb) => {
-      kb.once('keydown-ESC', () => this.back());
+      // Esc on an Elo's page goes back to the Livro; elsewhere, out of the Coleção.
+      kb.once('keydown-ESC', () =>
+        this.tab === 'elos' && this.page ? this.scene.restart({ tab: this.tab }) : this.back(),
+      );
       // Q and E (and Page Up / Page Down) switch tabs from anywhere.
       const shift = (d: number) => this.open(TABS[(current + d + TABS.length) % TABS.length] as TabId);
       kb.on('keydown-Q', () => shift(-1));
