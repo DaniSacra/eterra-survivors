@@ -185,7 +185,10 @@ export function describeAchievement(id: AchievementId): {
   return {
     name: text.name,
     desc: typeof text.desc === 'function' ? text.desc(t.int(shown)) : text.desc,
-    reward: t.achievements.reward(def.gold),
+    reward:
+      def.charge && config.achievementCharges
+        ? t.achievements.reward(def.gold) + t.sep + t.shop.charges[def.charge]
+        : t.achievements.reward(def.gold),
     title: t.achievements.titles[id] ?? null,
   };
 }

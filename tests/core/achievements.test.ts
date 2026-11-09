@@ -267,20 +267,22 @@ describe('live check and the closest one', () => {
 });
 
 describe('optional charges', () => {
-  it('are off by default; on, each unlocked one adds a use per run', () => {
+  it('each unlocked one adds a use per run while the switch is on (it is, by default)', () => {
     const s = newSave();
     s.achievements.push('eloFirst', 'seenAll', 'elosAll', 'killsRun1k');
-    expect(shopBonuses(s).charges).toEqual(config.charges);
     const flags = config as { achievementCharges: boolean };
-    flags.achievementCharges = true;
+    const was = flags.achievementCharges;
+    expect(was).toBe(true);
     try {
       expect(shopBonuses(s).charges).toEqual({
         reroll: config.charges.reroll + 1,
         skip: config.charges.skip + 1,
         banish: config.charges.banish + 1,
       });
-    } finally {
       flags.achievementCharges = false;
+      expect(shopBonuses(s).charges).toEqual(config.charges);
+    } finally {
+      flags.achievementCharges = was;
     }
   });
 });

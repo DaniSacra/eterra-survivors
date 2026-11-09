@@ -1168,7 +1168,7 @@ implementação abaixo; cada item é um commit.
 - Aceite: ids únicos e com texto; cada uma destrancável num save sintético; ouro somado uma vez; retroativas no save
   migrado.
 - Feito: testes em `tests/core/achievements.test.ts`; textos com `describeAchievement` (render/describe.ts); as três
-  cargas opcionais prontas atrás de `config.achievementCharges` (desligado).
+  cargas opcionais atrás de `config.achievementCharges`, ligado pelo Daniel em 2026-11-09 (Primeiro Elo: Trocar +1; Bestiário Completo: Pular +1; Livro Completo: Banir +1).
 
 **CC-04 · Conquistas na tela final e calibração** · impl + bal · P · ✅ feito
 
