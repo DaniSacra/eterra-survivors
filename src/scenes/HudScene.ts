@@ -17,8 +17,8 @@ import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 
 const PAD = 10;
-const XP_H = 14;
-const HP_H = 12;
+const XP_H = 16;
+const HP_H = 16;
 /** Pause button side: a full touch target. */
 const PAUSE = 44;
 /** Elite arrows sit this far in from the screen edge. */
@@ -84,12 +84,12 @@ export class HudScene extends Phaser.Scene {
     this.bars = this.add.graphics();
     this.timer = label(this, 0, 0, '', 24, { bold: true, stroke: true });
     // The level sits at the tip of the XP bar; gold and kills share one line, each after its icon.
-    this.level = label(this, 0, 0, '', 12, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
+    this.level = label(this, 0, 0, '', 14, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
     this.kills = label(this, 0, 0, '', 15, { bold: true, stroke: true }).setOrigin(1, 0.5);
     this.gold = label(this, 0, 0, '', 15, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
     this.coinIcon = this.add.image(0, 0, 'pickup.gold').setScale(ART_SCALE * 1.25);
     this.skullIcon = this.add.image(0, 0, 'icon.kills').setScale(ART_SCALE * 1.1);
-    this.hpText = label(this, 0, 0, '', 12, { bold: true, stroke: true });
+    this.hpText = label(this, 0, 0, '', 14, { bold: true, stroke: true });
     this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 15, {
       bold: true,
       color: UI.danger,
@@ -122,6 +122,7 @@ export class HudScene extends Phaser.Scene {
     this.hintText = label(this, 0, 0, '', 14, { color: UI.text });
     this.hintBox = this.add.container(0, 0, [this.hintBg, this.hintText]).setAlpha(0);
     this.build = new BuildSlots(this);
+    this.build.showEmpty = false;
     this.joystick = new Joystick(this);
     this.layout();
 

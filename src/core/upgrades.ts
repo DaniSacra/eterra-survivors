@@ -87,6 +87,24 @@ export function eloReady(world: World, weaponId: WeaponId): boolean {
   return !!base && base.level >= maxLevel(weaponId) && (world.passives[evolved.evo.passive] ?? 0) > 0;
 }
 
+/** Where an owned weapon stands on its Elo recipe (the pause screen shows it). */
+export type EloStatus =
+  { kind: 'formed' | 'ready' | 'none' } | { kind: 'missing'; levels: number; passive: PassiveId | null };
+
+export function eloStatus(world: World, weaponId: WeaponId): EloStatus {
+  if (isElo(weaponId)) return { kind: 'formed' };
+  const evolved = evolutionOf(weaponId);
+  if (!evolved || world.hasWeapon(evolved.id)) return { kind: 'none' };
+  if (eloReady(world, weaponId)) return { kind: 'ready' };
+  const level = world.weapons.find((w) => w.id === weaponId)?.level ?? 0;
+  const passive = evolved.evo.passive;
+  return {
+    kind: 'missing',
+    levels: Math.max(0, maxLevel(weaponId) - level),
+    passive: (world.passives[passive] ?? 0) > 0 ? null : passive,
+  };
+}
+
 /** The first evolution whose recipe is complete: base weapon at max level + its passive owned. */
 export function readyEvolution(world: World): UpgradeOption | null {
   for (const id of EVOLVED_IDS) {

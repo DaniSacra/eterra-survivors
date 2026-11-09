@@ -44,6 +44,8 @@ export class BuildSlots {
   private readonly glowTween: Phaser.Tweens.Tween;
   /** Some weapon's Elo is ready (the HUD then points at elites off screen). */
   ready = false;
+  /** Empty slots show how many still fit (the level-up preview); the HUD shows only the filled ones. */
+  showEmpty = true;
 
   constructor(
     scene: Phaser.Scene,
@@ -118,7 +120,7 @@ export class BuildSlots {
       const x = i * pitch;
       const o = world.weapons[i];
       if (!o) {
-        this.slot(g, x, 0, S, false, false);
+        if (this.showEmpty) this.slot(g, x, 0, S, false, false);
         continue;
       }
       const elo = isElo(o.id);
@@ -140,8 +142,11 @@ export class BuildSlots {
     for (let i = 0; i < config.weapons.maxPassives; i++) {
       const x = i * pitch + (S - P) / 2;
       const id = ids[i];
-      this.slot(g, x, py, P, !!id, false);
-      if (!id) continue;
+      if (!id) {
+        if (this.showEmpty) this.slot(g, x, py, P, false, false);
+        continue;
+      }
+      this.slot(g, x, py, P, true, false);
       this.icons[icon++]
         ?.setTexture(`icon.${id}`)
         .setPosition(x + P / 2, py + P / 2)

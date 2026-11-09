@@ -147,6 +147,15 @@ export const t = {
     quit: 'Desistir',
     /** Desistir asks once more (for 2 s) before ending the run. */
     quitConfirm: 'Confirmar desistir',
+    build: 'Sua build',
+    level: (n: number, max: number) => `Nv ${n}/${max}`,
+    /** Each weapon's Elo recipe status. */
+    formed: 'Elo formado',
+    ready: 'Elo pronto: abra um baú',
+    none: 'Sem Elo',
+    needLevels: (n: number) => (n === 1 ? 'falta 1 nível' : `faltam ${n} níveis`),
+    needPassive: (passive: string) => `falta ${passive}`,
+    eloOf: (elo: string) => `Elo ${elo}:`,
   },
 
   collection: {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
 import { dropPickup } from '../../src/core/pickups';
-import { applyUpgrade, candidates, chestReward, readyEvolution } from '../../src/core/upgrades';
+import { applyUpgrade, candidates, chestReward, eloStatus, readyEvolution } from '../../src/core/upgrades';
 import { maxLevel, weaponPower } from '../../src/core/weapons';
 import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
 import { newRunSummary } from '../../src/core/records';
@@ -134,5 +134,22 @@ describe('Elo moments', () => {
     recordRun(save, { ...newRunSummary(), hero: 'lyra', weapons: ['lightning', 'mace'] });
     expect(weaponUsed(save, 'mace')).toBe(true);
     expect(weaponUsed(save, 'bells')).toBe(false);
+  });
+});
+
+describe('Elo status (pause screen)', () => {
+  it('tells what is missing, ready or formed', () => {
+    const w = quietWorld();
+    expect(eloStatus(w, 'blade')).toEqual({
+      kind: 'missing',
+      levels: maxLevel('blade') - 1,
+      passive: 'might',
+    });
+    w.passives.might = 1;
+    expect(eloStatus(w, 'blade')).toEqual({ kind: 'missing', levels: maxLevel('blade') - 1, passive: null });
+    w.weapons[0]!.level = maxLevel('blade');
+    expect(eloStatus(w, 'blade')).toEqual({ kind: 'ready' });
+    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    expect(eloStatus(w, 'fury')).toEqual({ kind: 'formed' });
   });
 });
