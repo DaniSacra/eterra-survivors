@@ -39,7 +39,9 @@ export class PauseScene extends Phaser.Scene {
       const lx = cx - 8 - colW / 2;
       const top = Math.max(safeArea().top + 84, hud.countersBottom + 20);
       label(this, lx, top, t.pause.title, titleSize, { bold: true, color: UI.gold, stroke: true });
-      keyNav(this, this.stack(lx, top + 30 + 19, colW, 38, 6));
+      // Five buttons (and the wider gap before the options) in what is left under the title: 32 to 38 px tall.
+      const bh = Math.max(32, Math.min(38, (height - 8 - (top + 30) - 6 * 6) / 5));
+      keyNav(this, this.stack(lx, top + 30 + bh / 2, colW, bh, 6));
       const ly = top - 16;
       drawBuildList(this, world, cx + 8, ly, colW, height - ly - 8);
     } else if (width >= 760) {

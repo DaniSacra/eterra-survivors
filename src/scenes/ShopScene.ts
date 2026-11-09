@@ -36,6 +36,16 @@ import { SCENES } from './keys';
 const BADGE = 28;
 const GAP = 8;
 const HEAD = 24;
+/** Smallest item card: wide enough for icon, name and price, tall enough to touch. */
+const CARD_MIN_W = 150;
+const CARD_MIN_H = 40;
+/** Section tabs, when the whole list doesn't fit. */
+const TAB_H = 40;
+
+/** The section an item belongs to. */
+function sectionOf(id: ShopId): ShopSection {
+  return (Object.keys(SHOP_SECTIONS) as ShopSection[]).find((k) => SHOP_SECTIONS[k].includes(id)) ?? 'stats';
+}
 const SECTION_ICON: Record<ShopSection, string> = {
   stats: 'icon.might',
   helps: 'icon.reroll',
@@ -136,37 +146,78 @@ export class ShopScene extends Phaser.Scene {
       listBottom = bottom - dh - 10;
     }
 
-    // The list, section by section; cards as tall as the space allows.
+    // The list, section by section; cards as tall as the space allows (at least a touch target).
     const listW = listRight - left;
-    const cols = Math.max(1, Math.min(3, Math.floor((listW + GAP) / (165 + GAP))));
-    const rows = SECTIONS.reduce((n, k) => n + Math.ceil(SHOP_SECTIONS[k].length / cols), 0);
-    const cardH = Math.max(34, Math.min(52, (listBottom - top - SECTIONS.length * HEAD) / rows - GAP));
-    const cardW = (listW - GAP * (cols - 1)) / cols;
+    const cols = Math.max(1, Math.min(3, Math.floor((listW + GAP) / (CARD_MIN_W + GAP))));
+    const rowsOf = (keys: readonly ShopSection[]) =>
+      keys.reduce((n, k) => n + Math.ceil(SHOP_SECTIONS[k].length / cols), 0);
+    const fits = (listBottom - top - SECTIONS.length * HEAD) / rowsOf(SECTIONS) - GAP >= CARD_MIN_H;
+    // Too small for the whole list (small phones): one section at a time, under a row of section tabs.
+    const current = sectionOf(this.cart.selected ?? (SHOP_SECTIONS.stats[0] as ShopId));
+    const shown = fits ? SECTIONS : [current];
     const ids: ShopId[] = [];
     const cards: (Phaser.GameObjects.Rectangle | null)[] = [];
     let y = top;
-    for (const key of SECTIONS) {
-      this.add.image(left + 9, y + HEAD / 2 - 2, SECTION_ICON[key]).setScale((ART_SCALE * 18) / BADGE);
-      label(this, left + 22, y + 2, t.shop.sections[key], 14, { bold: true, color: UI.muted, align: 'left' });
-      y += HEAD;
+    if (!fits) {
+      const tw = (listW - GAP * (SECTIONS.length - 1)) / SECTIONS.length;
+      for (const [i, key] of SECTIONS.entries()) {
+        const tab = button(
+          this,
+          left + i * (tw + GAP) + tw / 2,
+          y + TAB_H / 2,
+          tw,
+          TAB_H,
+          () => this.showSection(key),
+          t.shop.tabs[key],
+        );
+        tab.setData('action', () => this.showSection(key));
+        if (key === current) tab.setStrokeStyle(3, UI.accent);
+        cards.push(tab);
+      }
+      y += TAB_H + GAP;
+    }
+    const heads = fits ? SECTIONS.length * HEAD : 0;
+    const cardH = Math.max(CARD_MIN_H, Math.min(52, (listBottom - y - heads) / rowsOf(shown) - GAP));
+    const cardW = (listW - GAP * (cols - 1)) / cols;
+    for (const key of shown) {
+      if (fits) {
+        this.add.image(left + 9, y + HEAD / 2 - 2, SECTION_ICON[key]).setScale((ART_SCALE * 18) / BADGE);
+        label(this, left + 22, y + 2, t.shop.sections[key], 14, {
+          bold: true,
+          color: UI.muted,
+          align: 'left',
+        });
+        y += HEAD;
+      }
       SHOP_SECTIONS[key].forEach((id, i) => {
         const x = left + (i % cols) * (cardW + GAP) + cardW / 2;
         const cy = y + Math.floor(i / cols) * (cardH + GAP) + cardH / 2;
-        cards.push(this.card(id, x, cy, cardW, cardH, ids.length));
+        cards.push(this.card(id, x, cy, cardW, cardH, cards.length));
         ids.push(id);
       });
       y += Math.ceil(SHOP_SECTIONS[key].length / cols) * (cardH + GAP);
     }
     cards.push(backButton(this, t.shop.back, () => this.back()));
+    const tabs = cards.length - ids.length - 1;
     const start = Math.max(0, ids.indexOf(this.cart.selected as ShopId));
-    this.nav = keyNav(this, cards, 0, start, (i) => {
-      const id = ids[i];
+    this.nav = keyNav(this, cards, 0, tabs + start, (i) => {
+      const id = ids[i - tabs];
       if (id) this.select(id);
     });
     this.select(ids[start] as ShopId);
 
     bindKeys(this, (kb) => {
       kb.once('keydown-ESC', () => this.back());
+      // With section tabs, Q/E switch them (as the Coleção's).
+      if (!fits)
+        kb.on('keydown', (e: KeyboardEvent) => {
+          const k = e.key.toLowerCase();
+          const d = k === 'q' ? -1 : k === 'e' ? 1 : 0;
+          if (d)
+            this.showSection(
+              SECTIONS[(SECTIONS.indexOf(current) + d + SECTIONS.length) % SECTIONS.length] as ShopSection,
+            );
+        });
       if (DEV_MODE)
         kb.on('keydown', (e: KeyboardEvent) => {
           if (e.key === '+' || e.key === '=') this.devStep(1);
@@ -177,7 +228,11 @@ export class ShopScene extends Phaser.Scene {
     restartOnResize(this);
   }
 
-  /** One item: icon, name, level and price (red when it can't be paid), or the Completo seal. */
+  /** Section tabs: show `key`'s items, its first one selected. */
+  private showSection(key: ShopSection): void {
+    this.scene.restart({ focus: SHOP_SECTIONS[key][0] });
+  }
+
   /** Short layout: Gaspar's first-visit line as a banner that fades out by itself. */
   private greetingBanner(cx: number, y: number): void {
     const text = label(this, cx + 14, y, t.shop.greeting, 14, { wrap: this.scale.width - 96 });

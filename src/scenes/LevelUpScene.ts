@@ -75,9 +75,12 @@ export class LevelUpScene extends Phaser.Scene {
         : height >= 700 && belowCardH >= 76
           ? 'below'
           : null;
-    hud.setBuildVisible(!panel);
+    // Lying down on a small phone, the cards can't fit under the build strip: it hides for the choice (the cards
+    // say each level) and the cards start right under the bars.
+    const tight = side && !besideStrip && (height - hud.bottom - 88) / n - gap < 60;
+    hud.setBuildVisible(!panel && !tight);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => hud.setBuildVisible(true));
-    const keep = panel ? hud.countersBottom : besideStrip ? hud.barsBottom : hud.bottom;
+    const keep = panel ? hud.countersBottom : besideStrip || tight ? hud.barsBottom : hud.bottom;
     const cardH = side
       ? Math.max(60, Math.min(100, (height - keep - 88) / n - gap))
       : panel === 'below'

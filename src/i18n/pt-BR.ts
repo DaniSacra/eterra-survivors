@@ -447,6 +447,8 @@ export const t = {
     costShort: (n: number) => int(n),
     back: 'Voltar',
     sections: { stats: 'Atributos', helps: 'Ajudas na escolha', special: 'Especiais' },
+    /** Section tabs on small phones, where the whole list doesn't fit. */
+    tabs: { stats: 'Atributos', helps: 'Ajudas', special: 'Especiais' },
     /** The detail panel of the selected item. */
     now: 'Agora',
     next: 'Próximo',
