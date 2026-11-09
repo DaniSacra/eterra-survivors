@@ -108,8 +108,6 @@ export const BOSS_PUFF = 30;
 export const ELITE_PUFF = 18;
 const GEM_GLINT = UI.xp;
 const ITEM_GLINT = 0xffd870;
-const HP_OK = 0x7cd860;
-const HP_LOW = 0xd83a4a;
 /**
  * Tints of enemies: hit (a white fill), frozen by Sopro de Geada, slowed by frost (white-lilac frost on top, never
  * the gems' cyan). And the hero's hurt wash.
@@ -264,7 +262,9 @@ export function drawFx(
   // Life under the hero's feet, so it can be read without looking at the corner.
   const hpK = Math.max(0, p.hp / p.stats.maxHp);
   g.fillStyle(INK, 0.8).fillRoundedRect(p.x - 17, p.y + 25, 34, 6, 3);
-  g.fillStyle(hpK > 0.35 ? HP_OK : HP_LOW).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
+  // The HUD's life color; low (under 35%) it blinks in the danger coral.
+  const low = hpK <= 0.35 && Math.sin(world.time * 12) > 0;
+  g.fillStyle(low ? UI.dangerHex : UI.hp).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
   // A chest on the ground twinkles: a soft gold ring around it and a star that blinks on its lid.
   for (const it of world.pickups.active) {
     if (it.type !== 'chest') continue;

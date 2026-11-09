@@ -1042,17 +1042,21 @@ da Estrada), descritos nos próprios itens.
   O esqueleto comum de Valmor também tinha olho brilhante (azul): ganhou olhinhos brancos nas órbitas; o brilho
   ficou só nas Ossadas, no fantasma, nos Encapuzados, nas elites e nos chefes.
 
-**RA-02 · Vida numa cor só** · visual · P · aprovado
+**RA-02 · Vida numa cor só** · visual · P · ✅ feito
 
 - Por quê: 04-visual #12: barrinha verde sob o herói e barra vermelha no HUD parecem duas coisas.
 - O quê: `UI.hp` nas duas, barrinha piscando em `UI.danger` abaixo de 35%.
 - Aceite: captura com as duas barras na mesma cor.
 
-**RA-03 · Tremor sem borda vazia** · visual · P · aprovado
+**RA-03 · Tremor sem borda vazia** · visual · P · ✅ feito
 
 - Por quê: 04-visual #13: o chão cobre a vista com 2 px de margem e o tremor mostra uma faixa escura de ~7 px.
 - O quê: margem de 24 px de mundo no `ground` e nos decals.
 - Aceite: captura no pico do tremor de dano sem borda escura.
+- Feito: a margem fixa de 24 px não bastava em 1000x680 (o tremor do Phaser anda `intensidade x lado x zoom` px de
+  mundo: 0.02 x 1000 x 1.42 = 28). Agora a margem é calculada no `fitCamera` a partir do tremor mais forte (0.02),
+  `ceil(0.02 x maior lado x zoom) + 4`, para o chão e os decals. Capturas do tremor de 0.02 sem borda nos três
+  tamanhos. Barrinha sob o herói em `UI.hp`, piscando em `UI.danger` abaixo de 35%.
 
 **RA-04 · Opções com selo de ligado e desligado** · visual · P · aprovado
 

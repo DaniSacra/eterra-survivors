@@ -66,6 +66,12 @@ const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> 
   jointBreaker: [0xffa060, 5, 6],
 };
 
+/**
+ * The strongest camera shake (fraction of the screen size): the ground reaches this far past the view. Phaser's
+ * shake moves the view by up to intensity x side x zoom world px on each axis.
+ */
+const MAX_SHAKE = 0.02;
+
 /** Damage numbers: drawn at NUMBER_FONT px, shown NUMBER_WORLD world px tall but never under NUMBER_SCREEN on screen. */
 const NUMBER_FONT = 16;
 const NUMBER_WORLD = 13;
@@ -124,6 +130,8 @@ export class GameScene extends Phaser.Scene {
   private stepDt = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
+  /** Ground drawn past each side of the view (world px), so a camera shake never shows the world's empty edge. */
+  private viewMargin = 24;
   /** Damage numbers' scale, so they never show under 14 px on screen however far the camera zooms out. */
   private numberScale = 1;
 
@@ -294,6 +302,7 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const zoom = clamp(Math.min(width, height) / config.view.minWorldSide, 0.5, 4);
     this.cameras.main.setZoom(zoom);
+    this.viewMargin = Math.ceil(MAX_SHAKE * Math.max(width, height) * zoom) + 4;
     this.numberScale = Math.max(NUMBER_WORLD, NUMBER_SCREEN / zoom) / NUMBER_FONT;
     this.world.setView(width / zoom, height / zoom);
     // Also while paused (no update runs): a phone turned on the pause screen must not show a black half.
@@ -309,11 +318,11 @@ export class GameScene extends Phaser.Scene {
     // (computed from the player, since cam.worldView only updates at render time)
     const vw = cam.width / cam.zoom;
     const vh = cam.height / cam.zoom;
-    const vx = w.player.x - vw / 2 - 2;
-    const vy = w.player.y - vh / 2 - 2;
-    this.ground.setPosition(vx, vy).setSize(vw + 4, vh + 4);
+    const vx = w.player.x - vw / 2 - this.viewMargin;
+    const vy = w.player.y - vh / 2 - this.viewMargin;
+    this.ground.setPosition(vx, vy).setSize(vw + this.viewMargin * 2, vh + this.viewMargin * 2);
     this.ground.setTilePosition(vx, vy);
-    this.decals.update(vx, vy, vw, vh);
+    this.decals.update(vx, vy, vw + this.viewMargin * 2, vh + this.viewMargin * 2);
   }
 
   override update(_time: number, delta: number): void {
