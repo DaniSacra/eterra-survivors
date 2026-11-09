@@ -230,3 +230,102 @@ arc     mace           L1    72.0  Lmax  1136.2  Elo(jointBreaker)   3150.0
   solo fire           L1     7.0  Lmax    19.2  Elo     36.1
 strike  fire           L1    49.0  Lmax   670.4  Elo(fireSword)   2124.2
 ```
+
+## Revisão 2026-11-08 · R2, balanceamento (2026-11-09, commit d967f5f)
+
+Sim com **12 sementes** (`SIM_SEEDS=12 npm run sim`, 144 corridas) depois de cada lote; compare com a seção "R1"
+acima. Itens: RE-01, RE-02, RE-05 (lote 1) · RE-03, RE-04, RE-07 (lote 2) · E-08, RE-06 (lote 3) · E-09 (lote 4) ·
+RE-08 e ajuste final (curva +5% de 5:00 em diante, Cripta com mais vida, Aldo com +30 de vida e armadura 2, Lobo
+Velho 10500, armas que miram vão no chefe). Detalhes e números de cada item no backlog. 1º Elo, mediana do chefe,
+tempo esgotado e mortes por faixa saem das linhas por corrida do sim.
+
+### Antes e depois
+
+| Herói / fase                        |          R1 |      lote 1 |      lote 2 |      lote 3 |      lote 4 |       **final** |
+| ----------------------------------- | ----------: | ----------: | ----------: | ----------: | ----------: | --------------: |
+| Aldo · Valmor                       |           4 |          10 |           8 |           6 |           6 |           **8** |
+| Aldo · Cripta                       |          10 |           8 |          11 |           9 |           8 |           **6** |
+| Aldo · Estrada                      |           4 |           6 |           8 |           6 |           8 |           **8** |
+| Lyra · Valmor                       |           8 |           8 |           7 |           8 |          10 |          **10** |
+| Lyra · Cripta                       |          10 |           7 |           9 |          11 |          11 |           **8** |
+| Lyra · Estrada                      |          10 |           9 |          10 |          10 |          12 |          **12** |
+| Teo · Valmor                        |           9 |           8 |           9 |          10 |          10 |           **9** |
+| Teo · Cripta                        |          11 |          11 |          12 |          11 |          11 |           **9** |
+| Teo · Estrada                       |          10 |          11 |          11 |           8 |          11 |          **10** |
+| Andilla · Valmor                    |          10 |          12 |          11 |          11 |          11 |          **11** |
+| Andilla · Cripta                    |          11 |          11 |          12 |          11 |          12 |          **11** |
+| Andilla · Estrada                   |          12 |          11 |          12 |          11 |          12 |          **10** |
+| **Total** (de 144)                  |         109 |         112 |         120 |         112 |         122 |         **112** |
+| Aldo / Lyra / Teo / Andilla (de 36) | 18/28/30/33 | 24/24/30/34 | 27/26/32/35 | 21/29/29/33 | 22/33/32/35 | **22/30/28/32** |
+| Valmor / Cripta / Estrada (de 48)   |    31/42/36 |    38/37/37 |    35/44/41 |    35/42/35 |    37/42/43 |    **38/34/40** |
+| 1º Elo médio (antes das 7:00)       |   7:48 (32) |   8:01 (25) |   8:08 (24) |   8:01 (37) |   7:41 (44) |   **8:09 (35)** |
+| Mediana da luta de chefe (vitórias) |        67 s |        64 s |        64 s |        56 s |        57 s |        **50 s** |
+| Tempo esgotado na Estrada (Lyra)    |       1 (1) |       3 (1) |       2 (1) |       1 (0) |       1 (0) |       **2 (0)** |
+| Mortes entre 6 e 8 min              |          14 |          12 |           9 |           8 |          11 |          **12** |
+
+Confirmação com **48 sementes** (576 corridas) do estado final: 459/576; Aldo 95/144 (66%), Lyra 113 (78%), Teo 118
+(82%), Andilla 133 (92%); Valmor 152, Cripta 152, Estrada 155 de 192; Aldo em Valmor 30/48; 1º Elo 7:52; chefe 51 s;
+tempo esgotado na Estrada 9 em 192 (2,3 por 12); mortes entre 6 e 8 min 41 (10,3 por 144).
+
+### Meta da R2
+
+- Todo herói entre 55% e 85%: **Aldo 61%, Lyra 83%, Teo 78% sim; Andilla 89% não** (92% com 48 sementes). RE-08
+  aplicado e medido; nerfs maiores testados não mexem nela (as derrotas dela são tempo esgotado no chefe) e tirariam a
+  força do começo pedida no E-03.
+- Aldo em Valmor pelo menos 7 de 12: **sim, 8** (30/48 com 48 sementes).
+- Valmor ≥ Cripta ≥ Estrada com folga de 3: **sim com 48 sementes** (152 / 152 / 155); nas 12 sementes oficiais
+  38 / 34 / 40 (a Estrada passa a Cripta por 6, ruído dessas sementes).
+- 1º Elo em média antes das 7:00: **não** (8:09; 7:52 com 48). A receita fica pronta em média aos 6:50 porque o robô
+  sobe as quatro armas por igual; ver E-08.
+- Luta de chefe com mediana de 45 a 90 s: **sim, 50 s**. No máximo 3 tempos esgotados na Estrada: **sim, 2**.
+
+### Sim
+
+```
+SUMMARY  hero    stage     wins  avg time  avg lvl  reached10  elos/run  gold/min  fast dmg
+         aldo    valmor    8/12      8:55     39.1          8       1.4      32.0        9%
+         aldo    crypt     6/12      9:26     37.2          8       1.2      27.7        8%
+         aldo    southRoad 8/12      9:24     44.3         10       1.9      37.9       11%
+         lyra    valmor    10/12     9:35     45.8         10       2.2      40.6       29%
+         lyra    crypt     8/12      9:10     39.5          8       1.6      40.1       27%
+         lyra    southRoad 12/12    10:00     48.8         12       2.3      49.5       27%
+         teo     valmor    9/12      9:11     41.4          9       1.4      37.4       13%
+         teo     crypt     9/12      9:41     41.8          9       1.5      35.1       16%
+         teo     southRoad 10/12     9:36     44.5         10       1.9      40.7       19%
+         andilla valmor    11/12     9:48     46.5         11       2.3      59.6       16%
+         andilla crypt     11/12    10:00     46.3         12       2.2      58.8        9%
+         andilla southRoad 10/12    10:00     48.2         12       2.2      62.0        9%
+
+PICKS    yahAura 56% · paladinSwords 55% · frost 47% · hammer 51% · wisps 50% · bells 46% · mace 52% · fire 51%
+REAL DPS blade:max 63 · elunLight:max 121 · yahAura:max 12 · daggers:max 109 · paladinSwords:max 41 · frost:max 108 · lightning:max 87 · hammer:max 90 · wisps:max 117 · bells:max 69 · mace:max 27 · fire:max 103 · fury 79 · holyLight 202 · yahFlame 41 · fan 173 · vigil 51 · blizzard 181 · storm 121 · jointBreaker 55 · fireSword 155 · forgeFury 153 · soulProcession 229 · funeralToll 90
+UNLOCK   second hero (800 gold) after 2 runs of Aldo in Valmor
+```
+
+### Lab
+
+```
+  solo blade          L1    11.5  Lmax    52.2  Elo     93.0
+arc     blade          L1   138.0  Lmax  2349.0  Elo(fury)   7254.0
+  solo elunLight      L1    14.4  Lmax   125.0  Elo    194.4
+homing  elunLight      L1    14.4  Lmax   375.0  Elo(holyLight)    970.8
+  solo yahAura        L1     7.8  Lmax    30.3  Elo     44.8
+aura    yahAura        L1    62.4  Lmax   695.8  Elo(yahFlame)   3046.4
+  solo daggers        L1    27.6  Lmax   121.8  Elo    162.0
+thrown  daggers        L1    55.2  Lmax   487.2  Elo(fan)   1068.0
+  solo paladinSwords  L1     5.0  Lmax    46.0  Elo     81.2
+orbit   paladinSwords  L1    86.5  Lmax  1242.0  Elo(vigil)   2630.6
+  solo frost          L1     8.0  Lmax    24.4  Elo     42.3
+zone    frost          L1    67.2  Lmax   914.8  Elo(blizzard)   3314.7
+  solo lightning      L1     9.0  Lmax    22.8  Elo     50.0
+strike  lightning      L1    36.0  Lmax   423.7  Elo(storm)   2512.5
+  solo hammer         L1    12.1  Lmax    93.6  Elo    168.0
+thrown  hammer         L1    48.4  Lmax   556.8  Elo(forgeFury)   2352.0
+  solo wisps          L1    10.4  Lmax    81.0  Elo    144.0
+homing  wisps          L1    20.8  Lmax   328.5  Elo(soulProcession)    720.0
+  solo bells          L1     4.2  Lmax    32.0  Elo     69.8
+orbit   bells          L1   147.7  Lmax  1384.0  Elo(funeralToll)   3944.3
+  solo mace           L1    12.0  Lmax    43.7  Elo     75.0
+arc     mace           L1   120.0  Lmax  1485.8  Elo(jointBreaker)   4650.0
+  solo fire           L1     7.0  Lmax    22.8  Elo     36.1
+strike  fire           L1    49.0  Lmax   796.1  Elo(fireSword)   2124.2
+```
