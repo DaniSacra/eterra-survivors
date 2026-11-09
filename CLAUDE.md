@@ -49,6 +49,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
   UI/UX proposals (what the player sees and when) come from the `ui-designer` agent, based on the reference
   screenshots in `docs/design/ui-references/`; the visual-director implements them.
+  Effects (weapons, Elos, hits, statuses, telegraphs) belong to the `vfx-director` agent: each effect must show
+  what its mechanic does.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Game, Hud (overlay), LevelUp, Pause, End.
 - Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
   `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.

@@ -34,15 +34,16 @@ write the report to the exact path below. Each agent that opens the game uses it
 | `03-qa.md`      | `general-purpose`       | 4174 | Plays the real game with Playwright (`playwright-core` at `/home/dani/projects/jerusalem-antiga/node_modules/playwright-core`, `window.game` in dev) at 420x820 and 1000x680: every scene and flow (menu, select, shop, run, level-up with Trocar/Pular/Banir, pause, options, Livro de Elos, end, unlocking the next stage, save reload). Records console errors, softlocks, keys or taps that do nothing or double-fire, FPS with the F4 stress spawn. Read-only: no edits. |
 | `04-visual.md`  | `visual-director`       | 4175 | Review only, **do not implement**: art and layout against the visual standard, consistency between scenes, readability of the chaos on a phone, missing or placeholder art, motion and feedback. Screenshot paths in the report.                                                                                                                                                                                                                                              |
 | `05-ui.md`      | `ui-designer`           | 4176 | Full UI/UX review grounded in `docs/design/ui-references/` and genre research: HUD, level-up, pause, end, menus, phone controls.                                                                                                                                                                                                                                                                                                                                              |
+| `06-vfx.md`     | `vfx-director`          | 4177 | Review only, **do not implement**: every weapon (base, max level, Elo), hits, deaths, pickups, statuses and boss telegraphs: what each does, what the player sees today, what the effect should show; performance cost of each proposal.                                                                                                                                                                                                                                      |
 
-When all five are done, check every file exists and is non-empty; rerun any agent that failed (once).
+When all six are done, check every file exists and is non-empty; rerun any agent that failed (once).
 
 ## 3. Game director (last, after all reports)
 
 Run `game-director` (foreground) with this task:
 
 > Read every report in `docs/reviews/<date>/` and the current `docs/design/backlog.md`. Write
-> `docs/reviews/<date>/06-direcao.md`: your own design read of the game (what moves it most toward the pillars:
+> `docs/reviews/<date>/07-direcao.md`: your own design read of the game (what moves it most toward the pillars:
 > evolutions, new content, retention), plus a triage of the reports: what you accept, merge, reject (and why), and
 > conflicts between reports with your decision. Then update `docs/design/backlog.md`: add a section
 > `## Revisão <date>` with the accepted items in the backlog's existing format (ID with a new prefix per kind, por
