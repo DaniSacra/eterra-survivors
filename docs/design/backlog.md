@@ -1092,6 +1092,13 @@ da Estrada), descritos nos próprios itens.
   com os pés na linha da descrição (o chapéu da Lyra cabe no cartão); selo "Vencida" com o `seal()` da RA-04 no canto
   superior direito do cartão da fase. Conferido em 390x844, 420x820, 820x420, 1000x680 e 1920x1080.
 
+**Medição F4 e capturas finais da R5** · ✅ feita
+
+- Mesmo método da R3 e R4 (420x820, CPU 4x, 701 inimigos): Lâmina L7 ~58 FPS (R4 ~58), 6 Elos 48 a 52 em três
+  medições (R4 ~50), Maça + Fogo + Raio ~55, Lâmina com 250 gemas cintilando ~56. Dentro do ruído; o cintilar das gemas
+  é só escala e alfa por imagem, sem alocação.
+- Capturas finais (420x820, 1000x680, 820x420) no scratchpad da sessão, `r5/final-*`.
+
 ### Rejeitados nesta revisão
 
 - `rat.hp` 24 (01-balance D6): medido, não resolve (Cripta 39/48).
