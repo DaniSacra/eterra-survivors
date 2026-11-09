@@ -27,7 +27,15 @@ import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
 import { SpatialHash } from './spatialHash';
-import { applyUpgrade, banishKey, canBanish, candidates, rollUpgrades, type UpgradeOption } from './upgrades';
+import {
+  applyUpgrade,
+  banishKey,
+  canBanish,
+  canReroll,
+  candidates,
+  rollUpgrades,
+  type UpgradeOption,
+} from './upgrades';
 import { blockCircle } from './terrain';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
@@ -214,7 +222,7 @@ export class World {
 
   /** Trocar: new options for the same level-up. */
   reroll(): void {
-    if (this.state !== 'levelup' || this.charges.reroll <= 0) return;
+    if (this.state !== 'levelup' || this.charges.reroll <= 0 || !canReroll(this)) return;
     this.charges.reroll--;
     this.upgradeOptions = rollUpgrades(this);
   }

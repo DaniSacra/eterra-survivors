@@ -95,6 +95,11 @@ export function optionsLeft(world: World): number {
   return candidates(world).length + rewards(world).length;
 }
 
+/** Trocar only when there is something else to show: more different cards left than a choice holds. */
+export function canReroll(world: World, n = config.xp.choices): boolean {
+  return optionsLeft(world) > n;
+}
+
 /** Banir is allowed on a card only while, without it, there would still be `n` different cards to offer. */
 export function canBanish(world: World, opt: UpgradeOption, n = config.xp.choices): boolean {
   return banishKey(opt) !== null && optionsLeft(world) - 1 >= n;

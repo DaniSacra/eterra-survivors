@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyUpgrade,
   canBanish,
+  canReroll,
   candidates,
   rollUpgrades,
   weaponLevelDiff,
@@ -116,6 +117,18 @@ describe('upgrades', () => {
     expect(w.charges.banish).toBe(4);
     w.skipLevelUp();
     expect(w.state).toBe('playing');
+  });
+
+  it("only reward cards left: Trocar can't show anything new and keeps its charge", () => {
+    const w = maxedWorld(); // nothing to level: the 3 reward cards
+    w.charges.reroll = 2;
+    w.pendingLevelUps = 1;
+    w.step(1 / 60, still);
+    expect(w.state).toBe('levelup');
+    expect(canReroll(w)).toBe(false);
+    w.reroll();
+    expect(w.charges.reroll).toBe(2);
+    expect(w.upgradeOptions.some((o) => canBanish(w, o))).toBe(false);
   });
 
   it('records the level at which the pool first ran short', () => {

@@ -3,7 +3,7 @@ import type { World } from '../core/world';
 import type { ChargeKey } from '../data/shop';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
-import { statPreview } from '../core/upgrades';
+import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
 import { describeUpgrade } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
@@ -180,7 +180,10 @@ export class LevelUpScene extends Phaser.Scene {
           color: UI.gold,
         });
       }
-      if (c <= 0) disable(b);
+      // A charge that would do nothing here is off too: Trocar with no other cards, Banir with no card to spare.
+      const useless =
+        (key === 'reroll' && !canReroll(w)) || (key === 'banish' && !opts.some((o) => canBanish(w, o)));
+      if (c <= 0 || useless) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
     if (!touch)
@@ -257,6 +260,7 @@ export class LevelUpScene extends Phaser.Scene {
   private useCharge(key: ChargeKey): void {
     const w = this.world;
     if (w.charges[key] <= 0) return;
+    if (key === 'banish' && !this.banishing && !w.upgradeOptions.some((o) => canBanish(w, o))) return;
     if (key === 'reroll') w.reroll();
     else if (key === 'skip') w.skipLevelUp();
     else return this.refresh(!this.banishing);
