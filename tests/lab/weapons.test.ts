@@ -1,60 +1,54 @@
 import { it } from 'vitest';
-import { spawnEnemy } from '../../src/core/enemies';
 import { maxLevel } from '../../src/core/weapons';
-import { World } from '../../src/core/world';
-import { EVOLUTIONS } from '../../src/data/evolutions';
-import { SIGNATURE_OWNER } from '../../src/data/characters';
-import { WEAPONS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
+import { EVOLUTIONS, evolutionOf, weaponCategory } from '../../src/data/evolutions';
+import { CATEGORY_BANDS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
+import { measureDps } from './measure';
 
 /**
- * Weapon lab (balance tool, skipped by `npm test`): `npm run lab` prints each weapon's DPS at level 1, max
- * level and as its Elo, against one pinned dummy ("solo", a boss) and against a dense frozen field ("crowd").
- * Dummies ignore knockback, so crowd numbers are an upper bound for weapons that push enemies away.
+ * Weapon lab (balance tool, skipped by `npm test`): `npm run lab` prints each weapon's category and DPS at level 1,
+ * max level and as its Elo, against one pinned dummy ("solo", a boss) and a dense frozen field ("crowd"), with the
+ * crowd DPS at max level as a share of the best aimed weapon (and each Elo against the best aimed Elo).
  */
-/** DPS of one weapon against a field of frozen, unkillable dummies around a still hero. */
-function dps(id: WeaponId, level: number, solo = false, secs = 20): number {
-  const w = new World(1, { character: SIGNATURE_OWNER[id] ?? 'aldo' });
-  w.spawner.update = () => {};
-  w.weapons.length = 0;
-  w.addWeapon(id);
-  w.weapons[0]!.level = level;
-  Object.assign(w.player.stats, { might: 1, area: 1, cooldown: 1, amount: 0 });
-  w.player.stats.maxHp = w.player.hp = 1e9;
-  for (let x = -260; x <= 260; x += 32)
-    for (let y = -260; y <= 260; y += 32) {
-      if (Math.hypot(x, y) < 30) continue;
-      if (solo && !(x === 60 && y === -4)) continue;
-      const e = spawnEnemy(w, 'skeleton', x, y);
-      e.hp = e.maxHp = 1e9;
-      e.def = { ...e.def, knockbackResist: 1 };
-    }
-  const lv = WEAPONS[id].levels[level - 1] as { orbitRadius?: number };
-  const pin = w.enemies.active[0]!;
-  w.freeze = 1e9;
-  for (let i = 0; i < secs * 60; i++) {
-    w.freeze = 1e9;
-    if (solo) {
-      pin.x = lv.orbitRadius ?? 60;
-      pin.y = 0;
-    }
-    w.step(1 / 60, { x: 0, y: 0 });
-    w.events.length = 0;
-  }
-  return w.weapons[0]!.damage / secs;
-}
-
 it.skipIf(!import.meta.env.LAB)('weapon lab', () => {
-  const rows: string[] = [];
-  for (const id of WEAPON_IDS) {
-    if (EVOLUTIONS[id]) continue;
-    const evo1 = WEAPON_IDS.find((e) => EVOLUTIONS[e]?.from === id)!;
-    rows.push(
-      `  solo ${id.padEnd(14)} L1 ${dps(id, 1, true).toFixed(1).padStart(7)}  Lmax ${dps(id, maxLevel(id), true).toFixed(1).padStart(7)}  Elo ${dps(evo1, 1, true).toFixed(1).padStart(8)}`,
-    );
-    const evo = WEAPON_IDS.find((e) => EVOLUTIONS[e]?.from === id)!;
-    rows.push(
-      `${(WEAPONS[id].kind + ' ').padEnd(7)} ${id.padEnd(14)} L1 ${dps(id, 1, false).toFixed(1).padStart(7)}  Lmax ${dps(id, maxLevel(id), false).toFixed(1).padStart(7)}  Elo(${evo}) ${dps(evo, 1, false).toFixed(1).padStart(8)}`,
+  const bases = WEAPON_IDS.filter((id) => !EVOLUTIONS[id]);
+  type Row = {
+    id: WeaponId;
+    elo: WeaponId;
+    l1: number;
+    max: number;
+    soloMax: number;
+    eloCrowd: number;
+    eloSolo: number;
+  };
+  const rows: Row[] = bases.map((id) => {
+    const elo = evolutionOf(id)?.id ?? id;
+    return {
+      id,
+      elo,
+      l1: measureDps(id, 1),
+      max: measureDps(id, maxLevel(id)),
+      soloMax: measureDps(id, maxLevel(id), true),
+      eloCrowd: measureDps(elo, 1),
+      eloSolo: measureDps(elo, 1, true),
+    };
+  });
+  const best = Math.max(...rows.filter((r) => weaponCategory(r.id) === 'aimed').map((r) => r.max));
+  const bestElo = Math.max(...rows.filter((r) => weaponCategory(r.id) === 'aimed').map((r) => r.eloCrowd));
+  const f = (x: number, n = 7) => x.toFixed(0).padStart(n);
+  const out = [
+    'cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base',
+  ];
+  for (const r of [...rows].sort(
+    (a, b) => weaponCategory(a.id).localeCompare(weaponCategory(b.id)) || b.max - a.max,
+  )) {
+    const cat = weaponCategory(r.id);
+    const [lo, hi] = CATEGORY_BANDS[cat];
+    const share = r.max / best;
+    const ok = share >= lo - 1e-9 && share <= hi + 1e-9 ? ' ' : '!';
+    out.push(
+      `${cat.padEnd(7)}${r.id.padEnd(16)}${f(r.l1, 8)}${f(r.max)}${f(r.soloMax, 11)}  ${f(share * 100, 5)}%${ok} ${Math.round(lo * 100)}-${Math.round(hi * 100)}%` +
+        `  | ${r.elo.padEnd(15)}${f(r.eloCrowd, 6)}${f(r.eloSolo, 6)}${f((r.eloCrowd / bestElo) * 100, 6)}%  ${(r.eloCrowd / r.max).toFixed(1)}x`,
     );
   }
-  console.log('\nLAB\n' + rows.join('\n'));
+  console.log('\nLAB\n' + out.join('\n'));
 });

@@ -1,5 +1,5 @@
 import type { PassiveId } from './upgrades';
-import type { WeaponId } from './weapons';
+import { WEAPONS, type WeaponCategory, type WeaponDef, type WeaponId } from './weapons';
 
 /**
  * Elos: a weapon at max level plus a passive (any level) turns into its evolved form
@@ -34,4 +34,10 @@ export function evolutionOf(base: WeaponId): { id: WeaponId; evo: Evolution } | 
     if (evo.from === base) return { id, evo };
   }
   return null;
+}
+
+/** A weapon's strength category; an Elo takes its base's. */
+export function weaponCategory(id: WeaponId): WeaponCategory {
+  const def: WeaponDef = WEAPONS[id];
+  return def.category ?? weaponCategory((EVOLUTIONS[id] as Evolution).from);
 }

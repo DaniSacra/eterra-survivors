@@ -83,6 +83,18 @@ export interface LevelsByKind {
 }
 export type WeaponKind = keyof LevelsByKind;
 
+/**
+ * How a weapon finds its targets, which sets how strong it may be (crowd DPS at max level, against the best aimed
+ * weapon): `aimed` goes where the hero walks or looks (85–100%), `auto` aims by itself or falls on random enemies
+ * (50–65%), `area` works around the hero: auras, orbits, zones (40–55%).
+ */
+export type WeaponCategory = 'aimed' | 'auto' | 'area';
+export const CATEGORY_BANDS: Record<WeaponCategory, [number, number]> = {
+  aimed: [0.85, 1],
+  auto: [0.5, 0.65],
+  area: [0.4, 0.55],
+};
+
 export type WeaponDef = {
   [K in WeaponKind]: {
     kind: K;
@@ -92,6 +104,8 @@ export type WeaponDef = {
      * within reach); 'facing' (default) goes where the hero walks.
      */
     aim?: 'nearest' | 'facing';
+    /** Strength band (base weapons only; an Elo inherits its base's, see `weaponCategory`). */
+    category?: WeaponCategory;
     /** Arc weapons: the second swing is a second blow in the same direction this many seconds later, not behind. */
     combo?: number;
   };
@@ -108,6 +122,7 @@ export const WEAPONS = {
   /** Lâmina de Valmor: Aldo's village steel, a wide slash in front. */
   blade: {
     kind: 'arc',
+    category: 'aimed',
     levels: levels<ArcLevel>(
       { damage: 10, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
       { damage: 13, range: 98 },
@@ -121,6 +136,7 @@ export const WEAPONS = {
   /** Luz de Elun: seeking motes of holy light. */
   elunLight: {
     kind: 'homing',
+    category: 'auto',
     levels: levels<HomingLevel>(
       {
         damage: 9,
@@ -144,6 +160,7 @@ export const WEAPONS = {
   /** Aura de Yah: a burning halo that hurts everything close. */
   yahAura: {
     kind: 'aura',
+    category: 'area',
     levels: levels<AuraLevel>(
       { damage: 4, cooldown: 0.5, radius: 55 },
       { radius: 65 },
@@ -157,6 +174,7 @@ export const WEAPONS = {
   /** Adagas de Andilla: quick knives thrown at the nearest enemy, passing through the first ones. */
   daggers: {
     kind: 'thrown',
+    category: 'aimed',
     aim: 'nearest',
     levels: levels<ThrownLevel>(
       {
@@ -181,6 +199,7 @@ export const WEAPONS = {
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
   paladinSwords: {
     kind: 'orbit',
+    category: 'area',
     levels: levels<OrbitLevel>(
       { damage: 10, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
       { count: 2 },
@@ -194,6 +213,7 @@ export const WEAPONS = {
   /** Geada de Valmor: patches of frost that hurt and slow. */
   frost: {
     kind: 'zone',
+    category: 'area',
     levels: levels<ZoneLevel>(
       { damage: 4, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
       { radius: 52 },
@@ -207,6 +227,7 @@ export const WEAPONS = {
   /** Raio de Lyra: lightning on random enemies. */
   lightning: {
     kind: 'strike',
+    category: 'auto',
     levels: levels<StrikeLevel>(
       { damage: 18, cooldown: 2.2, count: 1, radius: 24 },
       { count: 2 },
@@ -220,6 +241,7 @@ export const WEAPONS = {
   /** Martelo do Gaspar: the smith's heavy hammer, thrown ahead; it ploughs through rows. */
   hammer: {
     kind: 'thrown',
+    category: 'aimed',
     levels: levels<ThrownLevel>(
       {
         damage: 22,
@@ -243,6 +265,7 @@ export const WEAPONS = {
   /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
   wisps: {
     kind: 'homing',
+    category: 'auto',
     levels: levels<HomingLevel>(
       {
         damage: 8,
@@ -266,6 +289,7 @@ export const WEAPONS = {
   /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
   bells: {
     kind: 'orbit',
+    category: 'area',
     levels: levels<OrbitLevel>(
       { damage: 14, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
       { damage: 18 },
@@ -279,6 +303,7 @@ export const WEAPONS = {
   /** Maça de Ferro: a heavy iron mace, slow and wide, that crushes what is in front and throws it back. */
   mace: {
     kind: 'arc',
+    category: 'aimed',
     aim: 'nearest',
     combo: 0.2,
     levels: levels<ArcLevel>(
@@ -303,6 +328,7 @@ export const WEAPONS = {
   /** Fogo: flames falling on enemies, fewer than lightning but burning a wider patch. */
   fire: {
     kind: 'strike',
+    category: 'auto',
     levels: levels<StrikeLevel>(
       { damage: 14, cooldown: 2, count: 1, radius: 40 },
       { damage: 18 },
