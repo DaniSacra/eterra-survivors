@@ -15,7 +15,7 @@ import { loadSave, recordRun } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
 import { isElo } from '../core/weapons';
-import type { WeaponId } from '../data/weapons';
+import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
@@ -43,6 +43,14 @@ import { SCENES } from './keys';
 /** How long a hit lasts on an enemy, and the part of it (from the start) shown as a white flash. */
 const HIT_FLASH = config.enemies.hitFlash;
 const HIT_WHITE = 0.5;
+
+/**
+ * Weapons that hit a whole area on a beat (auras, frost patches): no white flash, or the crowd inside would turn
+ * into one white blob on every tick; their sparks, the squash and the weapon's own pulse show the hit.
+ */
+const AREA_HIT = Object.fromEntries(
+  WEAPON_IDS.map((id) => [id, WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone']),
+) as Record<WeaponId, boolean>;
 
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
@@ -195,7 +203,7 @@ export class GameScene extends Phaser.Scene {
           .setRotation(e.act === BossAct.Windup ? Math.sin(w.time * 18) * 0.18 : 0); // a boss winding up shakes
         if (this.stepDt > 0 && e.flash === HIT_FLASH) this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
-        if (hit > 1 - HIT_WHITE && !this.calm) img.setTintFill(TINT.hit);
+        if (hit > 1 - HIT_WHITE && !this.calm && !(e.hitBy && AREA_HIT[e.hitBy])) img.setTintFill(TINT.hit);
         else if (w.freeze > 0 && (w.freeze > 1 || Math.sin(w.time * 20) > -0.3))
           // Covered in frost (light on top), blinking in the last second before they walk again.
           img.setTint(TINT.frost, TINT.frost, TINT.frozen, TINT.frozen);

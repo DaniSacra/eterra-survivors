@@ -812,7 +812,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   modo calmo). Golpes e raios somem quando a partida acaba (não ficam congelados no ar). F4 com 701 inimigos a 4x: sem
   armas 58.3 para 58.0, Lâmina L7 56.5 para 56.1, 6 Elos 45.4 para 44.1 FPS (dentro do ruído, abaixo de 10%).
 
-**RF-06 · Aura e Chama de Yah pulsando no ritmo do dano** · vfx · P · aprovado
+**RF-06 · Aura e Chama de Yah pulsando no ritmo do dano** · vfx · P · ✅ feito
 
 - Por quê: 06-vfx #2: o alfa oscila por `sin(time * 6)`, desligado do tick (período ~1 s contra ticks de 0.35 a 0.5
   s); no L1 o único sinal de dano é a turma ficar vermelha; a Chama lê como serra.
@@ -820,6 +820,12 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   raio a cada tick; borda que acende no tick; 5 a 8 motes determinísticos. Chama: núcleo branco-quente, línguas de fogo
   arredondadas e brasas, disco grande a ~0.06 (o raio vai a 150 em RE-03).
 - Aceite: num vídeo curto dá para contar os ticks; a Chama não esconde os inimigos dentro dela.
+- Feito: fase pelo `OwnedWeapon.timer` (0 no tick); núcleo em 3 discos de luz macia; a cada tick uma onda fina sai do
+  núcleo até exatamente o raio de dano (desenhada por cima da multidão, fina, para ser vista sem esconder ninguém) e a
+  borda acende e descansa; 5 a 8 motes de luz subindo (mais por nível). Chama de Yah: disco grande a 0.06, núcleo
+  branco-quente, 16 línguas de fogo redondas que sobem (mais altas no tick) e 10 brasas. Ajuste do RF-02: acertos de
+  aura e de Geada não pintam o inimigo de branco (a turma inteira virava uma bolha branca a cada tick); o tick aparece
+  pela onda, pelas cruzes douradas e pelo squash.
 
 **RF-07 · Golpes que varrem (Lâmina, Fúria, Maça, Quebra-Junta, Corte Brutal)** · vfx · M · aprovado
 

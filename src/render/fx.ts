@@ -158,29 +158,16 @@ export function drawFx(
   for (const w of world.weapons) {
     const kind = WEAPONS[w.id].kind;
     if (kind === 'aura') {
-      const r = (weaponStats(w) as AuraLevel).radius * p.stats.area;
-      const pulse = 0.12 + 0.05 * Math.sin(world.time * 6);
-      const elo = isElo(w.id);
-      const c = elo ? FLAME_COLOR : AURA_COLOR;
-      g.fillStyle(c, pulse + (elo ? 0.05 : 0)).fillCircle(p.x, p.y, r);
-      g.lineStyle(elo ? 3 : 2, c, 0.6).strokeCircle(p.x, p.y, r);
-      if (elo) {
-        // Chama de Yah: flame tongues dancing on the rim.
-        for (let i = 0; i < 12; i++) {
-          const a = (i * Math.PI) / 6 + world.time * 0.6;
-          const h = 10 + 6 * Math.sin(world.time * 9 + i * 1.7);
-          const bx = p.x + Math.cos(a) * r;
-          const by = p.y + Math.sin(a) * r;
-          g.fillStyle(i % 2 ? AURA_COLOR : FLAME_COLOR, 0.7).fillTriangle(
-            bx + Math.cos(a + 1.57) * 5,
-            by + Math.sin(a + 1.57) * 5,
-            bx - Math.cos(a + 1.57) * 5,
-            by - Math.sin(a + 1.57) * 5,
-            bx + Math.cos(a) * h,
-            by + Math.sin(a) * h,
-          );
-        }
-      }
+      const st = weaponStats(w) as AuraLevel;
+      drawAura(
+        g,
+        top,
+        world,
+        st.radius * p.stats.area,
+        1 - w.timer / (st.cooldown * p.stats.cooldown),
+        w.level,
+        isElo(w.id),
+      );
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
       const count = s.count + p.stats.amount;
@@ -221,7 +208,7 @@ export function drawFx(
       // own send-off from the sparks.)
       if (f.r >= BOSS_PUFF) continue;
       const r = f.r;
-      if (k > 0.7) g.fillStyle(0xffffff, (k - 0.7) * 3).fillCircle(f.x, f.y, r * (1.1 - k * 0.4));
+      if (k > 0.7) g.fillStyle(0xffffff, (k - 0.7) * 2).fillCircle(f.x, f.y, r * (1.1 - k * 0.4));
       const out = 1 - k;
       for (let i = 0; i < 3; i++) {
         const a = i * 2.1 + f.x * 0.37;
@@ -289,6 +276,75 @@ export function drawFx(
     }
     g.fillStyle(c, 0.4 * t).fillCircle(b.x, b.y, b.radius);
     g.lineStyle(2, 0xffffff, 0.8 * t).strokeCircle(b.x, b.y, b.radius * (1.2 - t * 0.2));
+  }
+}
+
+/** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
+const AURA_CORE: readonly [number, number][] = [
+  [1, 0.05],
+  [0.6, 0.1],
+  [0.35, 0.18],
+];
+
+/**
+ * Aura de Yah: warm light around the hero that beats with its damage. `k` is the tick phase (0 right at a tick,
+ * 1 just before the next): each tick a wave runs out to exactly the damage radius and the rim lights up. Motes of
+ * light drift up inside. Chama de Yah: a white-hot core, round flame tongues on the rim and rising embers, over a
+ * very faint disc (its 150 px would cover the crowd).
+ */
+function drawAura(
+  g: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  world: World,
+  r: number,
+  k: number,
+  level: number,
+  elo: boolean,
+): void {
+  const p = world.player;
+  const t = world.time;
+  const c = elo ? FLAME_COLOR : AURA_COLOR;
+  if (elo) g.fillStyle(c, 0.06).fillCircle(p.x, p.y, r);
+  for (let i = elo ? 1 : 0; i < AURA_CORE.length; i++) {
+    const L = AURA_CORE[i] as readonly [number, number];
+    g.fillStyle(elo && i === 2 ? 0xfff0c0 : c, L[1]).fillCircle(p.x, p.y, r * L[0]);
+  }
+  // The rim flares on the tick and rests between ticks.
+  const flare = Math.max(0, 1 - k * 3);
+  g.lineStyle(2 + 2 * flare, c, 0.35 + 0.55 * flare).strokeCircle(p.x, p.y, r);
+  // The beat: a wave from the core out to the exact edge (over the crowd, thin, so it is seen but hides nothing).
+  if (k < 0.45) {
+    const wk = k / 0.45;
+    const wr = r * (0.3 + 0.7 * (1 - (1 - wk) ** 2));
+    top.lineStyle(4 - 3 * wk, elo ? 0xffc060 : 0xfff0a0, 0.7 * (1 - wk)).strokeCircle(p.x, p.y, wr);
+  }
+  // Motes of light (embers for the Chama) drifting up inside the radius, more with each level.
+  const motes = elo ? 10 : 4 + Math.ceil(level / 2);
+  for (let i = 0; i < motes; i++) {
+    const ph = (t * (elo ? 0.9 : 0.5) + i * 0.37) % 1;
+    const a = i * 2.4 + Math.floor(t * (elo ? 0.9 : 0.5) + i * 0.37) * 1.3;
+    const d = r * (0.2 + 0.7 * ((i * 0.618) % 1));
+    const mx = p.x + Math.cos(a) * d;
+    const my = p.y + Math.sin(a) * d - ph * (elo ? 30 : 18);
+    const ma = Math.sin(ph * Math.PI);
+    top
+      .fillStyle(elo ? (i % 2 ? FLAME_COLOR : 0xffd060) : 0xfff0a0, 0.75 * ma)
+      .fillCircle(mx, my, elo ? 2 : 2.2);
+    if (!elo) top.fillStyle(0xffffff, 0.8 * ma).fillCircle(mx, my, 1);
+  }
+  if (!elo) return;
+  // Round flame tongues licking up from the rim (they rise in screen space, like real flames), taller on a tick.
+  const n = 16;
+  for (let i = 0; i < n; i++) {
+    const a = (i * Math.PI * 2) / n + t * 0.4;
+    const bx = p.x + Math.cos(a) * r;
+    const by = p.y + Math.sin(a) * r;
+    const h = 9 + 5 * Math.sin(t * 9 + i * 1.7) + 6 * flare;
+    const w = 5;
+    g.fillStyle(i % 2 ? AURA_COLOR : FLAME_COLOR, 0.55);
+    g.fillCircle(bx, by, w);
+    g.fillTriangle(bx - w, by, bx + w, by, bx + Math.sin(t * 5 + i) * 2, by - h - w);
+    g.fillStyle(0xfff0c0, 0.5).fillCircle(bx, by + 1, w * 0.45);
   }
 }
 
