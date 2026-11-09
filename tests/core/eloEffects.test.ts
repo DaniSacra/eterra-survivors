@@ -160,6 +160,15 @@ describe('Luz Sagrada: the light that kills heals', () => {
     damageEnemy(w, spawnEnemy(w, 'bat', 300, 300), 1e6, 0, 0, 0, src);
     expect(w.player.hp).toBe(10 + def.mend.heal * (def.mend.perSecond + 1));
   });
+
+  it("a hero already down isn't brought back by the light: a lethal bite and a heal in one step still lose", () => {
+    const w = armed('holyLight');
+    w.player.hp = 0;
+    damageEnemy(w, spawnEnemy(w, 'bat', 300, 0), 1e6, 0, 0, 0, w.weapons[0]!);
+    expect(w.player.hp).toBe(0);
+    w.step(1 / 60, { x: 0, y: 0 });
+    expect(w.state).toBe('lost');
+  });
 });
 
 describe('Chama de Yah: the pushing wave', () => {

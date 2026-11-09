@@ -38,7 +38,13 @@ export function updatePlayer(p: Player, input: Vec2, dt: number): void {
     p.facing.y = input.y / len;
   }
   if (p.iframes > 0) p.iframes = Math.max(0, p.iframes - dt);
-  if (p.stats.regen > 0) p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.regen * dt);
+  if (p.stats.regen > 0) heal(p, p.stats.regen * dt);
+}
+
+/** Heals up to max HP. A hero already at 0 HP is down: no heal brings them back (only Segunda Chance does). */
+export function heal(p: Player, amount: number): void {
+  if (p.hp <= 0) return;
+  p.hp = Math.min(p.stats.maxHp, p.hp + amount);
 }
 
 /** Applies damage (less armor, at least minDamage) unless invulnerable. Returns true if the hit landed. */

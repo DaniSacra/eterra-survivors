@@ -1,3 +1,4 @@
+import { heal } from './player';
 import { config } from '../data/config';
 import { RANDOM_DROPS, type PickupId } from '../data/pickups';
 import { isFaded } from './behaviours';
@@ -48,7 +49,7 @@ const COLLECT: Record<PickupId, (world: World) => void> = {
   },
   food(world) {
     const p = world.player;
-    p.hp = Math.min(p.stats.maxHp, p.hp + config.pickups.foodHeal);
+    heal(p, config.pickups.foodHeal);
   },
   magnet: pullAllGems,
   bomb(world) {

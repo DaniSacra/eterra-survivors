@@ -1,3 +1,4 @@
+import { heal } from './player';
 import { config, type StatKey } from '../data/config';
 import { evolutionOf, type Evolution } from '../data/evolutions';
 import { CHEST } from '../data/pickups';
@@ -183,7 +184,7 @@ export function openChest(world: World): void {
   }
   addGold(world, CHEST.gold);
   const p = world.player;
-  p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.maxHp * CHEST.heal);
+  heal(p, p.stats.maxHp * CHEST.heal);
   // A level that forged an Elo is the Elo's moment: the chest opens first and plain, and the forge follows it.
   let forged = false;
   for (let i = mark; i < world.events.length; i++) if (world.events[i]?.type === 'eloForged') forged = true;
@@ -207,13 +208,13 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
       const def = PASSIVES[opt.id];
       world.passives[opt.id] = opt.level;
       p.stats[def.stat] += def.perLevel;
-      if (def.stat === 'maxHp') p.hp += def.perLevel;
+      if (def.stat === 'maxHp') heal(p, def.perLevel);
       break;
     }
     case 'reward': {
       const r: RewardDef = REWARDS[opt.id];
       if (r.gold) addGold(world, r.gold);
-      if (r.heal) p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.maxHp * r.heal);
+      if (r.heal) heal(p, p.stats.maxHp * r.heal);
       if (r.might) {
         p.stats.might += r.might;
         world.blessings++;
@@ -221,7 +222,7 @@ export function applyUpgrade(world: World, opt: UpgradeOption): void {
       break;
     }
     case 'heal':
-      p.hp = Math.min(p.stats.maxHp, p.hp + config.xp.healAmount);
+      heal(p, config.xp.healAmount);
       break;
   }
   if (opt.kind === 'weapon' || opt.kind === 'passive') forgeElos(world);

@@ -2,7 +2,7 @@ import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { WEAPONS, type WeaponDef } from '../data/weapons';
 import { addBolt } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
-import { hurtPlayer } from './player';
+import { heal, hurtPlayer } from './player';
 import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 import type { Zone } from './zones';
@@ -31,7 +31,7 @@ export function onKill(world: World, e: Enemy, source: OwnedWeapon | null): void
       if (source.stacks < def.mend.perSecond) {
         source.stacks++;
         const p = world.player;
-        p.hp = Math.min(p.stats.maxHp, p.hp + def.mend.heal);
+        heal(p, def.mend.heal);
       }
     }
     // Procissão: one more soul walks along for a while.
