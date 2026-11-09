@@ -20,9 +20,14 @@ export class ShopScene extends Phaser.Scene {
     this.focus = data.focus ?? null;
   }
 
+  /** Purchases wait a moment after (re)building, so a double tap buys one level, not two. */
+  private ready = false;
+
   create(): void {
     const { width, height } = this.scale;
-    const cards: Phaser.GameObjects.Rectangle[] = [];
+    const cards: (Phaser.GameObjects.Rectangle | null)[] = [];
+    this.ready = false;
+    this.time.delayedCall(250, () => (this.ready = true));
     const cx = width / 2;
     const save = loadSave();
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
@@ -30,7 +35,7 @@ export class ShopScene extends Phaser.Scene {
     label(this, cx, 66, t.shop.intro, 14, { color: UI.muted, wrap: Math.min(520, width - 32) });
     label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
 
-    let focus = 0;
+    let focus = -1;
     const gap = 8;
     const top = 124;
     const avail = height - top - 70;
@@ -47,10 +52,9 @@ export class ShopScene extends Phaser.Scene {
       const done = cost === null;
       const affordable = !done && cost <= save.gold;
       const card = button(this, x, y, cardW, cardH, () => this.buy(id));
-      if (affordable) {
-        if (id === this.focus) focus = cards.length;
-        cards.push(card);
-      } else disable(card);
+      if (id === this.focus) focus = i;
+      cards.push(card);
+      if (!affordable) disable(card);
       const lx = x - cardW / 2 + 10;
       const small = cardH < 50;
       label(this, lx, y - cardH / 2 + 5, t.shop.items[id], small ? 14 : 16, {
@@ -83,6 +87,8 @@ export class ShopScene extends Phaser.Scene {
           color: affordable ? UI.gold : UI.danger,
         }).setOrigin(1, 0.5);
     });
+    // Back sits on a row of its own.
+    while (cards.length % cols !== 0) cards.push(null);
     cards.push(button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back));
     keyNav(this, cards, cols, focus);
 
@@ -92,7 +98,8 @@ export class ShopScene extends Phaser.Scene {
 
   private buy(id: ShopId): void {
     const save = loadSave();
-    if (!buy(save, id)) return;
+    if (!this.ready || !buy(save, id)) return;
+    this.ready = false; // the restart is queued: a second press this frame still lands here
     writeSave(save);
     this.scene.restart({ focus: id });
   }

@@ -160,33 +160,64 @@ export function navStep(e: KeyboardEvent, cols = 1): number {
 export const isConfirm = (e: KeyboardEvent): boolean => !e.repeat && (e.key === 'Enter' || e.key === ' ');
 
 /**
- * Keyboard navigation over `button`s: arrows/WASD move the focus (by `cols` vertically in a grid),
- * Enter/Space presses the focused one. Disabled buttons are skipped. Returns nothing; the focus is drawn
- * as the hover look plus an accent border.
+ * Where the focus goes from `i` for a navigation step (±1 along the list, ±cols a row in a grid), skipping
+ * disabled entries. A vertical move keeps the column when it can, else goes to the nearest enabled entry of the
+ * next rows (e.g. a Back button on a row of its own), and wraps around at the ends. Pure, for tests.
+ */
+export function navMove(enabled: readonly boolean[], cols: number, i: number, step: number): number {
+  const n = enabled.length;
+  if (step === 1 || step === -1 || cols <= 1) {
+    const dir = step > 0 ? 1 : -1;
+    for (let k = 1; k <= n; k++) {
+      const j = (((i + dir * k) % n) + n) % n;
+      if (enabled[j]) return j;
+    }
+    return i;
+  }
+  const row = Math.floor(i / cols);
+  if (step > 0) {
+    for (let j = i + cols; j < n; j += cols) if (enabled[j]) return j;
+    for (let j = (row + 1) * cols; j < n; j++) if (enabled[j]) return j;
+    for (let j = i % cols; j < i; j += cols) if (enabled[j]) return j;
+    for (let j = 0; j < i; j++) if (enabled[j]) return j;
+  } else {
+    for (let j = i - cols; j >= 0; j -= cols) if (enabled[j]) return j;
+    for (let j = row * cols - 1; j >= 0; j--) if (enabled[j]) return j;
+    for (let j = n - 1; j > i; j--) if (enabled[j]) return j;
+  }
+  return i;
+}
+
+/**
+ * Keyboard navigation over `button`s laid out in a grid of `cols` columns, in reading order (`null` pads a row):
+ * arrows/WASD move the focus, Enter/Space presses the focused one. Disabled buttons are skipped. The focus is
+ * drawn as the hover look plus an accent border.
  */
 export function keyNav(
   scene: Phaser.Scene,
-  buttons: Phaser.GameObjects.Rectangle[],
+  buttons: (Phaser.GameObjects.Rectangle | null)[],
   cols = 1,
   start = 0,
 ): void {
-  const usable = buttons.filter((b) => b.input?.enabled);
-  if (usable.length === 0) return;
-  let i = Math.min(start, usable.length - 1);
+  const enabled = buttons.map((b) => !!b?.input?.enabled);
+  let i = enabled[start] ? start : enabled.indexOf(true);
+  if (i < 0) return;
   const show = () =>
-    usable.forEach((b, k) =>
-      b
-        .setFillStyle(k === i ? UI.panelHover : UI.panel)
-        .setStrokeStyle(k === i ? 3 : 2, k === i ? UI.accent : UI.border),
-    );
+    buttons.forEach((b, k) => {
+      if (b && enabled[k])
+        b.setFillStyle(k === i ? UI.panelHover : UI.panel).setStrokeStyle(
+          k === i ? 3 : 2,
+          k === i ? UI.accent : UI.border,
+        );
+    });
   show();
   bindKeys(scene, (kb) =>
     kb.on('keydown', (e: KeyboardEvent) => {
       const step = navStep(e, cols);
       if (step !== 0) {
-        i = (i + step + usable.length) % usable.length;
+        i = navMove(enabled, cols, i, step);
         show();
-      } else if (isConfirm(e)) (usable[i]?.getData('action') as () => void)();
+      } else if (isConfirm(e)) (buttons[i]?.getData('action') as () => void)();
     }),
   );
 }

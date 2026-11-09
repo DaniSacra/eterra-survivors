@@ -514,14 +514,14 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - Aceite: capturas em 820x420 e 640x360 de level-up, Loja, Livro, Preparação, Menu e Pausa sem nada fora da tela nem
   sobreposto; 420x820 e 1000x680 sem regressão.
 
-**RB-06 · Toque duplo na Loja compra dois níveis** · impl · P · aprovado
+**RB-06 · Toque duplo na Loja compra dois níveis** · impl · P · ✅ feito
 
 - Por quê: 03-qa #3: dois toques rápidos em Sopa Quente compram 0 para 2 (760 para 460 de ouro); `buy()` recria a cena
   e o segundo toque cai no botão novo.
 - O quê: ignorar compras por ~250 ms depois de uma compra (cards armados com `delayedCall`, como o `bindKeys`).
 - Aceite: duplo toque e duplo clique compram um nível só.
 
-**RB-07 · Teclado da Loja pula para o card errado** · impl · P · aprovado
+**RB-07 · Teclado da Loja pula para o card errado** · impl · P · ✅ feito
 
 - Por quê: 02-code #4: o `keyNav` recebe só os cards compráveis com `cols = 2`, então ↓ anda na diagonal.
 - O quê: passar todos os cards ao `keyNav` (que já pula desabilitados) e Voltar numa linha própria.
