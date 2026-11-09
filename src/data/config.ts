@@ -87,7 +87,7 @@ export const config = {
     dropChance: 0.006,
     maxActive: 40,
     foodHeal: 30,
-    bombDamage: 250,
+    bombDamage: 600,
     freezeTime: 6,
   },
   gold: {
