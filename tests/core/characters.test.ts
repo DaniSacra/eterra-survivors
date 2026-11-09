@@ -4,6 +4,7 @@ import { World } from '../../src/core/world';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { config } from '../../src/data/config';
 import { EVOLUTIONS } from '../../src/data/evolutions';
+import { STAGE_IDS } from '../../src/data/stages';
 
 describe('characters', () => {
   it.each(CHARACTER_IDS)('%s starts with its weapon and stat changes', (id) => {
@@ -43,7 +44,12 @@ describe('unlocks', () => {
     expect(unlockHero(save, 'lyra')).toBe(false);
   });
 
-  it('each stage opens when the previous one is cleared', () => {
+  it('playtest switch opens every stage', () => {
+    if (!config.unlockAllStages) return;
+    for (const id of STAGE_IDS) expect(stageUnlocked(newSave(), id)).toBe(true);
+  });
+
+  it.skipIf(config.unlockAllStages)('each stage opens when the previous one is cleared', () => {
     const save = newSave();
     expect(stageUnlocked(save, 'valmor')).toBe(true);
     expect(stageUnlocked(save, 'crypt')).toBe(false);

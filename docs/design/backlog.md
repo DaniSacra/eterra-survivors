@@ -429,7 +429,7 @@ depois e registra em `docs/balance-baseline.md`.
 **D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito
 
 - Por quê: com a renda de E-10, comprar heróis vira uma meta curta e boa.
-- O quê: `config.unlockAllHeroes` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
+- O quê: `config.unlockAllHeroes` e `config.unlockAllStages` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
 - Aceite: um jogador novo libera o segundo herói em 3 a 5 corridas no sim.
 
 ## Etapa 6: Lançamento

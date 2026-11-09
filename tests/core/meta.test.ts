@@ -197,8 +197,9 @@ describe('save versions and Elos', () => {
     });
     const ok = sanitizeSave({ cleared: ['valmor'], heroes: ['lyra'], lastHero: 'lyra', lastStage: 'crypt' });
     expect(lastRun(ok)).toEqual({ character: 'lyra', stage: 'crypt' });
-    // A stage no longer open, or junk, falls back to the default.
-    expect(lastRun(sanitizeSave({ lastHero: 'lyra', lastStage: 'crypt' })).stage).toBe('valmor');
+    // A stage no longer open (unless the playtest switch opens all), or junk, falls back to the default.
+    const locked = lastRun(sanitizeSave({ lastHero: 'lyra', lastStage: 'crypt' })).stage;
+    expect(locked).toBe(config.unlockAllStages ? 'crypt' : 'valmor');
     expect(lastRun(sanitizeSave({ lastHero: 'gandalf', lastStage: 42 }))).toEqual({
       character: 'aldo',
       stage: 'valmor',

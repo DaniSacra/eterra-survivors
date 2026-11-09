@@ -146,10 +146,10 @@ export function unlockHero(save: MetaSave, id: CharacterId): boolean {
   return true;
 }
 
-/** The first stage is always open; each next one opens when the previous is cleared. */
+/** The first stage is always open; each next one opens when the previous is cleared (or all, while playtesting). */
 export function stageUnlocked(save: MetaSave, id: StageId): boolean {
   const i = STAGE_IDS.indexOf(id);
-  return i === 0 || save.cleared.includes(STAGE_IDS[i - 1] as StageId);
+  return config.unlockAllStages || i === 0 || save.cleared.includes(STAGE_IDS[i - 1] as StageId);
 }
 
 export function markCleared(save: MetaSave, id: StageId): void {

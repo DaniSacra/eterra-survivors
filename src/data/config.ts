@@ -3,6 +3,8 @@ export const config = {
   matchDuration: 600, // seconds; the boss arrives at the end
   /** Playtesting: every hero is free. Set to false to sell them for gold again (data/characters.ts costs). */
   unlockAllHeroes: true,
+  /** Playtesting: every stage is open. Set to false so each stage opens by clearing the previous one. */
+  unlockAllStages: true,
   maxDt: 1 / 20, // clamp long frames so nothing tunnels
   view: {
     /** World pixels guaranteed along the screen's shortest side; sets the camera zoom. */
