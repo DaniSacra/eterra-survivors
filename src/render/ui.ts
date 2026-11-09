@@ -40,13 +40,20 @@ export function label(
   y: number,
   text: string,
   size: number,
-  opts: { color?: string; bold?: boolean; wrap?: number; align?: 'left' | 'center'; stroke?: boolean } = {},
+  opts: {
+    color?: string;
+    bold?: boolean;
+    italic?: boolean;
+    wrap?: number;
+    align?: 'left' | 'center';
+    stroke?: boolean;
+  } = {},
 ): Phaser.GameObjects.Text {
   return scene.add
     .text(x, y, text, {
       fontFamily: UI.font,
       fontSize: `${size}px`,
-      fontStyle: opts.bold ? 'bold' : 'normal',
+      fontStyle: [opts.bold ? 'bold' : '', opts.italic ? 'italic' : ''].join(' ').trim() || 'normal',
       color: opts.color ?? UI.text,
       align: opts.align ?? 'center',
       wordWrap: opts.wrap ? { width: opts.wrap } : undefined,

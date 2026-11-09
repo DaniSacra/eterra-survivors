@@ -55,3 +55,13 @@ export function stageCast(id: StageId): EnemyId[] {
   ];
   return [...new Set(ids)];
 }
+
+/** The bestiary's order: each stage's wave cast in stage order, then every elite, then the bosses. */
+export function bestiaryOrder(): EnemyId[] {
+  const ids = [
+    ...STAGE_IDS.flatMap((id) => STAGES[id].waves.flatMap((w) => w.enemies.map((e) => e.id))),
+    ...STAGE_IDS.flatMap((id) => STAGES[id].elites.map((e) => e.id)),
+    ...STAGE_IDS.map((id) => STAGES[id].boss.id),
+  ];
+  return [...new Set(ids)];
+}

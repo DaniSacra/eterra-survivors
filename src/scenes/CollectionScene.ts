@@ -13,6 +13,7 @@ import {
   restartOnResize,
   safeArea,
 } from '../render/ui';
+import { drawBestiary } from './collection/bestiary';
 import { drawElos } from './collection/elos';
 import { TABS, type TabArea, type TabContent, type TabId } from './collection/tab';
 import { SCENES } from './keys';
@@ -21,7 +22,7 @@ import { SCENES } from './keys';
 const TAB_KEY = 'collection.tab';
 
 const DRAW: Record<TabId, (a: TabArea) => TabContent> = {
-  bestiary: () => ({ buttons: [] }),
+  bestiary: drawBestiary,
   elos: drawElos,
   achievements: () => ({ buttons: [] }),
   heroes: () => ({ buttons: [] }),

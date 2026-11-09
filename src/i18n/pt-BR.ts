@@ -121,6 +121,73 @@ export const t = {
     tabs: { bestiary: 'Bestiário', elos: 'Elos', achievements: 'Conquistas', heroes: 'Heróis' },
   },
 
+  /** The Coleção's Bestiário: the sheet of each enemy met, in player terms (core/format.ts `enemyTraits`). */
+  bestiary: {
+    count: (n: number, total: number) => `${n} de ${total} encontrados`,
+    unknown: '???',
+    /** Kills on a card ("x1.234"). */
+    kills: (n: string) => `x${n}`,
+    empty: 'Os inimigos que você encontrar nas partidas aparecem aqui.',
+    seenIn: 'Visto em',
+    killed: 'Abatidos',
+    hp: 'Vida',
+    hpGrows: (n: string) => `${n}, cresce com o tempo`,
+    speed: 'Velocidade',
+    speeds: { slow: 'Lento', medium: 'Médio', fast: 'Rápido', faster: 'Mais rápido que você' },
+    damage: 'Dano ao tocar',
+    push: 'Empurrão',
+    pushes: { none: 'Não recua', little: 'Recua pouco', easy: 'Recua fácil' },
+    way: 'Jeito',
+    ways: {
+      charge: 'Investe em linha',
+      zigzag: 'Ziguezague',
+      phase: 'Atravessa e some',
+      elite: 'Deixa um baú',
+      cleave: 'Corte Brutal',
+      toll: 'Badalada',
+      lunge: 'Mordida Funda',
+    },
+    /** A line about each enemy: from the original where it has one, else written for the Survivors (docs/design/conquistas.md). */
+    quote: (line: string) => `"${line}"`,
+    /** A line someone says: "..." (Seu Joaquim). */
+    quoteBy: (line: string, who: string) => `"${line}" (${who})`,
+    speakers: { rat: 'Seu Joaquim' } as Partial<Record<EnemyId, string>>,
+    flavor: {
+      // original src/opening.js (the `ossada` fight)
+      bones: 'Uma mão de osso rompe a terra. Uma Ossada se levanta!',
+      // original src/opening.js (the `morcegos` fight)
+      bat: 'Dois morcegos descem do muro!',
+      // original src/opening.js (the `rato` and `ratoCova` fights)
+      graveRat: 'Um rato do tamanho de um gato sai de uma cova!',
+      // historias/capitulo1-aldo-sozinho.md (Seu Joaquim, village talk)
+      rat: 'Na minha época, a gente enfrentava rato gigante com uma vassoura!',
+      // historias/prologo.md (cast table)
+      hooded: 'Capa cinza, lâminas curvas, um olho cortado ao meio.',
+      // original src/chapter1.js (the `crow` encounter)
+      crow: 'Corvos mergulham do escuro!',
+      // original src/chapter1.js (a traveller on the road)
+      frostWolf: 'E não andem depois que escurece. Os lobos estão com fome este ano.',
+      // canone.md, Criaturas e povos [C]
+      goblin: 'Os goblins fizeram um acordo com os Nekaren: a Aliança Negra.',
+      // original src/data.js (`sineiro.say.intro`)
+      bellRinger: 'O último toque foi há cinquenta anos. Ninguém mais desce.',
+      // original src/chapter1.js (the pack battle)
+      oldWolf: 'A matilha sai da floresta! O Lobo Velho vem na frente.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      skeleton: 'Saiu de uma cova aberta por dentro. Mais inteiro que uma Ossada, e mais teimoso.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      spider: 'Faz ninho entre as lápides e nunca anda em linha reta.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      slime: 'Escorre do limo da cripta. Bater nela é como bater em mingau.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      ghost: 'Um frio que atravessa as paredes. Às vezes some, e o golpe passa junto.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      golem: 'Pedra que anda. Devagar, mas não para.',
+      // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
+      blackKnight: 'Armadura negra e olhos vermelhos. Ninguém em Valmor sabe de onde veio.',
+    } as Partial<Record<EnemyId, string>>,
+  },
+
   elos: {
     count: (n: number, total: number) => `${n} de ${total} Elos descobertos`,
     unknown: '???',

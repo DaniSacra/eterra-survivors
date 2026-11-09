@@ -68,28 +68,29 @@ Princípios que adotamos:
 
 ### Frases (somente do original; onde não há, fica sem frase)
 
-| Inimigo                         | Frase no jogo (pt-BR)                                                             | Fonte                                                 |
-| ------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Ossada (`bones`)                | "Uma mão de osso rompe a terra. Uma Ossada se levanta!"                           | original `src/opening.js` (luta `ossada`)             |
-| Morcego (`bat`)                 | "Dois morcegos descem do muro!"                                                   | original `src/opening.js` (luta `morcegos`)           |
-| Esqueleto (`skeleton`)          | (sem frase)                                                                       | só existe na tabela de dados                          |
-| Rato de Cova (`graveRat`)       | "Um rato do tamanho de um gato sai de uma cova!"                                  | original `src/opening.js` (luta `rato`, `ratoCova`)   |
-| Rato Gigante (`rat`)            | "Na minha época, a gente enfrentava rato gigante com uma vassoura!" (Seu Joaquim) | `historias/capitulo1-aldo-sozinho.md` (falas da vila) |
-| Aranha Tumular (`spider`)       | (sem frase)                                                                       | só dados (habilidade Ferroada)                        |
-| Gosma Verde (`slime`)           | (sem frase)                                                                       | só dados                                              |
-| Espectro (`ghost`)              | (sem frase)                                                                       | só dados (habilidade Toque Gélido)                    |
-| Encapuzado (`hooded`)           | "Capa cinza, lâminas curvas, um olho cortado ao meio."                            | `historias/prologo.md` (tabela de personagens)        |
-| Corvo (`crow`)                  | "Corvos mergulham do escuro!"                                                     | original `src/chapter1.js` (encontro `crow`)          |
-| Lobo da Geada (`frostWolf`)     | "E não andem depois que escurece. Os lobos estão com fome este ano."              | original `src/chapter1.js` (viajante da estrada)      |
-| Goblin Lanceiro (`goblin`)      | "Os goblins fizeram um acordo com os Nekaren: a Aliança Negra."                   | `canone.md`, Criaturas e povos [C]                    |
-| Golem de Pedra (`golem`)        | (sem frase)                                                                       | só dados                                              |
-| Cavaleiro Negro (`blackKnight`) | (sem frase)                                                                       | só dados (habilidade Corte Brutal)                    |
-| O Sineiro (`bellRinger`)        | "O último toque foi há cinquenta anos. Ninguém mais desce."                       | original `src/data.js` (`sineiro.say.intro`)          |
-| Lobo Velho (`oldWolf`)          | "A matilha sai da floresta! O Lobo Velho vem na frente."                          | original `src/chapter1.js` (batalha da matilha)       |
+| Inimigo                         | Frase no jogo (pt-BR)                                                              | Fonte                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Ossada (`bones`)                | "Uma mão de osso rompe a terra. Uma Ossada se levanta!"                            | original `src/opening.js` (luta `ossada`)             |
+| Morcego (`bat`)                 | "Dois morcegos descem do muro!"                                                    | original `src/opening.js` (luta `morcegos`)           |
+| Esqueleto (`skeleton`)          | "Saiu de uma cova aberta por dentro. Mais inteiro que uma Ossada, e mais teimoso." | escrita para o Survivors (2026-11-09), a revisar      |
+| Rato de Cova (`graveRat`)       | "Um rato do tamanho de um gato sai de uma cova!"                                   | original `src/opening.js` (luta `rato`, `ratoCova`)   |
+| Rato Gigante (`rat`)            | "Na minha época, a gente enfrentava rato gigante com uma vassoura!" (Seu Joaquim)  | `historias/capitulo1-aldo-sozinho.md` (falas da vila) |
+| Aranha Tumular (`spider`)       | "Faz ninho entre as lápides e nunca anda em linha reta."                           | escrita para o Survivors (2026-11-09), a revisar      |
+| Gosma Verde (`slime`)           | "Escorre do limo da cripta. Bater nela é como bater em mingau."                    | escrita para o Survivors (2026-11-09), a revisar      |
+| Espectro (`ghost`)              | "Um frio que atravessa as paredes. Às vezes some, e o golpe passa junto."          | escrita para o Survivors (2026-11-09), a revisar      |
+| Encapuzado (`hooded`)           | "Capa cinza, lâminas curvas, um olho cortado ao meio."                             | `historias/prologo.md` (tabela de personagens)        |
+| Corvo (`crow`)                  | "Corvos mergulham do escuro!"                                                      | original `src/chapter1.js` (encontro `crow`)          |
+| Lobo da Geada (`frostWolf`)     | "E não andem depois que escurece. Os lobos estão com fome este ano."               | original `src/chapter1.js` (viajante da estrada)      |
+| Goblin Lanceiro (`goblin`)      | "Os goblins fizeram um acordo com os Nekaren: a Aliança Negra."                    | `canone.md`, Criaturas e povos [C]                    |
+| Golem de Pedra (`golem`)        | "Pedra que anda. Devagar, mas não para."                                           | escrita para o Survivors (2026-11-09), a revisar      |
+| Cavaleiro Negro (`blackKnight`) | "Armadura negra e olhos vermelhos. Ninguém em Valmor sabe de onde veio."           | escrita para o Survivors (2026-11-09), a revisar      |
+| O Sineiro (`bellRinger`)        | "O último toque foi há cinquenta anos. Ninguém mais desce."                        | original `src/data.js` (`sineiro.say.intro`)          |
+| Lobo Velho (`oldWolf`)          | "A matilha sai da floresta! O Lobo Velho vem na frente."                           | original `src/chapter1.js` (batalha da matilha)       |
 
 As frases ficam em `pt-BR.ts` (`bestiary.flavor`, `Partial<Record<EnemyId, string>>`), com a fonte num comentário.
-**Pergunta aberta para o Daniel:** seis inimigos não têm texto no original (Esqueleto, Aranha Tumular, Gosma Verde,
-Espectro, Golem de Pedra, Cavaleiro Negro). Ele quer escrever uma linha para cada um? Até lá, ficam sem frase.
+~~**Pergunta aberta para o Daniel:** seis inimigos não têm texto no original (Esqueleto, Aranha Tumular, Gosma Verde,
+Espectro, Golem de Pedra, Cavaleiro Negro). Ele quer escrever uma linha para cada um?~~ Daniel, 2026-11-09: linhas
+escritas para o Survivors, a revisar no teste (só repetem o que o jogo e os dados do original já dizem).
 
 ## 3. Conquistas (35)
 
@@ -414,8 +415,8 @@ Cada passo termina com `npm test`, `npm run lint`, `npm run build` verdes e o jo
 
 ## Perguntas abertas para o Daniel
 
-1. Seis inimigos sem frase no original (Esqueleto, Aranha Tumular, Gosma Verde, Espectro, Golem de Pedra,
-   Cavaleiro Negro): quer escrever uma linha para cada?
+1. ~~Seis inimigos sem frase no original: quer escrever uma linha para cada?~~ Daniel, 2026-11-09: linhas escritas
+   para o Survivors, a revisar no teste.
 2. ~~As três recompensas opcionais: ligar ou deixar só ouro?~~ Daniel, 2026-11-09: ligadas.
 3. ~~Os nomes que citam o original: tudo bem usar assim?~~ Daniel, 2026-11-09: sim.
 

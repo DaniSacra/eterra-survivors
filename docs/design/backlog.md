@@ -1188,11 +1188,14 @@ implementação abaixo; cada item é um commit.
   título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
   abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
-**CC-06 · Aba Bestiário** · impl + visual · M · aprovado
+**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito
 
 - O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
   (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
 - Aceite: os 16 inimigos aparecem; não vistos sem nenhum dado; nenhuma frase inventada.
+- Feito: `enemyTraits` em `core/format.ts` e `bestiaryOrder` em `data/stages.ts` (testados); grade 4 x 4 (fases,
+  elites, chefes), ficha embaixo em pé e à direita deitado/largo. Frases do original com a fonte num comentário; as
+  seis sem texto no original ganharam linhas escritas para o Survivors (decisão do Daniel, a revisar no teste).
 
 **CC-07 · Aba Conquistas** · impl + ui · M · aprovado
 
@@ -1216,8 +1219,8 @@ implementação abaixo; cada item é um commit.
 
 **Perguntas abertas (CC)**
 
-1. Frases para os seis inimigos sem texto no original (Esqueleto, Aranha Tumular, Gosma Verde, Espectro, Golem de
-   Pedra, Cavaleiro Negro)?
+1. ~~Frases para os seis inimigos sem texto no original?~~ Daniel, 2026-11-09: linhas escritas para o Survivors, a
+   revisar no teste.
 2. ~~Ligar as três recompensas opcionais?~~ Respondida em 2026-11-09: ligadas.
 3. ~~Usar as citações do original nos nomes?~~ Respondida em 2026-11-09: sim, pode usar.
 
