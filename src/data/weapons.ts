@@ -22,20 +22,16 @@ export interface ArcLevel extends BaseLevel {
 }
 
 /**
- * A heavy blow that splits the ground: a fissure (a long rectangle) runs out in front of the hero, and a moment
- * later (the weapon's `combo` seconds) a tremor bursts where the blow landed. Everything it hits is stunned.
+ * A heavy blow in front of the hero: everything within `radius` of where it lands is hit and stunned. Every
+ * `waveEvery`-th blow (the weapon's) a shock wave runs out to `waveRadius`, a fraction `wave` of the damage,
+ * throwing everything back (`waveKnockback`).
  */
 export interface SlamLevel extends BaseLevel {
-  /** Length and width of each fissure, world px. */
-  length: number;
-  width: number;
+  radius: number;
   knockback: number;
-  /** Fissures per blow, fanned out by `spread` radians. */
-  count: number;
-  spread: number;
-  /** The tremor: a fraction of `damage`, and its radius. */
-  tremor: number;
-  tremorRadius: number;
+  wave: number;
+  waveRadius: number;
+  waveKnockback: number;
   /** Seconds the enemies hit can't move or bite (bosses: config.weapons.bossStun at most). */
   stun: number;
 }
@@ -125,8 +121,8 @@ export type WeaponDef = {
     aim?: 'nearest' | 'facing';
     /** Strength band (base weapons only; an Elo inherits its base's, see `weaponCategory`). */
     category?: WeaponCategory;
-    /** Slam weapons: the seconds until the tremor. */
-    combo?: number;
+    /** Slam weapons: every this many blows the shock wave runs out (1 = every blow). */
+    waveEvery?: number;
     /** Arc weapons: every `every`-th swing is a thrust instead, longer (x`range`), narrow (`arc`) and harder (x`damage`). */
     thrust?: { every: number; range: number; arc: number; damage: number };
     /** Thrown weapons: the chance of a critical hit, and its damage multiplier. */
@@ -141,9 +137,7 @@ export type WeaponDef = {
      * after `fall` s and burst again at `scale` of the damage and radius (one generation only).
      */
     split?: { count: number; distance: number; scale: number; fall: number };
-    /** Slam weapons (Quebra-Junta): each fissure branches at its tip into `count` more, `angle` apart, x`length` long. */
-    branch?: { count: number; angle: number; length: number };
-    /** Slam weapons: each tremor sets off one smaller tremor (x`scale` damage and radius) `delay` s later. */
+    /** Slam weapons: each full shock wave sets off a smaller one (x`scale` damage and radius) `delay` s later. */
     aftershock?: { scale: number; delay: number };
     /** Slam weapons: damage multiplier against enemies already stunned when hit (esmagar). */
     crush?: number;
@@ -391,7 +385,7 @@ export const WEAPONS = {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 9.4, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 2.2, knockback: 150 },
+      { damage: 9.4, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 2.2, knockback: 600 },
       { damage: 12 },
       { count: 2 },
       { orbitRadius: 88, radius: 12 },
@@ -400,30 +394,28 @@ export const WEAPONS = {
       { damage: 23, spin: 2.6 },
     ),
   },
-  /** Maça de Ferro: the blow splits the ground ahead, the ground shakes where it landed, and whoever is hit reels. */
+  /** Maça de Ferro: a heavy blow in front that leaves enemies reeling; every third, a shock wave throws them back. */
   mace: {
     kind: 'slam',
     category: 'aimed',
-    combo: 0.8,
+    waveEvery: 3,
     levels: levels<SlamLevel>(
       {
-        damage: 24,
-        cooldown: 1.5,
-        length: 150,
-        width: 34,
-        knockback: 80,
-        count: 1,
-        spread: 0.5,
-        tremor: 0.8,
-        tremorRadius: 55,
+        damage: 27,
+        cooldown: 1.4,
+        radius: 48,
+        knockback: 220,
+        wave: 0.8,
+        waveRadius: 105,
+        waveKnockback: 700,
         stun: 0.4,
       },
-      { damage: 31 },
-      { length: 175, tremorRadius: 62 },
-      { damage: 40, cooldown: 1.35 },
-      { width: 42 },
-      { damage: 50 },
-      { damage: 66, cooldown: 1.15, length: 200, tremorRadius: 72 },
+      { damage: 34 },
+      { radius: 52, waveRadius: 115 },
+      { damage: 43, cooldown: 1.25 },
+      { radius: 56 },
+      { damage: 54 },
+      { damage: 70, cooldown: 1.1, radius: 60, waveRadius: 125 },
     ),
   },
 
@@ -516,24 +508,21 @@ export const WEAPONS = {
     chain: { count: 2, range: 170, damage: 0.7 },
     levels: [{ damage: 25, cooldown: 0.8, count: 8, radius: 52 }],
   },
-  /** Quebra-Junta: the fissure branches in three, each tremor wakes a smaller one, and the stunned get crushed. */
+  /** Quebra-Junta: the shock wave on every blow, an aftershock right after it, and the stunned get crushed. */
   jointBreaker: {
     kind: 'slam',
-    combo: 0.8,
-    branch: { count: 2, angle: 0.55, length: 0.6 },
-    aftershock: { scale: 0.6, delay: 0.35 },
+    waveEvery: 1,
+    aftershock: { scale: 0.7, delay: 0.3 },
     crush: 1.5,
     levels: [
       {
-        damage: 107,
+        damage: 64,
         cooldown: 0.9,
-        length: 240,
-        width: 46,
-        knockback: 110,
-        count: 1,
-        spread: 0,
-        tremor: 1,
-        tremorRadius: 95,
+        radius: 70,
+        knockback: 260,
+        wave: 0.7,
+        waveRadius: 150,
+        waveKnockback: 800,
         stun: 0.5,
       },
     ],
@@ -586,7 +575,7 @@ export const WEAPONS = {
     kind: 'orbit',
     ward: { every: 10, damage: 3 },
     levels: [
-      { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 200 },
+      { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 750 },
     ],
   },
   /** Estrela de Lyra: the orb bursts and splits into small stars that fall around it and burst again. */

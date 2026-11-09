@@ -32,43 +32,49 @@ describe('weapon data', () => {
   });
 });
 
-describe('Maça de Ferro (slam: fissure, tremor, stun)', () => {
+describe('Maça de Ferro (slam: a blow in front, a shock wave every few)', () => {
   const mace = WEAPONS.mace;
   const l = mace.levels[0]!;
+  const ahead = l.radius * 0.55; // where the head lands (SMASH_AHEAD)
 
-  it('opens a fissure where the hero faces: a long strip, nothing beside it or behind', () => {
+  const blow = (w: World) => {
+    w.weapons[0]!.timer = 0;
+    updateWeapons(w, 1 / 60);
+  };
+
+  it('hits and stuns what is in front, not what is behind or far', () => {
     const w = prepared('mace');
     w.player.facing.x = 1;
-    const tip = spawnEnemy(w, 'blackKnight', l.length - 10, 0);
-    const beside = spawnEnemy(w, 'blackKnight', l.length / 2, l.width / 2 + 60);
-    const back = spawnEnemy(w, 'blackKnight', -60, 0);
-    updateWeapons(w, 1 / 60);
-    expect(tip.maxHp - tip.hp).toBeCloseTo(l.damage);
-    expect(beside.hp).toBe(beside.maxHp);
+    const front = spawnEnemy(w, 'blackKnight', ahead + l.radius - 10, 0);
+    const back = spawnEnemy(w, 'skeleton', -l.radius, 0);
+    const far = spawnEnemy(w, 'blackKnight', ahead + l.radius + 80, 0);
+    blow(w);
+    expect(front.maxHp - front.hp).toBeCloseTo(l.damage);
+    expect(front.stun).toBeGreaterThan(0);
     expect(back.hp).toBe(back.maxHp);
-    expect(w.slashes.active.some((s) => s.form === 'fissure')).toBe(true);
+    expect(far.hp).toBe(far.maxHp);
+    expect(w.slashes.active.some((s) => s.form === 'smash')).toBe(true);
   });
 
-  it('a moment later the ground shakes at the impact point, for part of the damage', () => {
+  it('every `waveEvery` blows a shock wave reaches farther and throws enemies back', () => {
     const w = prepared('mace');
     w.player.facing.x = 1;
-    const d = config.weapons.slamImpact;
-    // Beside the impact point, off the fissure: only the tremor reaches it.
-    const e = spawnEnemy(w, 'skeleton', d, l.tremorRadius - 5);
+    const e = spawnEnemy(w, 'skeleton', ahead + l.waveRadius - 10, 0);
     e.hp = e.maxHp = 1e6;
-    updateWeapons(w, 1 / 60);
+    for (let i = 0; i < mace.waveEvery - 1; i++) blow(w);
     expect(e.hp).toBe(e.maxHp);
-    for (let t = 0; t < mace.combo! + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
-    expect(e.maxHp - e.hp).toBeCloseTo(l.damage * l.tremor);
-    expect(w.slashes.active.some((s) => s.form === 'tremor')).toBe(true);
+    blow(w);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage * l.wave);
+    expect(e.kbx).toBeGreaterThan(l.waveKnockback * 0.3);
+    expect(w.slashes.active.some((s) => s.form === 'shock')).toBe(true);
   });
 
   it("stuns: the enemy hit stops and can't bite; a boss only for a moment", () => {
     const w = prepared('mace');
     w.player.facing.x = 1;
-    const e = spawnEnemy(w, 'skeleton', 40, 0);
+    const e = spawnEnemy(w, 'skeleton', ahead, 10);
     e.hp = e.maxHp = 1e6;
-    const boss = spawnEnemy(w, 'blackKnight', 130, 0);
+    const boss = spawnEnemy(w, 'blackKnight', ahead, -50);
     updateWeapons(w, 1 / 60);
     expect(e.stun).toBeCloseTo(l.stun);
     expect(boss.stun).toBeCloseTo(config.weapons.bossStun);
@@ -84,42 +90,40 @@ describe('Maça de Ferro (slam: fissure, tremor, stun)', () => {
     expect(w.player.hp).toBe(hp);
   });
 
-  it('Quebra-Junta: the fissure branches in three at its tip, and an enemy where they meet is hit once', () => {
+  it('Quebra-Junta: the wave on every blow, a smaller aftershock, and the stunned crushed', () => {
     const w = prepared('jointBreaker');
     const def = WEAPONS.jointBreaker;
     const j = def.levels[0]!;
     w.player.facing.x = 1;
-    const fork = spawnEnemy(w, 'blackKnight', j.length + 5, 0);
-    const branch = spawnEnemy(
-      w,
-      'blackKnight',
-      j.length + Math.cos(def.branch.angle) * j.length * def.branch.length * 0.8,
-      Math.sin(def.branch.angle) * j.length * def.branch.length * 0.8,
-    );
-    updateWeapons(w, 1 / 60);
-    expect(w.slashes.active.filter((s) => s.form === 'fissure')).toHaveLength(1 + def.branch.count);
-    expect(fork.maxHp - fork.hp).toBeCloseTo(j.damage);
-    expect(branch.hp).toBeLessThan(branch.maxHp);
-  });
-
-  it('Quebra-Junta: each tremor wakes a smaller one, and the stunned are crushed', () => {
-    const w = prepared('jointBreaker');
-    const def = WEAPONS.jointBreaker;
-    const j = def.levels[0]!;
-    w.player.facing.x = 1;
-    const d = config.weapons.slamImpact;
-    // Off the fissure, inside both tremors: its first tremor finds it unstunned, the aftershock stunned.
-    const e = spawnEnemy(w, 'skeleton', d, j.tremorRadius * def.aftershock.scale - 10);
+    const at = j.radius * 0.55;
+    // Outside the blow, inside both waves: the wave finds it unstunned, the aftershock stunned.
+    const e = spawnEnemy(w, 'skeleton', at + j.radius + 20, 0);
     e.hp = e.maxHp = 1e6;
+    e.def = { ...e.def, knockbackResist: 1 };
+    w.weapons[0]!.timer = 0;
     updateWeapons(w, 1 / 60);
-    expect(e.hp).toBe(e.maxHp);
-    let t = 0;
-    for (; t < def.combo + 0.02; t += 1 / 60) updateWeapons(w, 1 / 60);
     const first = e.maxHp - e.hp;
-    expect(first).toBeCloseTo(j.damage * j.tremor);
-    for (; t < def.combo + def.aftershock.delay + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
-    expect(e.maxHp - e.hp - first).toBeCloseTo(j.damage * j.tremor * def.aftershock.scale * def.crush);
-    expect(w.slashes.active.filter((s) => s.form === 'tremor')).toHaveLength(2);
+    expect(first).toBeCloseTo(j.damage * j.wave);
+    w.weapons[0]!.timer = 99;
+    for (let t = 0; t < def.aftershock.delay + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
+    expect(e.maxHp - e.hp - first).toBeCloseTo(j.damage * j.wave * def.aftershock.scale * def.crush);
+    expect(w.slashes.active.filter((s) => s.form === 'shock')).toHaveLength(2);
+  });
+});
+
+describe('Escudos de Valmor: the push', () => {
+  it('a shield throws the enemy it hits back by a real distance', () => {
+    const w = prepared('shields');
+    const s = WEAPONS.shields.levels[0]!;
+    const e = spawnEnemy(w, 'bones', s.orbitRadius, 0);
+    e.hp = e.maxHp = 1e6;
+    w.time = 0; // the shield starts at angle 0, right on it
+    updateWeapons(w, 1 / 60);
+    expect(e.hp).toBeLessThan(e.maxHp);
+    const x0 = e.x;
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    // Pushed outward more than it could walk back in half a second.
+    expect(e.x - x0).toBeGreaterThan(20);
   });
 });
 

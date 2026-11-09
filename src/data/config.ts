@@ -127,10 +127,9 @@ export const config = {
   },
   effects: {
     slashTtl: 0.18,
-    /** A slam's fissure stays open a little longer than a swing (the crack must be read). */
-    fissureTtl: 0.45,
-    /** A slam's tremor burst. */
-    tremorTtl: 0.35,
+    /** A mace blow's mark on the ground, and its shock wave running out. */
+    smashTtl: 0.4,
+    shockTtl: 0.45,
     /** Chama de Yah's wave running out. */
     pulseTtl: 0.4,
     boltTtl: 0.22,

@@ -34,14 +34,9 @@ export interface OwnedWeapon {
   damage: number;
   /** Match time when it was picked up. */
   since: number;
-  /** Seconds until a combo weapon's second blow or a slam's tremor (0 = none pending), and where it goes. */
-  combo: number;
-  comboAngle: number;
-  comboX: number;
-  comboY: number;
   /** Attacks made so far (a thrust or a Fúria wave comes every `every`). */
   swings: number;
-  /** Seconds until a tremor's aftershock (Quebra-Junta; 0 = none pending), and where. */
+  /** Seconds until a shock wave's aftershock (Quebra-Junta; 0 = none pending), and where. */
   after: number;
   afterX: number;
   afterY: number;
@@ -115,19 +110,12 @@ export function updateWeapons(world: World, dt: number): void {
       sweepOrbit(world, weaponStats(w) as OrbitLevel, w, slot);
       continue;
     }
-    if (w.combo > 0) {
-      w.combo -= dt;
-      if (w.combo <= 0) {
-        w.combo = 0;
-        tremor(world, weaponStats(w) as SlamLevel, w, w.comboX, w.comboY, 1);
-      }
-    }
     if (w.after > 0) {
       w.after -= dt;
       if (w.after <= 0) {
         w.after = 0;
         const scale = (WEAPONS[w.id] as WeaponDef).aftershock?.scale ?? 1;
-        tremor(world, weaponStats(w) as SlamLevel, w, w.afterX, w.afterY, scale);
+        shockWave(world, weaponStats(w) as SlamLevel, w, w.afterX, w.afterY, 0, scale);
       }
     }
     w.timer -= dt;
@@ -197,7 +185,7 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
     THRUST.range = s.range * th.range;
     THRUST.arc = th.arc;
     THRUST.knockback = s.knockback;
-    swingArc(world, THRUST, w, facing, true);
+    swingArc(world, THRUST, w, facing, true, 'thrust');
     return true;
   }
   for (let k = 0; k < s.swings; k++) swingArc(world, s, w, facing + k * Math.PI, k === 0);
@@ -219,119 +207,76 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
 const THRUST: ArcLevel = { damage: 0, cooldown: 0, range: 0, arc: 0, knockback: 0, swings: 1 };
 
 /**
- * A slam: one fissure per `count`, fanned by `spread`, from the hero along where they face; the tremor follows
- * `combo` seconds later at the impact point (in front of the hero, where it stood).
+ * A slam: the mace comes down in front of the hero. Everything within `radius` of the impact point is hit, pushed
+ * out a little and stunned; every `wave.every`-th blow a shock wave also runs out to `waveRadius`, hitting and
+ * throwing everything back. Quebra-Junta: the wave on every blow, an aftershock and the stunned crushed.
  */
 function fireSlam(world: World, s: SlamLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const def = WEAPONS[w.id] as WeaponDef;
   const facing = Math.atan2(p.facing.y, p.facing.x);
   const area = p.stats.area;
-  const length = s.length * area;
-  const half = (s.width * area) / 2;
-  const hit = world.targetsScratch;
-  hit.length = 0;
-  // Fissures that cross (a fan, Quebra-Junta's branches) hit an enemy once.
-  const once = s.count > 1 || !!def.branch;
-  const damage = dmg(world, s.damage);
-  world.numberBudget = config.effects.arcNumbers;
-  for (let k = 0; k < s.count; k++) {
-    const a = facing + (k - (s.count - 1) / 2) * s.spread;
-    fissure(world, s, w, p.x, p.y, a, length, half, damage, once);
-    // Quebra-Junta: at the tip the fissure branches out, a little shorter.
-    const br = def.branch;
-    if (!br) continue;
-    const tx = p.x + Math.cos(a) * length;
-    const ty = p.y + Math.sin(a) * length;
-    for (let b = 0; b < br.count; b++) {
-      const ba = a + (b - (br.count - 1) / 2) * br.angle * (br.count > 1 ? 2 / (br.count - 1) : 1);
-      fissure(world, s, w, tx, ty, ba, length * br.length, half, damage, once);
-    }
-  }
-  world.numberBudget = Infinity;
-  if (def.combo) {
-    const d = config.weapons.slamImpact * area;
-    w.combo = def.combo;
-    w.comboX = p.x + Math.cos(facing) * d;
-    w.comboY = p.y + Math.sin(facing) * d;
-    w.comboAngle = facing;
-  }
+  const r = s.radius * area;
+  // The impact point: in front, so the blow covers the hero's front half and a little behind.
+  const x = p.x + Math.cos(facing) * r * SMASH_AHEAD;
+  const y = p.y + Math.sin(facing) * r * SMASH_AHEAD;
+  smash(world, s, w, x, y, facing, r, dmg(world, s.damage), 'smash', s.knockback);
+  const every = def.kind === 'slam' ? (def.waveEvery ?? 0) : 0;
+  if (every > 0 && ++w.swings % every === 0) shockWave(world, s, w, x, y, facing, 1);
   return true;
 }
 
-/** One fissure from (x, y) along `angle`: everything on it is hit, pushed along and stunned. */
-function fissure(
+/** How far ahead of the hero the impact lands, in radii. */
+const SMASH_AHEAD = 0.55;
+
+/**
+ * The shock wave of a slam (x`scale` of its size and damage, for an aftershock). With an `aftershock`
+ * (Quebra-Junta) the full wave wakes a smaller one `delay` s later.
+ */
+function shockWave(
   world: World,
   s: SlamLevel,
   w: OwnedWeapon,
   x: number,
   y: number,
   angle: number,
-  length: number,
-  half: number,
-  damage: number,
-  once: boolean,
+  scale: number,
 ): void {
-  const list = world.enemies.active;
-  const hit = world.targetsScratch;
-  const ux = Math.cos(angle);
-  const uy = Math.sin(angle);
-  const slash = world.slashes.acquire();
-  slash.form = 'fissure';
-  slash.x = x;
-  slash.y = y;
-  slash.angle = angle;
-  slash.range = length;
-  slash.width = half * 2;
-  slash.arc = 0;
-  slash.shock = 0;
-  slash.weapon = w.id;
-  slash.ttl = config.effects.fissureTtl;
-  const mx = x + (ux * length) / 2;
-  const my = y + (uy * length) / 2;
-  const ids = world.enemyHash.query(mx, my, length / 2 + half + MAX_ENEMY_RADIUS, world.scratch);
-  for (let i = 0; i < ids.length; i++) {
-    const e = list[ids[i] as number] as Enemy;
-    if (e.dead) continue;
-    const dx = e.x - x;
-    const dy = e.y - y;
-    const along = dx * ux + dy * uy;
-    const across = Math.abs(dx * -uy + dy * ux);
-    const r = e.def.radius;
-    if (along < -r || along > length + r || across > half + r) continue;
-    if (once) {
-      if (hit.includes(e.uid)) continue;
-      hit.push(e.uid);
-    }
-    slamHit(world, e, s, damage, ux, uy, s.knockback, w);
-  }
-}
-
-/**
- * The slam's tremor: a burst at the impact point, a fraction of the damage, stunning again. With an `aftershock`
- * (Quebra-Junta) the first tremor wakes one smaller tremor a moment later.
- */
-function tremor(world: World, s: SlamLevel, w: OwnedWeapon, x: number, y: number, scale: number): void {
   const after = (WEAPONS[w.id] as WeaponDef).aftershock;
   if (after && scale === 1) {
     w.after = after.delay;
     w.afterX = x;
     w.afterY = y;
   }
-  const r = s.tremorRadius * world.player.stats.area * scale;
+  const r = s.waveRadius * world.player.stats.area * scale;
+  smash(world, s, w, x, y, angle, r, dmg(world, s.damage) * s.wave * scale, 'shock', s.waveKnockback);
+}
+
+/** Hits, pushes out from (x, y) and stuns everything within `r`; leaves the `form` mark on the ground. */
+function smash(
+  world: World,
+  s: SlamLevel,
+  w: OwnedWeapon,
+  x: number,
+  y: number,
+  angle: number,
+  r: number,
+  damage: number,
+  form: 'smash' | 'shock',
+  knockback: number,
+): void {
   const slash = world.slashes.acquire();
-  slash.form = 'tremor';
+  slash.form = form;
   slash.x = x;
   slash.y = y;
-  slash.angle = w.comboAngle;
+  slash.angle = angle;
   slash.range = 0;
   slash.width = 0;
   slash.arc = 0;
   slash.shock = r;
   slash.weapon = w.id;
-  slash.ttl = config.effects.tremorTtl;
+  slash.ttl = form === 'smash' ? config.effects.smashTtl : config.effects.shockTtl;
   const list = world.enemies.active;
-  const hit = dmg(world, s.damage) * s.tremor * scale;
   world.numberBudget = config.effects.arcNumbers;
   const ids = world.enemyHash.query(x, y, r + MAX_ENEMY_RADIUS, world.scratch);
   for (let i = 0; i < ids.length; i++) {
@@ -342,7 +287,7 @@ function tremor(world: World, s: SlamLevel, w: OwnedWeapon, x: number, y: number
     const reach = r + e.def.radius;
     if (dx * dx + dy * dy > reach * reach) continue;
     const d = Math.hypot(dx, dy) || 1;
-    slamHit(world, e, s, hit, dx / d, dy / d, s.knockback * 0.5, w);
+    slamHit(world, e, s, damage, dx / d, dy / d, knockback, w);
   }
   world.numberBudget = Infinity;
 }
@@ -369,12 +314,19 @@ function slamHit(
  * One swing at `angle`. `touch`: enemies hugging the hero are hit even outside the cone (only on the first
  * swing, so a front-and-back slash hits a hugging enemy once).
  */
-function swingArc(world: World, s: ArcLevel, w: OwnedWeapon, angle: number, touch: boolean): void {
+function swingArc(
+  world: World,
+  s: ArcLevel,
+  w: OwnedWeapon,
+  angle: number,
+  touch: boolean,
+  form: 'swing' | 'thrust' = 'swing',
+): void {
   const p = world.player;
   const range = s.range * p.stats.area;
   const list = world.enemies.active;
   const slash = world.slashes.acquire();
-  slash.form = 'swing';
+  slash.form = form;
   slash.angle = angle;
   slash.arc = s.arc;
   slash.range = range;

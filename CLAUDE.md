@@ -54,8 +54,11 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
   Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike, slam. Arc weapons swing around the hero (the blade
   adds a `thrust` every few swings); thrown weapons can fly where the hero faces (`aim: 'facing'`), burst on the
-  first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) open a fissure ahead, shake the
-  ground after `combo` seconds and stun (bosses only `config.weapons.bossStun`).
+  first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) land a heavy blow in front that
+  stuns (bosses only `config.weapons.bossStun`), and every `waveEvery` blows a shock wave that throws enemies back.
+  Weapons never shake the screen (only hurting the hero, bombs, bosses and the forge moment do). Knockback decays
+  at `config.enemies.knockbackDecay` per second, so a push travels about knockback / 10 px: a weapon that "pushes"
+  needs hundreds (the shields use 600).
   Every weapon has a **category** (`aimed` / `auto` / `area`, an Elo inherits its base's) and must sit in its band
   of crowd DPS at max level, relative to the best `aimed` weapon (`CATEGORY_BANDS` in `data/weapons.ts`: aimed
   85–100%, auto 50–65%, area 40–55%; Elos against the best aimed Elo). `tests/core/bands.test.ts` enforces it and
@@ -68,7 +71,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   forge moment (`GameScene.forgeMoment`): 0.5 s of slow motion, the `forge` sound, element sparks, the HUD notice
   and a braided chain between the Elo and its passive in the build strip (`BuildSlots`), kept all run.
   Each Elo has its own verb, as optional data on its `WeaponDef`: Fúria `wave`, Estrela de Lyra `split` (stars that
-  fall and burst again, `fuse` projectiles), Quebra-Junta `branch` / `aftershock` / `crush`, Leque de Facas
+  fall and burst again, `fuse` projectiles), Quebra-Junta `waveEvery: 1` / `aftershock` / `crush`, Leque de Facas
   `ricochet` / `bleed`, Luz Sagrada `mend`, Chama de Yah `pulse`, Vigília `dart` (`bladeRadius`, shared with the
   renderer), Nevasca `shatter` (queued, burst in `updateShatters`), Tempestade `chain`, Fúria da Forja
   `boomerang`, Procissão `swell`, Muralha de Valmor `ward` (`hurtHero`) and Espada de Fogo `ground` (burning

@@ -944,3 +944,19 @@ depois ELO X fury 1.5x · holyLight 5.5x · yahFlame 30.9x · vigil 7.5x · bliz
 O ELO X do sim compara a base no nível máximo com o Elo nas mesmas partidas; com a regra nova a base fica pouco
 tempo no máximo, então o número oscila muito entre rodadas. Fúria e Tempestade já ficavam abaixo de 2x antes
 desta rodada. O lab é a medida estável.
+
+## Ajustes depois do teste do Daniel (2026-11-09)
+
+- **Lâmina de Valmor**: a estocada (a cada 2 golpes) era desenhada como uma fatia fininha do arco e parecia bug.
+  Agora é uma estocada: um losango longo do herói até a ponta, com brilho na ponta (forma `thrust`).
+- **Escudos de Valmor / Muralha**: o empurrão de 150 sumia em ~15 px (o knockback decai 10x por segundo). 150 → 600
+  e 200 → 750: cerca de 60 px.
+- **Maça de Ferro** refeita: em vez de fenda + tremor atrasado, uma pancada à frente (raio 48–60) que atordoa e,
+  a cada 3 golpes, uma onda de choque (105–125 px, 80% do dano) que empurra forte. **Quebra-Junta**: a onda em
+  todo golpe, um eco a 70% logo depois e esmagar. Lab: maça 468 (93% da melhor `aimed`), Quebra-Junta 1890 (4,0x).
+- **Tela**: nenhuma arma treme mais a tela.
+- **Cripta**: com os escudos empurrando, a loja inteira voltou a 91%. `mult` HP 1,3 → 1,35, dano 1,75 → 1,85: 81%.
+
+Sim (16 sementes): Valmor 13% / 48% / 98%, Cripta 0% / 17% / 81%, Estrada 0% / 0% / 52%; 1º Elo 5,7–5,8 min.
+Nas partidas do bot a maça nova rende menos que a antiga (DPS real ~80 contra ~130): a pancada é curta e o bot anda
+de costas para os inimigos. Vale sentir na mão.

@@ -149,7 +149,7 @@ export function forgeElos(world: World): void {
     owned.id = id;
     owned.level = 1;
     owned.timer = 0;
-    owned.combo = owned.after = owned.stacks = owned.stackTime = 0;
+    owned.after = owned.stacks = owned.stackTime = 0;
     world.buildRev++;
     world.events.push({ type: 'eloForged', elo: id, from: evo.from, passive: evo.passive });
   }

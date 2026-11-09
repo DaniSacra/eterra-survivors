@@ -528,13 +528,12 @@ export class GameScene extends Phaser.Scene {
     const fx = config.effects;
     const sp = this.sparks;
     const p = this.world.player;
-    let thud = false;
     for (const s of this.world.slashes.active) {
       const ttl =
-        s.form === 'fissure'
-          ? fx.fissureTtl
-          : s.form === 'tremor'
-            ? fx.tremorTtl
+        s.form === 'smash'
+          ? fx.smashTtl
+          : s.form === 'shock'
+            ? fx.shockTtl
             : s.form === 'pulse'
               ? fx.pulseTtl
               : fx.slashTtl;
@@ -547,18 +546,14 @@ export class GameScene extends Phaser.Scene {
         }
         continue;
       }
-      if (s.form !== 'swing') {
-        // The ground gives: a thud on the blow, a stronger one when the tremor bursts, and dust.
-        if (!thud) {
-          thud = true;
-          this.shake(s.form === 'tremor' ? 140 : 90, s.form === 'tremor' ? 0.006 : 0.003);
-        }
+      if (s.form === 'smash' || s.form === 'shock') {
+        // Dust kicked up by the blow (no camera shake: weapons never move the screen).
         const spark = SWING_SPARK[s.weapon];
         if (!spark) continue;
         const n = spark[2];
         for (let i = 0; i < n; i++) {
-          const a = s.angle + (i - (n - 1) / 2) * (s.form === 'tremor' ? 1.2 : 0.25);
-          const d = s.form === 'tremor' ? s.shock * 0.5 : s.range * ((i + 0.5) / n);
+          const a = s.angle + (i - (n - 1) / 2) * (s.form === 'shock' ? 1.2 : 0.45);
+          const d = s.shock * (s.form === 'shock' ? 0.5 : 0.8);
           const x = s.x + Math.cos(a) * d;
           const y = s.y + Math.sin(a) * d;
           sp.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 60, 0.4, spark[1], spark[0], SPARK.star);

@@ -1,13 +1,6 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
-import {
-  WEAPONS,
-  type AuraLevel,
-  type OrbitLevel,
-  type SlamLevel,
-  type WeaponDef,
-  type WeaponId,
-} from '../data/weapons';
+import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponDef, type WeaponId } from '../data/weapons';
 import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { wardReady } from '../core/elos';
 import { config } from '../data/config';
@@ -130,11 +123,14 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
     burst: true,
   },
 };
-/** Slam fissures: the crack's dark, the dust thrown along it, and the Elo's glow inside the crack. */
-const CRACK = 0x2a1e1a;
+/** Mace blows: the dust, the dent where the head lands, pebbles, and the Elo's glow. */
 const DUST_LIGHT = 0xe8dcc8;
-const CRACK_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
-/** Reused corners of a fissure's strip (no allocation per frame). */
+const DUST_DARK = 0x6a5a48;
+const DENT = 0x3a2a24;
+const SLAM_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
+/** Part of a mace blow's mark spent with the head coming down. */
+const DROP = 0.18;
+/** Reused corners of a thrust's shape (no allocation per frame). */
 const QUAD = [
   { x: 0, y: 0 },
   { x: 0, y: 0 },
@@ -254,15 +250,6 @@ export function drawFx(
         w.level,
         isElo(w.id),
       );
-    } else if (kind === 'slam' && w.combo > 0) {
-      // Where the tremor will burst: a ring tightening on the impact point while it waits.
-      const s = weaponStats(w) as SlamLevel;
-      const r = s.tremorRadius * p.stats.area;
-      const k = 1 - w.combo / ((WEAPONS[w.id] as WeaponDef).combo ?? 1);
-      g.lineStyle(2, DUST_LIGHT, 0.25 + 0.45 * k);
-      ring(g, w.comboX, w.comboY, r * (1.15 - 0.15 * k));
-      g.fillStyle(CRACK, 0.12 + 0.18 * k);
-      disc(g, w.comboX, w.comboY, r * 0.3 * k);
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
       const count = s.count + p.stats.amount;
@@ -392,8 +379,16 @@ export function drawFx(
   // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
   if (world.state === 'won' || world.state === 'lost') return;
   for (const s of world.slashes.active) {
-    if (s.form === 'fissure') {
-      drawFissure(ground, top, s, 1 - s.ttl / config.effects.fissureTtl);
+    if (s.form === 'smash') {
+      drawSmash(ground, top, s, 1 - s.ttl / config.effects.smashTtl);
+      continue;
+    }
+    if (s.form === 'shock') {
+      drawShock(ground, top, s, 1 - s.ttl / config.effects.shockTtl);
+      continue;
+    }
+    if (s.form === 'thrust') {
+      drawThrust(g, p.x, p.y, s, 1 - s.ttl / config.effects.slashTtl, SWING_STYLE[s.weapon] ?? SWING_PLAIN);
       continue;
     }
     if (s.form === 'pulse') {
@@ -406,12 +401,6 @@ export function drawFx(
       ring(top, p.x, p.y, s.shock * grow);
       top.lineStyle(2, 0xffffff, 0.9 * (1 - k));
       ring(top, p.x, p.y, s.shock * grow * 0.96);
-      continue;
-    }
-    if (s.form === 'tremor') {
-      // The impact's crater and ring, from the moment it bursts.
-      const k = 1 - s.ttl / config.effects.tremorTtl;
-      drawImpact(ground, s.x, s.y, s.shock, s.angle, SWEEP * 0.7 + k * (1 - SWEEP * 0.7));
       continue;
     }
     const t = 1 - s.ttl / config.effects.slashTtl;
@@ -686,101 +675,127 @@ function drawSwing(
 }
 
 /**
- * A slam's fissure, from (x, y) along `angle`: it tears open from the hero outward in the first quarter, a jagged
- * dark crack down the middle of a dusty strip exactly as long and wide as what it hits; chips jump along its
- * edges, and it closes as it fades. The Elo's crack glows from inside.
+ * A mace blow landing at (s.x, s.y), facing `s.angle`, `t` 0 -> 1: the iron head's shadow drops in for a moment,
+ * then a dusty half-moon of impact opens to exactly the radius it hits, its front rim bright, and fades. The Elo's
+ * rim glows in its element's colour.
  */
-function drawFissure(
+function drawSmash(
   under: Phaser.GameObjects.Graphics,
   top: Phaser.GameObjects.Graphics,
   s: Slash,
   t: number,
 ): void {
-  const ux = Math.cos(s.angle);
-  const uy = Math.sin(s.angle);
-  const open = Math.min(1, t / 0.25);
-  const len = s.range * (1 - (1 - open) * (1 - open));
-  const fade = t < 0.5 ? 1 : 1 - (t - 0.5) / 0.5;
-  const half = s.width / 2;
-  // The strip it hits: a dusty band.
-  under.fillStyle(DUST_LIGHT, 0.28 * fade);
-  setCorner(0, s.x - uy * half, s.y + ux * half);
-  setCorner(1, s.x + ux * len - uy * half, s.y + uy * len + ux * half);
-  setCorner(2, s.x + ux * len + uy * half, s.y + uy * len - ux * half);
-  setCorner(3, s.x + uy * half, s.y - ux * half);
-  under.fillPoints(QUAD, true);
-  // The crack: a zig-zag down the middle, thick near the hero, thinning out.
-  const glow = CRACK_GLOW[s.weapon];
-  const n = 7;
-  let px = s.x;
-  let py = s.y;
-  for (let i = 1; i <= n; i++) {
-    const f = i / n;
-    if (f * s.range > len) break;
-    const side = (hash(s.x, s.y, i) - 0.5) * half * 0.9;
-    const x = s.x + ux * s.range * f - uy * side;
-    const y = s.y + uy * s.range * f + ux * side;
-    const w = (1 - f * 0.6) * Math.max(3, half * 0.35);
-    if (glow) {
-      under.lineStyle(w + 4, glow, 0.5 * fade);
-      under.lineBetween(px, py, x, y);
-    }
-    under.lineStyle(w, CRACK, 0.85 * fade);
-    under.lineBetween(px, py, x, y);
-    // A side crack every other joint.
-    if (i % 2 === 0) {
-      const sx = (hash(s.x, s.y, i + 9) > 0.5 ? 1 : -1) * half * 0.8;
-      under.lineStyle(w * 0.5, CRACK, 0.7 * fade);
-      under.lineBetween(x, y, x + ux * 10 - uy * sx, y + uy * 10 + ux * sx);
-    }
-    px = x;
-    py = y;
+  const r = s.shock;
+  const glow = SLAM_GLOW[s.weapon];
+  if (t < DROP) {
+    // The head coming down: its shadow grows and darkens on the spot.
+    const k = t / DROP;
+    under.fillStyle(INK, 0.15 + 0.25 * k);
+    under.fillEllipse(s.x, s.y + 4, r * 0.5 * k + 6, r * 0.25 * k + 3);
+    return;
   }
-  // Chips thrown up along the edges while it opens.
-  if (t < 0.35) {
-    const k = t / 0.35;
-    top.fillStyle(DUST_LIGHT, 0.9 * (1 - k));
-    for (let i = 0; i < 6; i++) {
-      const f = (i + 0.5) / 6;
-      if (f * s.range > len) break;
-      const side = (i % 2 ? 1 : -1) * (half + 6 * k);
-      disc(top, s.x + ux * s.range * f - uy * side, s.y + uy * s.range * f + ux * side - 14 * k, 2.5);
-    }
+  const k = (t - DROP) / (1 - DROP);
+  const open = 1 - (1 - k) * (1 - k) * (1 - k);
+  const fade = 1 - k * k;
+  const a0 = s.angle - Math.PI * 0.6;
+  const a1 = s.angle + Math.PI * 0.6;
+  under.fillStyle(DUST_LIGHT, 0.45 * fade);
+  disc(under, s.x, s.y, r * open);
+  under.fillStyle(DENT, 0.35 * fade);
+  disc(under, s.x, s.y, r * 0.28);
+  if (glow) {
+    top.lineStyle(9 * fade + 2, glow, 0.45 * fade);
+    arcLine(top, s.x, s.y, r * open, a0, a1);
+  }
+  top.lineStyle(7 * fade + 2, DUST_LIGHT, 0.95 * fade);
+  arcLine(top, s.x, s.y, r * open, a0, a1);
+  top.lineStyle(2, 0xffffff, 0.9 * fade);
+  arcLine(top, s.x, s.y, r * open * 0.93, a0 + 0.15, a1 - 0.15);
+  // Pebbles thrown out from the front half, falling back.
+  top.fillStyle(DUST_LIGHT, 0.9 * fade);
+  for (let i = 0; i < 5; i++) {
+    const a = a0 + ((a1 - a0) * (i + 0.5)) / 5;
+    const d = r * (0.6 + 0.5 * open);
+    disc(top, s.x + Math.cos(a) * d, s.y + Math.sin(a) * d - Math.sin(k * Math.PI) * 14, 2.5);
   }
 }
 
 /**
- * Where a heavy blow lands: a dark crater with cracks running out, and a dusty ring opening to exactly the shock
- * wave's radius (what it reaches). Drawn on the ground layer; `t` is the swing's 0 -> 1.
+ * A mace's shock wave running out from (s.x, s.y) to `s.shock`: a thick dusty ring with a bright inner edge and
+ * pebbles riding it, over a faint dust disc. Quebra-Junta's glows in its element's colour.
  */
-function drawImpact(
+function drawShock(
   under: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  r: number,
-  angle: number,
+  top: Phaser.GameObjects.Graphics,
+  s: Slash,
   t: number,
 ): void {
-  if (t < SWEEP * 0.7) return;
-  const k = (t - SWEEP * 0.7) / (1 - SWEEP * 0.7);
-  const fade = 1 - k * k;
-  under.fillStyle(0x3a2a24, 0.35 * fade);
-  disc(under, x, y, r * 0.35);
-  under.lineStyle(6 * (1 - k) + 1.5, 0xf0e8d8, 0.8 * (1 - k));
-  ring(under, x, y, r * (0.4 + 0.6 * k));
-  // Cracks fanning out from the crater, longest straight ahead.
-  under.lineStyle(3, 0x2a1e1a, 0.85 * fade);
-  for (let i = -2; i <= 2; i++) {
-    const a = angle + i * 0.9;
-    const len = r * (i === 0 ? 1 : 0.75);
-    const ux = Math.cos(a);
-    const uy = Math.sin(a);
-    const mx = x + ux * len * 0.5 - uy * (i % 2 ? 4 : -4);
-    const my = y + uy * len * 0.5 + ux * (i % 2 ? 4 : -4);
-    under.lineBetween(x + ux * r * 0.2, y + uy * r * 0.2, mx, my);
-    under.lineBetween(mx, my, x + ux * len, y + uy * len);
+  const grow = 1 - (1 - t) * (1 - t);
+  const r = s.shock * (0.2 + 0.8 * grow);
+  const fade = 1 - t;
+  const glow = SLAM_GLOW[s.weapon];
+  under.fillStyle(DUST_LIGHT, 0.12 * fade);
+  disc(under, s.x, s.y, r);
+  if (glow) {
+    top.lineStyle(12 * fade + 2, glow, 0.4 * fade);
+    ring(top, s.x, s.y, r);
+  }
+  top.lineStyle(8 * fade + 2, DUST_LIGHT, 0.75 * fade);
+  ring(top, s.x, s.y, r);
+  top.lineStyle(2, 0xffffff, 0.85 * fade);
+  ring(top, s.x, s.y, r * 0.94);
+  top.fillStyle(DUST_DARK, 0.8 * fade);
+  for (let i = 0; i < 10; i++) {
+    const a = (i * Math.PI) / 5 + s.x * 0.01;
+    disc(top, s.x + Math.cos(a) * r, s.y + Math.sin(a) * r, 2.5);
   }
 }
+
+/**
+ * The blade's thrust, `t` 0 -> 1: a long narrow stab shoots out from the hero to its full reach (the length it
+ * hits), a bright point at the tip, and pulls back as it fades. Not a thin slice of a swing: a lunge.
+ */
+function drawThrust(
+  g: Phaser.GameObjects.Graphics,
+  cx: number,
+  cy: number,
+  s: Slash,
+  t: number,
+  st: SwingStyle,
+): void {
+  const ux = Math.cos(s.angle);
+  const uy = Math.sin(s.angle);
+  const out = Math.min(1, t / 0.3);
+  const len = s.range * (1 - (1 - out) * (1 - out));
+  const fade = t < 0.5 ? 1 : 1 - (t - 0.5) / 0.5;
+  const half = Math.max(7, s.range * Math.tan(s.arc / 2) * 0.8);
+  const back = 14;
+  // The stab: a long diamond from just behind the hero to the tip, widest two thirds of the way out.
+  setCorner(0, cx - ux * back, cy - uy * back);
+  setCorner(1, cx + ux * len * 0.65 - uy * half, cy + uy * len * 0.65 + ux * half);
+  setCorner(2, cx + ux * len, cy + uy * len);
+  setCorner(3, cx + ux * len * 0.65 + uy * half, cy + uy * len * 0.65 - ux * half);
+  g.fillStyle(st.edge, 0.55 * fade);
+  g.fillPoints(QUAD, true);
+  g.lineStyle(2, INK, 0.5 * fade);
+  g.strokePoints(QUAD, true);
+  // The white core along the blade and a glint at the point.
+  g.lineStyle(3, 0xffffff, 0.95 * fade);
+  g.lineBetween(cx, cy, cx + ux * len * 0.97, cy + uy * len * 0.97);
+  if (t < 0.5) star(g, cx + ux * len, cy + uy * len, 5 + 7 * (1 - t * 2), 0xffffff, fade);
+  // Speed lines beside it.
+  g.lineStyle(1.5, st.fill, 0.7 * fade);
+  for (const side of SIDES) {
+    const o = side * (half + 6);
+    g.lineBetween(
+      cx + ux * len * 0.25 - uy * o,
+      cy + uy * len * 0.25 + ux * o,
+      cx + ux * len * 0.7 - uy * o,
+      cy + uy * len * 0.7 + ux * o,
+    );
+  }
+}
+const SIDES = [1, -1] as const;
 
 /** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
 const AURA_CORE: readonly [number, number][] = [

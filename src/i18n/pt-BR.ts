@@ -611,12 +611,12 @@ export const t = {
     },
     mace: {
       name: 'Maça de Ferro',
-      desc: 'O golpe abre uma fenda à frente e, logo depois, o chão treme onde a maça bateu. Quem é atingido fica tonto.',
+      desc: 'Uma pancada pesada à frente deixa os inimigos tontos. A cada três golpes, uma onda de choque empurra todos para longe.',
     },
     fire: { name: 'Fogo', desc: 'Chamas caem sobre os inimigos e queimam uma área larga.' },
     jointBreaker: {
       name: 'Quebra-Junta',
-      desc: 'A fenda se abre em três, cada tremor acorda outro menor, e quem já está tonto leva mais dano.',
+      desc: 'Cada pancada solta a onda de choque e logo outra menor, e quem já está tonto leva mais dano.',
     },
     fireSword: {
       name: 'Espada de Fogo',
@@ -705,9 +705,9 @@ export const t = {
     speed: 'Velocidade',
     radius: 'Raio',
     blast: 'Explosão',
-    length: 'Fenda',
-    width: 'Largura',
-    tremorRadius: 'Tremor',
+    wave: 'Onda',
+    waveRadius: 'Alcance da onda',
+    waveKnockback: 'Empurrão da onda',
     stun: 'Tontura',
   } as Record<string, string>,
 } as const;
