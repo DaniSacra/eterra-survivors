@@ -10,6 +10,20 @@ function rng(seed: number): () => number {
 
 const SIZE = 128;
 
+/**
+ * Draws a mark at (x, y) and, where it reaches past an edge (by `ext` px), again on the opposite side, so the
+ * tile repeats without a seam.
+ */
+function wrap(x: number, y: number, ext: number, draw: (x: number, y: number) => void): void {
+  for (const dx of [-SIZE, 0, SIZE])
+    for (const dy of [-SIZE, 0, SIZE]) {
+      const cx = x + dx;
+      const cy = y + dy;
+      if (cx + ext < 0 || cx - ext > SIZE || cy + ext < 0 || cy - ext > SIZE) continue;
+      draw(cx, cy);
+    }
+}
+
 export const TILE_ART: Record<string, ArtDef> = {
   /** Arredores de Valmor: snow over the graveyard, frozen tufts and pebbles. */
   tile: {
@@ -19,21 +33,30 @@ export const TILE_ART: Record<string, ArtDef> = {
       const r = rng(11);
       // Night snow: soft wide drifts rather than stones, so the dead read on top.
       p.fill(0x34405e).fillRect(0, 0, SIZE, SIZE);
-      for (let i = 0; i < 6; i++)
-        p.fill(0x3e4b6c, 0.6).fillEllipse(r() * SIZE, r() * SIZE, 50 + r() * 40, 18 + r() * 10);
-      for (let i = 0; i < 4; i++)
-        p.fill(0x2c3550, 0.5).fillEllipse(r() * SIZE, r() * SIZE, 30 + r() * 20, 6 + r() * 4);
-      for (let i = 0; i < 5; i++) {
-        const x = r() * SIZE;
-        const y = r() * SIZE;
-        p.fill(0x3a9a6a, 0.55)
-          .fillTriangle(x, y, x + 2, y - 6, x + 4, y)
-          .fillTriangle(x + 3, y, x + 6, y - 4, x + 7, y);
+      for (let i = 0; i < 6; i++) {
+        const [w, h] = [50 + r() * 40, 18 + r() * 10];
+        wrap(r() * SIZE, r() * SIZE, w / 2, (x, y) => p.fill(0x3e4b6c, 0.6).fillEllipse(x, y, w, h));
       }
-      for (let i = 0; i < 4; i++)
-        p.fill(0x55555e, 0.7).fillEllipse(r() * SIZE, r() * SIZE, 6 + r() * 4, 4 + r() * 2);
-      for (let i = 0; i < 30; i++)
-        p.fill(0xcbd8ec, 0.25 + r() * 0.3).fillCircle(r() * SIZE, r() * SIZE, 0.8 + r());
+      for (let i = 0; i < 4; i++) {
+        const [w, h] = [30 + r() * 20, 6 + r() * 4];
+        wrap(r() * SIZE, r() * SIZE, w / 2, (x, y) => p.fill(0x2c3550, 0.5).fillEllipse(x, y, w, h));
+      }
+      for (let i = 0; i < 5; i++)
+        wrap(r() * SIZE, r() * SIZE, 8, (x, y) =>
+          p
+            .fill(0x3a9a6a, 0.55)
+            .fillTriangle(x, y, x + 2, y - 6, x + 4, y)
+            .fillTriangle(x + 3, y, x + 6, y - 4, x + 7, y),
+        );
+      for (let i = 0; i < 4; i++) {
+        const [w, h] = [6 + r() * 4, 4 + r() * 2];
+        wrap(r() * SIZE, r() * SIZE, w / 2, (x, y) => p.fill(0x55555e, 0.7).fillEllipse(x, y, w, h));
+      }
+      for (let i = 0; i < 30; i++) {
+        const a = 0.25 + r() * 0.3;
+        const [x0, y0, rr] = [r() * SIZE, r() * SIZE, 0.8 + r()];
+        wrap(x0, y0, rr, (x, y) => p.fill(0xcbd8ec, a).fillCircle(x, y, rr));
+      }
     },
   },
   /** Cripta: blue stone slabs, dark mortar, teal moss. */
@@ -68,15 +91,19 @@ export const TILE_ART: Record<string, ArtDef> = {
     draw(p) {
       const r = rng(23);
       p.fill(0x3a4258).fillRect(0, 0, SIZE, SIZE);
-      for (let i = 0; i < 8; i++)
-        p.fill(0x4a5470, 0.45).fillEllipse(r() * SIZE, r() * SIZE, 26 + r() * 26, 10 + r() * 10);
-      for (let i = 0; i < 6; i++) {
-        const x = r() * SIZE;
-        const y = r() * SIZE;
-        p.fill(0x4e566e, 0.8).fillEllipse(x, y, 7 + r() * 4, 4 + r() * 2);
+      for (let i = 0; i < 8; i++) {
+        const [x0, y0, w, h] = [r() * SIZE, r() * SIZE, 26 + r() * 26, 10 + r() * 10];
+        wrap(x0, y0, w / 2, (x, y) => p.fill(0x4a5470, 0.45).fillEllipse(x, y, w, h));
       }
-      for (let i = 0; i < 24; i++)
-        p.fill(0xe8eff8, 0.2 + r() * 0.3).fillCircle(r() * SIZE, r() * SIZE, 0.8 + r());
+      for (let i = 0; i < 6; i++) {
+        const [x0, y0, w, h] = [r() * SIZE, r() * SIZE, 7 + r() * 4, 4 + r() * 2];
+        wrap(x0, y0, w / 2, (x, y) => p.fill(0x4e566e, 0.8).fillEllipse(x, y, w, h));
+      }
+      for (let i = 0; i < 24; i++) {
+        const a = 0.2 + r() * 0.3;
+        const [x0, y0, rr] = [r() * SIZE, r() * SIZE, 0.8 + r()];
+        wrap(x0, y0, rr, (x, y) => p.fill(0xe8eff8, a).fillCircle(x, y, rr));
+      }
     },
   },
   /**
