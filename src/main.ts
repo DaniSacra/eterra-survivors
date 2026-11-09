@@ -40,3 +40,11 @@ sound.init();
 
 // Dev-only handle for browser automation and console debugging.
 if (import.meta.env.DEV) (window as unknown as { game: Phaser.Game }).game = game;
+
+// Installed on a phone (Adicionar à tela inicial): the service worker keeps the game playable offline.
+if (import.meta.env.PROD && 'serviceWorker' in navigator)
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
+      // No offline copy (private mode, old browser): the game still runs online.
+    });
+  });
