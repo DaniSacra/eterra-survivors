@@ -73,7 +73,8 @@ export class HudScene extends Phaser.Scene {
 
     const kb = this.input.keyboard as Phaser.Input.Keyboard.KeyboardPlugin;
     kb.on('keydown-F3', () => this.debug.setVisible((this.debugOn = !this.debugOn)));
-    kb.on('keydown-F4', () => this.debugOn && this.stress());
+    // Stress test: dev builds only (it would let players farm XP on the live game).
+    if (import.meta.env.DEV) kb.on('keydown-F4', () => this.debugOn && this.stress());
     this.scale.on(Phaser.Scale.Events.RESIZE, this.layout, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.joystick.destroy();

@@ -103,7 +103,7 @@ Plano da noite de 2026-11-08 (aprovado): ver a seção "Revisão 2026-11-08" no 
 - O quê: um inimigo recebe no máximo um acerto por disparo, mesmo com frente e costas.
 - Aceite: teste com inimigo sobreposto ao herói recebe um acerto por disparo.
 
-**B-06 · Dica "F3 depuração" aparece em produção** · impl · P · ↩ reaberto na Revisão 2026-11-08 · aprovado
+**B-06 · Dica "F3 depuração" aparece em produção** · impl · P · ✅ feito (reaberto e fechado na Revisão 2026-11-08)
 
 - Por quê: visual-director: o menu mostra a dica de depuração para jogadores. Revisão 2026-11-08 (02-code #6, 03-qa
   #8): só a dica saiu; o atalho F4 continua ativo no GitHub Pages e gera 100 inimigos por toque (`HudScene.ts:75-76`),
