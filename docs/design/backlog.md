@@ -772,7 +772,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Lanceiro e Golem com anel dourado no chão desenhado na textura (`Pen.eliteRing`, no lugar da sombra preta); baú
   caído com anel dourado pulsando e uma estrela branca que pisca na tampa (`fx.ts`).
 
-**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · aprovado
+**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · ✅ feito
 
 - Por quê: 06-vfx #5 e #12: o baú (`cameras.main.flash`, `GameScene.ts:331`) pinta a tela de amarelo opaco num quadro e
   não mostra o que veio, justamente o momento do Elo; Badalada e Sopro de Geada idem; o fim do congelamento chega sem
@@ -784,6 +784,12 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Modo calmo: sem tremor e sem véu.
 - Aceite: nenhum `cameras.main.flash` opaco no jogo; captura do baú com Elo mostra o ícone do Elo; o congelamento pisca
   antes de acabar.
+- Feito: nenhum `cameras.main.flash` no jogo. Baú: raios de luz girando atrás do herói (6, ou dois conjuntos cruzados
+  com a cor do herói no Elo), anel na cor do herói, estrelas no Elo e o ícone da recompensa saltando do herói e
+  subindo (uma `Image` reusada). Badalada: anel dourado de som até as bordas em ~0.3 s (o tremor fica, fora do modo
+  calmo). Sopro de Geada: onda branco-lilás com lascas até as bordas, geada e pingentes nas bordas da tela enquanto
+  dura, tinta de 4 cantos nos congelados (topo claro) e os dois piscam no último 1 s. Lento: passos com cadência `time
+  * 4`. Sem véu (não foi preciso). Estado dos momentos em `render/fx.ts` (`Moments`), só tempos, sem alocar.
 
 **RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · aprovado
 

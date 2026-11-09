@@ -65,6 +65,8 @@ const HP_LOW = 0xd83a4a;
 export const TINT = {
   hit: 0xffffff,
   frozen: 0x80c8ff,
+  /** Top of a frozen enemy (the frost on it): the bottom gets `frozen`. */
+  frost: 0xf4f6ff,
   slowed: 0xb8e0ff,
   heroHurt: 0xff9090,
   /** The hero's outline while invulnerable, and the snow under the menu's party. */
@@ -88,6 +90,26 @@ const WARN_EDGE = 0xffffff;
 /** Length of a dash and of the gap after it on danger edges, world px. */
 const DASH = 9;
 
+/** The ice family (white and white-lilac, never the gems' cyan): Sopro de Geada's wave and frosted screen edges. */
+const ICE = 0xe8e2f4;
+/** Big moments the render keeps track of: match time when they happened (-Infinity = never). */
+export interface Moments {
+  /** A chest was opened; `elo` if it formed an Elo. */
+  chest: number;
+  elo: boolean;
+  /** Badalada (bomb) and Sopro de Geada (freeze) were picked up. */
+  bomb: number;
+  frost: number;
+}
+export const newMoments = (): Moments => ({
+  chest: -Infinity,
+  elo: false,
+  bomb: -Infinity,
+  frost: -Infinity,
+});
+/** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
+export const CHEST_SHOW = 1.3;
+
 /**
  * Redraws the transient shapes each frame: on the ground (under everyone) the hero light, frost and auras;
  * on top (over the enemies) orbiting pieces, slashes and bolts, so they never vanish in a crowd.
@@ -96,6 +118,7 @@ export function drawFx(
   ground: Phaser.GameObjects.Graphics,
   top: Phaser.GameObjects.Graphics,
   world: World,
+  m: Moments,
 ): void {
   let g = ground;
   g.clear();
@@ -107,6 +130,7 @@ export function drawFx(
   g.fillStyle(hero, 0.35).fillEllipse(p.x, p.y + 15, 44, 16);
   g.lineStyle(3, hero, 1).strokeEllipse(p.x, p.y + 15, 44, 16);
   g.lineStyle(2, 0xffffff, 0.35).strokeEllipse(p.x, p.y + 15, 52 * pulse, 20 * pulse);
+  drawMoments(g, top, world, m, hero);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
   for (const z of world.zones.active) {
     const a = Math.min(1, z.ttl / 0.4);
@@ -247,6 +271,127 @@ export function drawFx(
     g.fillStyle(c, 0.4 * t).fillCircle(b.x, b.y, b.radius);
     g.lineStyle(2, 0xffffff, 0.8 * t).strokeCircle(b.x, b.y, b.radius * (1.2 - t * 0.2));
   }
+}
+
+/** Chest, Badalada and Sopro de Geada: shapes that say what happened, instead of a full-screen flash. */
+function drawMoments(
+  g: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  world: World,
+  m: Moments,
+  hero: number,
+): void {
+  const p = world.player;
+  const t = world.time;
+  // Half the view's diagonal: a ring this big has reached every edge of the screen.
+  const edge = Math.hypot(world.view.w, world.view.h) / 2;
+  const chest = t - m.chest;
+  if (chest < CHEST_SHOW) {
+    // Rays of light turning behind the hero (two crossed sets for an Elo), a ring in the hero's color and,
+    // for an Elo, stars flying out.
+    const k = chest / CHEST_SHOW;
+    const fade = Math.min(1, chest * 8) * (1 - k);
+    const sets = m.elo ? 2 : 1;
+    for (let s = 0; s < sets; s++) {
+      const n = 6;
+      const len = (m.elo ? 120 : 95) * (0.6 + 0.4 * Math.min(1, chest * 3));
+      const spin = (s ? -0.9 : 1.2) * t + s * 0.5;
+      const half = 0.13;
+      g.fillStyle(s ? hero : ITEM_GLINT, 0.22 * fade);
+      for (let i = 0; i < n; i++) {
+        const a = spin + (i * Math.PI * 2) / n;
+        g.fillTriangle(
+          p.x,
+          p.y,
+          p.x + Math.cos(a - half) * len,
+          p.y + Math.sin(a - half) * len,
+          p.x + Math.cos(a + half) * len,
+          p.y + Math.sin(a + half) * len,
+        );
+      }
+    }
+    g.fillStyle(0xffffff, 0.25 * fade).fillCircle(p.x, p.y, 26);
+    const rk = Math.min(1, chest / 0.5);
+    if (rk < 1) {
+      top.lineStyle(5 * (1 - rk) + 1, hero, 1 - rk).strokeCircle(p.x, p.y, 18 + 80 * (1 - (1 - rk) ** 3));
+      top.lineStyle(2, 0xffffff, 0.8 * (1 - rk)).strokeCircle(p.x, p.y, 14 + 70 * (1 - (1 - rk) ** 3));
+    }
+    if (m.elo && chest < 0.8) {
+      const sk = chest / 0.8;
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4 + 0.4;
+        const d = 20 + 90 * (1 - (1 - sk) ** 2);
+        star(
+          top,
+          p.x + Math.cos(a) * d,
+          p.y + Math.sin(a) * d,
+          7 * (1 - sk) + 2,
+          i % 2 ? hero : 0xffffff,
+          1 - sk,
+        );
+      }
+    }
+  }
+  const bomb = t - m.bomb;
+  if (bomb < 0.45) {
+    // Badalada: a golden ring of sound from the hero to the edges of the screen (it hits everything on it).
+    for (let i = 0; i < 2; i++) {
+      const bk = Math.min(1, Math.max(0, (bomb - i * 0.07) / 0.32));
+      if (bk <= 0) continue;
+      const r = 20 + (edge - 20) * (1 - (1 - bk) ** 2);
+      const a = bomb < 0.32 ? 1 : 1 - (bomb - 0.32) / 0.13;
+      top.lineStyle(i ? 3 : 7, i ? 0xffffff : ITEM_GLINT, (i ? 0.6 : 0.85) * a).strokeCircle(p.x, p.y, r);
+      if (!i) g.lineStyle(26, ITEM_GLINT, 0.12 * a).strokeCircle(p.x, p.y, r - 10);
+    }
+  }
+  const frost = t - m.frost;
+  if (frost < 0.5) {
+    // Sopro de Geada: a wave of frost rolling out to the edges, with ice shards riding on it.
+    const fk = Math.min(1, frost / 0.4);
+    const r = 20 + (edge - 20) * (1 - (1 - fk) ** 2);
+    const a = frost < 0.4 ? 1 : 1 - (frost - 0.4) / 0.1;
+    g.lineStyle(30, ICE, 0.18 * a).strokeCircle(p.x, p.y, r - 14);
+    top.lineStyle(4, 0xffffff, 0.85 * a).strokeCircle(p.x, p.y, r);
+    for (let i = 0; i < 12; i++) {
+      const sa = (i * Math.PI) / 6 + 0.2;
+      shard(top, p.x + Math.cos(sa) * r, p.y + Math.sin(sa) * r, sa, 7, a);
+    }
+  }
+  if (world.freeze > 0) {
+    // Frost creeping on the edges of the screen while the world is frozen (blinking out in the last second).
+    const fa = world.freeze < 1 ? 0.5 + 0.5 * Math.sin(t * 20) : 1;
+    const vw = world.view.w / 2;
+    const vh = world.view.h / 2;
+    const th = 10;
+    top.fillStyle(ICE, 0.22 * fa);
+    top.fillRect(p.x - vw, p.y - vh, vw * 2, th).fillRect(p.x - vw, p.y + vh - th, vw * 2, th);
+    top
+      .fillRect(p.x - vw, p.y - vh + th, th, vh * 2 - th * 2)
+      .fillRect(p.x + vw - th, p.y - vh + th, th, vh * 2 - th * 2);
+    // Icicles along the top edge.
+    top.fillStyle(0xffffff, 0.35 * fa);
+    for (let x = -vw + 12; x < vw; x += 28) {
+      const h = 8 + ((((x * 7919) % 9) + 9) % 9);
+      top.fillTriangle(p.x + x - 5, p.y - vh + th, p.x + x + 5, p.y - vh + th, p.x + x, p.y - vh + th + h);
+    }
+  }
+}
+
+/** An ice shard: a small white-lilac diamond pointing along `a`. */
+function shard(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  a: number,
+  r: number,
+  alpha: number,
+): void {
+  const ux = Math.cos(a) * r;
+  const uy = Math.sin(a) * r;
+  const vx = -uy * 0.35;
+  const vy = ux * 0.35;
+  g.fillStyle(ICE, alpha).fillTriangle(x - ux, y - uy, x + vx, y + vy, x + ux, y + uy);
+  g.fillStyle(0xffffff, alpha).fillTriangle(x - ux, y - uy, x - vx, y - vy, x + ux, y + uy);
 }
 
 /** The telegraph of a boss ability: where it will hit, filling up during the windup. */

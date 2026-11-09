@@ -21,7 +21,7 @@ import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { UI } from '../render/ui';
 import { Controls } from '../render/controls';
-import { DAMAGE_TEXT, HERO_COLOR, TINT, drawFx } from '../render/fx';
+import { CHEST_SHOW, DAMAGE_TEXT, HERO_COLOR, TINT, drawFx, newMoments } from '../render/fx';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
@@ -77,6 +77,9 @@ export class GameScene extends Phaser.Scene {
   private choice!: RunChoice;
   /** The calm-screen option, read once per frame. */
   private calm = false;
+  /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
+  private moments = newMoments();
+  private rewardIcon!: Phaser.GameObjects.Image;
 
   constructor() {
     super(SCENES.game);
@@ -113,6 +116,8 @@ export class GameScene extends Phaser.Scene {
         img.setPosition(it.x, it.y - 2 + Math.sin(this.world.time * 4 + it.x) * 2);
       },
     );
+    this.moments = newMoments();
+    this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
     const heroSprite = CHARACTERS[this.world.character].sprite;
@@ -163,7 +168,8 @@ export class GameScene extends Phaser.Scene {
         }
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
-        const a = w.freeze > 0 ? 0 : Math.sin(w.time * 9 + e.uid * 1.7) * 0.06;
+        // Slowed enemies take heavy, slow steps.
+        const a = w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06;
         const hit = e.flash / HIT_FLASH; // 1 -> 0 after a hit
         img
           .setPosition(e.x, e.y)
@@ -172,7 +178,9 @@ export class GameScene extends Phaser.Scene {
           .setRotation(e.act === BossAct.Windup ? Math.sin(w.time * 18) * 0.18 : 0); // a boss winding up shakes
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
         if (hit > 1 - HIT_WHITE && !this.calm) img.setTintFill(TINT.hit);
-        else if (w.freeze > 0) img.setTint(TINT.frozen);
+        else if (w.freeze > 0 && (w.freeze > 1 || Math.sin(w.time * 20) > -0.3))
+          // Covered in frost (light on top), blinking in the last second before they walk again.
+          img.setTint(TINT.frost, TINT.frost, TINT.frozen, TINT.frozen);
         else if (e.slow > 0) img.setTint(TINT.slowed);
         else img.clearTint();
         img.setAlpha(isFaded(e) ? 0.3 : 1); // a fading ghost: harmless and untouchable for a moment
@@ -201,13 +209,9 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.fadeIn(150);
   }
 
-  /** Camera shake and flash, both skipped with the calm-screen option. */
+  /** Camera shake, skipped with the calm-screen option. */
   private shake(ms: number, intensity: number): void {
     if (!settings().calm) this.cameras.main.shake(ms, intensity);
-  }
-
-  private flash(ms: number, r: number, g: number, b: number): void {
-    if (!settings().calm) this.cameras.main.flash(ms, r, g, b);
   }
 
   /** Zoom so the shortest screen side always shows `minWorldSide` world pixels (portrait-friendly). */
@@ -264,7 +268,8 @@ export class GameScene extends Phaser.Scene {
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
-    drawFx(this.fx, this.fxTop, w);
+    drawFx(this.fx, this.fxTop, w, this.moments);
+    this.showReward();
     this.handleEvents();
     this.frameSounds();
   }
@@ -286,6 +291,27 @@ export class GameScene extends Phaser.Scene {
     h.hits = t.hits;
     h.gems = t.gems;
     h.kills = t.kills;
+  }
+
+  /** The chest's reward icon pops out of the hero and floats up, then fades. */
+  private showReward(): void {
+    const age = this.world.time - this.moments.chest;
+    const icon = this.rewardIcon;
+    if (age >= CHEST_SHOW) {
+      if (icon.visible) icon.setVisible(false);
+      return;
+    }
+    const p = this.world.player;
+    const pop = Math.min(1, age / 0.18);
+    const s =
+      ART_SCALE *
+      (this.moments.elo ? 2 : 1.6) *
+      (pop < 1 ? pop * 1.25 : 1 + 0.25 * Math.max(0, 1 - (age - 0.18) * 6));
+    icon
+      .setVisible(true)
+      .setPosition(p.x, p.y - 26 - 34 * Math.min(1, age / 0.5))
+      .setScale(s)
+      .setAlpha(age > CHEST_SHOW - 0.3 ? (CHEST_SHOW - age) / 0.3 : 1);
   }
 
   /** A golden ring that bursts from the hero when a level is gained. */
@@ -362,7 +388,9 @@ export class GameScene extends Phaser.Scene {
             e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name),
             true,
           );
-          this.flash(250, 255, 220, 140);
+          this.moments.chest = w.time;
+          this.moments.elo = e.reward.kind === 'evolution';
+          this.rewardIcon.setTexture(describeUpgrade(e.reward).icon);
           break;
         }
         case 'pickup':
@@ -371,9 +399,9 @@ export class GameScene extends Phaser.Scene {
           sound.play('pickup');
           this.hud.announce(t.pickups[e.id], true);
           if (e.id === 'bomb') {
-            this.flash(200, 255, 240, 200);
+            this.moments.bomb = w.time;
             this.shake(300, 0.012);
-          } else if (e.id === 'freeze') this.flash(300, 160, 220, 255);
+          } else if (e.id === 'freeze') this.moments.frost = w.time;
           break;
         case 'won':
         case 'lost': {
