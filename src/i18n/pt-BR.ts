@@ -148,6 +148,13 @@ export const t = {
     gold: 'Ouro',
     again: 'Jogar de novo',
     menu: 'Menu',
+    /** After a victory that opened the next stage: play it right away. */
+    next: 'Próxima fase',
+    passives: 'Passivas',
+    /** "Faltou pouco": the Elo closest to forming (an unknown Elo is named by its weapon, not revealed). */
+    almostElo: (elo: string) => `Faltou um baú para formar ${elo}!`,
+    almostEloUnknown: (weapon: string) => `Faltou um baú para o Elo de ${weapon}!`,
+    almostLevel: (weapon: string) => `${weapon} estava a um nível do Elo.`,
   },
 
   shop: {

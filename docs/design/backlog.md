@@ -974,7 +974,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Aceite: 420x820 e 1000x680 com o painel completo; 360x640 só com slots; nada sobreposto; prévia certa para uma
   passiva (teste do formatador).
 
-**RU-05 · Tela final com ícones, "faltou pouco" e Próxima fase** · ui + impl · P · aprovado
+**RU-05 · Tela final com ícones, "faltou pouco" e Próxima fase** · ui + impl · P · ✅ feito
 
 - Por quê: 05-ui #7: a tabela de DPS é boa, mas sem ícones nem o Elo que ficou a um passo, o melhor gancho de "só
   mais uma" (pilar 4); 03-qa (sugestão): depois de liberar uma fase, "Jogar de novo" repete a antiga.

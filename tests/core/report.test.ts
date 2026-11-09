@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
-import { passiveReport, weaponReport } from '../../src/core/report';
+import { almostElo, passiveReport, weaponReport } from '../../src/core/report';
 import { applyUpgrade } from '../../src/core/upgrades';
 import { maxLevel } from '../../src/core/weapons';
 import { WEAPONS } from '../../src/data/weapons';
@@ -53,5 +53,19 @@ describe('end-of-run report', () => {
       { id: 'vigor', level: 1 },
       { id: 'might', level: 2 },
     ]);
+  });
+
+  it('almostElo: a complete recipe missing only the chest, else one level short with the passive', () => {
+    const w = quietWorld();
+    const blade = w.weapons[0];
+    if (!blade) throw new Error('aldo starts with the blade');
+    expect(almostElo(w)).toBeNull();
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
+    blade.level = maxLevel('blade') - 1;
+    expect(almostElo(w)).toEqual({ kind: 'level', weapon: 'blade', elo: 'fury' });
+    blade.level = maxLevel('blade');
+    expect(almostElo(w)).toEqual({ kind: 'chest', weapon: 'blade', elo: 'fury' });
+    applyUpgrade(w, { kind: 'evolution', id: 'fury', from: 'blade' });
+    expect(almostElo(w)).toBeNull();
   });
 });
