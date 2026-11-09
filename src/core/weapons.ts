@@ -115,6 +115,7 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
   const facing = Math.atan2(p.facing.y, p.facing.x);
   const list = world.enemies.active;
   const ids = world.enemyHash.query(p.x, p.y, range + MAX_ENEMY_RADIUS, world.scratch);
+  world.numberBudget = config.effects.arcNumbers;
   for (let k = 0; k < s.swings; k++) {
     const angle = facing + k * Math.PI;
     const slash = world.slashes.acquire();
@@ -137,6 +138,7 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
       damageEnemy(world, e, dmg(world, s.damage), dx / (d || 1), dy / (d || 1), s.knockback, w);
     }
   }
+  world.numberBudget = Infinity;
   return true;
 }
 
@@ -256,6 +258,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
     const y = t.y;
     addBolt(world, x, y, radius, w.id);
     const ids = world.enemyHash.query(x, y, radius + MAX_ENEMY_RADIUS, world.scratch);
+    world.numberBudget = config.effects.strikeNumbers;
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;
       const r = radius + e.def.radius;
@@ -263,6 +266,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
         damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
     }
   }
+  world.numberBudget = Infinity;
   return targets.length > 0;
 }
 

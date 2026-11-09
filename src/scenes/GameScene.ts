@@ -66,6 +66,11 @@ const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> 
   jointBreaker: [0xffa060, 5, 6],
 };
 
+/** Damage numbers: drawn at NUMBER_FONT px, shown NUMBER_WORLD world px tall but never under NUMBER_SCREEN on screen. */
+const NUMBER_FONT = 16;
+const NUMBER_WORLD = 13;
+const NUMBER_SCREEN = 14;
+
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
 
@@ -119,6 +124,8 @@ export class GameScene extends Phaser.Scene {
   private stepDt = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
+  /** Damage numbers' scale, so they never show under 14 px on screen however far the camera zooms out. */
+  private numberScale = 1;
 
   constructor() {
     super(SCENES.game);
@@ -191,7 +198,7 @@ export class GameScene extends Phaser.Scene {
         this.add
           .text(0, 0, '', {
             fontFamily: UI.font,
-            fontSize: '13px',
+            fontSize: `${NUMBER_FONT}px`,
             fontStyle: 'bold',
             color: DAMAGE_TEXT.color,
           })
@@ -205,7 +212,7 @@ export class GameScene extends Phaser.Scene {
         if (txt.style.color !== color) txt.setColor(color);
         txt
           .setPosition(d.x, d.y)
-          .setScale(d.strong ? 1.35 : 1)
+          .setScale(d.strong ? this.numberScale * 1.3 : this.numberScale)
           .setAlpha(Math.min(1, d.ttl * 4));
       },
     );
@@ -287,6 +294,7 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const zoom = clamp(Math.min(width, height) / config.view.minWorldSide, 0.5, 4);
     this.cameras.main.setZoom(zoom);
+    this.numberScale = Math.max(NUMBER_WORLD, NUMBER_SCREEN / zoom) / NUMBER_FONT;
     this.world.setView(width / zoom, height / zoom);
     // Also while paused (no update runs): a phone turned on the pause screen must not show a black half.
     this.placeView();

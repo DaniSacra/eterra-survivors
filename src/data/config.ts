@@ -102,6 +102,12 @@ export const config = {
     damageMergeTime: 0.25,
     /** From this much damage (after merging) a number is a strong hit. */
     strongHit: 40,
+    /**
+     * Area hits around the hero would stack a number per enemy: a swing (arc) shows at most this many new numbers,
+     * and each falling strike bolt `strikeNumbers` (hits on an enemy that already shows one still add up there).
+     */
+    arcNumbers: 4,
+    strikeNumbers: 2,
     puffTtl: 0.3,
     maxPuffs: 60,
     /** Of those, kept for gem and item glints (deaths never take them). */

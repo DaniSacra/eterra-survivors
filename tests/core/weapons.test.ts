@@ -4,6 +4,7 @@ import { updateWeapons as rawUpdate } from '../../src/core/weapons';
 import type { World } from '../../src/core/world';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
 import { bareWorld, still } from './helpers';
+import { config } from '../../src/data/config';
 
 const blade = WEAPONS.blade.levels[0]!;
 const light = WEAPONS.elunLight.levels[0]!;
@@ -140,6 +141,34 @@ describe('damage numbers', () => {
     for (let i = 0; i < 20; i++) w.step(1 / 60, still); // past the merge window
     w.onEnemyDamaged(e, 5, null);
     expect(w.damageNumbers.size).toBe(2);
+  });
+
+  it('an area swing over a crowd shows at most arcNumbers new numbers, and later hits still add up there', () => {
+    const w = prepared('mace');
+    const crowd = [];
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      crowd.push(spawnEnemy(w, 'blackKnight', Math.cos(a) * 20, Math.sin(a) * 20));
+    }
+    w.weapons[0]!.timer = 0;
+    updateWeapons(w, 1 / 60);
+    const hit = crowd.filter((e) => e.hp < e.maxHp).length;
+    expect(hit).toBeGreaterThan(config.effects.arcNumbers);
+    expect(w.damageNumbers.size).toBe(config.effects.arcNumbers);
+    expect(w.numberBudget).toBe(Infinity);
+    // Other hits (not area) are not limited.
+    for (const e of crowd) w.onEnemyDamaged(e, 1, null);
+    expect(w.damageNumbers.size).toBe(16);
+  });
+
+  it('numbers of a crowd spread on both axes, the same way for the same enemy', () => {
+    const w = bareWorld();
+    const a = spawnEnemy(w, 'blackKnight', 0, 0);
+    const b = spawnEnemy(w, 'blackKnight', 0, 0);
+    w.onEnemyDamaged(a, 5, null);
+    w.onEnemyDamaged(b, 5, null);
+    const [na, nb] = w.damageNumbers.active;
+    expect(na!.x !== nb!.x || na!.y !== nb!.y).toBe(true);
   });
 
   it('auras and orbits show no numbers', () => {

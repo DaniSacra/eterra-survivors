@@ -257,7 +257,7 @@ depois e registra em `docs/balance-baseline.md`.
   margens com `env(safe-area-inset-*)`.
 - Aceite: em 390x844 e em paisagem, nenhum texto do HUD cortado pelo notch; vida legível sem olhar para o canto.
 
-**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · aprovado
+**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
 - Por quê: plano do Daniel e visual-director: sans-serif, todos brancos e iguais, empilham sobre a multidão.
 - O quê: menores, somados por inimigo num intervalo curto (~0.25 s), cor própria para golpe forte, ocultos para
@@ -270,6 +270,11 @@ depois e registra em `docs/balance-baseline.md`.
   (vem de RT-01); fonte `Math.ceil(14 / zoom)` ou `setScale(1 / zoom)` na criação, sem alocar por quadro. Aceite
   novo: captura de Quebra-Junta e Espada de Fogo em 420x820 sem pilha de números sobre o herói; nenhum número abaixo
   de 12 px de tela.
+- Feito na R5: `world.numberBudget` (core, testado): um golpe `arc` mostra no máximo `config.effects.arcNumbers` (4)
+  números novos e cada raio de `strike` no máximo `strikeNumbers` (2); acertos num inimigo que já mostra número
+  continuam somando nele. Como o dano de um disparo é igual para todos, "os 4 maiores" vira "os 4 primeiros". Desvio
+  por `uid` nos dois eixos (±8 x ±6). Fonte de 16 px com escala `max(13, 14 / zoom) / 16`: nunca abaixo de 14 px de
+  tela. O golpe do chefe acerta o herói, que não mostra número, então não precisou de regra.
 
 **A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 

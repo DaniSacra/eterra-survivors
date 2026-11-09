@@ -95,6 +95,8 @@ export class World {
   /** Reusable query buffer, so per-frame code never allocates. */
   readonly scratch: number[] = [];
   readonly targetsScratch: number[] = [];
+  /** New damage numbers the current area hit may still show (set by area fires, Infinity otherwise). */
+  numberBudget = Infinity;
 
   constructor(seed?: number, setup: RunSetup = {}) {
     this.seed = (seed ?? Date.now()) >>> 0;
