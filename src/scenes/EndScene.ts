@@ -37,6 +37,8 @@ export class EndScene extends Phaser.Scene {
     const right = cx + pw / 2 - 14;
     const small = pw < 460;
 
+    // Above the HUD, which the level-up and pause overlays bring to the top.
+    this.scene.bringToTop();
     dim(this, 0.82);
     // Laid out from y = 0, then the panel is sized to the content and everything is centred vertically.
     const first = this.children.list.length;

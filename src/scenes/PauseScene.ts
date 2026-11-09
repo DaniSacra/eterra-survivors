@@ -13,6 +13,7 @@ export class PauseScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const cx = width / 2;
     dim(this);
+    this.scene.bringToTop(SCENES.hud);
     // Phone lying down: actions on the left, options on the right, the title clear of the HUD timer.
     if (isShort(this) && width >= 600) {
       const colW = Math.min(320, (width - 48) / 2);

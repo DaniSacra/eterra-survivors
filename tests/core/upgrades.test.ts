@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { applyUpgrade, candidates, rollUpgrades, weaponLevelDiff } from '../../src/core/upgrades';
+import {
+  applyUpgrade,
+  candidates,
+  rollUpgrades,
+  weaponLevelDiff,
+  weaponsCompletedBy,
+} from '../../src/core/upgrades';
 import { addXp, xpToNext } from '../../src/core/xp';
 import { config } from '../../src/data/config';
 import { PASSIVES, PASSIVE_IDS } from '../../src/data/upgrades';
@@ -99,5 +105,16 @@ describe('passive limit', () => {
     const passives = candidates(w).filter((o) => o.kind === 'passive');
     expect(passives.length).toBeGreaterThan(0);
     for (const o of passives) expect(owned).toContain(o.id);
+  });
+
+  it('lists every owned weapon whose Elo a passive completes', () => {
+    expect(weaponsCompletedBy(['mace', 'blade', 'paladinSwords'], 'armor')).toEqual([
+      'mace',
+      'paladinSwords',
+    ]);
+    expect(weaponsCompletedBy(['blade', 'fire'], 'might')).toEqual(['blade', 'fire']);
+    expect(weaponsCompletedBy(['frost'], 'might')).toEqual([]);
+    // An Elo already formed needs nothing more.
+    expect(weaponsCompletedBy(['fury'], 'might')).toEqual([]);
   });
 });

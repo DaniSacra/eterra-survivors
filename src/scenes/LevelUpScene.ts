@@ -4,12 +4,17 @@ import type { ChargeKey } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { describeUpgrade } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
-import { UI, bindKeys, button, disable, label, restartOnResize, safeArea } from '../render/ui';
+import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
 import { SCENES } from './keys';
 
 const CHARGES: ChargeKey[] = ['reroll', 'skip', 'banish'];
-/** Height of the HUD's XP and life bars, left uncovered (HudScene layout). */
+/** Height of the HUD's XP and life bars, kept clear of the cards (the HUD is drawn on top). */
 const HUD_BARS = 44;
+/**
+ * When the choice opens, the overlay fades in and ignores touches for this long: a finger that taps again to
+ * dodge (floating joystick) must not pick whatever card is under it. Also lets the level pulse show through.
+ */
+const ARM_DELAY = 300;
 
 /** Overlay with the upgrade choices. The world is frozen (state 'levelup') while it is open. */
 export class LevelUpScene extends Phaser.Scene {
@@ -23,9 +28,13 @@ export class LevelUpScene extends Phaser.Scene {
     super(SCENES.levelUp);
   }
 
-  init(data: { world: World; banishing?: boolean }): void {
+  /** True when rebuilt after Trocar, Banir or a queued level-up: the player is already looking, no guard. */
+  private again = false;
+
+  init(data: { world: World; banishing?: boolean; again?: boolean }): void {
     this.world = data.world;
     this.banishing = !!data.banishing && this.world.charges.banish > 0;
+    this.again = !!data.again;
     this.selected = 0;
   }
 
@@ -49,10 +58,15 @@ export class LevelUpScene extends Phaser.Scene {
     const top = side ? keep + 54 : Math.max(keep + 80, height / 2 - ((cardH + gap) * n) / 2 - 10);
     const cx = side ? width / 2 - (bw + 12) / 2 : width / 2;
 
-    this.add
-      .rectangle(0, keep, width, height - keep, UI.dim, 0.72)
-      .setOrigin(0)
-      .setInteractive();
+    // The whole screen dims; the HUD (bars, timer, build) is brought above the overlay.
+    dim(this, 0.72);
+    this.scene.bringToTop(SCENES.hud);
+    if (!this.again) {
+      this.input.enabled = false;
+      this.cameras.main.setAlpha(0);
+      this.tweens.add({ targets: this.cameras.main, alpha: 1, duration: ARM_DELAY });
+      this.time.delayedCall(ARM_DELAY, () => (this.input.enabled = true));
+    }
     label(this, width / 2, side ? top - 28 : top - 44, t.levelUp.title, side ? 26 : 30, {
       bold: true,
       color: UI.gold,
@@ -62,7 +76,7 @@ export class LevelUpScene extends Phaser.Scene {
     this.cards = opts.map((opt, i) => {
       const y = top + i * (cardH + gap) + cardH / 2;
       const card = button(this, cx, y, cardW, cardH, () => this.choose(i));
-      const d = describeUpgrade(opt, owned);
+      const d = describeUpgrade(opt, owned, w.passives);
       const x0 = cx - cardW / 2;
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;
@@ -77,8 +91,16 @@ export class LevelUpScene extends Phaser.Scene {
         align: 'left',
         wrap: textW,
       });
-      if (d.recipe && desc.y + desc.height + 24 <= y + cardH / 2)
-        label(this, left, y + cardH / 2 - 7, d.recipe, 12, { color: UI.gold, align: 'left' }).setOrigin(0, 1);
+      if (d.recipe && desc.y + desc.height + 24 <= y + cardH / 2) {
+        const ry = y + cardH / 2 - 7;
+        // The recipe's passive as a mini icon, then its state ("você tem", "falta" or "Elo pronto").
+        const rx = d.recipeIcon ? left + 18 : left;
+        if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
+        label(this, rx, ry, d.recipe, 12, {
+          color: d.recipeMissing ? UI.muted : UI.gold,
+          align: 'left',
+        }).setOrigin(0, 1);
+      }
       return card;
     });
 
@@ -150,7 +172,7 @@ export class LevelUpScene extends Phaser.Scene {
 
   /** Rebuilds the cards while the level-up lasts, closes the overlay once it is over. */
   private refresh(banishing: boolean): void {
-    if (this.world.state === 'levelup') this.scene.restart({ world: this.world, banishing });
+    if (this.world.state === 'levelup') this.scene.restart({ world: this.world, banishing, again: true });
     else this.scene.stop();
   }
 }

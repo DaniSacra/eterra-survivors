@@ -67,8 +67,13 @@ export const t = {
     chargeKeys: 'R troca · X pula · B bane',
     evolution: 'Elo',
     evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
-    recipe: (passive: string) => `Forma Elo com ${passive}`,
+    recipeHave: (passive: string) => `Forma Elo com ${passive} (você tem)`,
+    recipeNeed: (passive: string) => `Forma Elo com ${passive} (falta)`,
+    eloReady: 'Elo pronto: pegue um baú',
     recipeFor: (weapon: string) => `Forma o Elo de ${weapon}`,
+    /** Several weapons joined with `and` ("Maça de Ferro e Espadas dos Paladinos"). */
+    recipeForMany: (weapons: string) => `Forma os Elos de ${weapons}`,
+    and: ' e ',
   },
 
   chest: {

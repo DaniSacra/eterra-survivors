@@ -60,6 +60,11 @@ export function readyEvolution(world: World): UpgradeOption | null {
   return null;
 }
 
+/** The owned base weapons whose Elo uses `passive` (a passive card lists them all). */
+export function weaponsCompletedBy(owned: readonly WeaponId[], passive: PassiveId): WeaponId[] {
+  return owned.filter((id) => evolutionOf(id)?.evo.passive === passive);
+}
+
 /** What a chest gives: an evolution if one is ready, else a level of something already owned, else a heal. */
 export function chestReward(world: World): UpgradeOption {
   return readyEvolution(world) ?? world.rng.pick(candidates(world, false)) ?? { kind: 'heal' };

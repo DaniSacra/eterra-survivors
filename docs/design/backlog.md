@@ -928,7 +928,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 
 ### R4 · Interface (dono: ui-designer)
 
-**RU-01 · Escolha segura, receita com estado e level-up sem faixa clara** · ui + impl · P · aprovado
+**RU-01 · Escolha segura, receita com estado e level-up sem faixa clara** · ui + impl · P · ✅ feito
 
 - Por quê: 05-ui #3: com o joystick flutuante, um toque novo logo depois de abrir a escolha pega a carta de baixo; a
   receita não diz se o jogador já tem a passiva; a carta de passiva cita só a primeira arma (Cota de Malha esquece a

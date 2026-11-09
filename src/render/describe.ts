@@ -1,8 +1,8 @@
 import { config, type StatKey } from '../data/config';
-import { EVOLUTIONS, evolutionOf } from '../data/evolutions';
-import { PASSIVES } from '../data/upgrades';
+import { evolutionOf } from '../data/evolutions';
+import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { WEAPONS, type WeaponId } from '../data/weapons';
-import { weaponLevelDiff, type UpgradeOption } from '../core/upgrades';
+import { weaponLevelDiff, weaponsCompletedBy, type UpgradeOption } from '../core/upgrades';
 import { t } from '../i18n/pt-BR';
 
 /** Stats that are multipliers show as percentages. */
@@ -33,19 +33,52 @@ export interface UpgradeText {
   desc: string;
   /** Asset key of the card's icon. */
   icon: string;
-  /** The Elo this option leads to, if any ("Elo com Força"), shown in gold. */
+  /** The Elo this option leads to, if any, and whether its passive is owned ("Forma Elo com Força (falta)"). */
   recipe: string;
+  /** Icon of the recipe's passive (weapon cards), shown before the recipe; '' when none. */
+  recipeIcon: string;
+  /** Weapon cards: the recipe's passive is missing (the recipe reads muted). */
+  recipeMissing: boolean;
 }
 
-/** Texts and icon of a level-up card. `owned`: the hero's weapons, to tell which passive completes an Elo. */
-export function describeUpgrade(opt: UpgradeOption, owned: readonly WeaponId[] = []): UpgradeText {
+/**
+ * Texts and icon of a level-up card. `owned`: the hero's weapons, to tell which Elos a passive completes;
+ * `passives`: the hero's passives, to tell whether a weapon's recipe is complete.
+ */
+export function describeUpgrade(
+  opt: UpgradeOption,
+  owned: readonly WeaponId[] = [],
+  passives: Partial<Record<PassiveId, number>> = {},
+): UpgradeText {
   switch (opt.kind) {
     case 'weapon': {
       const w = t.weapons[opt.id];
       const evo = evolutionOf(opt.id);
-      const recipe = evo ? t.levelUp.recipe(t.passives[evo.evo.passive]) : '';
+      const max = WEAPONS[opt.id].levels.length;
+      let recipe = '';
+      if (evo) {
+        const name = t.passives[evo.evo.passive];
+        const have = (passives[evo.evo.passive] ?? 0) > 0;
+        recipe =
+          have && opt.level >= max
+            ? t.levelUp.eloReady
+            : have
+              ? t.levelUp.recipeHave(name)
+              : t.levelUp.recipeNeed(name);
+      }
+      const recipeIcon = evo ? `icon.${evo.evo.passive}` : '';
+      const recipeMissing = !!evo && !passives[evo.evo.passive];
       const icon = `icon.${opt.id}`;
-      if (opt.level === 1) return { title: w.name, tag: t.levelUp.newWeapon, desc: w.desc, icon, recipe };
+      if (opt.level === 1)
+        return {
+          title: w.name,
+          tag: t.levelUp.newWeapon,
+          desc: w.desc,
+          icon,
+          recipe,
+          recipeIcon,
+          recipeMissing,
+        };
       const desc = weaponLevelDiff(opt.id, opt.level)
         .filter((d) => t.weaponStats[d.stat])
         .map((d) =>
@@ -56,22 +89,45 @@ export function describeUpgrade(opt: UpgradeOption, owned: readonly WeaponId[] =
           ),
         )
         .join(t.sep);
-      const max = WEAPONS[opt.id].levels.length;
-      return { title: w.name, tag: t.units.of(t.levelUp.level(opt.level), max), desc, icon, recipe };
+      return {
+        title: w.name,
+        tag: t.units.of(t.levelUp.level(opt.level), max),
+        desc,
+        icon,
+        recipe,
+        recipeIcon,
+        recipeMissing,
+      };
     }
     case 'evolution': {
       const w = t.weapons[opt.id];
-      return { title: w.name, tag: t.levelUp.evolution, desc: w.desc, icon: `icon.${opt.id}`, recipe: '' };
+      const icon = `icon.${opt.id}`;
+      return {
+        title: w.name,
+        tag: t.levelUp.evolution,
+        desc: w.desc,
+        icon,
+        recipe: '',
+        recipeIcon: '',
+        recipeMissing: false,
+      };
     }
     case 'passive': {
       const def = PASSIVES[opt.id];
-      const evo = Object.values(EVOLUTIONS).find((e) => e?.passive === opt.id && owned.includes(e.from));
+      const names = weaponsCompletedBy(owned, opt.id).map((id) => t.weapons[id].name);
       return {
         title: t.passives[opt.id],
         tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
         icon: `icon.${opt.id}`,
-        recipe: evo ? t.levelUp.recipeFor(t.weapons[evo.from].name) : '',
+        recipe:
+          names.length > 1
+            ? t.levelUp.recipeForMany(names.join(t.levelUp.and))
+            : names.length === 1
+              ? t.levelUp.recipeFor(names[0] as string)
+              : '',
+        recipeIcon: '',
+        recipeMissing: false,
       };
     }
     case 'heal':
@@ -81,6 +137,8 @@ export function describeUpgrade(opt: UpgradeOption, owned: readonly WeaponId[] =
         desc: t.levelUp.healDesc(config.xp.healAmount),
         icon: 'pickup.food',
         recipe: '',
+        recipeIcon: '',
+        recipeMissing: false,
       };
   }
 }
