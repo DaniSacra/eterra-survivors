@@ -1170,11 +1170,14 @@ implementação abaixo; cada item é um commit.
 - Feito: testes em `tests/core/achievements.test.ts`; textos com `describeAchievement` (render/describe.ts); as três
   cargas opcionais prontas atrás de `config.achievementCharges` (desligado).
 
-**CC-04 · Conquistas na tela final e calibração** · impl + bal · P · aprovado
+**CC-04 · Conquistas na tela final e calibração** · impl + bal · P · ✅ feito
 
 - O quê: `bank()` com `summarizeRun` + `recordRun`; tela final com conquistas novas e "Perto: ..."; sim imprime dano
   e maior golpe; calibrar `damageRun`, `bossFast` e `hit120`.
 - Aceite: toda tela final mostra uma conquista nova ou a mais perto; números em `docs/balance-baseline.md`.
+- Feito: até 3 conquistas novas (e "+N conquistas"), senão "Perto:" (a mais perto entre 50% e 99%; sem nenhuma,
+  a de maior progresso). O menu destranca as conquistas que um save antigo já merecia. Calibrado com 144 partidas
+  normais e 144 de veterano (`SIM_SHOP=full`): `damageRun` 260.000, `hit120` 100, `bossFast` 40 s mantido.
 
 **CC-05 · Tela Coleção com abas** · impl + ui · M · aprovado
 

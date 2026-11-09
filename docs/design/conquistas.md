@@ -95,8 +95,8 @@ Espectro, Golem de Pedra, Cavaleiro Negro). Ele quer escrever uma linha para cad
 
 Regras gerais: nenhuma secreta; todas mostram o progresso; o ouro cai no cofre na hora em que a conquista é
 registrada (fim da partida). Nomes em pt-BR, sem travessão. "Partida" = uma corrida; "no total" = somando todas.
-Os limites marcados com **(calibrar)** saem do sim no passo CC-04 (alvo: cerca de metade das vitórias do bot
-veterano consegue).
+Os limites marcados com **(calibrado)** saíram do sim no passo CC-04 (alvo: cerca de metade das vitórias do bot
+veterano consegue; números em `docs/balance-baseline.md`).
 
 ### Abates
 
@@ -111,12 +111,12 @@ veterano consegue).
 
 ### Dano
 
-| id            | Nome              | Descrição                               | Condição exata                   | Recompensa |
-| ------------- | ----------------- | --------------------------------------- | -------------------------------- | ---------- |
-| `hit80`       | Golpe Forte       | Acerte um golpe de arma de 80 ou mais.  | `bestHit >= 80`                  | 50 ouro    |
-| `hit120`      | Na Junta          | Acerte um golpe de arma de 120 ou mais. | `bestHit >= 120`                 | 100 ouro   |
-| `damageRun`   | Forja Acesa       | Cause 200.000 de dano numa partida.     | `runDamage >= 200000` (calibrar) | 100 ouro   |
-| `damageTotal` | Bigorna do Gaspar | Cause 1.000.000 de dano no total.       | `totals.damage >= 1000000`       | 150 ouro   |
+| id            | Nome              | Descrição                               | Condição exata                    | Recompensa |
+| ------------- | ----------------- | --------------------------------------- | --------------------------------- | ---------- |
+| `hit80`       | Golpe Forte       | Acerte um golpe de arma de 80 ou mais.  | `bestHit >= 80`                   | 50 ouro    |
+| `hit120`      | Na Junta          | Acerte um golpe de arma de 100 ou mais. | `bestHit >= 100` (calibrado)      | 100 ouro   |
+| `damageRun`   | Forja Acesa       | Cause 260.000 de dano numa partida.     | `runDamage >= 260000` (calibrado) | 100 ouro   |
+| `damageTotal` | Bigorna do Gaspar | Cause 1.000.000 de dano no total.       | `totals.damage >= 1000000`        | 150 ouro   |
 
 Conta do golpe: o maior dano de arma por acerto é 75 (Quebra-Junta) e 70 (Fúria da Forja); com Força 5 (+50%) e a
 Loja (+25%), 75 x 1,75 = 131. Então 80 pede uma arma pesada com um pouco de Força, e 120 pede a build de Força
@@ -159,13 +159,13 @@ As quatro primeiras usam a fala de vitória de cada herói no original (`src/dat
 
 ### Fases
 
-| id           | Nome                   | Descrição                                          | Condição exata                                                                        | Recompensa |
-| ------------ | ---------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------- |
-| `bossKnight` | O Cavaleiro Caiu       | Derrote o Cavaleiro Negro.                         | `kills(blackKnight) >= 1`                                                             | 50 ouro    |
-| `bossRinger` | Ninguém Mais Desce     | Derrote O Sineiro.                                 | `kills(bellRinger) >= 1`                                                              | 75 ouro    |
-| `bossWolf`   | O Velho da Matilha     | Derrote o Lobo Velho.                              | `kills(oldWolf) >= 1`                                                                 | 75 ouro    |
-| `bossFast`   | Antes do Segundo Golpe | Derrote um chefe em até 40 s depois que ele chega. | alguma vitória com `time - matchDuration <= 40` (calibrar; mediana do sim hoje: 50 s) | 100 ouro   |
-| `allStages`  | Caminho de Erukh       | Vença as três fases.                               | `save.cleared.length === STAGE_IDS.length`                                            | 150 ouro   |
+| id           | Nome                   | Descrição                                          | Condição exata                                                                                     | Recompensa |
+| ------------ | ---------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------- |
+| `bossKnight` | O Cavaleiro Caiu       | Derrote o Cavaleiro Negro.                         | `kills(blackKnight) >= 1`                                                                          | 50 ouro    |
+| `bossRinger` | Ninguém Mais Desce     | Derrote O Sineiro.                                 | `kills(bellRinger) >= 1`                                                                           | 75 ouro    |
+| `bossWolf`   | O Velho da Matilha     | Derrote o Lobo Velho.                              | `kills(oldWolf) >= 1`                                                                              | 75 ouro    |
+| `bossFast`   | Antes do Segundo Golpe | Derrote um chefe em até 40 s depois que ele chega. | alguma vitória com `time - matchDuration <= 40` (calibrado: mediana 49 s no sim, 34 s no veterano) | 100 ouro   |
+| `allStages`  | Caminho de Erukh       | Vença as três fases.                               | `save.cleared.length === STAGE_IDS.length`                                                         | 150 ouro   |
 
 ### Coleção
 

@@ -329,3 +329,24 @@ arc     mace           L1   120.0  Lmax  1485.8  Elo(jointBreaker)   4650.0
   solo fire           L1     7.0  Lmax    22.8  Elo     36.1
 strike  fire           L1    49.0  Lmax   796.1  Elo(fireSword)   2124.2
 ```
+
+## CC-04 · calibração das conquistas (2026-11-09)
+
+`SIM_SEEDS=12 npm run sim` (144 partidas) e o mesmo com `SIM_SHOP=full` (veterano: Loja inteira). O sim agora
+imprime `dmg` (dano total das armas) e `hit` (maior golpe de arma) por partida e uma linha `ACHIEVE` com as medianas
+entre as vitórias. Alvo do `conquistas.md`: cerca de metade das vitórias do veterano consegue.
+
+```
+ACHIEVE  wins 112/144 · run damage median 254049 · best hit median 70 · boss time median 49s
+ACHIEVE  veteran wins 135/144 · run damage median 256102 · best hit median 88 · boss time median 34s
+```
+
+| Conquista   | Proposta | Sim (vitórias que conseguem) | Veterano | Decisão                                  |
+| ----------- | -------- | ---------------------------- | -------- | ---------------------------------------- |
+| `damageRun` | 200.000  | 98%                          | 100%     | **260.000**: 32% no sim, 43% no veterano |
+| `hit120`    | 120      | 0%                           | 19%      | **100**: 10% no sim, 39% no veterano     |
+| `bossFast`  | 40 s     | 34%                          | 56%      | **40 s** mantido                         |
+
+Notas: o dano por partida se concentra entre 250 e 256 mil (o que uma vitória mata), então qualquer limite nessa
+faixa é sensível; 260 mil pede uma partida acima da média. Golpe de 90 daria 44% no veterano, mas ficaria colado
+no "Golpe Forte" (80); 100 mantém os dois degraus distintos. O id `hit120` ficou (o save guarda ids).
