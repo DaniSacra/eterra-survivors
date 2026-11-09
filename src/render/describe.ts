@@ -11,20 +11,20 @@ const PERCENT_STATS: StatKey[] = ['might', 'cooldown', 'area', 'growth', 'greed'
 const num = (v: number): string => String(Math.round(v * 100) / 100).replace('.', ',');
 
 function weaponValue(stat: string, v: number): string {
-  if (stat === 'arc') return `${Math.round((v * 180) / Math.PI)}°`;
-  if (stat === 'cooldown' || stat === 'duration') return `${num(v)}s`;
+  if (stat === 'arc') return t.units.degrees(String(Math.round((v * 180) / Math.PI)));
+  if (stat === 'cooldown' || stat === 'duration') return t.units.seconds(num(v));
   return num(v);
 }
 
 export function formatStatDelta(stat: StatKey, delta: number): string {
-  const sign = delta > 0 ? '+' : '−';
+  const sign = delta > 0 ? t.units.plus : t.units.minus;
   const abs = Math.abs(delta);
   const value = PERCENT_STATS.includes(stat)
-    ? `${Math.round(abs * 100)}%`
+    ? t.units.percent(String(Math.round(abs * 100)))
     : stat === 'regen'
-      ? `${num(abs)}/s`
+      ? t.units.perSecond(num(abs))
       : num(abs);
-  return `${t.stats[stat]} ${sign}${value}`;
+  return t.units.delta(t.stats[stat], sign, value);
 }
 
 export interface UpgradeText {
@@ -48,10 +48,16 @@ export function describeUpgrade(opt: UpgradeOption, owned: readonly WeaponId[] =
       if (opt.level === 1) return { title: w.name, tag: t.levelUp.newWeapon, desc: w.desc, icon, recipe };
       const desc = weaponLevelDiff(opt.id, opt.level)
         .filter((d) => t.weaponStats[d.stat])
-        .map((d) => `${t.weaponStats[d.stat]} ${weaponValue(d.stat, d.from)} → ${weaponValue(d.stat, d.to)}`)
-        .join(' · ');
+        .map((d) =>
+          t.units.change(
+            t.weaponStats[d.stat] as string,
+            weaponValue(d.stat, d.from),
+            weaponValue(d.stat, d.to),
+          ),
+        )
+        .join(t.sep);
       const max = WEAPONS[opt.id].levels.length;
-      return { title: w.name, tag: `${t.levelUp.level(opt.level)}/${max}`, desc, icon, recipe };
+      return { title: w.name, tag: t.units.of(t.levelUp.level(opt.level), max), desc, icon, recipe };
     }
     case 'evolution': {
       const w = t.weapons[opt.id];
@@ -62,7 +68,7 @@ export function describeUpgrade(opt: UpgradeOption, owned: readonly WeaponId[] =
       const evo = Object.values(EVOLUTIONS).find((e) => e?.passive === opt.id && owned.includes(e.from));
       return {
         title: t.passives[opt.id],
-        tag: `${t.levelUp.level(opt.level)}/${def.maxLevel}`,
+        tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
         icon: `icon.${opt.id}`,
         recipe: evo ? t.levelUp.recipeFor(t.weapons[evo.from].name) : '',

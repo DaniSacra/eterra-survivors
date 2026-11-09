@@ -110,9 +110,9 @@ export class EndScene extends Phaser.Scene {
     // Passives in one wrapped line.
     const passives = passiveReport(w);
     const list = passives.length
-      ? passives.map((p) => `${t.passives[p.id]} ${p.level}`).join(' · ')
+      ? passives.map((p) => t.end.passiveLevel(t.passives[p.id], p.level)).join(t.sep)
       : t.end.none;
-    const pl = label(this, left, y, `${t.end.passives}: ${list}`, 13, {
+    const pl = label(this, left, y, t.end.passivesLine(list), 13, {
       color: UI.muted,
       align: 'left',
       wrap: pw - 28,

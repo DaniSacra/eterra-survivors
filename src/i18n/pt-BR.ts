@@ -9,6 +9,23 @@ import type { WeaponId } from '../data/weapons';
 
 /** Every player-facing string lives here. Code never hardcodes UI text. */
 export const t = {
+  /** Separator between items on one line. */
+  sep: ' · ',
+  /** Units and signs of numbers shown to the player (the value comes already formatted). */
+  units: {
+    degrees: (v: string) => `${v}°`,
+    seconds: (v: string) => `${v}s`,
+    perSecond: (v: string) => `${v}/s`,
+    percent: (v: string) => `${v}%`,
+    plus: '+',
+    minus: '−',
+    /** A stat change: "Dano +10%". */
+    delta: (stat: string, sign: string, value: string) => `${stat} ${sign}${value}`,
+    /** A weapon stat from one level to the next: "Dano 10 → 13". */
+    change: (stat: string, from: string, to: string) => `${stat} ${from} → ${to}`,
+    /** Current out of max ("Nível 2/7"). */
+    of: (a: string, b: number) => `${a}/${b}`,
+  },
   title: 'Eterra Survivors',
   subtitle: 'Crônicas de Eterra',
 
@@ -37,7 +54,10 @@ export const t = {
     level: (n: number) => `Nível ${n}`,
     heal: 'Pão e sopa da Berta',
     healDesc: (n: number) => `Recupera ${n} de vida`,
-    hint: 'Toque numa opção ou use 1, 2, 3',
+    hintTouch: 'Toque numa opção',
+    hintKeys: 'Clique ou use 1, 2, 3',
+    /** Card title with its key on keyboards ("1. Força"). */
+    numbered: (n: number, title: string) => `${n}. ${title}`,
     banishHint: 'Escolha o que banir desta partida',
     charges: {
       reroll: (n: number) => `Trocar (${n})`,
@@ -105,7 +125,8 @@ export const t = {
     damage: 'Dano',
     owned: 'Tempo',
     dps: 'DPS',
-    passives: 'Passivas',
+    passivesLine: (list: string) => `Passivas: ${list}`,
+    passiveLevel: (name: string, level: number) => `${name} ${level}`,
     none: 'nenhuma',
     thousand: 'k',
     million: 'M',

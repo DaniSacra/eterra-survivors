@@ -562,7 +562,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   `meta.test.ts` para os dois casos.
 - Aceite: testes verdes; nenhum save atual perde dados (teste do L-02 continua verde).
 
-**RT-04 · Textos fora do i18n, ícone de pausa e dica por dispositivo** · impl · P · aprovado
+**RT-04 · Textos fora do i18n, ícone de pausa e dica por dispositivo** · impl · P · ✅ feito
 
 - Por quê: 02-code #11, 03-qa #7, 04-visual #19, 05-ui #3 (extra): unidades e separadores em `describe.ts`,
   `EndScene.ts`, `SelectScene.ts`; "II" como texto (`HudScene.ts:70`); a dica do level-up fala de toque no desktop e

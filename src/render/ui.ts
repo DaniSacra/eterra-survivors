@@ -4,6 +4,7 @@ import type Phaser from 'phaser';
 export const UI = {
   font: 'Georgia, "Times New Roman", serif',
   text: '#e8e2d0',
+  textHex: 0xe8e2d0,
   muted: '#a8a090',
   accent: 0xd8a040,
   /** Titles, rewards, highlights, costs. */

@@ -178,7 +178,7 @@ export class SelectScene extends Phaser.Scene {
     if (!compact) label(this, x, top + 40, c.role, 14, { color: UI.muted, align: 'left' });
     const stats = (Object.keys(def.stats) as StatKey[])
       .map((k) => formatStatDelta(k, (def.stats as Partial<Record<StatKey, number>>)[k] as number))
-      .join(' · ');
+      .join(t.sep);
     const st = label(this, x, top + (compact ? 34 : 62), stats, 14, { align: 'left', wrap: w - 120 });
     const iy = compact ? top + h - 18 : Math.min(top + h - 26, st.y + st.height + 22);
     this.add.image(x + 14, iy, `icon.${def.weapon}`).setScale(ART_SCALE * 1.1);

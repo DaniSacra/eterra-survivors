@@ -27,7 +27,7 @@ export class HudScene extends Phaser.Scene {
   private debug!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
   private pauseBtn!: Phaser.GameObjects.Rectangle;
-  private pauseIcon!: Phaser.GameObjects.Text;
+  private pauseIcon!: Phaser.GameObjects.Graphics;
   private hpText!: Phaser.GameObjects.Text;
   private debugOn = false;
   private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
@@ -67,7 +67,12 @@ export class HudScene extends Phaser.Scene {
     this.banner = label(this, 0, 0, '', 24, { bold: true, color: UI.danger, stroke: true }).setAlpha(0);
     const game = this.scene.get(SCENES.game) as GameScene;
     this.pauseBtn = button(this, 0, 0, 40, 40, () => game.pauseGame()).setAlpha(0.8);
-    this.pauseIcon = label(this, 0, 0, 'II', 18, { bold: true });
+    // The pause sign, drawn (two bars), centered on its own origin so layout() only moves it.
+    this.pauseIcon = this.add
+      .graphics()
+      .fillStyle(UI.textHex, 1)
+      .fillRect(-7, -8, 5, 16)
+      .fillRect(2, -8, 5, 16);
     this.joystick = new Joystick(this);
     this.layout();
 
@@ -166,8 +171,8 @@ export class HudScene extends Phaser.Scene {
       const d = t.debug;
       this.debug.setText(
         `${d.fps} ${Math.round(this.game.loop.actualFps)}\n` +
-          `${w.enemies.size} ${d.enemies} · ${w.projectiles.size} ${d.projectiles}\n` +
-          `${w.gems.size} ${d.gems} · ${w.damageNumbers.size} ${d.numbers}\n` +
+          `${w.enemies.size} ${d.enemies}${t.sep}${w.projectiles.size} ${d.projectiles}\n` +
+          `${w.gems.size} ${d.gems}${t.sep}${w.damageNumbers.size} ${d.numbers}\n` +
           `${d.seed} ${w.seed}`,
       );
     }

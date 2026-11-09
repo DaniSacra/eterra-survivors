@@ -33,6 +33,8 @@ export class LevelUpScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const w = this.world;
     const opts = w.upgradeOptions;
+    // Phones have no number keys: no "1." on the cards and a hint about touching.
+    const touch = this.sys.game.device.input.touch;
     // The HUD bars (XP and life) stay visible above the dimmed area.
     const keep = safeArea().top + HUD_BARS;
     const n = opts.length;
@@ -65,7 +67,10 @@ export class LevelUpScene extends Phaser.Scene {
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;
       const textW = cardW - 62 - 12;
-      label(this, left, y - cardH / 2 + 9, `${i + 1}. ${d.title}`, 18, { bold: true, align: 'left' });
+      label(this, left, y - cardH / 2 + 9, touch ? d.title : t.levelUp.numbered(i + 1, d.title), 18, {
+        bold: true,
+        align: 'left',
+      });
       label(this, x0 + cardW - 12, y - cardH / 2 + 19, d.tag, 13, { color: UI.gold }).setOrigin(1, 0.5);
       const desc = label(this, left, y - cardH / 2 + 33, d.desc, 14, {
         color: UI.muted,
@@ -78,7 +83,7 @@ export class LevelUpScene extends Phaser.Scene {
     });
 
     const bottom = top + n * (cardH + gap);
-    const hint = this.banishing ? t.levelUp.banishHint : t.levelUp.hint;
+    const hint = this.banishing ? t.levelUp.banishHint : touch ? t.levelUp.hintTouch : t.levelUp.hintKeys;
     label(this, cx, bottom + (side ? 8 : 14), hint, 14, { color: this.banishing ? UI.danger : UI.muted });
 
     // Trocar · Pular · Banir: a row under the cards, or a column beside them.
@@ -91,7 +96,7 @@ export class LevelUpScene extends Phaser.Scene {
       if (c <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
-    if (!this.sys.game.device.input.touch)
+    if (!touch)
       label(this, side ? bx : width / 2, side ? top + 22 + 3 * 52 : bottom + 90, t.levelUp.chargeKeys, 12, {
         color: UI.muted,
         wrap: side ? bw : undefined,
