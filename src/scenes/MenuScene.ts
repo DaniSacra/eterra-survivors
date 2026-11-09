@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
-import { UI, button, isShort, keyNav, label, restartOnResize } from '../render/ui';
+import { UI, button, isShort, keyNav, label, newsDot, restartOnResize } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { CHARACTERS, CHARACTER_IDS } from '../data/characters';
 import { HERO_COLOR, TINT } from '../render/fx';
-import { checkStoredAchievements } from '../render/save';
+import { checkStoredAchievements, loadSave } from '../render/save';
 import { SCENES } from './keys';
 
 export class MenuScene extends Phaser.Scene {
@@ -44,19 +44,23 @@ export class MenuScene extends Phaser.Scene {
     });
     const by = side ? (height - 160 - 16 - hint.height) / 2 + 28 : height * 0.58;
     hint.setY(by + (side ? 132 + 16 + hint.height / 2 : 172));
+    const collection = button(
+      this,
+      rx - bw / 4 - 3,
+      by + 116,
+      bw / 2 - 6,
+      44,
+      () => this.scene.start(SCENES.collection),
+      t.menu.collection,
+    );
+    // Something new in the Coleção (an achievement not seen yet): a gold dot on the button's corner.
+    if (loadSave().fresh.length > 0)
+      newsDot(this, collection.x + collection.width / 2 - 8, collection.y - collection.height / 2 + 8);
     keyNav(this, [
       button(this, rx, by, bw, 56, () => this.start(), t.menu.start),
       button(this, rx, by + 64, bw, 44, () => this.scene.start(SCENES.shop), t.menu.shop),
-      // Two smaller ones side by side: the book of Elos and the options.
-      button(
-        this,
-        rx - bw / 4 - 3,
-        by + 116,
-        bw / 2 - 6,
-        44,
-        () => this.scene.start(SCENES.eloBook),
-        t.menu.elos,
-      ),
+      // Two smaller ones side by side: the Coleção and the options.
+      collection,
       button(
         this,
         rx + bw / 4 + 3,

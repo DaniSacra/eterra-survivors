@@ -1179,11 +1179,14 @@ implementação abaixo; cada item é um commit.
   a de maior progresso). O menu destranca as conquistas que um save antigo já merecia. Calibrado com 144 partidas
   normais e 144 de veterano (`SIM_SHOP=full`): `damageRun` 260.000, `hit120` 100, `bossFast` 40 s mantido.
 
-**CC-05 · Tela Coleção com abas** · impl + ui · M · aprovado
+**CC-05 · Tela Coleção com abas** · impl + ui · M · ✅ feito
 
 - O quê: `CollectionScene` (Bestiário · Elos · Conquistas · Heróis) no lugar do `EloBookScene`; botão "Coleção" no
   menu com ponto de novidade.
 - Aceite: aba Elos idêntica ao Livro atual; teclado e toque trocam de aba; celular em pé e deitado.
+- Feito: cada aba desenha numa área (`scenes/collection/*.ts`); deitado, Voltar no canto e as abas ao lado, sem
+  título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
+  abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
 **CC-06 · Aba Bestiário** · impl + visual · M · aprovado
 

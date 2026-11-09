@@ -43,7 +43,7 @@ export const t = {
     start: 'Começar',
     shop: 'Loja do Gaspar',
     options: 'Opções',
-    elos: 'Livro de Elos',
+    collection: 'Coleção',
     controlsDesktop: 'WASD ou setas para andar · Espaço ou Esc pausa',
     /** Only shown in development builds. */
     debugHint: 'F3 depuração · F4 +100 inimigos',
@@ -116,8 +116,12 @@ export const t = {
     quitConfirm: 'Confirmar desistir',
   },
 
+  collection: {
+    title: 'Coleção',
+    tabs: { bestiary: 'Bestiário', elos: 'Elos', achievements: 'Conquistas', heroes: 'Heróis' },
+  },
+
   elos: {
-    title: 'Livro de Elos',
     count: (n: number, total: number) => `${n} de ${total} Elos descobertos`,
     unknown: '???',
     rule: 'Arma no nível máximo + a passiva certa, e depois um baú.',
@@ -145,7 +149,7 @@ export const t = {
     lost: 'Fim de jogo',
     lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
-    newElo: (name: string) => `Elo descoberto: ${name}! Veja no Livro de Elos.`,
+    newElo: (name: string) => `Elo descoberto: ${name}! Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,
     toBuy: (name: string, missing: number) => `Faltam ${missing} de ouro para ${name}`,
     canBuy: (name: string, cost: number) => `Já dá para comprar ${name} (${cost}) na Loja!`,

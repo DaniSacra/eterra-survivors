@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gridCols, isConfirm, navMove, navStep } from '../../src/render/ui';
+import { gridCols, isConfirm, navMove, navNearest, navStep } from '../../src/render/ui';
 
 const key = (k: string, repeat = false) => ({ key: k, repeat }) as KeyboardEvent;
 
@@ -38,5 +38,26 @@ describe('menu keyboard navigation', () => {
     expect(gridCols(14, 820, 328, 44, 8, 2)).toBe(3); // phone lying down
     expect(gridCols(14, 420, 626, 44, 8, 1)).toBe(2); // phone standing: 14 rows don't fit
     expect(gridCols(12, 420, 300, 56, 8, 2)).toBe(2); // too narrow for a third column
+  });
+
+  it('free layouts move to the nearest button in the direction (Coleção: tabs, a grid, Back)', () => {
+    // Two tabs on top, a 2 x 2 grid, Back centred at the bottom.
+    const pts = [
+      { x: 50, y: 0 },
+      { x: 150, y: 0 },
+      { x: 40, y: 100 },
+      { x: 160, y: 100 },
+      { x: 40, y: 200 },
+      { x: 160, y: 200 },
+      { x: 100, y: 300 },
+    ];
+    const on = pts.map(() => true);
+    expect(navNearest(pts, on, 0, 1, 0)).toBe(1); // tab -> next tab
+    expect(navNearest(pts, on, 1, 0, 1)).toBe(3); // right tab down -> right card
+    expect(navNearest(pts, on, 4, 0, 1)).toBe(6); // card down -> Back
+    expect(navNearest(pts, on, 6, 0, -1)).toBe(4); // Back up -> nearest card in the row above
+    expect(navNearest(pts, on, 0, 0, -1)).toBe(0); // nothing above: stays
+    on[3] = false;
+    expect(navNearest(pts, on, 1, 0, 1)).toBe(5); // disabled skipped, keeping the column
   });
 });

@@ -10,5 +10,5 @@ export const SCENES = {
   shop: 'shop',
   select: 'select',
   options: 'options',
-  eloBook: 'eloBook',
+  collection: 'collection',
 } as const;

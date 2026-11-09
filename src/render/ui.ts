@@ -115,6 +115,11 @@ export function seal(scene: Phaser.Scene, x: number, y: number, text: string, on
   return { text: txt, set };
 }
 
+/** The small gold "something new" dot (menu button, tabs, group chips). */
+export function newsDot(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Arc {
+  return scene.add.circle(x, y, 5, UI.goldHex).setStrokeStyle(2, UI.dim);
+}
+
 /** Full-screen translucent backdrop that also swallows clicks. */
 export function dim(scene: Phaser.Scene, alpha = 0.7): Phaser.GameObjects.Rectangle {
   const { width, height } = scene.scale;
@@ -250,19 +255,54 @@ export function navMove(enabled: readonly boolean[], cols: number, i: number, st
 }
 
 /**
+ * Where the focus goes from `i` when the buttons are laid out freely (tabs over a grid over a Back button): the
+ * nearest enabled one in the direction (dx, dy), favouring the ones in line. Stays put if there is none. Pure.
+ */
+export function navNearest(
+  points: readonly { x: number; y: number }[],
+  enabled: readonly boolean[],
+  i: number,
+  dx: number,
+  dy: number,
+): number {
+  const from = points[i];
+  if (!from) return i;
+  let best = i;
+  let bestScore = Infinity;
+  points.forEach((p, j) => {
+    if (j === i || !enabled[j]) return;
+    const along = (p.x - from.x) * dx + (p.y - from.y) * dy;
+    if (along <= 1) return;
+    const across = Math.abs((p.x - from.x) * dy) + Math.abs((p.y - from.y) * dx);
+    const score = along + across * 2;
+    if (score < bestScore) {
+      bestScore = score;
+      best = j;
+    }
+  });
+  return best;
+}
+
+/** What a `keyNav` returns: moves the focus from code (e.g. a card was tapped). */
+export interface KeyNav {
+  focus(i: number): void;
+}
+
+/**
  * Keyboard navigation over `button`s laid out in a grid of `cols` columns, in reading order (`null` pads a row):
  * arrows/WASD move the focus, Enter/Space presses the focused one. Disabled buttons are skipped. The focus is
- * drawn as the hover look plus an accent border.
+ * drawn as the hover look plus an accent border. `cols = 0` navigates by the buttons' positions instead (free
+ * layouts). `onFocus` hears every focus change (with the previous index).
  */
 export function keyNav(
   scene: Phaser.Scene,
   buttons: (Phaser.GameObjects.Rectangle | null)[],
   cols = 1,
   start = 0,
-): void {
+  onFocus?: (i: number, prev: number) => void,
+): KeyNav {
   const enabled = buttons.map((b) => !!b?.input?.enabled);
   let i = enabled[start] ? start : enabled.indexOf(true);
-  if (i < 0) return;
   const show = () =>
     buttons.forEach((b, k) => {
       if (b && enabled[k])
@@ -271,14 +311,31 @@ export function keyNav(
           k === i ? UI.accent : UI.border,
         );
     });
+  const focus = (j: number) => {
+    if (j === i || !enabled[j]) return;
+    const prev = i;
+    i = j;
+    show();
+    onFocus?.(i, prev);
+  };
+  if (i < 0) return { focus: () => {} };
   show();
+  const points = cols === 0 ? buttons.map((b) => ({ x: b?.x ?? 0, y: b?.y ?? 0 })) : [];
   bindKeys(scene, (kb) =>
     kb.on('keydown', (e: KeyboardEvent) => {
-      const step = navStep(e, cols);
-      if (step !== 0) {
-        i = navMove(enabled, cols, i, step);
-        show();
-      } else if (isConfirm(e)) (buttons[i]?.getData('action') as () => void)();
+      if (cols === 0) {
+        const s = navStep(e, 2);
+        if (s !== 0) {
+          const horizontal = s === 1 || s === -1;
+          focus(navNearest(points, enabled, i, horizontal ? s : 0, horizontal ? 0 : Math.sign(s)));
+          return;
+        }
+      } else {
+        const step = navStep(e, cols);
+        if (step !== 0) return focus(navMove(enabled, cols, i, step));
+      }
+      if (isConfirm(e)) (buttons[i]?.getData('action') as () => void)();
     }),
   );
+  return { focus };
 }
