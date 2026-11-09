@@ -1,4 +1,23 @@
 import type Phaser from 'phaser';
+import type { ElementId } from '../data/evolutions';
+
+/**
+ * The Elo elements' colours (forge sparks, the HUD chain, the Elo's tint, the Livro de Elos). One each, never
+ * shared; none is the XP gems' saturated cyan.
+ */
+export const ELEMENT_COLOR: Record<ElementId, number> = {
+  fury: 0xff4a4a, // red
+  fire: 0xff8c2a, // orange
+  forge: 0xc0703c, // copper
+  shadow: 0x2ed47a, // emerald
+  ice: 0xb8e2ff, // light blue
+  storm: 0xa070ff, // violet
+  holy: 0xffd870, // gold
+  arcane: 0xf0a0e8, // lilac pink
+  earth: 0xe0a030, // amber
+  soul: 0x7af0dc, // pale cyan (the gems keep the saturated one)
+  steel: 0xd0d8e4, // silver
+};
 
 /** Shared look for menus and overlays. */
 export const UI = {

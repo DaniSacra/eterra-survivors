@@ -13,7 +13,8 @@ import {
 import { maxLevel, weaponPower } from '../../src/core/weapons';
 import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
 import { newRunSummary } from '../../src/core/records';
-import { EVOLUTIONS, EVOLVED_IDS } from '../../src/data/evolutions';
+import { ELEMENTS, EVOLUTIONS, EVOLVED_IDS, elementOf } from '../../src/data/evolutions';
+import { ELEMENT_COLOR } from '../../src/render/ui';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
 import { WEAPONS } from '../../src/data/weapons';
 import { CHEST } from '../../src/data/pickups';
@@ -31,6 +32,17 @@ describe('evolution data', () => {
       expect(WEAPONS[id].levels).toHaveLength(1);
       expect(WEAPONS[id].kind).toBe(WEAPONS[evo.from].kind);
     }
+  });
+});
+
+describe('elements', () => {
+  it('every Elo has an element, every element a colour, and no two elements share one', () => {
+    for (const id of EVOLVED_IDS) expect(ELEMENTS).toContain(elementOf(id));
+    expect(elementOf('blade')).toBeNull();
+    for (const el of ELEMENTS) expect(ELEMENT_COLOR[el]).toBeTypeOf('number');
+    expect(new Set(ELEMENTS.map((el) => ELEMENT_COLOR[el])).size).toBe(ELEMENTS.length);
+    // Every element is used by some Elo.
+    for (const el of ELEMENTS) expect(EVOLVED_IDS.some((id) => elementOf(id) === el)).toBe(true);
   });
 });
 
