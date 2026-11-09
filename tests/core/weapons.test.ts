@@ -96,18 +96,70 @@ describe('Maça de Ferro (slam: a blow in front, a shock wave every few)', () =>
     const j = def.levels[0]!;
     w.player.facing.x = 1;
     const at = j.radius * 0.55;
-    // Outside the blow, inside both waves: the wave finds it unstunned, the aftershock stunned.
-    const e = spawnEnemy(w, 'skeleton', at + j.radius + 20, 0);
-    e.hp = e.maxHp = 1e6;
-    e.def = { ...e.def, knockbackResist: 1 };
+    // Inside the blow: blow and wave land on it unstunned (no crush in the same blow); the blow stuns it and the
+    // aftershock crushes it.
+    const e = spawnEnemy(w, 'skeleton', at, 0);
+    // Outside the blow, inside both waves: never stunned, so never crushed.
+    const out = spawnEnemy(w, 'skeleton', at + j.radius + 20, 0);
+    for (const x of [e, out]) {
+      x.hp = x.maxHp = 1e6;
+      x.def = { ...x.def, knockbackResist: 1 };
+    }
     w.weapons[0]!.timer = 0;
     updateWeapons(w, 1 / 60);
     const first = e.maxHp - e.hp;
-    expect(first).toBeCloseTo(j.damage * j.wave);
+    expect(first).toBeCloseTo(j.damage + j.damage * j.wave);
+    expect(e.stun).toBeGreaterThan(0);
+    expect(out.maxHp - out.hp).toBeCloseTo(j.damage * j.wave);
+    expect(out.stun).toBe(0);
     w.weapons[0]!.timer = 99;
     for (let t = 0; t < def.aftershock.delay + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
-    expect(e.maxHp - e.hp - first).toBeCloseTo(j.damage * j.wave * def.aftershock.scale * def.crush);
+    const after = j.damage * j.wave * def.aftershock.scale;
+    expect(e.maxHp - e.hp - first).toBeCloseTo(after * def.crush);
+    expect(out.maxHp - out.hp - j.damage * j.wave).toBeCloseTo(after);
     expect(w.slashes.active.filter((s) => s.form === 'shock')).toHaveLength(2);
+  });
+
+  it('a stun is never renewed: an enemy held in the blow still gets to move between stuns', () => {
+    const w = prepared('jointBreaker');
+    const j = WEAPONS.jointBreaker.levels[0]!;
+    w.player.facing.x = 1;
+    const e = spawnEnemy(w, 'skeleton', j.radius * 0.55, 0);
+    e.hp = e.maxHp = 1e9;
+    let free = 0;
+    // Blows far faster than the stun lasts.
+    for (let t = 0; t < 3; t += 1 / 60) {
+      w.weapons[0]!.timer = 0;
+      updateWeapons(w, 1 / 60);
+      e.stun -= 1 / 60;
+      if (e.stun <= 0) free++;
+    }
+    expect(free).toBeGreaterThan(0);
+  });
+
+  it('Quebra-Junta in a crowd: only the blow stuns, so the crowd is not held in place', () => {
+    const w = prepared('jointBreaker');
+    w.weapons[0]!.level = WEAPONS.jointBreaker.levels.length;
+    w.player.stats.area = 2;
+    w.player.stats.cooldown = 0.5;
+    w.player.hp = w.player.stats.maxHp = 1e9;
+    for (let i = 0; i < 120; i++) {
+      const a = (i / 120) * Math.PI * 2;
+      const r = 150 + (i % 6) * 30;
+      const e = spawnEnemy(w, 'skeleton', Math.cos(a) * r, Math.sin(a) * r);
+      e.hp = e.maxHp = 1e9;
+    }
+    let stunned = 0;
+    let seen = 0;
+    for (let t = 0; t < 10; t += 1 / 60) {
+      w.step(1 / 60, still);
+      for (const e of w.enemies.active) {
+        seen++;
+        if (e.stun > 0) stunned++;
+      }
+    }
+    // When the waves stunned (and renewed) too, ~46% of this crowd was stunned at any moment.
+    expect(stunned / seen).toBeLessThan(0.1);
   });
 });
 

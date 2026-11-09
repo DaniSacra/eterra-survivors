@@ -516,7 +516,7 @@ export const WEAPONS = {
     crush: 1.5,
     levels: [
       {
-        damage: 64,
+        damage: 70,
         cooldown: 0.9,
         radius: 70,
         knockback: 260,

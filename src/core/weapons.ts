@@ -220,9 +220,11 @@ function fireSlam(world: World, s: SlamLevel, w: OwnedWeapon): boolean {
   // The impact point: in front, so the blow covers the hero's front half and a little behind.
   const x = p.x + Math.cos(facing) * r * SMASH_AHEAD;
   const y = p.y + Math.sin(facing) * r * SMASH_AHEAD;
-  smash(world, s, w, x, y, facing, r, dmg(world, s.damage), 'smash', s.knockback);
+  // The wave goes first, so it (like the blow) only crushes what was stunned before this blow: the aftershock is
+  // what crushes the enemies this blow stuns.
   const every = def.kind === 'slam' ? (def.waveEvery ?? 0) : 0;
   if (every > 0 && ++w.swings % every === 0) shockWave(world, s, w, x, y, facing, 1);
+  smash(world, s, w, x, y, facing, r, dmg(world, s.damage), 'smash', s.knockback);
   return true;
 }
 
@@ -252,7 +254,10 @@ function shockWave(
   smash(world, s, w, x, y, angle, r, dmg(world, s.damage) * s.wave * scale, 'shock', s.waveKnockback);
 }
 
-/** Hits, pushes out from (x, y) and stuns everything within `r`; leaves the `form` mark on the ground. */
+/**
+ * Hits and pushes out from (x, y) everything within `r`, and leaves the `form` mark on the ground. Only the blow
+ * itself (`smash`) stuns: the waves hit and push, so a slam can't hold a whole crowd in place.
+ */
 function smash(
   world: World,
   s: SlamLevel,
@@ -287,12 +292,15 @@ function smash(
     const reach = r + e.def.radius;
     if (dx * dx + dy * dy > reach * reach) continue;
     const d = Math.hypot(dx, dy) || 1;
-    slamHit(world, e, s, damage, dx / d, dy / d, knockback, w);
+    slamHit(world, e, s, damage, dx / d, dy / d, knockback, w, form === 'smash');
   }
   world.numberBudget = Infinity;
 }
 
-/** A slam's hit: damage, a push, and a stun (short on bosses). Quebra-Junta crushes the already stunned. */
+/**
+ * A slam's hit: damage, a push and, from the blow (`stuns`), a stun (short on bosses). A stun running is never
+ * renewed, so an enemy always gets to move again between stuns. Quebra-Junta crushes the already stunned.
+ */
 function slamHit(
   world: World,
   e: Enemy,
@@ -302,11 +310,11 @@ function slamHit(
   ky: number,
   knockback: number,
   w: OwnedWeapon,
+  stuns: boolean,
 ): void {
   const crush = (WEAPONS[w.id] as WeaponDef).crush;
   const hard = crush && e.stun > 0 ? amount * crush : amount;
-  const stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
-  if (e.stun < stun) e.stun = stun;
+  if (stuns && e.stun <= 0) e.stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
   damageEnemy(world, e, hard, kx, ky, knockback, w);
 }
 

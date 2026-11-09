@@ -55,7 +55,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike, slam. Arc weapons swing around the hero (the blade
   adds a `thrust` every few swings); thrown weapons can fly where the hero faces (`aim: 'facing'`), burst on the
   first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) land a heavy blow in front that
-  stuns (bosses only `config.weapons.bossStun`), and every `waveEvery` blows a shock wave that throws enemies back.
+  stuns (bosses only `config.weapons.bossStun`; a stun running is never renewed, and it does not stop a boss's ability),
+  and every `waveEvery` blows a shock wave that throws enemies back (waves hit and push, only the blow stuns).
   Weapons never shake the screen (only hurting the hero, bombs, bosses and the forge moment do). Knockback decays
   at `config.enemies.knockbackDecay` per second, so a push travels about knockback / 10 px: a weapon that "pushes"
   needs hundreds (the shields use 600).
