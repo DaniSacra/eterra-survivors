@@ -14,7 +14,9 @@ import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, recordRun } from '../render/save';
 import { lastChoice, type RunChoice } from './SelectScene';
 import { World } from '../core/world';
-import { summarizeRun } from '../core/records';
+import { newRunSummary, summarizeRun } from '../core/records';
+import { liveAchievements } from '../core/achievements';
+import type { MetaSave } from '../core/meta';
 import type { AchievementId } from '../data/achievements';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
@@ -114,6 +116,11 @@ export class GameScene extends Phaser.Scene {
   /** Elos this run formed for the first time ever (shown on the end screen). */
   private newElos: WeaponId[] = [];
   private newAchievements: AchievementId[] = [];
+  /** The in-run achievement notice: the save as the run began, one reused summary, what was announced. */
+  private liveSave!: MetaSave;
+  private live = newRunSummary();
+  private liveShown = new Set<AchievementId>();
+  private nextCheck = 1;
   /** world.tally as of the last frame, to turn new attacks, hits, kills and gems into sounds. */
   private heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
   /** Gems picked in a row (each chime a bit higher), and when the last one was. */
@@ -150,7 +157,10 @@ export class GameScene extends Phaser.Scene {
     this.controls = null;
     this.gemStreak = 0;
     this.lastGem = -1;
-    this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(loadSave()) });
+    this.liveSave = loadSave();
+    this.liveShown.clear();
+    this.nextCheck = 1;
+    this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
     this.banked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
@@ -369,6 +379,19 @@ export class GameScene extends Phaser.Scene {
     this.showReward();
     this.handleEvents();
     this.frameSounds();
+    this.checkAchievements();
+  }
+
+  /**
+   * Once a second of play: achievements this run has just met (the HUD announces them; the real unlock happens
+   * when the run is recorded). Refills one summary; allocates only when something is found.
+   */
+  private checkAchievements(): void {
+    const w = this.world;
+    if (w.state !== 'playing' || w.time < this.nextCheck) return;
+    this.nextCheck = Math.floor(w.time) + 1;
+    const found = liveAchievements(this.liveSave, summarizeRun(w, this.live), this.liveShown);
+    for (let i = 0; i < found.length; i++) this.hud.toast(found[i] as AchievementId);
   }
 
   /** Sounds of frequent things, from the core's running counts (one sound per kind per frame at most). */

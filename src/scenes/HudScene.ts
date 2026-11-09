@@ -6,9 +6,12 @@ import { t } from '../i18n/pt-BR';
 import { BuildSlots } from '../render/buildPanel';
 import { Joystick } from '../render/joystick';
 import { ART_SCALE } from '../render/art/pen';
-import { UI, button, label, safeArea } from '../render/ui';
+import { SHORT_SCREEN, UI, button, label, safeArea } from '../render/ui';
 import { spawnOnRing } from '../core/enemies';
 import { segmentAt } from '../core/waves';
+import type { AchievementId } from '../data/achievements';
+import { describeAchievement } from '../render/describe';
+import { sound } from '../render/sound';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 
@@ -48,6 +51,12 @@ export class HudScene extends Phaser.Scene {
   countersBottom = 0;
   stripRight = 0;
   private debugOn = false;
+  /** The achievement notice: one at a time, from a queue, while the game runs. */
+  private toastBox!: Phaser.GameObjects.Container;
+  private toastBg!: Phaser.GameObjects.Rectangle;
+  private toastText!: Phaser.GameObjects.Text;
+  private toastQueue: AchievementId[] = [];
+  private toastOn = false;
   private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
   /** Safe-area insets, refreshed on layout. */
   private inset = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -60,6 +69,8 @@ export class HudScene extends Phaser.Scene {
     this.world = data.world;
     this.shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
     this.shownRev = -1;
+    this.toastQueue = [];
+    this.toastOn = false;
   }
 
   create(): void {
@@ -95,6 +106,11 @@ export class HudScene extends Phaser.Scene {
       .fillStyle(UI.textHex, 1)
       .fillRect(-7, -8, 5, 16)
       .fillRect(2, -8, 5, 16);
+    // The achievement notice, built once: a small gold-rimmed strip with a trophy, under the timer.
+    this.toastBg = this.add.rectangle(0, 0, 10, 34, UI.panel, 0.92).setStrokeStyle(2, UI.accent);
+    this.toastText = label(this, 12, 0, '', 14, { bold: true, color: UI.gold }).setOrigin(0, 0.5);
+    const trophy = this.add.image(0, 0, 'icon.trophy').setScale(ART_SCALE * 1.1);
+    this.toastBox = this.add.container(0, 0, [this.toastBg, trophy, this.toastText]).setAlpha(0);
     this.build = new BuildSlots(this);
     this.joystick = new Joystick(this);
     this.layout();
@@ -159,6 +175,41 @@ export class HudScene extends Phaser.Scene {
   /** The level-up panel shows the build itself (with a preview): the strip hides meanwhile. */
   setBuildVisible(visible: boolean): void {
     this.build.container.setVisible(visible);
+  }
+
+  /** Queues the in-run notice of an achievement just met. */
+  toast(id: AchievementId): void {
+    this.toastQueue.push(id);
+  }
+
+  /** Shows the next notice: 2.5 s under the timer (under the boss bar once it shows), never mid-screen. */
+  private nextToast(): void {
+    const id = this.toastQueue.shift();
+    if (!id) return;
+    this.toastOn = true;
+    this.toastText.setText(`${t.achievements.toast} ${describeAchievement(id).name}`);
+    const w = this.toastText.width + 54;
+    this.toastBg.setSize(w, 34).setPosition(0, 0);
+    this.toastBg.setOrigin(0.5);
+    const trophy = this.toastBox.list[1] as Phaser.GameObjects.Image;
+    trophy.setPosition(-w / 2 + 18, 0);
+    this.toastText.setPosition(-w / 2 + 34, 0);
+    // Standing: centred under the whole top block (the build strip reaches the middle on phones), or under the
+    // boss bar. Lying down there is no height to spare: top right, under the gold and kills, clear of the hero.
+    const { width, height } = this.scale;
+    const side = height < SHORT_SCREEN && width >= 600;
+    const x = side ? width - this.inset.right - PAD - w / 2 : width / 2;
+    const y = side ? this.countersBottom + 24 : this.world.boss ? this.bossY + 34 : this.bottom + 26;
+    this.toastBox.setPosition(x, y - 8).setAlpha(0);
+    sound.play('achievement');
+    this.tweens.add({ targets: this.toastBox, alpha: 1, y, duration: 200, ease: 'Back.easeOut' });
+    this.tweens.add({
+      targets: this.toastBox,
+      alpha: 0,
+      delay: 2500,
+      duration: 300,
+      onComplete: () => (this.toastOn = false),
+    });
   }
 
   /** Big centred message that fades out. Red warns; pass `good` for rewards. */
@@ -226,6 +277,16 @@ export class HudScene extends Phaser.Scene {
       this.kills.setText(t.hud.kills((this.shown.kills = w.kills)));
       this.placeCounters();
     }
+
+    // One notice at a time, and none while the level-up (or the pause) holds the game or a banner is up.
+    if (
+      !this.toastOn &&
+      this.toastQueue.length > 0 &&
+      w.state === 'playing' &&
+      this.banner.alpha === 0 &&
+      this.scene.isActive(SCENES.game)
+    )
+      this.nextToast();
 
     if (this.debugOn) {
       const d = t.debug;

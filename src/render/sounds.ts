@@ -44,6 +44,16 @@ export const SOUNDS = {
     vol: 0.1,
     notes: [0, 7, 12, 16, 19],
   },
+  /** An achievement met in the run (the HUD notice). */
+  achievement: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 880,
+    to: 880,
+    dur: 0.08,
+    vol: 0.1,
+    notes: [0, 5, 9, 12],
+  },
   elite: { kind: 'synth', wave: 'sawtooth', from: 180, to: 120, dur: 0.22, vol: 0.06, notes: [0, -2] },
   boss: { kind: 'synth', wave: 'sine', from: 220, to: 200, dur: 0.45, vol: 0.16, notes: [0, -5, -12] },
   won: {

@@ -356,6 +356,8 @@ export const t = {
       elosAll: 'Mestre dos Elos',
     } as Partial<Record<AchievementId, string>>,
     reward: (gold: number) => `+${gold} ouro`,
+    /** The in-run notice. */
+    toast: 'Conquista!',
     progress: (value: string, goal: string) => `${value} de ${goal}`,
   },
 

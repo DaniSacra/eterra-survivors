@@ -1216,10 +1216,15 @@ implementação abaixo; cada item é um commit.
   totais no pé. Herói não comprado: silhueta e preço. O título vestido aparece no topo da aba e, em itálico, embaixo
   de "fase · herói" na tela final.
 
-**CC-09 · Aviso de conquista na partida** · impl + vfx · P · aprovado
+**CC-09 · Aviso de conquista na partida** · impl + vfx · P · ✅ feito
 
 - O quê: checagem uma vez por segundo, aviso pequeno no alto do HUD (2,5 s, fila), som `achievement`.
 - Aceite: não cobre o centro nem a barra do chefe; espera o level-up fechar; FPS igual.
+- Feito: `GameScene.checkAchievements` uma vez por segundo de jogo (um `RunSummary` reaproveitado, save lido no
+  início da partida): 0,015 ms por checagem com 700 inimigos. Aviso do HUD montado uma vez (troféu, "Conquista!" e
+  o nome), em fila, 2,5 s; em pé, centrado embaixo do bloco do topo ou da barra do chefe; deitado, no canto de cima
+  à direita, embaixo do ouro e abates. Espera o level-up, a pausa e os avisos grandes ("chegou!") saírem. Som
+  `achievement` em `render/sounds.ts`.
 
 **CC-10 · Revisão visual e documentação** · visual + impl · P · aprovado
 
