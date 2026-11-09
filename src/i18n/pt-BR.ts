@@ -318,6 +318,11 @@ export const t = {
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
     newElo: (name: string, gold: number) => `Elo descoberto: ${name}! +${gold} de ouro. Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,
+    /** Packed notes, when the end screen runs out of room. */
+    elosFound: (names: string, gold: number) => `Elos descobertos: ${names}! +${gold} de ouro`,
+    achievementsFound: (n: number) => `${n} conquistas novas! Veja na Coleção.`,
+    bankedGoal: (gold: number, name: string, missing: number) =>
+      `No cofre: ${gold} ouro · faltam ${int(missing)} para ${name}`,
     /** The long-term goal: the most expensive thing left in the Loja. */
     toBuy: (name: string, missing: number) => `Faltam ${int(missing)} para ${name}`,
     run: (stage: string, hero: string) => `${stage} · ${hero}`,
