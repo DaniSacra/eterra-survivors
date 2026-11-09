@@ -1,4 +1,3 @@
-import { SIGNATURE_OWNER } from '../data/characters';
 import { config, type StatKey } from '../data/config';
 import { EVOLUTIONS, EVOLVED_IDS, evolutionOf } from '../data/evolutions';
 import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
@@ -42,8 +41,6 @@ export function candidates(world: World, newThings = true): UpgradeOption[] {
   const canAddWeapon = newThings && world.weapons.length < config.weapons.maxOwned;
   for (const id of WEAPON_IDS) {
     if (isElo(id)) continue;
-    const owner = SIGNATURE_OWNER[id];
-    if (owner && owner !== world.character) continue; // another hero's signature weapon
     const owned = world.weapons.find((w) => w.id === id);
     const evolved = evolutionOf(id);
     if (owned && owned.level < maxLevel(id)) out.push({ kind: 'weapon', id, level: owned.level + 1 });

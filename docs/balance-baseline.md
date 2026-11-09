@@ -477,3 +477,53 @@ auto   wisps                 20    207         81     36%! 50-65%  | soulProcess
 auto   lightning              9     91         23     16%! 50-65%  | storm            3499    94    63%  38.4x
 
 ```
+
+## Etapa 1 · armas livres e faixas por categoria
+
+Mudanças: fim das armas exclusivas (qualquer herói recebe qualquer arma e Elo); `category` em cada arma
+(`aimed`/`auto`/`area`) e teste `tests/core/bands.test.ts` com as faixas do lab (multidão a 64 px com um leve
+desalinhamento fixo, para o raio não pular de um anel da grade para o outro). Dano reescalado por arma até
+cada uma ficar no meio da sua faixa: área caiu ~30%, Raio e Fogos-Fátuos subiram, e os Elos foram puxados para
+perto de 2000 (aimed), 1160 (auto) e 960 (área) de DPS em multidão. Nevasca, Tempestade, Espada de Fogo e
+Quebra-Junta perderam 60–80%.
+
+### Lab depois
+
+```
+cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base
+aimed  mace                  47    504        126    100%  85-100%  | jointBreaker     1860   153    88%  3.7x
+aimed  daggers               86    474        191     94%  85-100%  | fan              1910   482    91%  4.0x
+aimed  hammer                64    465        121     92%  85-100%  | forgeFury        1854   412    88%  4.0x
+aimed  blade                 38    464         58     92%  85-100%  | fury             2106   117   100%  4.5x
+area   bells                 17    246         17     49%  40-55%  | funeralToll       953    80    45%  3.9x
+area   frost                  8    242         25     48%  40-55%  | blizzard          957    28    45%  3.9x
+area   yahAura                0    242         30     48%  40-55%  | yahFlame          960    48    46%  4.0x
+area   paladinSwords         26    241         31     48%  40-55%  | vigil             958   165    45%  4.0x
+auto   fire                   8    295         26     58%  50-65%  | fireSword        1178    33    56%  4.0x
+auto   lightning             25    294         63     58%  50-65%  | storm            1152    45    55%  3.9x
+auto   elunLight             13    290        113     58%  50-65%  | holyLight        1166   397    55%  4.0x
+auto   wisps                 23    289        122     57%  50-65%  | soulProcession   1175   365    56%  4.1x
+
+```
+
+### Vitórias por fase e perfil de loja (depois)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  26/32 81%         9.8 min       549  aldo 63% · lyra 88% · teo 75% · andilla 100%
+         valmor    half  29/32 91%        10.2 min       702  aldo 88% · lyra 88% · teo 100% · andilla 88%
+         valmor    full  32/32 100%              -       887  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         crypt     none  27/32 84%         6.8 min       510  aldo 75% · lyra 88% · teo 75% · andilla 100%
+         crypt     half  30/32 94%         8.7 min       675  aldo 100% · lyra 100% · teo 75% · andilla 100%
+         crypt     full  32/32 100%              -       862  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         southRoad none  31/32 97%        15.0 min       558  aldo 88% · lyra 100% · teo 100% · andilla 100%
+         southRoad half  32/32 100%              -       705  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         southRoad full  30/32 94%        15.0 min       896  aldo 100% · lyra 75% · teo 100% · andilla 100%
+
+REAL DPS blade:max 85 (104) · elunLight:max 374 (134) · yahAura:max 15 (86) · daggers:max 279 (122) · paladinSwords:max 29 (89) · frost:max 146 (83) · lightning:max 250 (116) · hammer:max 148 (69) · wisps:max 346 (66) · bells:max 58 (77) · mace:max 103 (85) · fire:max 169 (68) · fury 136 (75) · holyLight 946 (74) · yahFlame 86 (51) · fan 608 (73) · vigil 108 (49) · blizzard 235 (38) · storm 369 (51) · jointBreaker 280 (27) · fireSword 383 (32) · forgeFury 500 (26) · soulProcession 723 (29) · funeralToll 179 (35)
+ELO X    fury 2.3x · holyLight 2.8x · yahFlame 10.3x · fan 2.4x · vigil 5.8x · blizzard 1.5x · storm 1.5x · jointBreaker 3.4x · fireSword 2.0x · forgeFury 3.9x · soulProcession 2.4x · funeralToll 3.9x
+```
+
+Antes 267/288, depois 271/288: os Elos ficaram mais fracos, mas as armas automáticas cresceram. O DPS real das
+partidas não acompanha o lab: as teleguiadas (Luz Sagrada 946, Procissão 723) passam longe das que dependem da
+mira do bot (Lâmina 85, Fúria 136). A Etapa 6 calibra pelo DPS real; o lab segura a ordem entre categorias.

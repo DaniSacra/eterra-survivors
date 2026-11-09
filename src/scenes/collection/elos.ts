@@ -1,6 +1,5 @@
 import { weaponUsed } from '../../core/meta';
 import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../../data/evolutions';
-import { SIGNATURE_OWNER } from '../../data/characters';
 import { t } from '../../i18n/pt-BR';
 import { ART_SCALE } from '../../render/art/pen';
 import { UI, gridCols, label } from '../../render/ui';
@@ -70,11 +69,6 @@ export function drawElos(a: TabArea): TabContent {
       .setScale((ART_SCALE * ICON) / 28);
     // A shadow of the Elo: its shape shows, its colors stay hidden.
     if (!seen) elo.setTint(UI.border);
-    const owner = SIGNATURE_OWNER[evo.from];
-    if (owner)
-      label(scene, x + cardW / 2 - 10, rowY, t.elos.owner(t.characters[owner].name), 12, {
-        color: UI.muted,
-      }).setOrigin(1, 0.5);
     // Known: the recipe's names. Unknown: only the weapon it grows from (a hint, as in the original game).
     const recipe = recipeKnown
       ? t.elos.recipe(t.weapons[evo.from].name, t.passives[evo.passive])

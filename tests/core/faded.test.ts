@@ -84,8 +84,8 @@ describe('piercing shots', () => {
     const c = spawnEnemy(w, 'skeleton', 200, 0);
     const shot = shoot(w, 90, 1);
     fly(w);
-    expect(a.maxHp - a.hp).toBe(5);
-    expect(b.maxHp - b.hp).toBe(5);
+    expect(a.maxHp - a.hp).toBeCloseTo(5);
+    expect(b.maxHp - b.hp).toBeCloseTo(5);
     expect(c.hp).toBe(c.maxHp);
     expect(shot.dead).toBe(true);
   });

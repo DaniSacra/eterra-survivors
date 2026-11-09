@@ -68,6 +68,6 @@ describe('Lâmina with two swings', () => {
     const e = spawnEnemy(w, 'blackKnight', 0, 0);
     rebuildEnemyHash(w);
     updateWeapons(w, 1);
-    expect(e.maxHp - e.hp).toBe(WEAPONS.blade.levels[2]!.damage);
+    expect(e.maxHp - e.hp).toBeCloseTo(WEAPONS.blade.levels[2]!.damage);
   });
 });

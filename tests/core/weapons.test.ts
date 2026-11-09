@@ -124,7 +124,7 @@ describe('Lâmina de Valmor (arc)', () => {
     w.player.stats.might = 2;
     const e = spawnEnemy(w, 'blackKnight', 40, 0);
     updateWeapons(w, 0);
-    expect(e.maxHp - e.hp).toBe(blade.damage * 2);
+    expect(e.maxHp - e.hp).toBeCloseTo(blade.damage * 2);
   });
 });
 
@@ -150,7 +150,7 @@ describe('Luz de Elun (homing)', () => {
     for (let i = 0; i < 120 && e.hp === e.maxHp; i++) w.step(1 / 60, still);
     expect(e.hp).toBeLessThan(e.maxHp);
     for (let i = 0; i < 60; i++) w.step(1 / 60, still);
-    expect(e.maxHp - e.hp).toBe(2 * WEAPONS.elunLight.levels[0]!.damage);
+    expect(e.maxHp - e.hp).toBeCloseTo(2 * WEAPONS.elunLight.levels[0]!.damage);
     expect(w.projectiles.size).toBe(0);
   });
 
@@ -174,8 +174,8 @@ describe('Aura de Yah (area)', () => {
     const out = spawnEnemy(w, 'skeleton', aura.radius + 80, 0);
     updateWeapons(w, 0);
     updateWeapons(w, aura.cooldown);
-    expect(a.maxHp - a.hp).toBe(aura.damage * 2);
-    expect(b.maxHp - b.hp).toBe(aura.damage * 2);
+    expect(a.maxHp - a.hp).toBeCloseTo(aura.damage * 2);
+    expect(b.maxHp - b.hp).toBeCloseTo(aura.damage * 2);
     expect(out.hp).toBe(out.maxHp);
   });
 });

@@ -272,7 +272,6 @@ export const t = {
     rule: 'Arma no nível máximo + a passiva certa, e depois um baú.',
     recipe: (weapon: string, passive: string) => `${weapon} + ${passive}`,
     hint: (weapon: string) => `Nasce de ${weapon}`,
-    owner: (hero: string) => `Só ${hero}`,
     /** The recipe drawn as icons: weapon + passive = Elo, the passive a mystery until discovered. */
     plus: '+',
     equals: '=',
@@ -378,7 +377,7 @@ export const t = {
         name: 'Mãos de Ferreiro',
         desc: (n) => `Termine uma partida com ${n} armas no nível máximo (Elos contam).`,
       },
-      allShared: { name: 'Conhece o Ofício', desc: 'Use cada arma compartilhada pelo menos uma vez.' },
+      allShared: { name: 'Conhece o Ofício', desc: 'Use cada arma (fora os Elos) pelo menos uma vez.' },
       soloWin: { name: 'Fiel à Primeira', desc: 'Vença uma fase sem pegar nenhuma arma além da inicial.' },
       winAldo: { name: 'Próximo.', desc: 'Vença uma fase com Aldo.' },
       winLyra: { name: 'Mais uma para o livro.', desc: 'Vença uma fase com Lyra.' },
@@ -478,7 +477,7 @@ export const t = {
     /** Seal on a stage already won. */
     cleared: 'Vencida',
     keys: '←→ herói · ↑↓ fase · Enter parte',
-    signature: (weapon: string) => `Arma própria: ${weapon}`,
+    signature: (weapon: string) => `Arma inicial: ${weapon}`,
   },
 
   characters: {

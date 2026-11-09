@@ -124,13 +124,13 @@ export const WEAPONS = {
     kind: 'arc',
     category: 'aimed',
     levels: levels<ArcLevel>(
-      { damage: 10, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
-      { damage: 13, range: 98 },
+      { damage: 11, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
+      { damage: 15, range: 98 },
       { swings: 2 },
-      { damage: 17, cooldown: 0.8, range: 100 },
-      { damage: 21, arc: 2.7 },
-      { damage: 25, cooldown: 0.7, range: 110 },
-      { damage: 36, range: 122, arc: 3 },
+      { damage: 19, cooldown: 0.8, range: 100 },
+      { damage: 24, arc: 2.7 },
+      { damage: 28, cooldown: 0.7, range: 110 },
+      { damage: 40, range: 122, arc: 3 },
     ),
   },
   /** Luz de Elun: seeking motes of holy light. */
@@ -139,7 +139,7 @@ export const WEAPONS = {
     category: 'auto',
     levels: levels<HomingLevel>(
       {
-        damage: 9,
+        damage: 8.2,
         cooldown: 1.3,
         speed: 280,
         count: 2,
@@ -150,11 +150,11 @@ export const WEAPONS = {
         knockback: 40,
       },
       { cooldown: 1 },
-      { damage: 12, cooldown: 0.8 },
+      { damage: 11, cooldown: 0.8 },
       { count: 3 },
-      { pierce: 1, damage: 15 },
+      { pierce: 1, damage: 14 },
       { count: 5 },
-      { damage: 20, pierce: 2 },
+      { damage: 18, pierce: 2 },
     ),
   },
   /** Aura de Yah: a burning halo that hurts everything close. */
@@ -178,7 +178,7 @@ export const WEAPONS = {
     aim: 'nearest',
     levels: levels<ThrownLevel>(
       {
-        damage: 12,
+        damage: 19,
         cooldown: 0.9,
         speed: 460,
         count: 2,
@@ -189,25 +189,26 @@ export const WEAPONS = {
         knockback: 30,
       },
       { count: 3 },
-      { damage: 15 },
+      { damage: 23 },
       { pierce: 2, cooldown: 0.7 },
       { count: 4 },
-      { damage: 18 },
-      { damage: 21, pierce: 3 },
+      { damage: 28 },
+      { damage: 33, pierce: 3 },
     ),
   },
+
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
   paladinSwords: {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 10, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
+      { damage: 6.7, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
       { count: 2 },
-      { damage: 14 },
+      { damage: 9.4 },
       { count: 3, spin: 3.5 },
       { orbitRadius: 82, radius: 14 },
       { count: 4 },
-      { damage: 20, spin: 4 },
+      { damage: 13, spin: 4 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
@@ -215,13 +216,13 @@ export const WEAPONS = {
     kind: 'zone',
     category: 'area',
     levels: levels<ZoneLevel>(
-      { damage: 4, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
+      { damage: 4.1, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
       { radius: 52 },
       { count: 2 },
-      { damage: 6, duration: 3 },
+      { damage: 6.2, duration: 3 },
       { radius: 60 },
       { count: 3 },
-      { damage: 8, cooldown: 2.5, duration: 3.5 },
+      { damage: 8.3, cooldown: 2.5, duration: 3.5 },
     ),
   },
   /** Raio de Lyra: lightning on random enemies. */
@@ -229,13 +230,13 @@ export const WEAPONS = {
     kind: 'strike',
     category: 'auto',
     levels: levels<StrikeLevel>(
-      { damage: 18, cooldown: 2.2, count: 1, radius: 24 },
+      { damage: 49, cooldown: 2.2, count: 1, radius: 32 },
       { count: 2 },
-      { damage: 24 },
+      { damage: 65 },
       { count: 3, cooldown: 2 },
-      { radius: 32 },
-      { count: 4, damage: 30 },
-      { damage: 38, cooldown: 1.7 },
+      { radius: 36 },
+      { count: 4, damage: 82 },
+      { damage: 105, radius: 40, cooldown: 1.7 },
     ),
   },
   /** Martelo do Gaspar: the smith's heavy hammer, thrown ahead; it ploughs through rows. */
@@ -244,7 +245,7 @@ export const WEAPONS = {
     category: 'aimed',
     levels: levels<ThrownLevel>(
       {
-        damage: 22,
+        damage: 29,
         cooldown: 1.8,
         speed: 260,
         count: 1,
@@ -254,12 +255,12 @@ export const WEAPONS = {
         spread: 0.3,
         knockback: 260,
       },
-      { damage: 28 },
+      { damage: 36 },
       { count: 2 },
       { pierce: 5 },
-      { damage: 36, cooldown: 1.6 },
+      { damage: 47, cooldown: 1.6 },
       { count: 3 },
-      { damage: 48, radius: 15 },
+      { damage: 62, radius: 15 },
     ),
   },
   /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
@@ -268,7 +269,7 @@ export const WEAPONS = {
     category: 'auto',
     levels: levels<HomingLevel>(
       {
-        damage: 8,
+        damage: 12,
         cooldown: 1.6,
         speed: 170,
         count: 2,
@@ -279,11 +280,11 @@ export const WEAPONS = {
         knockback: 10,
       },
       { count: 3 },
-      { damage: 11 },
+      { damage: 16 },
       { pierce: 3, lifetime: 5 },
       { count: 4 },
-      { damage: 14 },
-      { count: 5, damage: 18, cooldown: 1.1 },
+      { damage: 22 },
+      { count: 5, damage: 27, cooldown: 1.1 },
     ),
   },
   /** Sinos de Bronze: heavy bells swinging in a wide, slow circle. */
@@ -291,13 +292,13 @@ export const WEAPONS = {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 14, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
-      { damage: 18 },
+      { damage: 7.2, cooldown: 0.8, count: 1, orbitRadius: 110, radius: 18, spin: 1.6, knockback: 260 },
+      { damage: 9.1 },
       { count: 2 },
       { orbitRadius: 125, radius: 20 },
-      { damage: 24, cooldown: 0.7 },
+      { damage: 12, cooldown: 0.7 },
       { count: 3 },
-      { damage: 32, spin: 2 },
+      { damage: 17, spin: 2 },
     ),
   },
   /** Maça de Ferro: a heavy iron mace, slow and wide, that crushes what is in front and throws it back. */
@@ -308,7 +309,7 @@ export const WEAPONS = {
     combo: 0.2,
     levels: levels<ArcLevel>(
       {
-        damage: 21,
+        damage: 18,
         cooldown: 1.4,
         range: 105,
         arc: 2.1,
@@ -317,26 +318,27 @@ export const WEAPONS = {
         shock: 0.5,
         shockRadius: 40,
       },
-      { damage: 28 },
+      { damage: 24 },
       { swings: 2 },
-      { damage: 36, cooldown: 1.25 },
+      { damage: 31, cooldown: 1.25 },
       { range: 115, arc: 2.4, shockRadius: 46 },
-      { damage: 47 },
-      { damage: 72, cooldown: 1, range: 125 },
+      { damage: 41 },
+      { damage: 63, cooldown: 1, range: 125 },
     ),
   },
+
   /** Fogo: flames falling on enemies, fewer than lightning but burning a wider patch. */
   fire: {
     kind: 'strike',
     category: 'auto',
     levels: levels<StrikeLevel>(
-      { damage: 14, cooldown: 2, count: 1, radius: 40 },
-      { damage: 18 },
+      { damage: 16, cooldown: 2, count: 1, radius: 40 },
+      { damage: 21 },
       { count: 2 },
       { radius: 48, cooldown: 1.8 },
-      { damage: 24 },
+      { damage: 28 },
       { count: 3 },
-      { damage: 38, radius: 56 },
+      { damage: 44, radius: 56 },
     ),
   },
 
@@ -345,14 +347,14 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 110, cooldown: 0.5, range: 165, arc: Math.PI * 2, knockback: 160, swings: 1 }],
+    levels: [{ damage: 60, cooldown: 0.5, range: 138, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
     kind: 'homing',
     levels: [
       {
-        damage: 36,
+        damage: 32,
         cooldown: 0.65,
         speed: 340,
         count: 8,
@@ -367,7 +369,7 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    levels: [{ damage: 14, cooldown: 0.3, radius: 150 }],
+    levels: [{ damage: 15, cooldown: 0.3, radius: 150 }],
   },
   /** Leque de Facas: Andilla's fan of knives, a wide spread thrown at the nearest enemy. */
   fan: {
@@ -375,7 +377,7 @@ export const WEAPONS = {
     aim: 'nearest',
     levels: [
       {
-        damage: 36,
+        damage: 28,
         cooldown: 0.45,
         speed: 480,
         count: 12,
@@ -387,22 +389,23 @@ export const WEAPONS = {
       },
     ],
   },
+
   /** Vigília dos Quatro: the paladins keep watch, wide and fast. */
   vigil: {
     kind: 'orbit',
     levels: [
-      { damage: 40, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
+      { damage: 57, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
     ],
   },
   /** Nevasca: frost everywhere. */
   blizzard: {
     kind: 'zone',
-    levels: [{ damage: 20, cooldown: 1.4, count: 5, radius: 85, duration: 4 }],
+    levels: [{ damage: 4.7, cooldown: 1.4, count: 5, radius: 85, duration: 4 }],
   },
   /** Tempestade: a storm over the battlefield. */
   storm: {
     kind: 'strike',
-    levels: [{ damage: 75, cooldown: 0.8, count: 8, radius: 52 }],
+    levels: [{ damage: 36, cooldown: 0.8, count: 8, radius: 52 }],
   },
   /** Quebra-Junta: the mace aims at the joints, two huge blows that crack the ground. */
   jointBreaker: {
@@ -411,7 +414,7 @@ export const WEAPONS = {
     combo: 0.2,
     levels: [
       {
-        damage: 160,
+        damage: 61,
         cooldown: 0.8,
         range: 160,
         arc: 3.4,
@@ -422,17 +425,18 @@ export const WEAPONS = {
       },
     ],
   },
+
   /** Espada de Fogo: a rain of burning swords over the field. */
   fireSword: {
     kind: 'strike',
-    levels: [{ damage: 80, cooldown: 0.8, count: 7, radius: 70 }],
+    levels: [{ damage: 26, cooldown: 0.8, count: 7, radius: 70 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {
     kind: 'thrown',
     levels: [
       {
-        damage: 115,
+        damage: 103,
         cooldown: 1,
         speed: 300,
         count: 4,
@@ -449,7 +453,7 @@ export const WEAPONS = {
     kind: 'homing',
     levels: [
       {
-        damage: 28,
+        damage: 36,
         cooldown: 0.9,
         speed: 210,
         count: 9,
@@ -465,7 +469,7 @@ export const WEAPONS = {
   funeralToll: {
     kind: 'orbit',
     levels: [
-      { damage: 70, cooldown: 0.5, count: 6, orbitRadius: 140, radius: 26, spin: 2.2, knockback: 320 },
+      { damage: 42, cooldown: 0.5, count: 6, orbitRadius: 140, radius: 26, spin: 2.2, knockback: 320 },
     ],
   },
 } satisfies Record<string, WeaponDef>;

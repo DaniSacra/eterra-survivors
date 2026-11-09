@@ -68,7 +68,9 @@ describe('upgrade descriptions', () => {
 
   it('describes new weapons, weapon levels, passives and heal', () => {
     expect(describeUpgrade({ kind: 'weapon', id: 'elunLight', level: 1 }).tag).toBe(t.levelUp.newWeapon);
-    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 2 }).desc).toMatch(/^Dano 10 → 13/);
+    expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 2 }).desc).toMatch(
+      new RegExp(`^Dano ${WEAPONS.blade.levels[0]!.damage} → ${WEAPONS.blade.levels[1]!.damage}`),
+    );
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 3 }).desc).toBe('Golpes 1 → 2');
     expect(describeUpgrade({ kind: 'passive', id: 'might', level: 2 }).desc).toBe('Dano +10%');
     expect(describeUpgrade({ kind: 'heal' }).title).toBe(t.levelUp.heal);

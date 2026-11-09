@@ -34,7 +34,7 @@ describe('floor items', () => {
     const near = spawnEnemy(w, 'blackKnight', 100, 0);
     const far = spawnEnemy(w, 'blackKnight', 4000, 0);
     take(w, 'bomb');
-    expect(near.maxHp - near.hp).toBe(config.pickups.bombDamage);
+    expect(near.maxHp - near.hp).toBeCloseTo(config.pickups.bombDamage);
     expect(far.hp).toBe(far.maxHp);
   });
 

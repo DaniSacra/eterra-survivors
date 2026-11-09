@@ -1,6 +1,6 @@
-import { SIGNATURE_OWNER, type CharacterId } from '../data/characters';
+import type { CharacterId } from '../data/characters';
 import { ENEMY_IDS, type EnemyId } from '../data/enemies';
-import { EVOLUTIONS, EVOLVED_IDS } from '../data/evolutions';
+import { EVOLUTIONS } from '../data/evolutions';
 import type { StageId } from '../data/stages';
 import { WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { isElo, maxLevel } from './weapons';
@@ -106,10 +106,3 @@ export function favoriteWeapon(rec: HeroRecord): WeaponId | null {
   }
   return best;
 }
-
-/** The Elos a hero can ever form: the shared ones and the hero's own signature Elo. */
-export const possibleElos = (hero: CharacterId): WeaponId[] =>
-  EVOLVED_IDS.filter((id) => {
-    const owner = SIGNATURE_OWNER[EVOLUTIONS[id]?.from as WeaponId];
-    return !owner || owner === hero;
-  });

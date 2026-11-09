@@ -71,7 +71,7 @@ describe('Espadas dos Paladinos (orbit)', () => {
     const hit = spawnEnemy(w, 'blackKnight', Math.cos(a) * s.orbitRadius, Math.sin(a) * s.orbitRadius);
     const away = spawnEnemy(w, 'blackKnight', -300, 0);
     updateWeapons(w, 0);
-    expect(hit.maxHp - hit.hp).toBe(s.damage);
+    expect(hit.maxHp - hit.hp).toBeCloseTo(s.damage);
     expect(away.hp).toBe(away.maxHp);
   });
 
@@ -101,13 +101,13 @@ describe('Geada de Lyra (zone)', () => {
     const e = spawnEnemy(w, 'blackKnight', 120, 0);
     w.step(1 / 60, still);
     expect(w.zones.size).toBe(1);
-    expect(e.maxHp - e.hp).toBe(s.damage);
+    expect(e.maxHp - e.hp).toBeCloseTo(s.damage);
     expect(e.slow).toBeGreaterThan(0);
     const x = e.x;
     w.step(0.1, still);
     const slowed = x - e.x;
     for (let i = 0; i < 30; i++) w.step(1 / 60, still);
-    expect(e.maxHp - e.hp).toBe(s.damage * 2);
+    expect(e.maxHp - e.hp).toBeCloseTo(s.damage * 2);
     w.weapons.length = 0;
     for (let i = 0; i < 60 * s.duration; i++) w.step(1 / 60, still);
     expect(w.zones.size).toBe(0);
@@ -129,7 +129,7 @@ describe('Raio de Lyra (strike)', () => {
     const near = spawnEnemy(w, 'blackKnight', 100, 50);
     const offscreen = spawnEnemy(w, 'blackKnight', 5000, 0);
     for (let i = 0; i < 10; i++) w.step(1 / 60, still);
-    expect(near.maxHp - near.hp).toBe(s.damage);
+    expect(near.maxHp - near.hp).toBeCloseTo(s.damage);
     expect(offscreen.hp).toBe(offscreen.maxHp);
     expect(w.bolts.size).toBe(1);
   });

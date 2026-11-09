@@ -1,7 +1,8 @@
 import type Phaser from 'phaser';
 import { formatTime } from '../../core/format';
 import { heroUnlocked, newHeroRecord } from '../../core/meta';
-import { favoriteWeapon, possibleElos } from '../../core/records';
+import { favoriteWeapon } from '../../core/records';
+import { EVOLVED_IDS } from '../../data/evolutions';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../../data/characters';
 import { STAGE_IDS } from '../../data/stages';
 import { t } from '../../i18n/pt-BR';
@@ -117,7 +118,7 @@ function heroCard(
   const c = t.collection.heroes;
   const dash = c.none;
   const fav = favoriteWeapon(rec);
-  const elos = possibleElos(id);
+  const elos = EVOLVED_IDS;
   const rows: [string, string | null][] = [
     [c.runs, t.int(rec.runs)],
     [c.bestTime, rec.bestTime > 0 ? formatTime(rec.bestTime) : dash],

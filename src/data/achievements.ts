@@ -1,4 +1,4 @@
-import { CHARACTER_IDS, SIGNATURE_OWNER, type CharacterId } from './characters';
+import { CHARACTER_IDS, type CharacterId } from './characters';
 import { ENEMY_IDS, type EnemyId } from './enemies';
 import { EVOLUTIONS, EVOLVED_IDS } from './evolutions';
 import type { ChargeKey } from './shop';
@@ -63,8 +63,8 @@ export interface AchievementDef {
   charge?: ChargeKey;
 }
 
-/** Base weapons any hero can be offered (not a signature weapon, not an Elo). */
-export const SHARED_WEAPONS = WEAPON_IDS.filter((id) => !EVOLUTIONS[id] && !SIGNATURE_OWNER[id]);
+/** Base weapons (not an Elo): any hero can be offered any of them. */
+export const SHARED_WEAPONS = WEAPON_IDS.filter((id) => !EVOLUTIONS[id]);
 
 const DEFS = {
   // Abates

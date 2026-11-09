@@ -5,7 +5,7 @@ import type { WeaponId } from './weapons';
 export interface CharacterDef {
   /** Asset key in render/assets.ts. */
   sprite: string;
-  /** Signature weapon: the hero starts with it and no other hero can ever get it (nor its Elo). */
+  /** Starting weapon (every weapon is in the shared pool; any hero can be offered any of them). */
   weapon: WeaponId;
   /** Added to the default stats. */
   stats: Partial<Stats>;
@@ -26,8 +26,3 @@ export const CHARACTERS = {
 
 export type CharacterId = keyof typeof CHARACTERS;
 export const CHARACTER_IDS = Object.keys(CHARACTERS) as CharacterId[];
-
-/** Who owns each signature weapon. */
-export const SIGNATURE_OWNER: Partial<Record<WeaponId, CharacterId>> = Object.fromEntries(
-  CHARACTER_IDS.map((id) => [CHARACTERS[id].weapon, id]),
-);
