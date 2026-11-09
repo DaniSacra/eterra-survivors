@@ -223,6 +223,14 @@ export class EndScene extends Phaser.Scene {
     const line = (text: string, size: number, color: string, bold = false) => {
       const l = label(this, cx, y, text, size, { bold, color, wrap: w }).setOrigin(0.5, 0);
       y += l.height + 6;
+      return l;
+    };
+    // An achievement line: a trophy before the text (a padlock for the closest one, still locked).
+    const badged = (text: string, size: number, color: string, icon: string, bold = false) => {
+      const l = line(text, size, color, bold);
+      // Shifted right by half the icon's room, so icon and text stay centred together.
+      l.setX(cx + 11);
+      this.add.image(cx + 11 - l.width / 2 - 13, l.y + size * 0.62, icon).setScale(ART_SCALE * (size / 18));
     };
     if (this.unlocked) line(t.end.unlocked(t.stages[this.unlocked].name), 16, UI.gold, true);
     // "Faltou pouco": the hook for one more run. An Elo never formed keeps its name a secret.
@@ -243,15 +251,16 @@ export class EndScene extends Phaser.Scene {
     const fresh = this.newAchievements;
     for (const id of fresh.slice(0, 3)) {
       const a = describeAchievement(id);
-      line(t.end.achievement(a.name, a.reward), 15, UI.gold, true);
+      badged(t.end.achievement(a.name, a.reward), 15, UI.gold, 'icon.trophy', true);
     }
     if (fresh.length > 3) line(t.end.moreAchievements(fresh.length - 3), 14, UI.gold);
     const near = fresh.length === 0 ? (closestAchievement(save) ?? closestAchievement(save, 0)) : null;
     if (near)
-      line(
+      badged(
         t.end.near(describeAchievement(near.id).name, achievementProgress(near.id, near.value, near.goal)),
         14,
         UI.text,
+        'icon.lock',
       );
     const goal = nextGoal(save);
     line(t.end.banked(save.gold), 14, UI.text);

@@ -1226,9 +1226,12 @@ implementação abaixo; cada item é um commit.
   à direita, embaixo do ouro e abates. Espera o level-up, a pausa e os avisos grandes ("chegou!") saírem. Som
   `achievement` em `render/sounds.ts`.
 
-**CC-10 · Revisão visual e documentação** · visual + impl · P · aprovado
+**CC-10 · Revisão visual e documentação** · visual + impl · P · ✅ feito
 
 - O quê: visual-director confere as abas e o aviso; `CLAUDE.md` com os arquivos novos; itens marcados aqui.
+- Feito: as quatro abas e o aviso conferidos em 420 x 820, 1000 x 680 e 820 x 420 (toque, mouse e teclado). Na tela
+  final, as conquistas novas ganham o troféu e a "Perto:" o cadeado; o título vestido aparece embaixo do herói.
+  `CLAUDE.md` com a Coleção e os arquivos novos.
 
 **Perguntas abertas (CC)**
 

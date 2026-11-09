@@ -58,7 +58,14 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   screenshots in `docs/design/ui-references/`; the visual-director implements them.
   Effects (weapons, Elos, hits, statuses, telegraphs) belong to the `vfx-director` agent: each effect must show
   what its mechanic does.
-- `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Game, Hud (overlay), LevelUp, Pause, End.
+- `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Collection, Options, Game, Hud (overlay), LevelUp,
+  Pause, End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
+  Conquistas, Heróis): each tab draws in a `TabArea` and returns its focusable buttons; the scene owns the tab row,
+  Back and keys (free-layout `keyNav` with `cols = 0`, Q/E switch tabs, Esc back).
+- Collection and achievements: `core/records.ts` (`summarizeRun`, favourite weapon, possible Elos),
+  `data/achievements.ts` (declarative list and groups), `core/achievements.ts` (metrics, unlock, live check);
+  `core/meta.ts` `recordRun` updates hero records, bestiary, totals and achievements at the end of a run. In a run,
+  `GameScene` checks live achievements once a second and the HUD shows a queued toast.
 - Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
   `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.
 - Sound: `render/sounds.ts` is the **single sound map** (Web Audio synth recipes today, swap an entry to a file
