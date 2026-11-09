@@ -92,6 +92,8 @@ export const t = {
 
   /** The Elo moments in a run: the recipe progress and the forge notice. */
   elo: {
+    /** An Elo's line on its page, in quotes. */
+    quote: (line: string) => `“${line}”`,
     /** The in-run notice when an Elo forms. */
     forged: (elo: string, weapon: string, passive: string) => `Elo forjado: ${elo} · ${weapon} + ${passive}`,
     /** A recipe's progress, after the choice on a level-up card and live on the pause screen. */

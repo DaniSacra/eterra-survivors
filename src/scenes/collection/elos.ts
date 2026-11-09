@@ -143,7 +143,7 @@ function drawPage(a: TabArea, id: WeaponId): TabContent {
   y += desc.height + (short ? 10 : 18);
   const line = t.elo.lines[id];
   if (line) {
-    const lore = label(scene, cx, y, `“${line}”`, 14, { italic: true, color: UI.muted, wrap: w });
+    const lore = label(scene, cx, y, t.elo.quote(line), 14, { italic: true, color: UI.muted, wrap: w });
     lore.setOrigin(0.5, 0);
     y += lore.height + (short ? 12 : 22);
   }

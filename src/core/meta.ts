@@ -493,7 +493,6 @@ export function buy(save: MetaSave, id: ShopId): boolean {
   return true;
 }
 
-/** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */
 /**
  * The Loja's two-step purchase: choosing an item only selects it (its detail shows); buying needs a confirmation
  * of the selected item, and enough gold.
@@ -522,6 +521,7 @@ export function biggestGoal(save: MetaSave): { id: ShopId; cost: number } | null
   return best;
 }
 
+/** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */
 export function shopBonuses(save: MetaSave): RunBonuses {
   const out: RunBonuses = { stats: {}, charges: { ...config.charges }, revives: 0 };
   for (const id of SHOP_IDS) {

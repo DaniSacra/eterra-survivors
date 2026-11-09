@@ -192,7 +192,3 @@ export function closestAchievement(
   }
   return found;
 }
-
-/** Achievements with a title that the save has unlocked. */
-export const unlockedTitles = (save: MetaSave): AchievementId[] =>
-  save.achievements.filter((id) => ACHIEVEMENTS[id].title);

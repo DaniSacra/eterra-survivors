@@ -27,8 +27,8 @@ export interface SlotFocus {
 
 /**
  * The build as two rows of slots: weapons on top (with a pip per level), passives under them (smaller). Empty
- * slots show how many still fit; a weapon at max level gets a gold bar, a formed Elo a pulsing gold frame and a
- * formed Elo a fixed gold frame. Not interactive (it must not steal joystick touches). Draws only on `refresh`.
+ * slots show how many still fit; a weapon at max level gets a gold bar and a formed Elo a frame in its
+ * element's colour, chained to its passive. Not interactive (it must not steal joystick touches). Draws only on `refresh`.
  */
 export class BuildSlots {
   readonly container: Phaser.GameObjects.Container;
