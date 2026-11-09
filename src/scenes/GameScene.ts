@@ -52,6 +52,10 @@ const AREA_HIT = Object.fromEntries(
   WEAPON_IDS.map((id) => [id, WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone']),
 ) as Record<WeaponId, boolean>;
 
+/** Projectile sprites that spin as they fly, and the one that drops embers. */
+const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
+const FORGE = 'proj.forgeFury';
+
 /** Sparks a swing throws when it starts: [color, size, count]. */
 const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> = {
   fury: [0xffd870, 6, 6],
@@ -166,7 +170,11 @@ export class GameScene extends Phaser.Scene {
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
         if (img.texture.key !== p.sprite) img.setTexture(p.sprite);
-        img.setPosition(p.x, p.y).setRotation(p.angle);
+        // Hammers spin end over end as they fly.
+        img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
+        // Fúria da Forja drops embers behind it.
+        if (p.sprite === FORGE && this.stepDt > 0 && this.sparks.rand() < 0.3)
+          this.sparks.add(p.x, p.y, 0, 20, 0.4, 5, 0xffa040, SPARK.ember);
       },
     );
     this.damageMirror = new Mirror(

@@ -86,8 +86,8 @@ const gem = (s: number): ArtDef => ({
 
 export const ITEM_ART: Record<string, ArtDef> = {
   // ---- Projectiles ----
-  'proj.elunLight': glowOrb(0xfff6c0, 0xf0d860, 4),
-  'proj.holyLight': glowOrb(0xffffff, 0xfff6c0, 5),
+  'proj.elunLight': glowOrb(0xfff6c0, 0xa8e060, 4), // Teo's green-gold
+  'proj.holyLight': glowOrb(0xffffff, 0xffe070, 5),
   'proj.daggers': blade(0xe8eff8, 0x55555e, 16),
   'proj.fan': blade(0xffd8e0, 0xa8323e, 18),
   'proj.hammer': hammer(0x8a8a96, false),

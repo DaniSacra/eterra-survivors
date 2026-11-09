@@ -6,6 +6,7 @@ import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
 import type { Bolt } from '../core/effects';
+import type { Projectile } from '../core/projectiles';
 import { INK } from './art/pen';
 import { UI } from './ui';
 import { star } from './sparks';
@@ -211,14 +212,54 @@ export function drawFx(
       const r = s.radius * p.stats.area;
       const style = ORBIT_STYLE[w.id] ?? SWORDS;
       const elo = isElo(w.id);
-      if (elo) top.lineStyle(2, style.dark, 0.35).strokeCircle(p.x, p.y, orbitR); // the guarded circle
+      if (elo) {
+        // The guarded circle (Vigília: a gold ring with the four paladins' marks turning on it).
+        top.lineStyle(2, style.dark, style.blade ? 0.6 : 0.35).strokeCircle(p.x, p.y, orbitR);
+        if (style.blade)
+          for (let i = 0; i < 4; i++) {
+            const a = world.time * 0.5 + (i * Math.PI) / 2;
+            const mx = p.x + Math.cos(a) * orbitR;
+            const my = p.y + Math.sin(a) * orbitR;
+            top.fillStyle(style.dark, 0.9).fillTriangle(mx - 4, my, mx, my - 6, mx + 4, my);
+            top.fillTriangle(mx - 4, my, mx, my + 6, mx + 4, my);
+          }
+      }
+      // Swords leave a trail along their circle, so the turn reads even in a still frame.
+      const trail = elo ? 1 : 0.6;
+      const dir = s.spin >= 0 ? 1 : -1;
       for (let i = 0; i < count; i++) {
         const a = orbitAngle(world.time, s.spin, i, count);
         const x = p.x + Math.cos(a) * orbitR;
         const y = p.y + Math.sin(a) * orbitR;
-        if (elo) top.fillStyle(style.dark, 0.35).fillCircle(x, y, r * 1.5); // Elo glow
-        if (style.blade) drawSword(top, x, y, a + Math.PI / 2, r, style);
-        else drawBell(top, x, y, r, style);
+        if (style.blade) {
+          const tc = elo ? ITEM_GLINT : style.color;
+          top.fillStyle(tc, 0.16);
+          band(
+            top,
+            p.x,
+            p.y,
+            orbitR - r * 0.6,
+            orbitR + r * 0.6,
+            dir > 0 ? a - trail : a,
+            dir > 0 ? a : a + trail,
+          );
+          top.fillStyle(tc, 0.28);
+          band(
+            top,
+            p.x,
+            p.y,
+            orbitR - r * 0.4,
+            orbitR + r * 0.4,
+            dir > 0 ? a - trail * 0.4 : a,
+            dir > 0 ? a : a + trail * 0.4,
+          );
+          // Vigília: a white-gold glow exactly the size of the hit.
+          if (elo) {
+            top.fillStyle(0xfff6d0, 0.3).fillCircle(x, y, r);
+            top.lineStyle(1.5, ITEM_GLINT, 0.7).strokeCircle(x, y, r);
+          }
+          drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
+        } else drawBell(top, x, y, r, style);
       }
     }
   }
@@ -236,6 +277,10 @@ export function drawFx(
       .strokeEllipse(it.x, it.y + 9, 34 + 4 * tw, 11 + 1.5 * tw);
     const k = Math.max(0, Math.sin(world.time * 3 + it.y)) ** 4; // mostly off, then a quick twinkle
     if (k > 0.05) star(g, it.x + 6, it.y - 9, 3 + 6 * k, 0xffffff, k);
+  }
+  for (const pr of world.projectiles.active) {
+    const tr = pr.source ? TRAIL[pr.source.id] : undefined;
+    if (tr) drawTrail(g, pr, tr, world.time);
   }
   for (const f of world.puffs.active) {
     const k = f.ttl / config.effects.puffTtl; // 1 -> 0
@@ -277,6 +322,53 @@ export function drawFx(
     );
   }
   for (const b of world.bolts.active) drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
+}
+
+/**
+ * A projectile's trail (drawn under its sprite): a speed streak (`line`: wide color, then a thin bright core), or
+ * a wavy row of fading lights (`dots`). `len` is seconds of flight it covers; `star` adds a twinkle at the head.
+ */
+interface Trail {
+  color: number;
+  core: number;
+  width: number;
+  len: number;
+  dots: boolean;
+  star: boolean;
+}
+const TRAIL: Partial<Record<WeaponId, Trail>> = {
+  elunLight: { color: 0xb8e070, core: 0xfff6c0, width: 5, len: 0.06, dots: false, star: false },
+  holyLight: { color: 0xffe070, core: 0xffffff, width: 6, len: 0.07, dots: false, star: true },
+  daggers: { color: HERO_COLOR.andilla, core: 0xffffff, width: 3, len: 0.05, dots: false, star: false },
+  fan: { color: 0xa8323e, core: 0xffd8e0, width: 3, len: 0.05, dots: false, star: false },
+  hammer: { color: 0xcbd8ec, core: 0xffffff, width: 10, len: 0.12, dots: false, star: false },
+  forgeFury: { color: 0xffa040, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
+  wisps: { color: 0x40e0d8, core: 0xe8ffff, width: 4, len: 0.12, dots: true, star: false },
+  soulProcession: { color: 0x8ac0f0, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
+};
+
+function drawTrail(g: Phaser.GameObjects.Graphics, pr: Projectile, tr: Trail, time: number): void {
+  const len = pr.speed * tr.len;
+  const ux = Math.cos(pr.angle);
+  const uy = Math.sin(pr.angle);
+  if (tr.dots) {
+    for (let i = 1; i <= 3; i++) {
+      const d = (len * i) / 3;
+      const wob = Math.sin(time * 8 + i * 1.3 + pr.poolIndex) * 3;
+      const x = pr.x - ux * d - uy * wob;
+      const y = pr.y - uy * d + ux * wob;
+      g.fillStyle(tr.color, 0.5 - i * 0.12).fillCircle(x, y, tr.width * (1 - i * 0.2));
+    }
+    return;
+  }
+  g.lineStyle(tr.width, tr.color, 0.35).lineBetween(pr.x, pr.y, pr.x - ux * len, pr.y - uy * len);
+  g.lineStyle(tr.width * 0.4, tr.core, 0.8).lineBetween(
+    pr.x,
+    pr.y,
+    pr.x - ux * len * 0.55,
+    pr.y - uy * len * 0.55,
+  );
+  if (tr.star) star(g, pr.x, pr.y, 9 + 2 * Math.sin(time * 10 + pr.poolIndex), 0xffffff, 0.8);
 }
 
 /** A cheap hash of a point in [0, 1): the same bolt keeps the same zigzag, and every bolt gets its own. */

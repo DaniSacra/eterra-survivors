@@ -864,7 +864,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   anel roxo no chão e faíscas roxas; Tempestade com 2 galhos e sombra de nuvem. Sem o escurecer de tela (não
   precisou).
 
-**RF-09 · Projéteis e órbitas com rastro e a cor do dono** · vfx · M · aprovado
+**RF-09 · Projéteis e órbitas com rastro e a cor do dono** · vfx · M · ✅ feito
 
 - Por quê: 06-vfx #6, #10, #14, #18: Luz de Elun branca some entre esqueletos brancos; órbitas sem rastro somem na
   multidão; o halo da Vigília é um disco marrom maior que o hitbox; o Martelo voa parado; Adagas sem rastro; as armas
@@ -873,6 +873,13 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   velocidade vermelho de Andilla; Martelo girando (`SPIN` por sprite, pré-calculado); Espadas com arco de rastro
   (~0.6 rad); Vigília sem disco, brilho do tamanho do hitbox e anel dourado com 4 marcas.
 - Aceite: captura em L7 com 100 inimigos: todos os projéteis e espadas achados; nenhum halo maior que o hitbox.
+- Feito: rastros por arma (`TRAIL` em `fx.ts`, desenhados no `fxTop` sob o sprite, comprimento pela velocidade): Luz
+  de Elun com halo verde-dourado de Teo e rastro curto; Luz Sagrada com rastro dourado e estrelinha piscando; Adagas
+  com traço vermelho de Andilla; Leque com traço rosa-escuro; Martelo girando em voo (`SPIN` por sprite) com rastro
+  largo; Fúria da Forja igual, alaranjada e soltando brasas; Fogos-Fátuos e Procissão com fila de luzes ondulante.
+  Espadas com rastro em setor de anel (~0.6 rad) ao longo da órbita; Vigília sem o disco marrom, brilho branco-dourado
+  do tamanho exato do hitbox, rastro dourado mais longo e o círculo guardado como anel dourado com 4 marcas girando.
+  Sinos ficaram como estavam (não fazem parte deste item).
 
 **RF-10 · Investidas legíveis e chegada das Ossadas** · vfx + visual · P · aprovado
 
