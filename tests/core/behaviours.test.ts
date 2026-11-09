@@ -63,3 +63,15 @@ describe('enemy behaviours', () => {
     expect(STAGES.valmor.waves.flatMap((s) => s.enemies.map((x) => x.id))).not.toContain('rat');
   });
 });
+
+describe('determinism', () => {
+  it('the same seed plays out the same, whatever ran before', () => {
+    const run = () => {
+      const w = bareWorld(7);
+      for (let i = 0; i < 20; i++) spawnEnemy(w, 'spider', 200 + i * 10, i * 5);
+      for (let i = 0; i < 60; i++) w.step(STEP, still);
+      return w.enemies.active.map((e) => `${e.uid}:${e.x.toFixed(3)},${e.y.toFixed(3)}`).join(' ');
+    };
+    expect(run()).toBe(run());
+  });
+});

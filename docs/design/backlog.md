@@ -310,13 +310,13 @@ depois e registra em `docs/balance-baseline.md`.
   Na Cripta, considerar o Rato Gigante (do elenco original da cripta, hoje sem uso).
 - Aceite: teste do comportamento; FPS no stress test inalterado.
 
-**D-05 · Mais armas no grupo compartilhado** · impl + bal · M
+**D-05 · Mais armas no grupo compartilhado** · impl + bal · M · ✅ feito
 - Por quê: são só 6 armas compartilhadas; poucas builds por herói (pilar 3).
 - O quê: 2 a 3 armas novas de `kind` existentes e seus Elos, com nomes do original (pedir ao game-director uma
   proposta com dados prontos).
 - Aceite: no sim, nenhuma arma nova com pick rate acima de 40%.
 
-**D-06 · Heróis voltam a ser comprados** · impl · P
+**D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito
 - Por quê: com a renda de E-10, comprar heróis vira uma meta curta e boa.
 - O quê: `config.unlockAllHeroes` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
 - Aceite: um jogador novo libera o segundo herói em 3 a 5 corridas no sim.

@@ -117,7 +117,7 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
     slash.angle = angle;
     slash.arc = s.arc;
     slash.range = range;
-    slash.elo = isElo(w.id);
+    slash.weapon = w.id;
     slash.ttl = config.effects.slashTtl;
     for (let i = 0; i < ids.length; i++) {
       const e = list[ids[i] as number] as Enemy;
@@ -247,7 +247,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
     targets.push(t.uid);
     const x = t.x;
     const y = t.y;
-    addBolt(world, x, y, radius, isElo(w.id));
+    addBolt(world, x, y, radius, w.id);
     const ids = world.enemyHash.query(x, y, radius + MAX_ENEMY_RADIUS, world.scratch);
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;

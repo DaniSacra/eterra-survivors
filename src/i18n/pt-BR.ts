@@ -220,6 +220,13 @@ export const t = {
     forgeFury: { name: 'Fúria da Forja', desc: 'Martelos que não param, atravessando tudo.' },
     soulProcession: { name: 'Procissão das Almas', desc: 'Uma fila longa de luzes caminha pelo campo.' },
     funeralToll: { name: 'Dobre Fúnebre', desc: 'Os sinos dobram por tudo o que chega perto.' },
+    mace: { name: 'Maça de Ferro', desc: 'Uma maça pesada que esmaga quem está à frente e empurra longe.' },
+    fire: { name: 'Fogo', desc: 'Chamas caem sobre os inimigos e queimam uma área larga.' },
+    jointBreaker: {
+      name: 'Quebra-Junta',
+      desc: 'Mira nas juntas: golpes enormes para a frente e para trás.',
+    },
+    fireSword: { name: 'Espada de Fogo', desc: 'Uma chuva de espadas em chamas sobre o campo.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {

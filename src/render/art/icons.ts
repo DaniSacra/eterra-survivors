@@ -120,6 +120,27 @@ const hammer =
     p.rrect(13, 5, 11, 8, 2, head);
     p.ink();
   };
+const mace =
+  (head: number, spikes: number) =>
+  (p: Pen): void => {
+    p.outline = 1.2;
+    p.poly([7, 21, 9, 23, 17, 15, 15, 13], 0x9a6232);
+    p.circle(18, 10, 5.5, head);
+    p.ink();
+    for (let k = 0; k < 4; k++) {
+      const a = (k * Math.PI) / 2 + 0.4;
+      p.fill(spikes).fillCircle(18 + Math.cos(a) * 6, 10 + Math.sin(a) * 6, 1.6);
+    }
+  };
+const flame =
+  (outer: number, inner: number, sword = false) =>
+  (p: Pen): void => {
+    if (sword) p.line(C, 4, C, 20, 4.5, INK).line(C, 4, C, 20, 2.2, 0xe8eff8);
+    p.outline = 1.2;
+    p.poly([C, 6, C + 6, C + 2, C + 6, C + 7, C, 23, C - 6, C + 7, C - 6, C + 2], outer);
+    p.ink();
+    p.fill(inner).fillEllipse(C, C + 5, 6, 8);
+  };
 const wisp =
   (c: number, n: number) =>
   (p: Pen): void => {
@@ -166,6 +187,8 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.hammer': weapon(hammer(0x8a8a96)),
   'icon.wisps': weapon(wisp(0x40e0d8, 2)),
   'icon.bells': weapon(bell(0xc89040)),
+  'icon.mace': weapon(mace(0x8a8a96, 0xcbd8ec)),
+  'icon.fire': weapon(flame(0xff8a3a, 0xffd060)),
   // Elos
   'icon.fury': elo(sword(0xffe8a0, 0xa8323e)),
   'icon.holyLight': elo(orb(0xffffff, 0xfff6c0, 3)),
@@ -177,6 +200,8 @@ export const ICON_ART: Record<string, ArtDef> = {
   'icon.forgeFury': elo(hammer(0xffa040)),
   'icon.soulProcession': elo(wisp(0x8ac0f0, 3)),
   'icon.funeralToll': elo(bell(0xe8b860, true)),
+  'icon.jointBreaker': elo(mace(0xc86a3a, 0xffe8a0)),
+  'icon.fireSword': elo(flame(0xff5a2a, 0xffe080, true)),
   // Passives
   'icon.vigor': passive(0x8a2a3a, (p) => {
     p.outline = 1.2;

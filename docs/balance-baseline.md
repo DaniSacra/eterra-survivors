@@ -104,3 +104,68 @@ homing  wisps          L1    20.8  Lmax   328.5  Elo(soulProcession)    720.0
   solo bells          L1     4.2  Lmax    32.0  Elo     69.8
 orbit   bells          L1   147.7  Lmax  1384.0  Elo(funeralToll)   3944.3
 ```
+
+## Etapa 5 · conteúdo novo (2026-11-08)
+
+- D-04: comportamentos novos. A Aranha Tumular anda em zigue-zague, o Espectro atravessa a multidão e às vezes
+  some (inofensivo e intocável por 1,2 s), o Encapuzado e o Rato Gigante (novo, na Cripta a partir dos 2:00)
+  agacham e dão um bote em linha reta. Custo do passo: 0,47 ms com 700 inimigos desses (0,39 ms só esqueletos).
+- D-05: armas compartilhadas novas nos dois `kind` que faltavam no grupo: Maça de Ferro (arc), com o Elo
+  Quebra-Junta (+ Armadura), e Fogo (strike), com o Elo Espada de Fogo (+ Dano). O PICKS do sim é a parte das
+  corridas que terminaram com a arma; o bot pega 4 das 8 compartilhadas, então a média esperada é perto de 50%.
+  As novas ficam no nível das outras (nenhuma se destaca).
+- D-06: heróis custam 800 (Lyra, Teo) e 1200 (Andilla). O bot com Aldo em Valmor compra o segundo herói depois de
+  4 corridas (um jogador novo, que morre antes, leva umas 5 ou 6). `unlockAllHeroes` segue true até o fim dos testes.
+- Zigue-zague da aranha suavizado (8 sementes em Valmor: 22/32 com ele, 23/32 sem). O contador de `uid` dos
+  inimigos passou a ser por `World`: antes ele vazava de uma corrida para a outra e a mesma semente dava
+  resultados diferentes.
+- L-01 (medir num celular de verdade) fica com o Daniel: F4 no celular, ver se segura 60 FPS com 500 inimigos.
+
+### Sim
+
+```
+SUMMARY  hero    stage     wins  avg time  avg lvl  reached10  elos/run  gold/min  fast dmg
+         aldo    valmor    2/4       8:41     37.8          3       2.0      36.6       21%
+         aldo    crypt     3/4       9:54     47.5          3       2.8      40.2        7%
+         aldo    southRoad 2/4      10:00     47.5          4       2.3      48.4        4%
+         lyra    valmor    3/4       8:56     42.0          3       2.0      37.2       22%
+         lyra    crypt     3/4      10:00     47.8          4       2.0      42.7       12%
+         lyra    southRoad 3/4       8:58     42.3          3       2.0      41.8       24%
+         teo     valmor    2/4       8:29     33.3          2       1.0      31.7       12%
+         teo     crypt     3/4      10:00     44.3          4       2.3      40.6       13%
+         teo     southRoad 1/4       8:15     31.8          1       0.8      26.9       15%
+         andilla valmor    4/4      10:00     47.3          4       3.0      60.0        0%
+         andilla crypt     4/4      10:00     50.8          4       2.8      66.1       27%
+         andilla southRoad 3/4       9:16     40.8          3       2.0      46.3       19%
+PICKS    yahAura 44% · paladinSwords 35% · frost 48% · hammer 58% · wisps 44% · bells 60% · mace 50% · fire 50%
+UNLOCK   second hero (800 gold) after 4 runs of Aldo in Valmor
+```
+
+### Lab
+
+```
+  solo blade          L1    11.5  Lmax    52.2  Elo     93.0
+arc     blade          L1   115.0  Lmax  1983.6  Elo(fury)   5115.0
+  solo elunLight      L1    14.4  Lmax   125.0  Elo    194.4
+homing  elunLight      L1    14.4  Lmax   375.0  Elo(holyLight)    970.8
+  solo yahAura        L1     7.8  Lmax    30.3  Elo     44.8
+aura    yahAura        L1    62.4  Lmax   695.8  Elo(yahFlame)   2195.2
+  solo daggers        L1    30.0  Lmax   121.8  Elo     27.0
+thrown  daggers        L1    60.0  Lmax   487.2  Elo(fan)   1064.3
+  solo paladinSwords  L1     5.0  Lmax    46.0  Elo     81.2
+orbit   paladinSwords  L1    86.5  Lmax  1242.0  Elo(vigil)   2630.6
+  solo frost          L1     8.0  Lmax    24.4  Elo     42.3
+zone    frost          L1    72.0  Lmax   895.2  Elo(blizzard)   3171.2
+  solo lightning      L1     9.0  Lmax    22.8  Elo     50.0
+strike  lightning      L1    36.0  Lmax   427.5  Elo(storm)   2517.5
+  solo hammer         L1    12.1  Lmax    93.6  Elo    168.0
+thrown  hammer         L1    48.4  Lmax   556.8  Elo(forgeFury)   2352.0
+  solo wisps          L1    10.4  Lmax    81.0  Elo    144.0
+homing  wisps          L1    20.8  Lmax   328.5  Elo(soulProcession)    720.0
+  solo bells          L1     4.2  Lmax    32.0  Elo     69.8
+orbit   bells          L1   147.7  Lmax  1384.0  Elo(funeralToll)   3944.3
+  solo mace           L1    12.0  Lmax    43.7  Elo     75.0
+arc     mace           L1    72.0  Lmax  1136.2  Elo(jointBreaker)   3150.0
+  solo fire           L1     7.0  Lmax    19.2  Elo     36.1
+strike  fire           L1    49.0  Lmax   667.2  Elo(fireSword)   2114.7
+```

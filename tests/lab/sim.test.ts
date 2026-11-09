@@ -1,5 +1,7 @@
 import { it } from 'vitest';
-import { CHARACTER_IDS } from '../../src/data/characters';
+import { CHARACTERS, CHARACTER_IDS, SIGNATURE_OWNER } from '../../src/data/characters';
+import { EVOLUTIONS } from '../../src/data/evolutions';
+import { WEAPON_IDS } from '../../src/data/weapons';
 import { STAGE_IDS } from '../../src/data/stages';
 import { simulate, type SimResult } from './bot';
 
@@ -54,5 +56,19 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
             .padStart(8)}  ${pct(rs.reduce((a, r) => a + r.taken.fast, 0) / taken).padStart(8)}`,
       );
     }
+  // Pick rate of the shared weapons: share of runs that ended owning it (or its Elo).
+  const shared = WEAPON_IDS.filter((id) => !EVOLUTIONS[id] && !SIGNATURE_OWNER[id]);
+  out.push(
+    '\nPICKS    ' +
+      shared
+        .map((id) => `${id} ${pct(results.filter((r) => r.owned.includes(id)).length / results.length)}`)
+        .join(' · '),
+  );
+  // A new player: Aldo in Valmor, run after run, until the cheapest hero is affordable.
+  const cheapest = Math.min(...CHARACTER_IDS.map((h) => CHARACTERS[h].cost).filter((c) => c > 0));
+  let bank = 0;
+  let runs = 0;
+  while (bank < cheapest && runs < 20) bank += simulate('aldo', 'valmor', 100 + runs++).gold;
+  out.push(`UNLOCK   second hero (${cheapest} gold) after ${runs} runs of Aldo in Valmor`);
   console.log('\nSIM\n' + out.join('\n'));
 });

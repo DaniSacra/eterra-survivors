@@ -17,11 +17,11 @@ export const CHARACTERS = {
   /** Guerreiro: tough, starts with his village blade. */
   aldo: { sprite: 'player.aldo', weapon: 'blade', stats: { maxHp: 20, armor: 1 }, cost: 0 },
   /** Maga, Aldo's younger sister: lightning, wide spells, frail. */
-  lyra: { sprite: 'player.lyra', weapon: 'lightning', stats: { area: 0.1, maxHp: -10 }, cost: 300 },
+  lyra: { sprite: 'player.lyra', weapon: 'lightning', stats: { area: 0.1, maxHp: -10 }, cost: 800 },
   /** Clérigo: the holy light, and wounds that close by themselves. */
-  teo: { sprite: 'player.teo', weapon: 'elunLight', stats: { regen: 0.4 }, cost: 300 },
+  teo: { sprite: 'player.teo', weapon: 'elunLight', stats: { regen: 0.4 }, cost: 800 },
   /** Ladina: knives, quick feet and luck with gold. */
-  andilla: { sprite: 'player.andilla', weapon: 'daggers', stats: { moveSpeed: 10, greed: 0.25 }, cost: 500 },
+  andilla: { sprite: 'player.andilla', weapon: 'daggers', stats: { moveSpeed: 10, greed: 0.25 }, cost: 1200 },
 } satisfies Record<string, CharacterDef>;
 
 export type CharacterId = keyof typeof CHARACTERS;

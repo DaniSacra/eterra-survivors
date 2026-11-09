@@ -17,9 +17,14 @@ export const HERO_COLOR: Record<CharacterId, number> = {
 };
 const SLASH_COLOR = 0xe8f0ff;
 const SLASH_EDGE = 0x9ad8ff;
+/** Swings: [fill, edge]. Steel by default; Elos get warmer, brighter versions. */
+const SLASH_PLAIN: readonly [number, number] = [SLASH_COLOR, SLASH_EDGE];
+const SLASH_STYLE: Partial<Record<WeaponId, readonly [number, number]>> = {
+  fury: [0xffe8a0, 0xffa040],
+  mace: [0xd8d0c4, 0x8a8478],
+  jointBreaker: [0xf0e0c8, 0xc86a3a],
+};
 /** Elos get warmer, brighter versions of their base colors. */
-const FURY_COLOR = 0xffe8a0;
-const FURY_EDGE = 0xffa040;
 const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = 0xff6a3a;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or hanging bells. */
@@ -37,8 +42,19 @@ const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
 const FROST_COLOR = 0x9ad8ff;
 const BLIZZARD_COLOR = 0xe8f6ff;
 const BLIZZARD_EDGE = 0x4a8ad8;
-const BOLT_COLOR = 0xfff6a0;
-const STORM_COLOR = 0xd8b8ff;
+/** How each strike weapon falls from the sky: lightning (default) or fire. */
+interface BoltStyle {
+  color: number;
+  core: number;
+  width: number;
+  fire: boolean;
+}
+const BOLT_PLAIN: BoltStyle = { color: 0xfff6a0, core: 0xffffff, width: 5, fire: false };
+const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
+  storm: { color: 0xd8b8ff, core: 0xffffff, width: 7, fire: false },
+  fire: { color: 0xff8a3a, core: 0xffd060, width: 5, fire: true },
+  fireSword: { color: 0xff5a2a, core: 0xffe080, width: 7, fire: true },
+};
 const PUFF_COLOR = 0xe8eef8;
 const GEM_GLINT = 0x9be35a;
 const ITEM_GLINT = 0xffd870;
@@ -169,8 +185,9 @@ export function drawFx(
     const t = s.ttl / config.effects.slashTtl;
     const a0 = s.angle - s.arc / 2;
     const a1 = s.angle + s.arc / 2;
-    const fill = s.elo ? FURY_COLOR : SLASH_COLOR;
-    const edge = s.elo ? FURY_EDGE : SLASH_EDGE;
+    const style = SLASH_STYLE[s.weapon] ?? SLASH_PLAIN;
+    const fill = style[0];
+    const edge = style[1];
     g.fillStyle(edge, 0.25 * t)
       .slice(p.x, p.y, s.range, a0, a1, false)
       .fillPath();
@@ -191,14 +208,25 @@ export function drawFx(
   }
   for (const b of world.bolts.active) {
     const t = b.ttl / config.effects.boltTtl;
-    const c = b.elo ? STORM_COLOR : BOLT_COLOR;
-    const w = b.elo ? 7 : 5;
-    // Ink, then color, then a white core: a cartoon lightning bolt.
-    for (let i = 0; i < BOLT_LAYERS.length; i++) {
-      const L = BOLT_LAYERS[i] as readonly [number, number, number];
-      g.lineStyle(w * L[0], L[1] === -1 ? c : L[1], L[2] * t);
-      g.lineBetween(b.x, b.y - 260, b.x + 8, b.y - 120);
-      g.lineBetween(b.x + 8, b.y - 120, b.x - 6, b.y);
+    const style = BOLT_STYLE[b.weapon] ?? BOLT_PLAIN;
+    const c = style.color;
+    const w = style.width;
+    if (style.fire) {
+      // A falling flame: a fat streak from up and to the left, then a burst of fire on the ground.
+      for (let i = 0; i < BOLT_LAYERS.length; i++) {
+        const L = BOLT_LAYERS[i] as readonly [number, number, number];
+        g.lineStyle(w * L[0] * 1.6, L[1] === -1 ? c : L[1], L[2] * t);
+        g.lineBetween(b.x - 90 * t, b.y - 200 * t, b.x, b.y);
+      }
+      g.fillStyle(style.core, 0.5 * t).fillCircle(b.x, b.y, b.radius * (1.3 - t * 0.3));
+    } else {
+      // Ink, then color, then a white core: a cartoon lightning bolt.
+      for (let i = 0; i < BOLT_LAYERS.length; i++) {
+        const L = BOLT_LAYERS[i] as readonly [number, number, number];
+        g.lineStyle(w * L[0], L[1] === -1 ? c : L[1], L[2] * t);
+        g.lineBetween(b.x, b.y - 260, b.x + 8, b.y - 120);
+        g.lineBetween(b.x + 8, b.y - 120, b.x - 6, b.y);
+      }
     }
     g.fillStyle(c, 0.4 * t).fillCircle(b.x, b.y, b.radius);
     g.lineStyle(2, 0xffffff, 0.8 * t).strokeCircle(b.x, b.y, b.radius * (1.2 - t * 0.2));

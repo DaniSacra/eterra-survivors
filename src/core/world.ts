@@ -44,6 +44,8 @@ export interface RunSetup {
 export class World {
   time = 0;
   kills = 0;
+  /** Next enemy uid: per world, so a seed always plays out the same. */
+  nextUid = 1;
   level = 1;
   xp = 0;
   pendingLevelUps = 0;

@@ -267,6 +267,32 @@ export const WEAPONS = {
       { damage: 32, spin: 2 },
     ),
   },
+  /** Maça de Ferro: a heavy iron mace, slow and wide, that crushes what is in front and throws it back. */
+  mace: {
+    kind: 'arc',
+    levels: levels<ArcLevel>(
+      { damage: 16, cooldown: 1.4, range: 78, arc: 2.1, knockback: 230, swings: 1 },
+      { damage: 21 },
+      { swings: 2 },
+      { damage: 27, cooldown: 1.25 },
+      { range: 88, arc: 2.4 },
+      { damage: 35 },
+      { damage: 46, cooldown: 1.1, range: 96 },
+    ),
+  },
+  /** Fogo: flames falling on enemies, fewer than lightning but burning a wider patch. */
+  fire: {
+    kind: 'strike',
+    levels: levels<StrikeLevel>(
+      { damage: 14, cooldown: 2, count: 1, radius: 40 },
+      { damage: 18 },
+      { count: 2 },
+      { radius: 48, cooldown: 1.8 },
+      { damage: 24 },
+      { count: 3 },
+      { damage: 32, radius: 56 },
+    ),
+  },
 
   // Evolved forms (see data/evolutions.ts): one level, never offered on level-up, only from a chest.
 
@@ -331,6 +357,16 @@ export const WEAPONS = {
   storm: {
     kind: 'strike',
     levels: [{ damage: 50, cooldown: 1, count: 6, radius: 44 }],
+  },
+  /** Quebra-Junta: the mace aims at the joints, front and back, with a huge blow. */
+  jointBreaker: {
+    kind: 'arc',
+    levels: [{ damage: 75, cooldown: 1, range: 120, arc: 2.6, knockback: 320, swings: 2 }],
+  },
+  /** Espada de Fogo: a rain of burning swords over the field. */
+  fireSword: {
+    kind: 'strike',
+    levels: [{ damage: 38, cooldown: 1.1, count: 5, radius: 58 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {

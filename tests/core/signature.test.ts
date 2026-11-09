@@ -42,9 +42,12 @@ describe('signature weapons', () => {
     expect(shared.length).toBeGreaterThanOrEqual(5);
   });
 
-  it('every passive is part of exactly one Elo', () => {
+  it('every passive is part of an Elo, and of two at most (recipes stay easy to remember)', () => {
     const used = EVOLVED_IDS.map((id) => EVOLUTIONS[id]?.passive);
-    for (const p of PASSIVE_IDS) expect(used.filter((u) => u === p).length).toBeLessThanOrEqual(1);
-    expect(new Set(used).size).toBe(used.length);
+    for (const p of PASSIVE_IDS) {
+      const n = used.filter((u) => u === p).length;
+      expect(n).toBeGreaterThanOrEqual(1);
+      expect(n).toBeLessThanOrEqual(2);
+    }
   });
 });

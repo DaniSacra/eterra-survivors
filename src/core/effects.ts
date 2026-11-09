@@ -1,6 +1,7 @@
 import { config } from '../data/config';
 import type { Pool, Poolable } from './pool';
 import type { World } from './world';
+import type { WeaponId } from '../data/weapons';
 
 /** Anything that disappears after a while. */
 export interface Timed extends Poolable {
@@ -22,27 +23,34 @@ export interface Slash extends Timed {
   angle: number;
   arc: number;
   range: number;
-  /** From an Elo (drawn in its own colors). */
-  elo: boolean;
+  /** The weapon that swung it (each is drawn in its own colors). */
+  weapon: WeaponId;
 }
-export const createSlash = (): Slash => ({ poolIndex: -1, ttl: 0, angle: 0, arc: 0, range: 0, elo: false });
+export const createSlash = (): Slash => ({
+  poolIndex: -1,
+  ttl: 0,
+  angle: 0,
+  arc: 0,
+  range: 0,
+  weapon: 'blade',
+});
 
-/** A lightning bolt hitting the ground for a moment (purely visual). */
+/** Something falling from the sky (lightning, fire) and hitting the ground for a moment (purely visual). */
 export interface Bolt extends Timed {
   x: number;
   y: number;
   radius: number;
-  /** From an Elo (drawn in its own colors). */
-  elo: boolean;
+  /** The weapon that cast it (each is drawn in its own look). */
+  weapon: WeaponId;
 }
-export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0, elo: false });
+export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0, weapon: 'lightning' });
 
-export function addBolt(world: World, x: number, y: number, radius: number, elo = false): void {
+export function addBolt(world: World, x: number, y: number, radius: number, weapon: WeaponId): void {
   const b = world.bolts.acquire();
   b.x = x;
   b.y = y;
   b.radius = radius;
-  b.elo = elo;
+  b.weapon = weapon;
   b.ttl = config.effects.boltTtl;
 }
 

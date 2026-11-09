@@ -12,7 +12,7 @@ const CHARGE = { trigger: 200, windup: 0.5, dash: 0.55, speedMult: 2.6, rest: 3.
 /** Phase: now and then fades out (harmless, cannot be hit) and drifts faster. */
 const PHASE = { faded: 1.2, solid: 4, fadedSpeed: 1.4 };
 /** Zigzag: weaves sideways while closing in. */
-const ZIGZAG = { freq: 5, amount: 1.1 };
+const ZIGZAG = { freq: 3, amount: 0.4 };
 
 /** True while a phasing enemy is faded (no contact damage, ignores hits). */
 export const isFaded = (e: Enemy): boolean => e.def.move === 'phase' && e.act === Act.Active;

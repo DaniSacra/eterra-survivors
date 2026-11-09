@@ -53,14 +53,13 @@ export const createEnemy = (): Enemy => ({
   dead: false,
 });
 
-let nextUid = 1;
 /** Reused output of behaviourStep. */
 const STEP = { x: 0, y: 0 };
 
 export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hpMult = 1): Enemy {
   const e = world.enemies.acquire();
   const def: EnemyDef = ENEMIES[type];
-  e.uid = nextUid++;
+  e.uid = world.nextUid++;
   e.type = type;
   e.def = def;
   e.x = x;
