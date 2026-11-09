@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, spawnEnemy, spawnRadius, updateEnemies } from '../../src/core/enemies';
 import { ENEMIES } from '../../src/data/enemies';
-import { bareWorld as quietWorld, still } from './helpers';
+import type { OwnedWeapon } from '../../src/core/weapons';
+import { bareWorld as quietWorld, quietWorld as armedWorld, still } from './helpers';
 
 describe('enemies', () => {
   it('walk straight towards the player', () => {
@@ -28,6 +29,22 @@ describe('enemies', () => {
     updateEnemies(w, 1 / 60);
     expect(w.player.hp).toBe(w.player.stats.maxHp - ENEMIES.skeleton.damage);
     expect(w.events).toEqual([{ type: 'playerHit' }]);
+  });
+
+  it('remember the weapon that hit them last, for its spark', () => {
+    const w = armedWorld();
+    const e = spawnEnemy(w, 'golem', 300, 0);
+    expect(e.hitBy).toBeNull();
+    const src = w.weapons[0] as OwnedWeapon;
+    damageEnemy(w, e, 1, 0, 0, 0, src);
+    expect(e.hitBy).toBe(src.id);
+    damageEnemy(w, e, 1);
+    expect(e.hitBy).toBeNull();
+    const again = spawnEnemy(w, 'golem', 300, 0);
+    damageEnemy(w, again, 1, 0, 0, 0, src);
+    again.dead = true;
+    w.step(1 / 60, still);
+    expect(spawnEnemy(w, 'golem', 0, 300).hitBy).toBeNull(); // a reused slot starts clean
   });
 
   it('die by damage and get swept, counting kills', () => {

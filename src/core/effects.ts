@@ -107,7 +107,9 @@ export interface Puff extends Timed {
 export const createPuff = (): Puff => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, r: 0, kind: 'death' });
 
 export function addPuff(world: World, x: number, y: number, r: number, kind: Puff['kind']): void {
-  if (world.puffs.size >= config.effects.maxPuffs) return;
+  // Deaths leave room for pickup glints, so those still show in a big wave.
+  const { maxPuffs, pickupPuffs } = config.effects;
+  if (world.puffs.size >= (kind === 'death' ? maxPuffs - pickupPuffs : maxPuffs)) return;
   const p = world.puffs.acquire();
   p.x = x;
   p.y = y;

@@ -7,6 +7,7 @@ import { BossAct } from '../core/bosses';
 import type { Enemy } from '../core/enemies';
 import { INK } from './art/pen';
 import { UI } from './ui';
+import { star } from './sparks';
 import type { CharacterId } from '../data/characters';
 
 /** Identity color of each hero, for the light under their feet (so the eye finds them in a crowd). */
@@ -56,7 +57,11 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true },
   fireSword: { color: 0xff8a20, core: 0xfff0a0, width: 7, fire: true },
 };
-const PUFF_COLOR = 0xe8eef8;
+const PUFF_COLOR = 0xf4f6fb;
+const PUFF_SHADE = 0xb8c0d8;
+/** Death puffs this big are bosses (radius 30 and up; elites are 18 to 26). */
+export const BOSS_PUFF = 30;
+export const ELITE_PUFF = 18;
 const GEM_GLINT = 0x8adcff;
 const ITEM_GLINT = 0xffd870;
 const HP_OK = 0x7cd860;
@@ -211,15 +216,29 @@ export function drawFx(
   }
   for (const f of world.puffs.active) {
     const k = f.ttl / config.effects.puffTtl; // 1 -> 0
-    const r = f.r * (1.6 - k * 0.8);
     if (f.kind === 'death') {
-      g.fillStyle(PUFF_COLOR, 0.55 * k).fillCircle(f.x, f.y, r);
-      g.fillStyle(0xffffff, 0.5 * k).fillCircle(f.x - r * 0.3, f.y - r * 0.3, r * 0.35);
+      // A cartoon poof: a white pop, then three little clouds puffing out and shrinking. (Bosses get their
+      // own send-off from the sparks.)
+      if (f.r >= BOSS_PUFF) continue;
+      const r = f.r;
+      if (k > 0.7) g.fillStyle(0xffffff, (k - 0.7) * 3).fillCircle(f.x, f.y, r * (1.1 - k * 0.4));
+      const out = 1 - k;
+      for (let i = 0; i < 3; i++) {
+        const a = i * 2.1 + f.x * 0.37;
+        const cx = f.x + Math.cos(a) * r * (0.2 + 0.8 * out);
+        const cy = f.y + Math.sin(a) * r * (0.2 + 0.6 * out) - r * 0.4 * out;
+        const cr = r * (0.5 - 0.15 * i) * (0.5 + k * 0.7);
+        g.fillStyle(PUFF_SHADE, 0.75 * k).fillCircle(cx + cr * 0.15, cy + cr * 0.2, cr);
+        g.fillStyle(PUFF_COLOR, 0.9 * k).fillCircle(cx, cy, cr);
+      }
     } else {
+      const r = f.r * (1.6 - k * 0.8);
       const c = f.kind === 'gem' ? GEM_GLINT : ITEM_GLINT;
       g.lineStyle(2, c, k).strokeCircle(f.x, f.y, r);
     }
   }
+  // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
+  if (world.state === 'won' || world.state === 'lost') return;
   for (const s of world.slashes.active) {
     // A sweeping blade: a wide soft band, a bright band near the edge and a crisp edge line, trailing off.
     const t = s.ttl / config.effects.slashTtl;
@@ -499,21 +518,6 @@ function drawBossWarning(
       break;
     }
   }
-}
-
-/** A cartoon four-point star of radius `r` (a twinkle). */
-function star(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  r: number,
-  color: number,
-  alpha: number,
-): void {
-  const w = r * 0.28;
-  g.fillStyle(color, alpha);
-  g.fillTriangle(x - w, y, x + w, y, x, y - r).fillTriangle(x - w, y, x + w, y, x, y + r);
-  g.fillTriangle(x, y - w, x, y + w, x - r, y).fillTriangle(x, y - w, x, y + w, x + r, y);
 }
 
 /** A dashed arc (current line style), its dashes shifted `offset` px along it. */

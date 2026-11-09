@@ -6,6 +6,7 @@ import { behaviourStep, isFaded } from './behaviours';
 import { hurtPlayer } from './player';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
+import type { WeaponId } from '../data/weapons';
 import type { World } from './world';
 
 export interface Enemy extends Poolable {
@@ -20,6 +21,8 @@ export interface Enemy extends Poolable {
   kbx: number;
   kby: number;
   flash: number;
+  /** The weapon that hit it last (null: none, or not a weapon), so the render can draw that weapon's spark. */
+  hitBy: WeaponId | null;
   /** Seconds left slowed by frost. */
   slow: number;
   /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
@@ -44,6 +47,7 @@ export const createEnemy = (): Enemy => ({
   kbx: 0,
   kby: 0,
   flash: 0,
+  hitBy: null,
   slow: 0,
   orbitReady: new Array<number>(config.weapons.maxOwned).fill(0),
   act: 0,
@@ -66,6 +70,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.y = y;
   e.maxHp = e.hp = def.hp * hpMult;
   e.kbx = e.kby = e.flash = e.slow = 0;
+  e.hitBy = null;
   e.orbitReady.fill(0);
   e.act = 0;
   e.actT = def.ability ? def.ability.every / 2 : def.move ? 2 : 0;
@@ -120,6 +125,7 @@ export function damageEnemy(
   world.tally.hits++;
   e.hp -= amount;
   e.flash = config.enemies.hitFlash;
+  e.hitBy = source ? source.id : null;
   const kb = knockback * (1 - e.def.knockbackResist);
   e.kbx += kx * kb;
   e.kby += ky * kb;

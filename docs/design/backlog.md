@@ -791,7 +791,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   dura, tinta de 4 cantos nos congelados (topo claro) e os dois piscam no último 1 s. Lento: passos com cadência `time
   * 4`. Sem véu (não foi preciso). Estado dos momentos em `render/fx.ts` (`Moments`), só tempos, sem alocar.
 
-**RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · aprovado
+**RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · ✅ feito
 
 - Por quê: 06-vfx (infraestrutura), #1 e #8: nenhum acerto diz qual arma bateu nem quão forte; a morte é uma bolha de
   sabão cinza; elite e chefe morrem igual a um morcego; a vitória não tem momento. Gema e item dividem o teto de puffs
@@ -803,6 +803,14 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   chefe com anéis de luz, estrelas e tremor forte (sem câmera lenta). Reservar 10 do teto de puffs para gema e item.
 - Aceite: F4 com 700 inimigos sem queda maior que 10% contra a medição do início da R3; capturas de morte comum, de
   elite e do chefe aprovadas pelo vfx-director.
+- Feito: `render/sparks.ts`: 96 faíscas criadas uma vez (48 no modo calmo), no máximo 24 novas por quadro, desenhadas
+  no `fxTop`; alimentadas lendo o estado (`e.flash` recém-posto, puff novo). Core: `Enemy.hitBy` (a arma do último
+  acerto, uma atribuição em `damageEnemy`) com teste, e `effects.pickupPuffs` (10 do teto de puffs reservados para
+  gema e item) com teste. Faísca por arma: estrela branca (corte), cruz dourada (luz; roxa no Raio, verde-dourada na
+  Luz de Elun), floco (gelo), brasa que sobe (fogo). Morte: pop branco, 3 nuvenzinhas e 2 a 3 estrelinhas; elite com
+  anel e confete dourado; chefe com 3 anéis (dourado, branco, cor do herói), estrelas, confete e tremor forte (fora do
+  modo calmo). Golpes e raios somem quando a partida acaba (não ficam congelados no ar). F4 com 701 inimigos a 4x: sem
+  armas 58.3 para 58.0, Lâmina L7 56.5 para 56.1, 6 Elos 45.4 para 44.1 FPS (dentro do ruído, abaixo de 10%).
 
 **RF-06 · Aura e Chama de Yah pulsando no ritmo do dano** · vfx · P · aprovado
 

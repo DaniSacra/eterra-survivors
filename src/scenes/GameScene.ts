@@ -21,7 +21,17 @@ import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { UI } from '../render/ui';
 import { Controls } from '../render/controls';
-import { CHEST_SHOW, DAMAGE_TEXT, HERO_COLOR, TINT, drawFx, newMoments } from '../render/fx';
+import {
+  BOSS_PUFF,
+  CHEST_SHOW,
+  DAMAGE_TEXT,
+  ELITE_PUFF,
+  HERO_COLOR,
+  TINT,
+  drawFx,
+  newMoments,
+} from '../render/fx';
+import { SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
@@ -80,6 +90,11 @@ export class GameScene extends Phaser.Scene {
   /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
   private moments = newMoments();
   private rewardIcon!: Phaser.GameObjects.Image;
+  /** Hit sparks, death stars and confetti (a fixed pool). */
+  private sparks = new Sparks();
+  /** Match time last frame: hits and puffs are only new on frames where the world moved. */
+  private lastTime = 0;
+  private stepDt = 0;
 
   constructor() {
     super(SCENES.game);
@@ -117,6 +132,8 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.moments = newMoments();
+    this.sparks = new Sparks();
+    this.lastTime = 0;
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
@@ -176,6 +193,7 @@ export class GameScene extends Phaser.Scene {
           .setScale(ART_SCALE * (1 + a + 0.15 * hit), ART_SCALE * (1 - a - 0.15 * hit))
           .setFlipX(w.player.x < e.x)
           .setRotation(e.act === BossAct.Windup ? Math.sin(w.time * 18) * 0.18 : 0); // a boss winding up shakes
+        if (this.stepDt > 0 && e.flash === HIT_FLASH) this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
         if (hit > 1 - HIT_WHITE && !this.calm) img.setTintFill(TINT.hit);
         else if (w.freeze > 0 && (w.freeze > 1 || Math.sin(w.time * 20) > -0.3))
@@ -246,6 +264,10 @@ export class GameScene extends Phaser.Scene {
     this.calm = settings().calm;
     this.hud.joystick.setEnabled(w.state === 'playing');
     w.step(delta / 1000, this.controls.read());
+    this.stepDt = w.time - this.lastTime;
+    this.lastTime = w.time;
+    this.sparks.frame(this.calm);
+    this.deathSparks();
 
     this.placeView();
     // The hero bounces while walking and turns to where it goes.
@@ -269,6 +291,9 @@ export class GameScene extends Phaser.Scene {
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
     drawFx(this.fx, this.fxTop, w, this.moments);
+    // Sparks keep flying after the boss falls (the world stops), but hold still behind the level-up choice.
+    if (w.state !== 'levelup') this.sparks.update(delta / 1000);
+    this.sparks.draw(this.fxTop);
     this.showReward();
     this.handleEvents();
     this.frameSounds();
@@ -291,6 +316,32 @@ export class GameScene extends Phaser.Scene {
     h.hits = t.hits;
     h.gems = t.gems;
     h.kills = t.kills;
+  }
+
+  /** Stars for each new death; gold confetti for an elite (its chest); rings, stars and a big shake for a boss. */
+  private deathSparks(): void {
+    if (this.stepDt <= 0) return;
+    const fresh = config.effects.puffTtl - this.stepDt - 1e-6;
+    const sp = this.sparks;
+    const hero = HERO_COLOR[this.world.character];
+    for (const f of this.world.puffs.active) {
+      if (f.kind !== 'death' || f.ttl < fresh) continue;
+      if (f.r >= BOSS_PUFF) {
+        sp.add(f.x, f.y, 0, 0, 0.7, f.r * 4, UI.goldHex, SPARK.ring, true);
+        sp.add(f.x, f.y, 0, 0, 0.9, f.r * 6, 0xffffff, SPARK.ring, true);
+        sp.add(f.x, f.y, 0, 0, 1.1, f.r * 8, hero, SPARK.ring, true);
+        sp.burst(f.x, f.y, 10, 260, 9, 0xffffff, SPARK.star, 0.8);
+        sp.burst(f.x, f.y, 8, 200, 7, UI.goldHex, SPARK.confetti, 1.1);
+        sp.burst(f.x, f.y, 6, 180, 7, hero, SPARK.confetti, 1.1);
+        this.shake(500, 0.02);
+      } else if (f.r >= ELITE_PUFF) {
+        sp.add(f.x, f.y, 0, 0, 0.5, f.r * 3, UI.goldHex, SPARK.ring, true);
+        sp.burst(f.x, f.y - f.r * 0.5, 6, 160, 6, UI.goldHex, SPARK.confetti, 0.9);
+        sp.burst(f.x, f.y - f.r * 0.5, 4, 150, 6, 0xffffff, SPARK.confetti, 0.9);
+        sp.burst(f.x, f.y - f.r * 0.5, 3, 170, 7, 0xffffff, SPARK.star, 0.5);
+      } else if (sp.room)
+        sp.burst(f.x, f.y - f.r * 0.3, 2 + (f.poolIndex & 1), 110, 5, 0xffffff, SPARK.star, 0.35, false);
+    }
   }
 
   /** The chest's reward icon pops out of the hero and floats up, then fades. */

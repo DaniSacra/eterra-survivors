@@ -104,6 +104,8 @@ export const config = {
     strongHit: 40,
     puffTtl: 0.3,
     maxPuffs: 60,
+    /** Of those, kept for gem and item glints (deaths never take them). */
+    pickupPuffs: 10,
   },
   joystick: {
     radius: 56,
