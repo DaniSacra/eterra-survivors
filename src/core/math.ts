@@ -7,25 +7,6 @@ export const TAU = Math.PI * 2;
 
 export const clamp = (v: number, min: number, max: number): number => (v < min ? min : v > max ? max : v);
 
-export const distSq = (ax: number, ay: number, bx: number, by: number): number => {
-  const dx = bx - ax;
-  const dy = by - ay;
-  return dx * dx + dy * dy;
-};
-
-/** Normalizes (x, y) into `out`; a zero vector stays zero. Returns the original length. */
-export function normalizeInto(out: Vec2, x: number, y: number): number {
-  const len = Math.hypot(x, y);
-  if (len === 0) {
-    out.x = 0;
-    out.y = 0;
-  } else {
-    out.x = x / len;
-    out.y = y / len;
-  }
-  return len;
-}
-
 /** Smallest signed difference between two angles, in (-PI, PI]. */
 export function angleDiff(a: number, b: number): number {
   let d = (b - a) % TAU;

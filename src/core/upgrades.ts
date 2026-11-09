@@ -3,7 +3,7 @@ import { config } from '../data/config';
 import { EVOLUTIONS, EVOLVED_IDS, evolutionOf } from '../data/evolutions';
 import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
-import { maxLevel } from './weapons';
+import { isElo, maxLevel } from './weapons';
 import type { World } from './world';
 
 /** `level` is the level the thing will have after picking (1 = new weapon). */
@@ -13,8 +13,6 @@ export type UpgradeOption =
   /** Only from chests: `from` turns into `id`. */
   | { kind: 'evolution'; id: WeaponId; from: WeaponId }
   | { kind: 'heal' };
-
-const isEvolved = (id: WeaponId): boolean => EVOLUTIONS[id] !== undefined;
 
 /** Identifies a weapon or passive for banishing (null for things that can't be banished). */
 export function banishKey(opt: UpgradeOption): string | null {
@@ -26,7 +24,7 @@ export function candidates(world: World, newThings = true): UpgradeOption[] {
   const out: UpgradeOption[] = [];
   const canAddWeapon = newThings && world.weapons.length < config.weapons.maxOwned;
   for (const id of WEAPON_IDS) {
-    if (isEvolved(id)) continue;
+    if (isElo(id)) continue;
     const owner = SIGNATURE_OWNER[id];
     if (owner && owner !== world.character) continue; // another hero's signature weapon
     const owned = world.weapons.find((w) => w.id === id);

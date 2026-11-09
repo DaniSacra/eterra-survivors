@@ -52,13 +52,15 @@ export const PROJECTILE_SPRITE = Object.fromEntries(WEAPON_IDS.map((id) => [id, 
 
 type Fire<K extends WeaponKind> = (world: World, s: LevelsByKind[K], w: OwnedWeapon) => boolean;
 
-/** Each kind's attack. Returns false when there was nothing to attack (retry soon instead of a full cooldown). */
-const FIRE: { [K in WeaponKind]: Fire<K> } = {
+/**
+ * Each kind's attack. Returns false when there was nothing to attack (retry soon instead of a full cooldown).
+ * Orbit has none: its blades are always out (`sweepOrbit`).
+ */
+const FIRE: { [K in Exclude<WeaponKind, 'orbit'>]: Fire<K> } = {
   arc: fireArc,
   homing: fireHoming,
   aura: fireAura,
   thrown: fireThrown,
-  orbit: fireOrbit,
   zone: fireZone,
   strike: fireStrike,
 };
@@ -67,17 +69,18 @@ export function updateWeapons(world: World, dt: number): void {
   const list = world.weapons;
   for (let slot = 0; slot < list.length; slot++) {
     const w = list[slot] as OwnedWeapon;
+    const kind = WEAPONS[w.id].kind;
     // Orbit blades are always out: they test contact every frame, and the cooldown is the re-hit delay.
-    if (WEAPONS[w.id].kind === 'orbit') {
+    if (kind === 'orbit') {
       sweepOrbit(world, weaponStats(w) as OrbitLevel, w, slot);
       continue;
     }
     w.timer -= dt;
     if (w.timer > 0) continue;
     const s = weaponStats(w);
-    const fire = FIRE[WEAPONS[w.id].kind] as Fire<WeaponKind>;
+    const fire = FIRE[kind] as Fire<WeaponKind>;
     const fired = fire(world, s, w);
-    if (fired && WEAPONS[w.id].kind !== 'aura') world.tally.attacks++;
+    if (fired && kind !== 'aura') world.tally.attacks++;
     w.timer = fired ? s.cooldown * world.player.stats.cooldown : config.weapons.idleRetry;
   }
 }
@@ -183,11 +186,6 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
     shot.pierce = s.pierce;
     shot.ttl = s.lifetime;
   }
-  return true;
-}
-
-/** Never called through the cooldown loop: see `sweepOrbit`. */
-function fireOrbit(): boolean {
   return true;
 }
 

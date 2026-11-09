@@ -573,13 +573,13 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - Aceite: `grep` não acha texto de jogador fora do `pt-BR.ts` nesses arquivos; dica certa em 420x820 (toque) e
   1000x680.
 
-**RT-05 · Código morto e duplicação** · impl · P · aprovado
+**RT-05 · Código morto e duplicação** · impl · P · ✅ feito
 
 - Por quê: 02-code #12: `normalizeInto` e `distSq` só usados em teste; `fireOrbit` é stub; `isEvolved` repete `isElo`.
 - O quê: remover os dois helpers e o teste deles; tirar `orbit` do mapa `FIRE` pelo tipo; ficar só com `isElo`.
 - Aceite: testes, lint e typecheck verdes.
 
-**RT-06 · Favicon** · impl · P · aprovado
+**RT-06 · Favicon** · impl · P · ✅ feito
 
 - Por quê: 03-qa #10: 404 de `/favicon.ico` gera 2 erros de console no Chromium com janela.
 - O quê: um favicon pequeno (SVG inline no `index.html`, desenhado no estilo do jogo, sem asset externo pesado).

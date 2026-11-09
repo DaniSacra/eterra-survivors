@@ -1,19 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { Rng, angleDiff, clamp, normalizeInto } from '../../src/core/math';
+import { Rng, angleDiff, clamp } from '../../src/core/math';
 
 describe('math', () => {
   it('clamps', () => {
     expect(clamp(5, 0, 3)).toBe(3);
     expect(clamp(-1, 0, 3)).toBe(0);
     expect(clamp(2, 0, 3)).toBe(2);
-  });
-
-  it('normalizes and keeps zero vectors at zero', () => {
-    const v = { x: 0, y: 0 };
-    expect(normalizeInto(v, 3, 4)).toBe(5);
-    expect(v).toEqual({ x: 0.6, y: 0.8 });
-    normalizeInto(v, 0, 0);
-    expect(v).toEqual({ x: 0, y: 0 });
   });
 
   it('computes the shortest angle difference', () => {
