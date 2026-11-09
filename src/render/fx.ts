@@ -8,7 +8,8 @@ import {
   type WeaponDef,
   type WeaponId,
 } from '../data/weapons';
-import { isElo, orbitAngle, weaponStats } from '../core/weapons';
+import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
+import { wardReady } from '../core/elos';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW } from '../core/bosses';
 import { CHARGE } from '../core/behaviours';
@@ -58,6 +59,8 @@ const SWEEP = 0.55;
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = ELEMENT_COLOR.holy;
+/** Espada de Fogo's burning ground: the flames' light orange. */
+const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
 interface OrbitStyle {
   color: number;
@@ -104,6 +107,16 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true, sword: false, branches: 0 },
   fireSword: { color: ELEMENT_COLOR.fire, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
   staff: { color: 0xb070f0, core: 0xf4e8ff, width: 3, fire: false, sword: false, branches: 0, burst: true },
+  /** Nevasca's shatter: an enemy bursting into ice. */
+  blizzard: {
+    color: ELEMENT_COLOR.ice,
+    core: 0xffffff,
+    width: 3,
+    fire: false,
+    sword: false,
+    branches: 0,
+    burst: true,
+  },
   lyraStar: {
     color: ELEMENT_COLOR.arcane,
     core: 0xfff6c0,
@@ -267,8 +280,14 @@ export function drawFx(
       const dir = s.spin >= 0 ? 1 : -1;
       for (let i = 0; i < count; i++) {
         const a = orbitAngle(world.time, s.spin, i, count);
-        const x = p.x + Math.cos(a) * orbitR;
-        const y = p.y + Math.sin(a) * orbitR;
+        // Vigília's swords dart out toward the nearest enemy and back.
+        const br = bladeRadius(w, a, orbitR);
+        const x = p.x + Math.cos(a) * br;
+        const y = p.y + Math.sin(a) * br;
+        if (br > orbitR + 1) {
+          top.lineStyle(r * 0.9, ITEM_GLINT, 0.35);
+          top.lineBetween(p.x + Math.cos(a) * orbitR, p.y + Math.sin(a) * orbitR, x, y);
+        }
         if (style.blade) {
           const tc = elo ? ITEM_GLINT : style.color;
           top.fillStyle(tc, 0.16);
@@ -301,6 +320,17 @@ export function drawFx(
           drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
         } else drawShield(top, x, y, r, style);
       }
+    }
+  }
+  // Muralha de Valmor's guard, while it is up: a steel ring of plates around the hero.
+  if (wardReady(world)) {
+    const wr = 30 + Math.sin(world.time * 3) * 1.5;
+    top.lineStyle(3, INK, 0.5);
+    ring(top, p.x, p.y, wr + 1);
+    top.lineStyle(2, ELEMENT_COLOR.steel, 0.9);
+    for (let i = 0; i < 6; i++) {
+      const a = world.time * 0.8 + (i * Math.PI) / 3;
+      arcLine(top, p.x, p.y, wr, a, a + Math.PI / 3 - 0.25);
     }
   }
   g = top;
@@ -358,6 +388,18 @@ export function drawFx(
   for (const s of world.slashes.active) {
     if (s.form === 'fissure') {
       drawFissure(ground, top, s, 1 - s.ttl / config.effects.fissureTtl);
+      continue;
+    }
+    if (s.form === 'pulse') {
+      // Chama de Yah's wave: a ring of holy fire running out to its edge, leaving a glow behind.
+      const k = 1 - s.ttl / config.effects.pulseTtl;
+      const grow = 1 - (1 - k) * (1 - k);
+      ground.fillStyle(ELEMENT_COLOR.holy, 0.18 * (1 - k));
+      disc(ground, p.x, p.y, s.shock * grow);
+      top.lineStyle(8 * (1 - k) + 2, ELEMENT_COLOR.holy, 0.85 * (1 - k));
+      ring(top, p.x, p.y, s.shock * grow);
+      top.lineStyle(2, 0xffffff, 0.9 * (1 - k));
+      ring(top, p.x, p.y, s.shock * grow * 0.96);
       continue;
     }
     if (s.form === 'tremor') {
@@ -451,6 +493,20 @@ function drawBolt(
   const st = BOLT_STYLE[b.weapon] ?? BOLT_PLAIN;
   const fade = 1 - u;
   const r = b.radius;
+  if (b.link) {
+    // Tempestade's jump: a zigzag from enemy to enemy (outline, colour, white core) and a spark where it lands.
+    const mx = (b.fromX + b.x) / 2 + (hash(b.x, b.y, 7) - 0.5) * 30;
+    const my = (b.fromY + b.y) / 2 + (hash(b.x, b.y, 8) - 0.5) * 30;
+    for (let i = 0; i < BOLT_LAYERS.length; i++) {
+      const L = BOLT_LAYERS[i] as readonly [number, number, number];
+      top.lineStyle(st.width * 0.6 * L[0], L[1] === -1 ? st.color : L[1], L[2] * fade);
+      top.lineBetween(b.fromX, b.fromY, mx, my);
+      top.lineBetween(mx, my, b.x, b.y);
+    }
+    top.fillStyle(0xffffff, 0.9 * fade);
+    disc(top, b.x, b.y, 4 + 4 * fade);
+    return;
+  }
   if (st.burst) {
     // An orb bursting: a flash, a soft disc filling the blast, and a bright ring running out to its edge.
     const grow = 1 - (1 - u) * (1 - u);
@@ -797,6 +853,7 @@ function drawAura(
  * breaks into pieces. Nevasca adds falling snowflakes.
  */
 function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
+  if (!z.slows) return drawEmbers(g, z, time);
   const elo = !!z.source && isElo(z.source.id);
   const age = z.duration - z.ttl;
   const fade = Math.min(1, z.ttl / ZONE_BREAK);
@@ -851,6 +908,33 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
     const fy = z.y - r * 0.7 + ph * r * 1.4;
     g.fillStyle(0xffffff, 0.8 * Math.sin(ph * Math.PI) * fade);
     disc(g, fx + Math.sin(time * 3 + i) * 3, fy, 2);
+  }
+}
+
+/**
+ * Espada de Fogo's burning ground: a glowing patch with a rim of embers and flame tongues flickering up from it,
+ * fading out as it cools. Whoever walks in catches fire (the orange tint).
+ */
+function drawEmbers(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
+  const fade = Math.min(1, z.ttl / ZONE_BREAK);
+  const r = z.radius;
+  g.fillStyle(0x3a1408, 0.35 * fade);
+  disc(g, z.x, z.y, r);
+  g.fillStyle(ELEMENT_COLOR.fire, 0.22 * fade);
+  disc(g, z.x, z.y, r * 0.8);
+  g.lineStyle(2.5, EMBER, 0.7 * fade);
+  ring(g, z.x, z.y, r);
+  const n = 7;
+  for (let i = 0; i < n; i++) {
+    const ph = (time * 1.6 + i * 0.37 + z.x * 0.001) % 1;
+    const a = (i * Math.PI * 2) / n + z.y * 0.01;
+    const d = r * (0.25 + 0.55 * ((i * 0.618) % 1));
+    const fx = z.x + Math.cos(a) * d;
+    const fy = z.y + Math.sin(a) * d * 0.7 - ph * 14;
+    const fr = 5 * (1 - ph) + 1.5;
+    g.fillStyle(i % 2 ? EMBER : 0xffe070, 0.8 * (1 - ph) * fade);
+    g.fillTriangle(fx - fr, fy, fx + fr, fy, fx, fy - fr * 2.4);
+    disc(g, fx, fy, fr);
   }
 }
 

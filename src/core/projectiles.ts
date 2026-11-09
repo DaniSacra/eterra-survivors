@@ -30,6 +30,9 @@ export interface Projectile extends Poolable {
   bounces: number;
   /** Estrela de Lyra's small stars: falling, they touch nothing, and burst where they land (when `ttl` ends). */
   fuse: boolean;
+  /** Fúria da Forja: at this much `ttl` left the hammer turns back (0 = never); `home` once it does. */
+  back: number;
+  home: boolean;
   /** Asset key (one per weapon). */
   sprite: string;
   /** The weapon credited with its damage. */
@@ -58,6 +61,8 @@ export const createProjectile = (): Projectile => ({
   critMult: 1,
   bounces: 0,
   fuse: false,
+  back: 0,
+  home: false,
   sprite: '',
   source: null,
   target: null,
@@ -130,7 +135,21 @@ export function updateProjectiles(world: World, dt: number): void {
       }
       continue;
     }
-    if (p.ttl <= 0) {
+    if (p.back > 0 && p.ttl <= p.back) {
+      // Halfway: the hammer turns home, and may hit everything again on the way back.
+      p.back = 0;
+      p.home = true;
+      p.hits.length = 0;
+      p.ttl += p.ttl; // time enough to come all the way back
+    }
+    if (p.home) {
+      const pl = world.player;
+      const hx = pl.x - p.x;
+      const hy = pl.y - p.y;
+      if (hx * hx + hy * hy < HOME_SQ) p.dead = true;
+      else p.angle = Math.atan2(hy, hx);
+    }
+    if (p.ttl <= 0 || p.dead) {
       p.dead = true;
       continue;
     }
@@ -191,6 +210,8 @@ export function updateProjectiles(world: World, dt: number): void {
 }
 
 const isDead = (p: Projectile): boolean => p.dead;
+/** A returning hammer is caught this close to the hero. */
+const HOME_SQ = 24 * 24;
 
 /**
  * A bursting shot: everything within `blast` of where it struck is hit, pushed out from the centre. Estrela de
@@ -244,6 +265,8 @@ function scatterStars(
     star.critChance = 0;
     star.critMult = 1;
     star.bounces = 0;
+    star.back = 0;
+    star.home = false;
     star.hits.length = 0;
     star.dead = false;
   }

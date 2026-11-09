@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { applyDot, rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
-import { updateProjectiles } from '../../src/core/projectiles';
-import { STARLET } from '../../src/core/projectiles';
-import { updateWeapons } from '../../src/core/weapons';
+import { hurtHero, updateShatters } from '../../src/core/elos';
+import { applyDot, damageEnemy, rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
+import { STARLET, updateProjectiles } from '../../src/core/projectiles';
+import { bladeRadius, updateWeapons } from '../../src/core/weapons';
+import { addZone, updateZones } from '../../src/core/zones';
 import type { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { WEAPONS, type WeaponId } from '../../src/data/weapons';
@@ -141,5 +142,168 @@ describe('damage over time', () => {
     expect(e.dotDps).toBe(10);
     expect(e.dotKind).toBe('bleed');
     expect(e.dot).toBe(3);
+  });
+});
+
+describe('Luz Sagrada: the light that kills heals', () => {
+  it('each kill by the light heals `mend.heal`, at most `mend.perSecond` times a second', () => {
+    const w = armed('holyLight');
+    const def = WEAPONS.holyLight;
+    const src = w.weapons[0]!;
+    w.player.hp = 10;
+    for (let i = 0; i < def.mend.perSecond + 3; i++) {
+      const e = spawnEnemy(w, 'bat', 400 + i * 30, 0);
+      damageEnemy(w, e, 1e6, 0, 0, 0, src);
+    }
+    expect(w.player.hp).toBe(10 + def.mend.heal * def.mend.perSecond);
+    w.time += 1.01;
+    damageEnemy(w, spawnEnemy(w, 'bat', 300, 300), 1e6, 0, 0, 0, src);
+    expect(w.player.hp).toBe(10 + def.mend.heal * (def.mend.perSecond + 1));
+  });
+});
+
+describe('Chama de Yah: the pushing wave', () => {
+  it('every `pulse.every` pulses a wave hits farther and harder, and throws enemies back', () => {
+    const w = armed('yahFlame');
+    const def = WEAPONS.yahFlame;
+    const l = def.levels[0]!;
+    // Beyond the aura, inside the wave.
+    const e = tough(w, l.radius * (1 + def.pulse.radius) * 0.5, 0);
+    e.def = { ...e.def, knockbackResist: 0 };
+    for (let i = 0; i < def.pulse.every - 1; i++) {
+      w.weapons[0]!.timer = 0;
+      run(w, 1 / 60);
+    }
+    expect(e.hp).toBe(e.maxHp);
+    w.weapons[0]!.timer = 0;
+    run(w, 1 / 60);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage * def.pulse.damage);
+    expect(e.kbx).toBeGreaterThan(0);
+    expect(w.slashes.active.some((s) => s.form === 'pulse')).toBe(true);
+  });
+});
+
+describe('Vigília: swords that dart out', () => {
+  it('a sword passing the nearest enemy’s direction darts out to it and comes back', () => {
+    const w = armed('vigil');
+    const def = WEAPONS.vigil;
+    const l = def.levels[0]!;
+    const own = w.weapons[0]!;
+    const e = tough(w, l.orbitRadius + def.dart.reach * 0.8, 0);
+    run(w, 2);
+    expect(own.aim).toBeCloseTo(0);
+    expect(e.hp).toBeLessThan(e.maxHp);
+    // Away from the aim, a sword stays on its circle; on it, it goes out to the enemy.
+    expect(bladeRadius(own, Math.PI, l.orbitRadius)).toBe(l.orbitRadius);
+    expect(bladeRadius(own, 0, l.orbitRadius)).toBeCloseTo(e.x - w.player.x);
+  });
+});
+
+describe('Nevasca: the frozen shatter', () => {
+  it('an enemy dying inside the frost shatters, hurting those around it', () => {
+    const w = armed('blizzard');
+    const def = WEAPONS.blizzard;
+    const src = w.weapons[0]!;
+    w.weapons[0]!.timer = 99;
+    const z = addZone(w, 300, 0, 85, 4, 5, src);
+    const dying = spawnEnemy(w, 'bat', 300, 0);
+    const near = tough(w, 300 + def.shatter.radius - 5, 0);
+    const far = tough(w, 300 + def.shatter.radius + 60, 0);
+    damageEnemy(w, dying, 1e6, 0, 0, 0, null);
+    rebuildEnemyHash(w);
+    updateShatters(w);
+    expect(near.maxHp - near.hp).toBeCloseTo(z.damage * def.shatter.damage);
+    expect(far.hp).toBe(far.maxHp);
+    expect(w.shatters).toHaveLength(0);
+  });
+});
+
+describe('Tempestade: the chain', () => {
+  it('each bolt jumps to `chain.count` more enemies nearby', () => {
+    const w = armed('storm');
+    const def = WEAPONS.storm;
+    w.player.stats.amount = 1 - def.levels[0]!.count; // one bolt
+    const a = tough(w, 50, 0);
+    const b = tough(w, 50 + def.chain.range - 20, 0);
+    const c = tough(w, 50 + (def.chain.range - 20) * 2, 0);
+    run(w, 1 / 60);
+    for (const e of [a, b, c]) expect(e.hp).toBeLessThan(e.maxHp);
+    expect(b.maxHp - b.hp).toBeCloseTo(def.levels[0]!.damage * def.chain.damage);
+    expect(w.bolts.active.filter((x) => x.link)).toHaveLength(def.chain.count);
+  });
+});
+
+describe('Fúria da Forja: the boomerang', () => {
+  it('the hammer turns back halfway and hits again on the way home', () => {
+    const w = armed('forgeFury');
+    const l = WEAPONS.forgeFury.levels[0]!;
+    w.player.stats.amount = 1 - l.count;
+    const e = tough(w, 100, 0);
+    run(w, 1 / 60);
+    w.weapons[0]!.timer = 99;
+    run(w, l.lifetime / 2 - 0.05);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage);
+    run(w, l.lifetime);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage * 2);
+    expect(w.projectiles.size).toBe(0); // caught again
+  });
+});
+
+describe('Procissão: the souls of the kills', () => {
+  it('each kill adds a wisp to the next casts, up to the cap, until it fades', () => {
+    const w = armed('soulProcession');
+    const def = WEAPONS.soulProcession;
+    const src = w.weapons[0]!;
+    for (let i = 0; i < def.swell.cap + 2; i++)
+      damageEnemy(w, spawnEnemy(w, 'bat', 500 + i * 20, 0), 1e6, 0, 0, 0, src);
+    expect(src.stacks).toBe(def.swell.cap);
+    tough(w, 100, 0);
+    run(w, 1 / 60);
+    expect(w.projectiles.size).toBe(def.levels[0]!.count + def.swell.cap);
+    w.projectiles.active.forEach((p) => (p.dead = true));
+    w.projectiles.releaseWhere((p) => p.dead);
+    w.time += def.swell.duration + 0.1;
+    src.timer = 0;
+    run(w, 1 / 60);
+    expect(w.projectiles.size).toBe(def.levels[0]!.count);
+  });
+});
+
+describe('Muralha de Valmor: the guard', () => {
+  it('takes one hit every `ward.every` seconds and throws the blow back at the attacker', () => {
+    const w = armed('valmorWall');
+    const def = WEAPONS.valmorWall;
+    const e = tough(w, 0, 0);
+    const hp = w.player.hp;
+    expect(hurtHero(w, e, 10)).toBe(false);
+    expect(w.player.hp).toBe(hp);
+    expect(e.maxHp - e.hp).toBeCloseTo(def.levels[0]!.damage * def.ward.damage);
+    expect(w.events).toContainEqual({ type: 'ward' });
+    w.player.iframes = 0;
+    expect(hurtHero(w, e, 10)).toBe(true); // the guard is down
+    w.player.iframes = 0;
+    w.time += def.ward.every;
+    expect(hurtHero(w, e, 10)).toBe(false); // and back up
+  });
+});
+
+describe('Espada de Fogo: burning ground', () => {
+  it('where the sword falls the ground burns, setting alight whoever stands in it', () => {
+    const w = armed('fireSword');
+    const def = WEAPONS.fireSword;
+    const l = def.levels[0]!;
+    w.player.stats.amount = 1 - l.count;
+    tough(w, 100, 0);
+    run(w, 1 / 60);
+    const z = w.zones.active[0]!;
+    expect(z.slows).toBe(false);
+    expect(z.ttl).toBeCloseTo(def.ground.duration, 1);
+    const walker = tough(w, z.x + 10, z.y);
+    rebuildEnemyHash(w);
+    updateZones(w, config.zones.tick);
+    expect(walker.dot).toBeGreaterThan(0);
+    expect(walker.dotKind).toBe('burn');
+    expect(walker.dotDps).toBeCloseTo(l.damage * def.ground.burn);
+    expect(walker.slow).toBe(0);
   });
 });

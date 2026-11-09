@@ -131,6 +131,8 @@ export const config = {
     fissureTtl: 0.45,
     /** A slam's tremor burst. */
     tremorTtl: 0.35,
+    /** Chama de Yah's wave running out. */
+    pulseTtl: 0.4,
     boltTtl: 0.22,
     damageNumberTtl: 0.6,
     damageNumberRise: 40, // px per second

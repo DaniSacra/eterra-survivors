@@ -1,12 +1,19 @@
 import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS } from '../data/enemies';
 import { expire, type Timed } from './effects';
-import { damageEnemy, type Enemy } from './enemies';
+import { applyDot, damageEnemy, type Enemy } from './enemies';
 import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 
-/** A patch of frost on the ground: hurts every `config.zones.tick` and slows what stands in it. */
+/**
+ * A patch on the ground that hurts every `config.zones.tick`: frost slows what stands in it; burning ground
+ * (Espada de Fogo) sets it alight instead.
+ */
 export interface Zone extends Timed {
+  slows: boolean;
+  /** Burning: damage per second it sets on whoever stands in it, and for how long (0 = none). */
+  burnDps: number;
+  burnFor: number;
   x: number;
   y: number;
   radius: number;
@@ -21,6 +28,9 @@ export interface Zone extends Timed {
 export const createZone = (): Zone => ({
   poolIndex: -1,
   ttl: 0,
+  slows: true,
+  burnDps: 0,
+  burnFor: 0,
   x: 0,
   y: 0,
   radius: 0,
@@ -38,8 +48,10 @@ export function addZone(
   duration: number,
   damage: number,
   source: OwnedWeapon | null = null,
-): void {
+): Zone {
   const z = world.zones.acquire();
+  z.slows = true;
+  z.burnDps = z.burnFor = 0;
   z.x = x;
   z.y = y;
   z.radius = radius;
@@ -47,6 +59,7 @@ export function addZone(
   z.ttl = z.duration = duration;
   z.tick = 0;
   z.source = source;
+  return z;
 }
 
 export function updateZones(world: World, dt: number): void {
@@ -65,7 +78,8 @@ export function updateZones(world: World, dt: number): void {
       if (e.dead || (e.x - z.x) ** 2 + (e.y - z.y) ** 2 > r * r) continue;
       damageEnemy(world, e, z.damage, 0, 0, 0, z.source);
       // Slowed until a little after the next tick, so standing in frost keeps it on.
-      e.slow = tick * 1.5;
+      if (z.slows) e.slow = tick * 1.5;
+      if (z.burnDps > 0) applyDot(e, 'burn', z.burnDps, z.burnFor, z.source);
     }
   }
   expire(world.zones, dt);

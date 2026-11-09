@@ -14,6 +14,8 @@ export type GameEvent =
   /** A recipe was completed (weapon and passive at max level): `from` just turned into the Elo `elo`. */
   | { type: 'eloForged'; elo: WeaponId; from: WeaponId; passive: PassiveId }
   | { type: 'pickup'; id: PickupId }
+  /** Muralha de Valmor's guard took a hit (and gave it back). */
+  | { type: 'ward' }
   /** Segunda Chance: the hero fell and got up again. */
   | { type: 'revived' }
   | { type: 'won' }

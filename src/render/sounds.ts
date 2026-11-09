@@ -54,6 +54,17 @@ export const SOUNDS = {
     vol: 0.09,
     notes: [0, 0, 7],
   },
+  /** Muralha de Valmor's guard takes a hit: a bright clang. */
+  ward: {
+    kind: 'synth',
+    wave: 'square',
+    from: 1500,
+    to: 1100,
+    dur: 0.07,
+    vol: 0.07,
+    notes: [0, 12],
+    every: 0.2,
+  },
   /** An achievement met in the run (the HUD notice). */
   achievement: {
     kind: 'synth',

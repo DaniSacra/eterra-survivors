@@ -18,6 +18,7 @@ import {
   type Slash,
 } from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
+import { updateShatters } from './elos';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
 import type { Charges, RunBonuses } from './meta';
@@ -96,6 +97,9 @@ export class World {
   readonly pickups = new Pool<Pickup>(createPickup, 8);
   readonly slashes = new Pool<Slash>(createSlash, 4);
   readonly bolts = new Pool<Bolt>(createBolt, 16);
+  /** Nevasca's shatters waiting to burst this step (x, y, radius, damage each), and who deals them. */
+  readonly shatters: number[] = [];
+  readonly shatterBy: OwnedWeapon[] = [];
   readonly zones = new Pool<Zone>(createZone, 16);
   readonly puffs = new Pool<Puff>(createPuff, 32);
   /** Seconds left of Sopro de Geada (enemies frozen). */
@@ -162,6 +166,10 @@ export class World {
       after: 0,
       afterX: 0,
       afterY: 0,
+      stacks: 0,
+      stackTime: 0,
+      aim: 0,
+      aimReach: 0,
       levelAt: this.time,
       levelDamage: 0,
       prevDps: 0,
@@ -185,6 +193,7 @@ export class World {
     updateWeapons(this, dt);
     updateZones(this, dt);
     updateProjectiles(this, dt);
+    updateShatters(this);
     sweepDeadEnemies(this);
     updateGems(this, dt);
     updatePickups(this);

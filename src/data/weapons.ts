@@ -151,6 +151,33 @@ export type WeaponDef = {
     ricochet?: { count: number; range: number };
     /** Thrown weapons: a critical hit makes the enemy bleed `dps` x the hit's damage per second for `duration` s. */
     bleed?: { dps: number; duration: number };
+    /** Luz Sagrada: each kill heals the hero `heal` HP, at most `perSecond` times a second. */
+    mend?: { heal: number; perSecond: number };
+    /** Chama de Yah: every `every`-th pulse is a wave out to x`radius`, x`damage`, pushing everything away. */
+    pulse?: { every: number; damage: number; radius: number; knockback: number };
+    /**
+     * Vigília: each sword darts out `reach` px and back once a turn, as it passes the direction of the nearest
+     * enemy (over `window` of the turn).
+     */
+    dart?: { reach: number; window: number };
+    /** Nevasca: an enemy that dies inside its frost shatters, hurting all around it (x`damage` of a tick). */
+    shatter?: { damage: number; radius: number };
+    /** Tempestade: each bolt jumps to `count` more enemies within `range`, x`damage` each. */
+    chain?: { count: number; range: number; damage: number };
+    /** Fúria da Forja: the hammer turns back halfway and hits again on the way home. */
+    boomerang?: boolean;
+    /** Procissão: each kill adds a wisp to the next casts, up to `cap`, for `duration` s after the last kill. */
+    swell?: { cap: number; duration: number };
+    /**
+     * Muralha de Valmor: a guard that takes one hit every `every` s; the attacker gets x`damage` of a shield's
+     * blow back.
+     */
+    ward?: { every: number; damage: number };
+    /**
+     * Espada de Fogo: where the sword lands the ground burns for `duration` s (x`damage` of the strike per tick),
+     * setting alight whoever walks in (`burn`: x`dps` of the strike per second, for `for` s).
+     */
+    ground?: { duration: number; damage: number; burn: number; for: number };
   };
 }[WeaponKind];
 
@@ -426,6 +453,7 @@ export const WEAPONS = {
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
     kind: 'homing',
+    mend: { heal: 1, perSecond: 4 },
     levels: [
       {
         damage: 32,
@@ -443,7 +471,8 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    levels: [{ damage: 15, cooldown: 0.3, radius: 150 }],
+    pulse: { every: 10, damage: 4, radius: 1.25, knockback: 320 },
+    levels: [{ damage: 10, cooldown: 0.3, radius: 150 }],
   },
   /** Leque de Facas: knives that bounce from enemy to enemy, and crits that make them bleed. */
   fan: {
@@ -470,19 +499,22 @@ export const WEAPONS = {
   /** Vigília dos Quatro: the paladins keep watch, wide and fast. */
   vigil: {
     kind: 'orbit',
+    dart: { reach: 120, window: 0.16 },
     levels: [
-      { damage: 57, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
+      { damage: 56, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
     ],
   },
   /** Nevasca: frost everywhere. */
   blizzard: {
     kind: 'zone',
+    shatter: { damage: 8, radius: 55 },
     levels: [{ damage: 4.7, cooldown: 1.4, count: 5, radius: 85, duration: 4 }],
   },
   /** Tempestade: a storm over the battlefield. */
   storm: {
     kind: 'strike',
-    levels: [{ damage: 36, cooldown: 0.8, count: 8, radius: 52 }],
+    chain: { count: 2, range: 170, damage: 0.7 },
+    levels: [{ damage: 25, cooldown: 0.8, count: 8, radius: 52 }],
   },
   /** Quebra-Junta: the fissure branches in three, each tremor wakes a smaller one, and the stunned get crushed. */
   jointBreaker: {
@@ -510,14 +542,16 @@ export const WEAPONS = {
   /** Espada de Fogo: a rain of burning swords over the field. */
   fireSword: {
     kind: 'strike',
-    levels: [{ damage: 26, cooldown: 0.8, count: 7, radius: 70 }],
+    ground: { duration: 2.5, damage: 0.15, burn: 0.3, for: 2 },
+    levels: [{ damage: 12, cooldown: 0.8, count: 7, radius: 70 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {
     kind: 'thrown',
+    boomerang: true,
     levels: [
       {
-        damage: 103,
+        damage: 54,
         cooldown: 1,
         speed: 300,
         count: 4,
@@ -532,6 +566,7 @@ export const WEAPONS = {
   /** Procissão das Almas: a long line of lights walking the field. */
   soulProcession: {
     kind: 'homing',
+    swell: { cap: 4, duration: 4 },
     levels: [
       {
         damage: 36,
@@ -549,6 +584,7 @@ export const WEAPONS = {
   /** Muralha de Valmor: a ring of shields, wide and close-set, that the dead can't get through. */
   valmorWall: {
     kind: 'orbit',
+    ward: { every: 10, damage: 3 },
     levels: [
       { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 200 },
     ],

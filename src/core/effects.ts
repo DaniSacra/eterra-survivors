@@ -22,9 +22,10 @@ export function expire<T extends Timed>(pool: Pool<T>, dt: number): void {
 export interface Slash extends Timed {
   /**
    * `swing`: an arc around the hero (follows them). `fissure`: a crack of length `range` and width `width` running
-   * from (x, y) along `angle`. `tremor`: a burst of radius `shock` at (x, y).
+   * from (x, y) along `angle`. `tremor`: a burst of radius `shock` at (x, y). `pulse`: a wave running out to
+   * `shock` around the hero (Chama de Yah).
    */
-  form: 'swing' | 'fissure' | 'tremor';
+  form: 'swing' | 'fissure' | 'tremor' | 'pulse';
   x: number;
   y: number;
   width: number;
@@ -57,8 +58,22 @@ export interface Bolt extends Timed {
   radius: number;
   /** The weapon that cast it (each is drawn in its own look). */
   weapon: WeaponId;
+  /** A jump between two enemies (Tempestade's chain) from (fromX, fromY), instead of a fall from the sky. */
+  link: boolean;
+  fromX: number;
+  fromY: number;
 }
-export const createBolt = (): Bolt => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, radius: 0, weapon: 'lightning' });
+export const createBolt = (): Bolt => ({
+  poolIndex: -1,
+  ttl: 0,
+  x: 0,
+  y: 0,
+  radius: 0,
+  weapon: 'lightning',
+  link: false,
+  fromX: 0,
+  fromY: 0,
+});
 
 export function addBolt(world: World, x: number, y: number, radius: number, weapon: WeaponId): void {
   const b = world.bolts.acquire();
@@ -67,6 +82,16 @@ export function addBolt(world: World, x: number, y: number, radius: number, weap
   b.radius = radius;
   b.weapon = weapon;
   b.ttl = config.effects.boltTtl;
+  b.link = false;
+}
+
+/** A bolt jumping from (fx, fy) to (x, y) (Tempestade's chain), purely visual. */
+export function addLink(world: World, fx: number, fy: number, x: number, y: number, weapon: WeaponId): void {
+  addBolt(world, x, y, 0, weapon);
+  const b = world.bolts.active[world.bolts.active.length - 1] as Bolt;
+  b.link = true;
+  b.fromX = fx;
+  b.fromY = fy;
 }
 
 export interface DamageNumber extends Timed {

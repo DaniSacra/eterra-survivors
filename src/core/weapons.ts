@@ -18,7 +18,7 @@ import {
   type ZoneLevel,
 } from '../data/weapons';
 import { isFaded } from './behaviours';
-import { addBolt } from './effects';
+import { addBolt, addLink } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import { TAU, angleDiff } from './math';
 import { nearestEnemy, randomEnemyNear, type Projectile } from './projectiles';
@@ -45,6 +45,15 @@ export interface OwnedWeapon {
   after: number;
   afterX: number;
   afterY: number;
+  /**
+   * Elo counters: Procissão's extra wisps (until `stackTime`), Luz Sagrada's heals this second (since
+   * `stackTime`), Muralha de Valmor's guard (ready at `stackTime`).
+   */
+  stacks: number;
+  stackTime: number;
+  /** Vigília: the direction of the nearest enemy, where the swords dart out, and how far past the circle. */
+  aim: number;
+  aimReach: number;
   /** When the current level (or Elo) started, and `damage` at that moment: the damage per second at this level. */
   levelAt: number;
   levelDamage: number;
@@ -135,6 +144,21 @@ const dmg = (world: World, base: number): number => base * world.player.stats.mi
 /** Shots, blades, patches or bolts: the level's count plus the Mãos Ligeiras bonus. */
 const amount = (world: World, base: number): number => base + world.player.stats.amount;
 
+/**
+ * Distance from the hero of an orbit blade at angle `a` (shared with the renderer): the orbit radius, except
+ * Vigília's swords, which dart out and back as they pass the direction of the nearest enemy (`w.aim`), furthest
+ * right on it.
+ */
+export function bladeRadius(w: OwnedWeapon, a: number, orbitR: number): number {
+  const dart = (WEAPONS[w.id] as WeaponDef).dart;
+  if (!dart || w.aimReach <= 0) return orbitR;
+  // How far from the aim the blade is, in turns (-0.5..0.5).
+  let d = (a - w.aim) / TAU;
+  d -= Math.round(d);
+  const half = dart.window / 2;
+  return d > -half && d < half ? orbitR + w.aimReach * Math.cos((Math.PI * d) / dart.window) : orbitR;
+}
+
 /** Angle of blade `i` of `count` of an orbit weapon at time `t` (shared with the renderer). */
 export const orbitAngle = (t: number, spin: number, i: number, count: number): number =>
   t * spin + (i * TAU) / count;
@@ -155,6 +179,8 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   shot.critMult = 1;
   shot.bounces = 0;
   shot.fuse = false;
+  shot.back = 0;
+  shot.home = false;
   shot.hits.length = 0;
   shot.dead = false;
   return shot;
@@ -388,7 +414,10 @@ function fireHoming(world: World, s: HomingLevel, w: OwnedWeapon): boolean {
   const targets = world.targetsScratch;
   targets.length = 0;
   let first: Enemy | null = null;
-  const count = amount(world, s.count);
+  // Procissão: the souls of the last kills walk along for a while.
+  const swell = (WEAPONS[w.id] as WeaponDef).swell;
+  if (swell && w.stackTime <= world.time) w.stacks = 0;
+  const count = amount(world, s.count) + (swell ? w.stacks : 0);
   for (let i = 0; i < count; i++) {
     // Distinct targets first; with fewer enemies than shots, the extras go to the nearest one.
     const t: Enemy | null = nearestEnemy(world, p.x, p.y, config.weapons.seekRange, targets) ?? first;
@@ -436,6 +465,7 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
     shot.ttl = s.lifetime;
     shot.blast = blast;
     shot.bounces = def.kind === 'thrown' ? (def.ricochet?.count ?? 0) : 0;
+    if (def.boomerang) shot.back = s.lifetime / 2;
     if (crit) {
       shot.critChance = crit.chance;
       shot.critMult = crit.mult;
@@ -451,10 +481,19 @@ function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): 
   const orbitR = s.orbitRadius * p.stats.area;
   const hitR = s.radius * p.stats.area;
   const rehit = s.cooldown * p.stats.cooldown;
+  const dart = (WEAPONS[w.id] as WeaponDef).dart;
+  if (dart) {
+    const reach = dart.reach * p.stats.area;
+    const t = nearestEnemy(world, p.x, p.y, orbitR + reach + MAX_ENEMY_RADIUS);
+    w.aim = t ? Math.atan2(t.y - p.y, t.x - p.x) : 0;
+    // Out to the enemy (none inside the circle: the swords already pass through it).
+    w.aimReach = t ? Math.min(reach, Math.max(0, Math.hypot(t.x - p.x, t.y - p.y) - orbitR)) : 0;
+  }
   for (let i = 0; i < count; i++) {
     const a = orbitAngle(world.time, s.spin, i, count);
-    const bx = p.x + Math.cos(a) * orbitR;
-    const by = p.y + Math.sin(a) * orbitR;
+    const br = bladeRadius(w, a, orbitR);
+    const bx = p.x + Math.cos(a) * br;
+    const by = p.y + Math.sin(a) * br;
     const ids = world.enemyHash.query(bx, by, hitR + MAX_ENEMY_RADIUS, world.scratch);
     for (let n = 0; n < ids.length; n++) {
       const e = list[ids[n] as number] as Enemy;
@@ -515,9 +554,41 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
       if (!e.dead && (e.x - x) ** 2 + (e.y - y) ** 2 <= r * r)
         damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
     }
+    const def = WEAPONS[w.id] as WeaponDef;
+    if (def.chain) chainBolt(world, s, w, t, def.chain);
+    // Espada de Fogo: the ground where it fell keeps burning.
+    const gr = def.ground;
+    if (gr) {
+      const z = addZone(world, x, y, radius, gr.duration, dmg(world, s.damage) * gr.damage, w);
+      z.slows = false;
+      z.burnDps = dmg(world, s.damage) * gr.burn;
+      z.burnFor = gr.for;
+    }
   }
   world.numberBudget = Infinity;
   return targets.length > 0;
+}
+
+/** Tempestade: from the struck enemy the bolt jumps to the nearest ones it hasn't hit, one after another. */
+function chainBolt(
+  world: World,
+  s: StrikeLevel,
+  w: OwnedWeapon,
+  from: Enemy,
+  chain: { count: number; range: number; damage: number },
+): void {
+  const targets = world.targetsScratch;
+  let x = from.x;
+  let y = from.y;
+  for (let c = 0; c < chain.count; c++) {
+    const next = nearestEnemy(world, x, y, chain.range, targets);
+    if (!next) break;
+    targets.push(next.uid);
+    addLink(world, x, y, next.x, next.y, w.id);
+    damageEnemy(world, next, dmg(world, s.damage) * chain.damage, 0, 0, 0, w);
+    x = next.x;
+    y = next.y;
+  }
 }
 
 /** A distance that always stays inside the visible area. */
@@ -544,5 +615,43 @@ function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
     const dy = e.y - p.y;
     if (dx * dx + dy * dy <= r * r) damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
   }
+  const pulse = (WEAPONS[w.id] as WeaponDef).pulse;
+  if (pulse && ++w.swings % pulse.every === 0) yahWave(world, s, w, radius * pulse.radius, pulse);
   return true;
+}
+
+/** Chama de Yah's wave: everything out to `radius` is hit harder and thrown back. */
+function yahWave(
+  world: World,
+  s: AuraLevel,
+  w: OwnedWeapon,
+  radius: number,
+  pulse: { damage: number; knockback: number },
+): void {
+  const p = world.player;
+  const list = world.enemies.active;
+  const slash = world.slashes.acquire();
+  slash.form = 'pulse';
+  slash.x = p.x;
+  slash.y = p.y;
+  slash.angle = 0;
+  slash.range = 0;
+  slash.width = 0;
+  slash.arc = 0;
+  slash.shock = radius;
+  slash.weapon = w.id;
+  slash.ttl = config.effects.pulseTtl;
+  world.numberBudget = config.effects.arcNumbers;
+  const ids = world.enemyHash.query(p.x, p.y, radius + MAX_ENEMY_RADIUS, world.scratch);
+  for (let i = 0; i < ids.length; i++) {
+    const e = list[ids[i] as number] as Enemy;
+    if (e.dead) continue;
+    const dx = e.x - p.x;
+    const dy = e.y - p.y;
+    const r = radius + e.def.radius * 0.5;
+    if (dx * dx + dy * dy > r * r) continue;
+    const d = Math.hypot(dx, dy) || 1;
+    damageEnemy(world, e, dmg(world, s.damage) * pulse.damage, dx / d, dy / d, pulse.knockback, w);
+  }
+  world.numberBudget = Infinity;
 }

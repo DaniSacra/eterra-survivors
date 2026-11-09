@@ -847,3 +847,31 @@ recalibrados para cada Elo ficar onde estava (lab, multidão, % da melhor Elo `a
 | fan          | 1875 · 4,3x | 8091 · 18,6x | 2002 · 4,6x (dano 52 → 22, 7 → 5 facas, recarga 0,3 → 0,4) |
 
 O Leque perde contra um alvo só (solo 1875 → 485): antes era fora da curva; hoje fica perto das outras `aimed`.
+
+## Etapa 5 · efeitos novos das outras nove Elos
+
+| Elo            | efeito novo (dado em `data/weapons.ts`)                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| Luz Sagrada    | `mend`: cada abate pela luz cura 1 de vida, no máximo 4 por segundo                              |
+| Chama de Yah   | `pulse`: a cada 10 pulsos (3 s) uma onda até 1,25x o raio, 4x o dano, empurrando tudo            |
+| Vigília        | `dart`: cada espada avança até o inimigo mais próximo (até 120 px) ao passar pela direção dele   |
+| Nevasca        | `shatter`: quem morre dentro da geada estilhaça, 8x o dano do tique em 55 px                     |
+| Tempestade     | `chain`: cada raio pula para mais 2 inimigos a até 170 px, 70% do dano                           |
+| Fúria da Forja | `boomerang`: o martelo volta na metade do caminho e acerta de novo na volta                      |
+| Procissão      | `swell`: cada abate soma uma alma às próximas levas, até +4, por 4 s depois do último abate      |
+| Muralha        | `ward`: uma proteção absorve um golpe a cada 10 s e devolve 3x o dano do escudo a quem bateu     |
+| Espada de Fogo | `ground`: o chão queima 2,5 s onde a espada cai e põe fogo em quem passa (`burn`, dano contínuo) |
+
+Lab em multidão, % da melhor Elo `aimed` (antes da etapa → só efeitos → recalibrado):
+
+| Elo                                             | antes                                                                 | só efeitos  | depois                                          |
+| ----------------------------------------------- | --------------------------------------------------------------------- | ----------- | ----------------------------------------------- |
+| forgeFury                                       | 1854 · 4,2x                                                           | 3543 · 8,1x | 1858 · 4,2x (dano 103 → 54)                     |
+| vigil                                           | 958 · 4,3x                                                            | 1397 · 6,3x | 941 · 4,2x (dano 57 → 56, investida até o alvo) |
+| yahFlame                                        | 960 · 4,4x                                                            | 1446 · 6,6x | 964 · 4,4x (dano 15 → 10)                       |
+| fireSword                                       | 1178 · 4,2x                                                           | 2549 · 9,1x | 1176 · 4,2x (dano 26 → 12)                      |
+| storm                                           | 1152 · 4,2x                                                           | 1660 · 6,0x | 1153 · 4,2x (dano 36 → 25)                      |
+| holyLight, blizzard, soulProcession, valmorWall | sem mudança no lab (os efeitos dependem de abates ou de levar golpes) |             |                                                 |
+
+O lab usa alvos imortais, então cura, estilhaço, almas e a proteção não aparecem nele; o sim mede o efeito real
+na Etapa 7.

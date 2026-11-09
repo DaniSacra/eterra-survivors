@@ -2,7 +2,7 @@ import { config } from '../data/config';
 import type { BossAbility, EnemyId } from '../data/enemies';
 import { spawnEnemy, type Enemy } from './enemies';
 import { TAU, angleDiff } from './math';
-import { hurtPlayer } from './player';
+import { hurtHero } from './elos';
 import { segmentAt } from './waves';
 import type { World } from './world';
 
@@ -49,7 +49,10 @@ export function updateBoss(world: World, e: Enemy, dt: number): boolean {
         e.x += e.aimX * speed * dt;
         e.y += e.aimY * speed * dt;
         const r = config.player.radius + e.def.radius;
-        if ((p.x - e.x) ** 2 + (p.y - e.y) ** 2 < r * r && hurtPlayer(p, ab.damage * world.stage.mult.damage))
+        if (
+          (p.x - e.x) ** 2 + (p.y - e.y) ** 2 < r * r &&
+          hurtHero(world, e, ab.damage * world.stage.mult.damage)
+        )
           world.events.push({ type: 'playerHit' });
       }
       return true;
@@ -66,7 +69,7 @@ function release(world: World, e: Enemy, ab: BossAbility): boolean {
       const dy = p.y - e.y;
       const inReach = Math.hypot(dx, dy) <= ab.range + config.player.radius;
       const inArc = Math.abs(angleDiff(Math.atan2(e.aimY, e.aimX), Math.atan2(dy, dx))) <= (ab.arc ?? 1) / 2;
-      if (inReach && inArc && hurtPlayer(p, ab.damage * world.stage.mult.damage))
+      if (inReach && inArc && hurtHero(world, e, ab.damage * world.stage.mult.damage))
         world.events.push({ type: 'playerHit' });
       e.act = BossAct.Active;
       e.actT = CLEAVE_SHOW;

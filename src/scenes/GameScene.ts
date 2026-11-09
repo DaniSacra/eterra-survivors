@@ -509,8 +509,23 @@ export class GameScene extends Phaser.Scene {
     const p = this.world.player;
     let thud = false;
     for (const s of this.world.slashes.active) {
-      const ttl = s.form === 'fissure' ? fx.fissureTtl : s.form === 'tremor' ? fx.tremorTtl : fx.slashTtl;
+      const ttl =
+        s.form === 'fissure'
+          ? fx.fissureTtl
+          : s.form === 'tremor'
+            ? fx.tremorTtl
+            : s.form === 'pulse'
+              ? fx.pulseTtl
+              : fx.slashTtl;
       if (s.ttl < ttl - this.stepDt - 1e-6) continue;
+      if (s.form === 'pulse') {
+        // Chama de Yah's wave: holy sparks flung out from the hero.
+        for (let i = 0; i < 10; i++) {
+          const a = (i * Math.PI) / 5;
+          sp.add(p.x, p.y, Math.cos(a) * 260, Math.sin(a) * 260, 0.4, 7, ELEMENT_COLOR.holy, SPARK.star);
+        }
+        continue;
+      }
       if (s.form !== 'swing') {
         // The ground gives: a thud on the blow, a stronger one when the tremor bursts, and dust.
         if (!thud) {
@@ -776,6 +791,25 @@ export class GameScene extends Phaser.Scene {
             this.shake(300, 0.012);
           } else if (e.id === 'freeze') this.moments.frost = w.time;
           break;
+        case 'ward': {
+          // Muralha de Valmor took the hit: steel sparks around the hero and a clang.
+          sound.play('ward');
+          const p = w.player;
+          for (let i = 0; i < 8; i++) {
+            const a = (i * Math.PI) / 4;
+            this.sparks.add(
+              p.x + Math.cos(a) * 28,
+              p.y + Math.sin(a) * 28,
+              Math.cos(a) * 180,
+              Math.sin(a) * 180,
+              0.35,
+              6,
+              ELEMENT_COLOR.steel,
+              SPARK.star,
+            );
+          }
+          break;
+        }
         case 'revived':
           sound.play('levelUp');
           this.hud.announce(t.revived, true);

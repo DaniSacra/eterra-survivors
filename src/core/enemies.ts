@@ -2,7 +2,7 @@ import { config } from '../data/config';
 import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/enemies';
 import { updateBoss } from './bosses';
 import { behaviourStep, isFaded } from './behaviours';
-import { hurtPlayer } from './player';
+import { hurtHero, onKill } from './elos';
 import { BLOCKED, blockCircle, spawnPoint } from './terrain';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
@@ -78,7 +78,13 @@ export type DotKind = 'bleed' | 'burn';
  * Puts damage over time on an enemy (`dps` for `duration` s). The stronger one stays: a weaker one only refreshes
  * the time if it lasts longer.
  */
-export function applyDot(e: Enemy, kind: DotKind, dps: number, duration: number, by: OwnedWeapon | null): void {
+export function applyDot(
+  e: Enemy,
+  kind: DotKind,
+  dps: number,
+  duration: number,
+  by: OwnedWeapon | null,
+): void {
   if (dps >= e.dotDps || e.dot <= 0) {
     if (e.dot <= 0) e.dotTick = config.dotTick;
     e.dotDps = dps;
@@ -171,7 +177,10 @@ export function damageEnemy(
   e.kbx += kx * kb;
   e.kby += ky * kb;
   world.onEnemyDamaged(e, amount, source);
-  if (e.hp <= 0) e.dead = true;
+  if (e.hp <= 0) {
+    e.dead = true;
+    onKill(world, e, source);
+  }
 }
 
 export function updateEnemies(world: World, dt: number): void {
@@ -288,7 +297,7 @@ export function updateEnemies(world: World, dt: number): void {
       cx * cx + cy * cy < minD * minD &&
       !isFaded(e) &&
       e.stun <= 0 &&
-      hurtPlayer(p, e.def.damage * damageMult)
+      hurtHero(world, e, e.def.damage * damageMult)
     ) {
       world.events.push({ type: 'playerHit' });
       break;
