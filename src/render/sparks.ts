@@ -20,6 +20,8 @@ export const SPARK = {
   confetti: 4,
   /** A ring growing out: big moments. */
   ring: 5,
+  /** A drop that falls: bleeding. */
+  drop: 6,
 } as const;
 type SparkKind = (typeof SPARK)[keyof typeof SPARK];
 
@@ -92,6 +94,11 @@ export class Sparks {
 
   get room(): boolean {
     return this.made < BUDGET && this.n < this.cap;
+  }
+
+  /** Room for ambient sparks (drips, embers off a status): only while the pool is half empty, so hits keep theirs. */
+  get idle(): boolean {
+    return this.made < BUDGET / 2 && this.n < this.cap / 2;
   }
 
   /** Adds a spark; `force` skips the per-frame budget (never the cap). */
@@ -178,6 +185,7 @@ export class Sparks {
       s.vy *= drag;
       if (s.kind === SPARK.ember) s.vy -= 60 * dt;
       else if (s.kind === SPARK.confetti) s.vy += 140 * dt;
+      else if (s.kind === SPARK.drop) s.vy += 260 * dt;
     }
   }
 
@@ -232,6 +240,16 @@ export class Sparks {
             s.x + ux,
             s.y + uy,
           );
+          break;
+        }
+        case SPARK.drop: {
+          // A round drop with a point on top, falling.
+          const r = s.size * 0.4;
+          g.fillStyle(s.color, a);
+          disc(g, s.x, s.y, r);
+          g.fillTriangle(s.x - r * 0.9, s.y - r * 0.3, s.x + r * 0.9, s.y - r * 0.3, s.x, s.y - r * 2.4);
+          g.fillStyle(0xffffff, 0.7 * a);
+          disc(g, s.x - r * 0.35, s.y - r * 0.2, r * 0.3);
           break;
         }
         case SPARK.ring: {

@@ -93,6 +93,8 @@ interface BoltStyle {
   branches: number;
   /** Not from the sky: an orb bursting where it struck (Cajado de Lyra). */
   burst?: boolean;
+  /** The burst throws ice shards out to its edge (Nevasca's shatter). */
+  shards?: boolean;
 }
 const BOLT_PLAIN: BoltStyle = {
   color: 0xc890ff,
@@ -116,6 +118,7 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
     sword: false,
     branches: 0,
     burst: true,
+    shards: true,
   },
   lyraStar: {
     color: ELEMENT_COLOR.arcane,
@@ -199,13 +202,18 @@ export interface Moments {
   /** Badalada (bomb) and Sopro de Geada (freeze) were picked up. */
   bomb: number;
   frost: number;
+  /** The hero's life went up (Luz Sagrada's kills, a chest, food). */
+  heal: number;
 }
 export const newMoments = (): Moments => ({
   chest: -Infinity,
   elo: false,
   bomb: -Infinity,
   frost: -Infinity,
+  heal: -Infinity,
 });
+/** How long the life bar glows after a heal, seconds. */
+const HEAL_SHOW = 0.3;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
 export const CHEST_SHOW = 1.3;
 
@@ -322,17 +330,8 @@ export function drawFx(
       }
     }
   }
-  // Muralha de Valmor's guard, while it is up: a steel ring of plates around the hero.
-  if (wardReady(world)) {
-    const wr = 30 + Math.sin(world.time * 3) * 1.5;
-    top.lineStyle(3, INK, 0.5);
-    ring(top, p.x, p.y, wr + 1);
-    top.lineStyle(2, ELEMENT_COLOR.steel, 0.9);
-    for (let i = 0; i < 6; i++) {
-      const a = world.time * 0.8 + (i * Math.PI) / 3;
-      arcLine(top, p.x, p.y, wr, a, a + Math.PI / 3 - 0.25);
-    }
-  }
+  drawWard(top, world);
+  drawStuns(top, world);
   g = top;
   // Life under the hero's feet, so it can be read without looking at the corner.
   const hpK = Math.max(0, p.hp / p.stats.maxHp);
@@ -340,6 +339,13 @@ export function drawFx(
   // The HUD's life color; low (under 35%) it blinks in the danger coral.
   const low = hpK <= 0.35 && Math.sin(world.time * 12) > 0;
   g.fillStyle(low ? UI.dangerHex : UI.hp).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
+  // Healed: the bar glows white for a moment, so the gain is seen where the life is read.
+  const healed = world.time - m.heal;
+  if (healed < HEAL_SHOW) {
+    const hk = 1 - healed / HEAL_SHOW;
+    g.lineStyle(2, 0xffffff, 0.9 * hk).strokeRoundedRect(p.x - 18, p.y + 24, 36, 8, 4);
+    g.fillStyle(0xffffff, 0.5 * hk).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
+  }
   // A chest on the ground twinkles: a soft gold ring around it and a star that blinks on its lid.
   for (const it of world.pickups.active) {
     if (it.type !== 'chest') continue;
@@ -520,6 +526,13 @@ function drawBolt(
       top.fillStyle(0xffffff, 0.9 * (1 - u / 0.3));
       disc(top, b.x, b.y, 5 + r * 0.35 * (u / 0.3));
     }
+    if (st.shards)
+      // The frozen enemy breaking: ice shards flung out to the edge of what the shatter hits.
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3 + hash(b.x, b.y, 4) * 2;
+        const d = r * (0.25 + 0.75 * grow);
+        shard(top, b.x + Math.cos(a) * d, b.y + Math.sin(a) * d, a, 7 * fade + 2, fade);
+      }
     return;
   }
   if (st.fire) {
@@ -918,11 +931,12 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
 function drawEmbers(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
   const fade = Math.min(1, z.ttl / ZONE_BREAK);
   const r = z.radius;
-  g.fillStyle(0x3a1408, 0.35 * fade);
+  // Light fills: patches overlap a lot under a crowd, and stacked they must never hide who walks in them.
+  g.fillStyle(0x3a1408, 0.18 * fade);
   disc(g, z.x, z.y, r);
-  g.fillStyle(ELEMENT_COLOR.fire, 0.22 * fade);
+  g.fillStyle(ELEMENT_COLOR.fire, 0.14 * fade);
   disc(g, z.x, z.y, r * 0.8);
-  g.lineStyle(2.5, EMBER, 0.7 * fade);
+  g.lineStyle(2, EMBER, 0.6 * fade);
   ring(g, z.x, z.y, r);
   const n = 7;
   for (let i = 0; i < n; i++) {
@@ -935,6 +949,77 @@ function drawEmbers(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void
     g.fillStyle(i % 2 ? EMBER : 0xffe070, 0.8 * (1 - ph) * fade);
     g.fillTriangle(fx - fr, fy, fx + fr, fy, fx, fy - fr * 2.4);
     disc(g, fx, fy, fr);
+  }
+}
+
+/** Radius of Muralha de Valmor's guard around the hero (just outside the sprite and its light). */
+const WARD_R = 32;
+
+/**
+ * Muralha de Valmor's guard. Up: a silver bubble of six steel plates (ink outline, white glint running round) that
+ * will take the next hit. Down: a thin arc filling back around the hero as it recharges, so the player sees when the
+ * next block comes.
+ */
+function drawWard(g: Phaser.GameObjects.Graphics, world: World): void {
+  const p = world.player;
+  const up = wardReady(world);
+  if (!up) {
+    for (const w of world.weapons) {
+      const ward = (WEAPONS[w.id] as WeaponDef).ward;
+      if (!ward) continue;
+      const k = 1 - Math.max(0, w.stackTime - world.time) / ward.every;
+      const a0 = -Math.PI / 2;
+      g.lineStyle(4, INK, 0.35);
+      arcLine(g, p.x, p.y, WARD_R, a0, a0 + Math.PI * 2 * k);
+      g.lineStyle(2, ELEMENT_COLOR.steel, 0.6);
+      arcLine(g, p.x, p.y, WARD_R, a0, a0 + Math.PI * 2 * k);
+      return;
+    }
+    return;
+  }
+  const t = world.time;
+  const wr = WARD_R + Math.sin(t * 3) * 1.5;
+  g.fillStyle(ELEMENT_COLOR.steel, 0.1);
+  disc(g, p.x, p.y, wr);
+  for (let i = 0; i < 6; i++) {
+    const a = t * 0.8 + (i * Math.PI) / 3;
+    g.lineStyle(6, INK, 0.7);
+    arcLine(g, p.x, p.y, wr, a, a + Math.PI / 3 - 0.22);
+    g.lineStyle(3.5, ELEMENT_COLOR.steel, 1);
+    arcLine(g, p.x, p.y, wr, a, a + Math.PI / 3 - 0.22);
+  }
+  // A glint sliding round the plates, and a twinkle on top now and then: "polished, ready".
+  const ga = -t * 2.2;
+  g.lineStyle(2, 0xffffff, 0.9);
+  arcLine(g, p.x, p.y, wr, ga, ga + 0.35);
+  const tw = Math.max(0, Math.sin(t * 2.5)) ** 6;
+  if (tw > 0.05) star(g, p.x + wr * 0.6, p.y - wr * 0.8, 3 + 5 * tw, 0xffffff, tw);
+}
+
+/** Two little stars circling the head of each stunned enemy (a slam), at most this many a frame. */
+const STUN_SHOWN = 48;
+function drawStuns(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemies.active;
+  const t = world.time;
+  let n = 0;
+  for (let i = 0; i < list.length && n < STUN_SHOWN; i++) {
+    const e = list[i] as Enemy;
+    if (e.stun <= 0 || e.def.boss) continue;
+    n++;
+    const r = e.def.radius;
+    const y = e.y - r - 5;
+    for (let k = 0; k < 2; k++) {
+      const a = t * 7 + e.uid + k * Math.PI;
+      const front = Math.sin(a) > 0;
+      star(
+        g,
+        e.x + Math.cos(a) * r * 0.7,
+        y + Math.sin(a) * 2.5,
+        front ? 4.5 : 3.5,
+        0xfff0a0,
+        front ? 1 : 0.7,
+      );
+    }
   }
 }
 

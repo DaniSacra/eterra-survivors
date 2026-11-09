@@ -18,7 +18,7 @@ import { newRunSummary, summarizeRun, type RunSummary } from '../core/records';
 import { liveAchievements } from '../core/achievements';
 import type { MetaSave } from '../core/meta';
 import type { AchievementId } from '../data/achievements';
-import { WEAPONS, WEAPON_IDS, type WeaponId } from '../data/weapons';
+import { WEAPONS, WEAPON_IDS, type WeaponDef, type WeaponId } from '../data/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
@@ -92,6 +92,12 @@ const NUMBER_FONT = 16;
 const NUMBER_WORLD = 13;
 const NUMBER_SCREEN = 14;
 
+/** An enemy's sprite, with who it showed last frame and whether they were stunned (to catch a crush). */
+type EnemyImage = Phaser.GameObjects.Image & { uid?: number; stunned?: boolean };
+
+/** Chance per frame that a bleeding or burning enemy lets a drop fall or an ember rise. */
+const DOT_SPARK = 0.06;
+
 /** Shown instead of the damage numbers when they are turned off. */
 const NONE: readonly DamageNumber[] = [];
 
@@ -117,7 +123,7 @@ export class GameScene extends Phaser.Scene {
   private playerSprite!: Phaser.GameObjects.Image;
   /** A light silhouette behind the hero: a permanent outline that reads over any crowd. */
   private playerOutline!: Phaser.GameObjects.Image;
-  private enemyMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
+  private enemyMirror!: Mirror<Enemy, EnemyImage>;
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
@@ -154,6 +160,8 @@ export class GameScene extends Phaser.Scene {
   /** Match time last frame: hits and puffs are only new on frames where the world moved. */
   private lastTime = 0;
   private stepDt = 0;
+  /** The hero's life last frame, to see a heal. */
+  private lastHp = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
   private obstacles!: Obstacles;
@@ -224,6 +232,7 @@ export class GameScene extends Phaser.Scene {
     this.moments = newMoments();
     this.sparks = new Sparks();
     this.lastTime = 0;
+    this.lastHp = this.world.player.hp;
     this.bossAct = 0;
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
@@ -276,7 +285,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.enemyMirror = new Mirror(
-      () => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
+      (): EnemyImage => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
       (img, e) => {
         const w = this.world;
         if (img.texture.key !== e.def.sprite) {
@@ -309,7 +318,17 @@ export class GameScene extends Phaser.Scene {
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
           .setRotation(e.act === BossAct.Windup && e.def.ability ? Math.sin(w.time * 18) * 0.18 : 0);
-        if (this.stepDt > 0 && e.flash === HIT_FLASH) this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
+        if (this.stepDt > 0) {
+          if (e.flash === HIT_FLASH) {
+            this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
+            // Quebra-Junta crushing one that was already dizzy.
+            if (img.uid === e.uid && img.stunned && e.hitBy && (WEAPONS[e.hitBy] as WeaponDef).crush)
+              this.crushSpark(e);
+          }
+          if (e.dot > 0 && this.sparks.idle && this.sparks.rand() < DOT_SPARK) this.dotSpark(e);
+        }
+        img.uid = e.uid;
+        img.stunned = e.stun > 0;
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
         if (hit > 1 - HIT_WHITE && !this.calm && !(e.hitBy && AREA_HIT[e.hitBy])) img.setTintFill(TINT.hit);
         else if (w.freeze > 0 && (w.freeze > 1 || Math.sin(w.time * 20) > -0.3))
@@ -408,6 +427,8 @@ export class GameScene extends Phaser.Scene {
     this.stepDt = w.time - this.lastTime;
     this.lastTime = w.time;
     this.sparks.frame(this.calm);
+    if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) this.healSpark();
+    this.lastHp = w.player.hp;
     this.deathSparks();
     this.swingSparks();
     this.boltSparks();
@@ -609,6 +630,43 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /** A crush (a slam on a stunned enemy): an amber star bursting on it and a small ring, "that hit harder". */
+  private crushSpark(e: Enemy): void {
+    const sp = this.sparks;
+    const r = e.def.radius;
+    sp.add(e.x, e.y, 0, 0, 0.25, r * 2.2, ELEMENT_COLOR.earth, SPARK.ring);
+    sp.add(e.x, e.y - r * 0.3, 0, -30, 0.25, 9 + r * 0.3, 0xffffff, SPARK.star);
+    sp.burst(e.x, e.y, 3, 120, 5, ELEMENT_COLOR.earth, SPARK.star, 0.3, false);
+  }
+
+  /** A bleeding enemy drips emerald drops; a burning one gives off embers. */
+  private dotSpark(e: Enemy): void {
+    const sp = this.sparks;
+    const r = e.def.radius;
+    const x = e.x + (sp.rand() - 0.5) * r;
+    if (e.dotKind === 'bleed') sp.add(x, e.y + r * 0.2, 0, 20, 0.45, 8, ELEMENT_COLOR.shadow, SPARK.drop);
+    else sp.add(x, e.y - r * 0.4, 0, -25, 0.5, 6, ELEMENT_COLOR.fire, SPARK.ember);
+  }
+
+  /** The hero healed: red crosses (the life bar's colour) rising from the hero, and the bar glows (drawFx). */
+  private healSpark(): void {
+    const p = this.world.player;
+    const sp = this.sparks;
+    this.moments.heal = this.world.time;
+    for (let i = 0; i < 2; i++)
+      sp.add(
+        p.x + (sp.rand() - 0.5) * 40,
+        p.y - 18 - sp.rand() * 12,
+        0,
+        -60,
+        0.6,
+        7,
+        UI.hp,
+        SPARK.cross,
+        true,
+      );
+  }
+
   /** Lobo Velho's lunge ending: dust where it stops. */
   private lungeDust(b: Enemy): void {
     for (let i = 0; i < 5; i++)
@@ -792,20 +850,23 @@ export class GameScene extends Phaser.Scene {
           } else if (e.id === 'freeze') this.moments.frost = w.time;
           break;
         case 'ward': {
-          // Muralha de Valmor took the hit: steel sparks around the hero and a clang.
+          // Muralha de Valmor took the hit: the plates burst off in a steel ring, sparks fly, a clang.
           sound.play('ward');
           const p = w.player;
+          this.sparks.add(p.x, p.y, 0, 0, 0.35, 52, ELEMENT_COLOR.steel, SPARK.ring, true);
+          this.sparks.add(p.x, p.y, 0, 0, 0.25, 40, 0xffffff, SPARK.ring, true);
           for (let i = 0; i < 8; i++) {
             const a = (i * Math.PI) / 4;
             this.sparks.add(
-              p.x + Math.cos(a) * 28,
-              p.y + Math.sin(a) * 28,
+              p.x + Math.cos(a) * 32,
+              p.y + Math.sin(a) * 32,
               Math.cos(a) * 180,
               Math.sin(a) * 180,
               0.35,
               6,
               ELEMENT_COLOR.steel,
               SPARK.star,
+              true,
             );
           }
           break;
