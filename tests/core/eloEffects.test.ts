@@ -206,6 +206,21 @@ describe('Vigília: swords that dart out', () => {
     expect(bladeRadius(own, Math.PI, l.orbitRadius)).toBe(l.orbitRadius);
     expect(bladeRadius(own, 0, l.orbitRadius)).toBeCloseTo(e.x - w.player.x);
   });
+
+  it('in a crowd hugging the hero, the swords still dart out to the nearest enemy beyond the circle', () => {
+    const w = armed('vigil');
+    const def = WEAPONS.vigil;
+    const l = def.levels[0]!;
+    const own = w.weapons[0]!;
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      tough(w, Math.cos(a) * l.orbitRadius * 0.5, Math.sin(a) * l.orbitRadius * 0.5);
+    }
+    tough(w, 0, l.orbitRadius + def.dart.reach * 0.6);
+    run(w, 1 / 60);
+    expect(own.aim).toBeCloseTo(Math.PI / 2);
+    expect(own.aimReach).toBeCloseTo(def.dart.reach * 0.6);
+  });
 });
 
 describe('Nevasca: the frozen shatter', () => {

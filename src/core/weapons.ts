@@ -443,11 +443,25 @@ function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): 
   const rehit = s.cooldown * p.stats.cooldown;
   const dart = (WEAPONS[w.id] as WeaponDef).dart;
   if (dart) {
+    // Out to the nearest enemy beyond the circle (those inside it, the swords already pass through).
     const reach = dart.reach * p.stats.area;
-    const t = nearestEnemy(world, p.x, p.y, orbitR + reach + MAX_ENEMY_RADIUS);
-    w.aim = t ? Math.atan2(t.y - p.y, t.x - p.x) : 0;
-    // Out to the enemy (none inside the circle: the swords already pass through it).
-    w.aimReach = t ? Math.min(reach, Math.max(0, Math.hypot(t.x - p.x, t.y - p.y) - orbitR)) : 0;
+    const ids = world.enemyHash.query(p.x, p.y, orbitR + reach + MAX_ENEMY_RADIUS, world.scratch);
+    let best = Infinity;
+    let tx = 0;
+    let ty = 0;
+    for (let n = 0; n < ids.length; n++) {
+      const e = list[ids[n] as number] as Enemy;
+      if (e.dead || isFaded(e)) continue;
+      const d = Math.hypot(e.x - p.x, e.y - p.y);
+      if (d > orbitR && d < best) {
+        best = d;
+        tx = e.x;
+        ty = e.y;
+      }
+    }
+    const found = best <= orbitR + reach + MAX_ENEMY_RADIUS;
+    w.aim = found ? Math.atan2(ty - p.y, tx - p.x) : 0;
+    w.aimReach = found ? Math.min(reach, best - orbitR) : 0;
   }
   for (let i = 0; i < count; i++) {
     const a = orbitAngle(world.time, s.spin, i, count);
