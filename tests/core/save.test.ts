@@ -187,7 +187,9 @@ describe('recordRun', () => {
       }),
     );
     expect(out.elos).toEqual(['storm']);
-    expect(s.gold).toBe(80);
+    // The run's gold, plus what its achievements gave (core/achievements.ts).
+    expect(out.achievements).toEqual(['rats500', 'survive5', 'eloFirst']);
+    expect(s.gold).toBe(80 + 50 + 25 + 50);
     expect(s.cleared).toEqual([]);
     expect(s.elos).toEqual(['storm']);
     expect(s.records.lyra).toMatchObject({

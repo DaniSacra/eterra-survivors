@@ -1,3 +1,4 @@
+import { ACHIEVEMENTS, type AchievementId } from '../data/achievements';
 import { config, type StatKey } from '../data/config';
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
@@ -166,3 +167,24 @@ export function formatCompact(v: number): string {
 
 /** One decimal, pt-BR comma. */
 export const formatDecimal = (v: number): string => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+
+/**
+ * An achievement's texts: name, description (with its goal: the seconds for bossFast, else the goal), gold reward
+ * and the title it gives, if any.
+ */
+export function describeAchievement(id: AchievementId): {
+  name: string;
+  desc: string;
+  reward: string;
+  title: string | null;
+} {
+  const def = ACHIEVEMENTS[id];
+  const text = t.achievements.items[id];
+  const shown = def.metric === 'bossFast' ? (def.at ?? 0) : def.goal;
+  return {
+    name: text.name,
+    desc: typeof text.desc === 'function' ? text.desc(t.int(shown)) : text.desc,
+    reward: t.achievements.reward(def.gold),
+    title: t.achievements.titles[id] ?? null,
+  };
+}

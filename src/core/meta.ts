@@ -5,6 +5,8 @@ import { STAGES, STAGE_IDS, stageCast, type StageId } from '../data/stages';
 import { ENEMY_IDS, type EnemyId } from '../data/enemies';
 import { EVOLVED_IDS } from '../data/evolutions';
 import { WEAPON_IDS, type WeaponId } from '../data/weapons';
+import { ACHIEVEMENTS, ACHIEVEMENT_IDS, type AchievementId } from '../data/achievements';
+import { checkAchievements } from './achievements';
 import type { RunSummary } from './records';
 
 /**
@@ -77,6 +79,12 @@ export interface MetaSave {
   /** Enemies seen at least once. */
   bestiary: Partial<Record<EnemyId, BestiaryEntry>>;
   totals: Totals;
+  /** Achievements unlocked (their gold already banked). */
+  achievements: AchievementId[];
+  /** Unlocked but not yet seen in the Coleção (the menu button shows a dot). */
+  fresh: AchievementId[];
+  /** The title chosen (an unlocked achievement that gives one); absent: no title shown. */
+  title?: AchievementId;
   /**
    * The raw save when it came from a newer version (an old build still cached): kept so that writing it back
    * doesn't drop what this build doesn't know. See `serializeSave`.
@@ -102,6 +110,8 @@ export const newSave = (): MetaSave => ({
   records: {},
   bestiary: {},
   totals: newTotals(),
+  achievements: [],
+  fresh: [],
 });
 
 const newTotals = (): Totals => ({ runs: 0, wins: 0, kills: 0, damage: 0, gold: 0, time: 0 });
@@ -220,6 +230,9 @@ export function sanitizeSave(raw: unknown): MetaSave {
     records?: unknown;
     bestiary?: unknown;
     totals?: unknown;
+    achievements?: unknown;
+    fresh?: unknown;
+    title?: unknown;
   };
   if (typeof r.version === 'number' && r.version > SAVE_VERSION) save.future = r as Record<string, unknown>;
   if (typeof r.gold === 'number' && Number.isFinite(r.gold) && r.gold >= 0) save.gold = Math.floor(r.gold);
@@ -239,6 +252,10 @@ export function sanitizeSave(raw: unknown): MetaSave {
   for (const k of Object.keys(save.totals) as (keyof Totals)[])
     save.totals[k] = num(totals[k], k !== 'damage' && k !== 'time');
   if (!(typeof r.version === 'number' && r.version >= 2)) seedFromCleared(save);
+  save.achievements = known(r.achievements, ACHIEVEMENT_IDS);
+  save.fresh = known(r.fresh, save.achievements);
+  const title = save.achievements.find((id) => id === r.title);
+  if (title && ACHIEVEMENTS[title].title) save.title = title;
   // The last choice only if it can still be played (hero owned, stage open).
   const hero = CHARACTER_IDS.find((id) => id === r.lastHero);
   if (hero && heroUnlocked(save, hero)) save.lastHero = hero;
@@ -294,6 +311,9 @@ export function serializeSave(save: MetaSave): object {
     records: mergeUp(future.records, known.records),
     bestiary: mergeUp(future.bestiary, known.bestiary),
     totals: mergeUp(future.totals, known.totals),
+    achievements: union(future.achievements, known.achievements),
+    fresh: union(future.fresh, known.fresh),
+    title: known.title ?? future.title,
     lastHero: known.lastHero,
     lastStage: known.lastStage,
   };
@@ -303,11 +323,13 @@ export function serializeSave(save: MetaSave): object {
 export interface RunRecorded {
   /** Elos new to the save. */
   elos: WeaponId[];
+  /** Achievements unlocked by this run (their gold already banked). */
+  achievements: AchievementId[];
 }
 
 /**
  * Records a finished run in the save: its gold, the stage if won, its Elos, the hero's records, the bestiary and
- * the totals. Pure: render/save.ts loads, calls this and writes.
+ * the totals; then unlocks the achievements it earned. Pure: render/save.ts loads, calls this and writes.
  */
 export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   save.gold += Math.max(0, Math.floor(run.gold));
@@ -347,7 +369,7 @@ export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   tot.damage += run.damage;
   tot.gold += Math.max(0, Math.floor(run.gold));
   tot.time += run.time;
-  return { elos };
+  return { elos, achievements: checkAchievements(save) };
 }
 
 /** Marks Elos as discovered; returns the ones that were new. */
@@ -413,7 +435,7 @@ export function buy(save: MetaSave, id: ShopId): boolean {
   return true;
 }
 
-/** The starting stat deltas and per-run charges the shop gives. */
+/** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */
 export function shopBonuses(save: MetaSave): RunBonuses {
   const out: RunBonuses = { stats: {}, charges: { ...config.charges } };
   for (const id of SHOP_IDS) {
@@ -424,5 +446,10 @@ export function shopBonuses(save: MetaSave): RunBonuses {
     if ('stat' in def) out.stats[def.stat] = (out.stats[def.stat] ?? 0) + add;
     else out.charges[def.charge] += add;
   }
+  if (config.achievementCharges)
+    for (const id of save.achievements) {
+      const charge = ACHIEVEMENTS[id].charge;
+      if (charge) out.charges[charge]++;
+    }
   return out;
 }

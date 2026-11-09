@@ -1,4 +1,5 @@
 import type { StatKey } from '../data/config';
+import type { AchievementGroup, AchievementId } from '../data/achievements';
 import type { CharacterId } from '../data/characters';
 import type { EnemyId } from '../data/enemies';
 import type { StageId } from '../data/stages';
@@ -7,10 +8,18 @@ import type { ChargeKey, ShopId } from '../data/shop';
 import type { PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
 
+/** A whole number with pt-BR thousands dots: 10000 -> "10.000". */
+const int = (n: number): string => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/** Achievement name and description (a goal-dependent one gets the goal already formatted). */
+type AchievementText = { name: string; desc: string | ((goal: string) => string) };
+
 /** Every player-facing string lives here. Code never hardcodes UI text. */
 export const t = {
   /** Separator between items on one line. */
   sep: ' · ',
+  /** Whole numbers shown to the player ("8.240"). */
+  int,
   /** Units and signs of numbers shown to the player (the value comes already formatted). */
   units: {
     degrees: (v: string) => `${v}°`,
@@ -164,6 +173,79 @@ export const t = {
     almostElo: (elo: string) => `Faltou um baú para formar ${elo}!`,
     almostEloUnknown: (weapon: string) => `Faltou um baú para o Elo de ${weapon}!`,
     almostLevel: (weapon: string) => `${weapon} estava a um nível do Elo.`,
+  },
+
+  /** Conquistas (docs/design/conquistas.md). The four hero ones are each hero's victory line in the original. */
+  achievements: {
+    groups: {
+      kills: 'Abates',
+      damage: 'Dano',
+      survival: 'Sobrevivência',
+      weapons: 'Armas e Elos',
+      heroes: 'Heróis',
+      stages: 'Fases',
+      collection: 'Coleção',
+    } satisfies Record<AchievementGroup, string>,
+    items: {
+      killsRun1k: { name: 'Mil Covas Fechadas', desc: (n) => `Derrote ${n} inimigos numa partida.` },
+      killsRun3k: { name: 'Noite Sem Fim', desc: (n) => `Derrote ${n} inimigos numa partida.` },
+      killsTotal10k: { name: 'Coveiro de Valmor', desc: (n) => `Derrote ${n} inimigos no total.` },
+      killsTotal50k: { name: 'A Vila Dorme Tranquila', desc: (n) => `Derrote ${n} inimigos no total.` },
+      // Seu Joaquim's line in the original (historias/capitulo1-aldo-sozinho.md).
+      rats500: {
+        name: 'Na Minha Época',
+        desc: (n) => `Derrote ${n} ratos. O Seu Joaquim fazia isso com uma vassoura.`,
+      },
+      elites25: { name: 'Pedra e Lança', desc: (n) => `Derrote ${n} elites.` },
+      hit80: { name: 'Golpe Forte', desc: (n) => `Acerte um golpe de arma de ${n} ou mais.` },
+      hit120: { name: 'Na Junta', desc: (n) => `Acerte um golpe de arma de ${n} ou mais.` },
+      damageRun: { name: 'Forja Acesa', desc: (n) => `Cause ${n} de dano numa partida.` },
+      damageTotal: { name: 'Bigorna do Gaspar', desc: (n) => `Cause ${n} de dano no total.` },
+      survive5: { name: 'Meia-Noite', desc: 'Sobreviva 5 minutos.' },
+      survive10: { name: 'Até o Fim da Noite', desc: 'Sobreviva até o chefe chegar.' },
+      untouched: { name: 'Nem um Arranhão', desc: 'Passe 1:30 sem levar dano.' },
+      closeWin: { name: 'Por um Fio', desc: 'Vença uma fase com 10% da vida ou menos.' },
+      level50: { name: 'Lenda da Taverna', desc: (n) => `Chegue ao nível ${n} numa partida.` },
+      eloFirst: { name: 'Primeiro Elo', desc: 'Forme um Elo.' },
+      elosRun3: { name: 'Corrente Inteira', desc: (n) => `Forme ${n} Elos numa partida.` },
+      maxed4: {
+        name: 'Mãos de Ferreiro',
+        desc: (n) => `Termine uma partida com ${n} armas no nível máximo (Elos contam).`,
+      },
+      allShared: { name: 'Conhece o Ofício', desc: 'Use cada arma compartilhada pelo menos uma vez.' },
+      soloWin: { name: 'Fiel à Primeira', desc: 'Vença uma fase sem pegar nenhuma arma além da inicial.' },
+      winAldo: { name: 'Próximo.', desc: 'Vença uma fase com Aldo.' },
+      winLyra: { name: 'Mais uma para o livro.', desc: 'Vença uma fase com Lyra.' },
+      winTeo: { name: 'Que descansem em paz.', desc: 'Vença uma fase com Teo.' },
+      winAndilla: { name: 'Fácil. Quase.', desc: 'Vença uma fase com Andilla.' },
+      // A diary note in the original (src/data.js).
+      winAll: {
+        name: 'Os Quatro',
+        desc: 'Vença com os quatro heróis. Os paladinos que fecharam a cripta eram quatro.',
+      },
+      heroAllStages: { name: 'De Ponta a Ponta', desc: 'Vença as três fases com o mesmo herói.' },
+      bossKnight: { name: 'O Cavaleiro Caiu', desc: 'Derrote o Cavaleiro Negro.' },
+      bossRinger: { name: 'Ninguém Mais Desce', desc: 'Derrote O Sineiro.' },
+      bossWolf: { name: 'O Velho da Matilha', desc: 'Derrote o Lobo Velho.' },
+      bossFast: {
+        name: 'Antes do Segundo Golpe',
+        desc: (n) => `Derrote um chefe em até ${n} s depois que ele chega.`,
+      },
+      allStages: { name: 'Caminho de Erukh', desc: 'Vença as três fases.' },
+      seen8: { name: 'Diário de Caça', desc: (n) => `Encontre ${n} tipos de inimigo.` },
+      seenAll: { name: 'Bestiário Completo', desc: 'Encontre todos os inimigos, elites e chefes.' },
+      elosAll: { name: 'Livro Completo', desc: 'Descubra todos os Elos.' },
+      shop10: { name: 'Freguês do Gaspar', desc: (n) => `Compre ${n} níveis na Loja.` },
+    } satisfies Record<AchievementId, AchievementText> as Record<AchievementId, AchievementText>,
+    titles: {
+      killsTotal50k: 'Guardião de Valmor',
+      soloWin: 'Fiel à Primeira',
+      winAll: 'Um dos Quatro',
+      seenAll: 'Caçador das Covas',
+      elosAll: 'Mestre dos Elos',
+    } as Partial<Record<AchievementId, string>>,
+    reward: (gold: number) => `+${gold} ouro`,
+    progress: (value: string, goal: string) => `${value} de ${goal}`,
   },
 
   shop: {

@@ -77,6 +77,11 @@ export const config = {
     /** Extra gold in every chest. */
     chest: 25,
   },
+  /**
+   * Achievements with a `charge` (Primeiro Elo, Bestiário Completo, Livro Completo) add one use per run of that
+   * level-up helper. Off: they give only gold (Daniel decides, docs/design/conquistas.md).
+   */
+  achievementCharges: false,
   /** Level-up helpers every run starts with (the shop adds more). */
   charges: { reroll: 1, skip: 1, banish: 0 },
   zones: {

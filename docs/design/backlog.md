@@ -1161,12 +1161,14 @@ implementação abaixo; cada item é um commit.
 - Feito: testes em `tests/core/save.test.ts`; `achievements`, `fresh` e `title` entram no save junto com as
   conquistas (CC-03), ainda na versão 2.
 
-**CC-03 · Conquistas (dados e lógica)** · impl · M · aprovado
+**CC-03 · Conquistas (dados e lógica)** · impl · M · ✅ feito
 
 - O quê: `src/data/achievements.ts` (35 entradas declarativas), `core/achievements.ts` (métricas, progresso,
   checagem, conquista mais perto), textos em `pt-BR.ts`.
 - Aceite: ids únicos e com texto; cada uma destrancável num save sintético; ouro somado uma vez; retroativas no save
   migrado.
+- Feito: testes em `tests/core/achievements.test.ts`; textos com `describeAchievement` (render/describe.ts); as três
+  cargas opcionais prontas atrás de `config.achievementCharges` (desligado).
 
 **CC-04 · Conquistas na tela final e calibração** · impl + bal · P · aprovado
 
