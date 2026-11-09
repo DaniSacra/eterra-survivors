@@ -323,7 +323,7 @@ export const WEAPONS = {
     kind: 'aura',
     levels: [{ damage: 14, cooldown: 0.3, radius: 150 }],
   },
-  /** Leque de Facas: Andilla's fan of knives in every direction. */
+  /** Leque de Facas: Andilla's fan of knives, a wide spread thrown at the nearest enemy. */
   fan: {
     kind: 'thrown',
     aim: 'nearest',
@@ -336,7 +336,7 @@ export const WEAPONS = {
         pierce: 3,
         lifetime: 1.2,
         radius: 7,
-        spread: (Math.PI * 2) / 10,
+        spread: 0.1,
         knockback: 40,
       },
     ],

@@ -639,7 +639,7 @@ sementes depois de cada lote e registrar.
   deixaria essas armas muito acima das outras na multidão do lab (já são as maiores). Conferir jogando (o humano entra
   na multidão).
 
-**RE-04 · Leque de Facas melhor que as Adagas contra um alvo** · impl + bal · P · aprovado
+**RE-04 · Leque de Facas melhor que as Adagas contra um alvo** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D1: o Elo da Andilla rende 81 DPS no chefe a 60 px e 27 a 90 px (0,18x da base), contra Adagas
   L7 152; ela é a mais lenta contra o chefe (107 s). Num anel de 10 facas só uma pega o alvo. Conflito com B-01
@@ -648,6 +648,11 @@ sementes depois de cada lote e registrar.
   rotação de meio passo do B-01 continua no core e no teste para qualquer arremesso que cubra o círculo. Medido: chefe
   243 / 135 / 79 DPS a 60 / 90 / 140 px; multidão 1175 (igual).
 - Aceite: no lab de chefe, Leque acima de 1,5x as Adagas L7 a 60 e a 90 px; multidão do lab sem queda.
+- Feito (lote 2): `spread` **0.1** em vez de 0.16 (leque de ~52° com 10 facas, ~57° com 11), porque com 0.16 o lab de
+  chefe deu 243 / 135 / 79 DPS a 60 / 90 / 140 px, e 135 a 90 px não passa de 1,5x as Adagas L7 (152). Com 0.1: **297
+  / 243 / 131** (1,95x e 1,6x a 60 e 90 px); multidão do lab 1064 para 1068 (sem queda); lab solo 27 para 162. Testes:
+  o Leque mira no mais próximo e acerta pelo menos 3 facas a 90 px; o anel do B-01 continua testado para qualquer
+  arremesso que cubra o círculo. Descrição no pt-BR atualizada.
 
 **RE-07 · Pequenos acertos de curva** · impl + bal · P · aprovado
 

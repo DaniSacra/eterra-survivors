@@ -5,18 +5,40 @@ import { WEAPONS } from '../../src/data/weapons';
 import { bareWorld, still } from './helpers';
 
 describe('Leque de Facas', () => {
-  it('always throws a knife straight ahead (no blind spot in front)', () => {
+  it('throws a forward fan at the nearest enemy, most knives on one target', () => {
     const w = bareWorld();
     w.addWeapon('fan');
-    w.player.facing.x = 1;
+    w.player.facing.x = 1; // facing away from the target: the fan aims, it does not follow the facing
     w.player.facing.y = 0;
-    const e = spawnEnemy(w, 'blackKnight', 100, 0);
-    e.def = { ...e.def, speed: 0 };
-    for (let i = 0; i < 20; i++) w.step(1 / 60, still);
-    expect(e.hp).toBeLessThan(e.maxHp);
-    expect(
-      w.projectiles.active.some((p) => Math.abs(Math.sin(p.angle)) < 1e-9 && Math.cos(p.angle) > 0),
-    ).toBe(true);
+    const e = spawnEnemy(w, 'blackKnight', 0, 90);
+    e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+    rebuildEnemyHash(w);
+    updateWeapons(w, 1 / 60);
+    const s = WEAPONS.fan.levels[0]!;
+    const half = ((s.count - 1) / 2) * s.spread + 1e-9;
+    expect(w.projectiles.size).toBe(s.count);
+    for (const p of w.projectiles.active) expect(Math.abs(p.angle - Math.PI / 2)).toBeLessThanOrEqual(half);
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    // At 90 px at least 3 knives of the first volley land (a ring of 10 landed one).
+    expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(3 * s.damage);
+  });
+
+  it('a throw that covers the whole circle keeps one knife straight ahead (no blind spot)', () => {
+    const lv = WEAPONS.fan.levels[0] as { spread: number };
+    const spread = lv.spread;
+    lv.spread = (Math.PI * 2) / 10;
+    try {
+      const w = bareWorld();
+      w.addWeapon('fan');
+      w.player.facing.x = 1;
+      w.player.facing.y = 0;
+      updateWeapons(w, 1 / 60); // nobody around: thrown where the hero faces
+      expect(
+        w.projectiles.active.some((p) => Math.abs(Math.sin(p.angle)) < 1e-9 && Math.cos(p.angle) > 0),
+      ).toBe(true);
+    } finally {
+      lv.spread = spread;
+    }
   });
 });
 

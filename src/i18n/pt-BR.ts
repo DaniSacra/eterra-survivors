@@ -235,7 +235,10 @@ export const t = {
     fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
     holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
     yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
-    fan: { name: 'Leque de Facas', desc: 'Facas para todos os lados, que atravessam fileiras.' },
+    fan: {
+      name: 'Leque de Facas',
+      desc: 'Um leque de facas no inimigo mais próximo, que atravessa fileiras.',
+    },
     vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta do herói.' },
     blizzard: { name: 'Nevasca', desc: 'O inverno cobre o campo inteiro.' },
     storm: { name: 'Tempestade', desc: 'O céu inteiro desaba sobre os mortos.' },
