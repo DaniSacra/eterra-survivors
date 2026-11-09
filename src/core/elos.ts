@@ -115,6 +115,9 @@ export function hurtHero(world: World, attacker: Enemy, amount: number): boolean
 
 /** The owned weapon whose guard is up right now (Muralha de Valmor), or null. */
 export function wardReady(world: World): OwnedWeapon | null {
-  for (const w of world.weapons) if ((WEAPONS[w.id] as WeaponDef).ward && w.stackTime <= world.time) return w;
+  for (let iW = 0; iW < world.weapons.length; iW++) {
+    const w = world.weapons[iW] as (typeof world.weapons)[number];
+    if ((WEAPONS[w.id] as WeaponDef).ward && w.stackTime <= world.time) return w;
+  }
   return null;
 }

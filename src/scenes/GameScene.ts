@@ -413,13 +413,14 @@ export class GameScene extends Phaser.Scene {
     this.decals.update(vx, vy, fw, fh);
     this.obstacles.update(vx, vy, fw, fh);
     if (layout.kind === 'corridor')
-      this.forest.forEach((f, i) => {
+      for (let i = 0; i < this.forest.length; i++) {
+        const f = this.forest[i] as Phaser.GameObjects.TileSprite;
         const edge = (i === 0 ? -1 : 1) * (layout.width / 2);
         const fwSide = Math.max(1, i === 0 ? edge - vx : vx + fw - edge);
         f.setPosition(edge, vy)
           .setSize(fwSide, fh)
           .setTilePosition(i === 0 ? edge - fwSide : edge, vy);
-      });
+      }
   }
 
   override update(_time: number, delta: number): void {
@@ -508,7 +509,8 @@ export class GameScene extends Phaser.Scene {
     const fresh = config.effects.puffTtl - this.stepDt - 1e-6;
     const sp = this.sparks;
     const hero = HERO_COLOR[this.world.character];
-    for (const f of this.world.puffs.active) {
+    for (let iF = 0; iF < this.world.puffs.active.length; iF++) {
+      const f = this.world.puffs.active[iF] as (typeof this.world.puffs.active)[number];
       if (f.kind !== 'death' || f.ttl < fresh) continue;
       if (f.r >= BOSS_PUFF) {
         sp.add(f.x, f.y, 0, 0, 0.7, f.r * 4, UI.goldHex, SPARK.ring, true);
@@ -534,7 +536,8 @@ export class GameScene extends Phaser.Scene {
     const fx = config.effects;
     const sp = this.sparks;
     const p = this.world.player;
-    for (const s of this.world.slashes.active) {
+    for (let iS = 0; iS < this.world.slashes.active.length; iS++) {
+      const s = this.world.slashes.active[iS] as (typeof this.world.slashes.active)[number];
       const ttl =
         s.form === 'smash'
           ? fx.smashTtl
@@ -584,7 +587,8 @@ export class GameScene extends Phaser.Scene {
     if (this.stepDt <= 0) return;
     const fresh = config.effects.boltTtl - this.stepDt - 1e-6;
     const sp = this.sparks;
-    for (const b of this.world.bolts.active) {
+    for (let iB = 0; iB < this.world.bolts.active.length; iB++) {
+      const b = this.world.bolts.active[iB] as (typeof this.world.bolts.active)[number];
       if (b.ttl < fresh) continue;
       const spark = HIT_SPARK[b.weapon];
       if (!spark) continue;

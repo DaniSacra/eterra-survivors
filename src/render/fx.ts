@@ -236,8 +236,12 @@ export function drawFx(
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
-  for (const z of world.zones.active) drawZone(g, z, world.time);
-  for (const w of world.weapons) {
+  for (let iZ = 0; iZ < world.zones.active.length; iZ++) {
+    const z = world.zones.active[iZ] as (typeof world.zones.active)[number];
+    drawZone(g, z, world.time);
+  }
+  for (let iW = 0; iW < world.weapons.length; iW++) {
+    const w = world.weapons[iW] as (typeof world.weapons)[number];
     const kind = WEAPONS[w.id].kind;
     if (kind === 'aura') {
       const st = weaponStats(w) as AuraLevel;
@@ -334,7 +338,8 @@ export function drawFx(
     g.fillStyle(0xffffff, 0.5 * hk).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
   }
   // A chest on the ground twinkles: a soft gold ring around it and a star that blinks on its lid.
-  for (const it of world.pickups.active) {
+  for (let iIt = 0; iIt < world.pickups.active.length; iIt++) {
+    const it = world.pickups.active[iIt] as (typeof world.pickups.active)[number];
     if (it.type !== 'chest') continue;
     const tw = Math.sin(world.time * 5 + it.x) * 0.5 + 0.5;
     ground
@@ -343,11 +348,13 @@ export function drawFx(
     const k = Math.max(0, Math.sin(world.time * 3 + it.y)) ** 4; // mostly off, then a quick twinkle
     if (k > 0.05) star(g, it.x + 6, it.y - 9, 3 + 6 * k, 0xffffff, k);
   }
-  for (const pr of world.projectiles.active) {
+  for (let iPr = 0; iPr < world.projectiles.active.length; iPr++) {
+    const pr = world.projectiles.active[iPr] as (typeof world.projectiles.active)[number];
     const tr = pr.source ? TRAIL[pr.source.id] : undefined;
     if (tr) drawTrail(g, pr, tr, world.time);
   }
-  for (const f of world.puffs.active) {
+  for (let iF = 0; iF < world.puffs.active.length; iF++) {
+    const f = world.puffs.active[iF] as (typeof world.puffs.active)[number];
     const k = f.ttl / config.effects.puffTtl; // 1 -> 0
     if (f.kind === 'death') {
       // A cartoon poof: a white pop, then three little clouds puffing out and shrinking. (Bosses get their
@@ -378,7 +385,8 @@ export function drawFx(
   }
   // Once the run is over the world stops: swings and bolts frozen mid-air would only look stuck.
   if (world.state === 'won' || world.state === 'lost') return;
-  for (const s of world.slashes.active) {
+  for (let iS = 0; iS < world.slashes.active.length; iS++) {
+    const s = world.slashes.active[iS] as (typeof world.slashes.active)[number];
     if (s.form === 'smash') {
       drawSmash(ground, top, s, 1 - s.ttl / config.effects.smashTtl);
       continue;
@@ -416,7 +424,10 @@ export function drawFx(
       SWING_STYLE[s.weapon] ?? SWING_PLAIN,
     );
   }
-  for (const b of world.bolts.active) drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
+  for (let iB = 0; iB < world.bolts.active.length; iB++) {
+    const b = world.bolts.active[iB] as (typeof world.bolts.active)[number];
+    drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
+  }
 }
 
 /**
@@ -979,7 +990,8 @@ function drawWard(g: Phaser.GameObjects.Graphics, world: World): void {
   const p = world.player;
   const up = wardReady(world);
   if (!up) {
-    for (const w of world.weapons) {
+    for (let iW = 0; iW < world.weapons.length; iW++) {
+      const w = world.weapons[iW] as (typeof world.weapons)[number];
       const ward = (WEAPONS[w.id] as WeaponDef).ward;
       if (!ward) continue;
       const k = 1 - Math.max(0, w.stackTime - world.time) / ward.every;
