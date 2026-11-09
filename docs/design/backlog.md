@@ -502,7 +502,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - Aceite: no Chromium, `ctx.suspend()` seguido de um toque volta a tocar; Daniel confere no iPhone (trocar de app e
   voltar).
 
-**RB-05 · Celular deitado: botões e cartas fora da tela** · impl + ui · M · aprovado
+**RB-05 · Celular deitado: botões e cartas fora da tela** · impl + ui · M · ✅ feito
 
 - Por quê: 03-qa #1, #2, #4, #5, #6 (820x420): Trocar/Pular/Banir abaixo da tela no level-up (`LevelUpScene.ts:39-40`,
   77); Loja corta Paciência e Bênção do Templo (`ShopScene.ts:38-41`); Livro de Elos esconde a última linha

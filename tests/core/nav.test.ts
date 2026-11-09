@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isConfirm, navMove, navStep } from '../../src/render/ui';
+import { gridCols, isConfirm, navMove, navStep } from '../../src/render/ui';
 
 const key = (k: string, repeat = false) => ({ key: k, repeat }) as KeyboardEvent;
 
@@ -31,5 +31,12 @@ describe('menu keyboard navigation', () => {
     expect(navMove(on, 2, 0, -2)).toBe(4); // A up wraps to Back
     expect(navMove(on, 2, 3, -2)).toBe(0); // D up: B disabled -> nearest above (A)
     expect(navMove([true, true, true], 1, 2, 1)).toBe(0);
+  });
+
+  it('list screens add columns only when the rows would not fit and the cards stay wide enough', () => {
+    expect(gridCols(14, 1000, 486, 44, 8, 2)).toBe(2); // desktop: 7 rows fit
+    expect(gridCols(14, 820, 328, 44, 8, 2)).toBe(3); // phone lying down
+    expect(gridCols(14, 420, 626, 44, 8, 1)).toBe(2); // phone standing: 14 rows don't fit
+    expect(gridCols(12, 420, 300, 56, 8, 2)).toBe(2); // too narrow for a third column
   });
 });

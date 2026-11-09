@@ -118,6 +118,47 @@ export function safeArea(): { top: number; right: number; bottom: number; left: 
   }
 }
 
+/** Below this height (a phone lying down) list screens use a compact header with Back in the top-left corner. */
+export const SHORT_SCREEN = 520;
+
+export const isShort = (scene: Phaser.Scene): boolean => scene.scale.height < SHORT_SCREEN;
+
+/** A screen's Back button: centered at the bottom, or in the top-left corner on short screens. */
+export function backButton(
+  scene: Phaser.Scene,
+  text: string,
+  onClick: () => void,
+): Phaser.GameObjects.Rectangle {
+  const { width, height } = scene.scale;
+  const left = safeArea().left;
+  return isShort(scene)
+    ? button(scene, left + 16 + 50, 28, 100, 40, onClick, text)
+    : button(scene, width / 2, height - 34, Math.min(220, width - 60), 44, onClick, text);
+}
+
+/**
+ * Columns for a grid of `n` cards of at least `rowH` px (plus `gap`) in `avail` px of height: starts at `start`
+ * and adds columns (up to 3) while the rows don't fit and the cards stay at least `minW` wide.
+ */
+export function gridCols(
+  n: number,
+  width: number,
+  avail: number,
+  rowH: number,
+  gap = 8,
+  start = 1,
+  minW = 180,
+): number {
+  let cols = start;
+  while (
+    cols < 3 &&
+    Math.ceil(n / cols) * (rowH + gap) > avail &&
+    (width - 24 - gap * cols) / (cols + 1) >= minW
+  )
+    cols++;
+  return cols;
+}
+
 /** Static overlays simply rebuild themselves when the window resizes. */
 export function restartOnResize(scene: Phaser.Scene): void {
   const handler = () => scene.scene.restart(scene.scene.settings.data);

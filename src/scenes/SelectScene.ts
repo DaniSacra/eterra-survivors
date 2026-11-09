@@ -8,7 +8,7 @@ import { formatStatDelta } from '../render/describe';
 import { HERO_COLOR } from '../render/fx';
 import { t } from '../i18n/pt-BR';
 import { loadSave, writeSave } from '../render/save';
-import { UI, bindKeys, button, disable, isConfirm, label, restartOnResize } from '../render/ui';
+import { UI, bindKeys, button, disable, isConfirm, isShort, label, restartOnResize } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { SCENES } from './keys';
 
@@ -38,27 +38,36 @@ export class SelectScene extends Phaser.Scene {
     const gap = 8;
     const wrapW = Math.min(640, width - 24);
 
+    // Phone lying down: title and gold share the top row, and every card is a bit shorter.
+    const short = isShort(this);
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
-    label(this, cx, 30, t.select.title, 26, { bold: true, color: UI.gold });
-    label(this, cx, 60, t.select.gold(save.gold), 16, { bold: true, color: UI.gold });
+    label(this, cx, short ? 26 : 30, t.select.title, short ? 24 : 26, { bold: true, color: UI.gold });
+    label(this, short ? cx + wrapW / 2 : cx, short ? 26 : 60, t.select.gold(save.gold), 16, {
+      bold: true,
+      color: UI.gold,
+    }).setOrigin(short ? 1 : 0.5, 0.5);
 
     // Heroes: 4 in a row when wide, 2 x 2 on phones.
     const hcols = width >= 600 ? 4 : 2;
     const hw = (wrapW - gap * (hcols - 1)) / hcols;
-    const hh = Math.min(126, (height - 330) / (4 / hcols) - gap);
-    let y = 92;
+    const hh = short
+      ? Math.max(56, Math.min(126, height - 330))
+      : Math.min(126, (height - 330) / (4 / hcols) - gap);
+    let y = short ? 48 : 92;
     label(this, cx - wrapW / 2, y, t.select.hero, 15, { color: UI.muted, align: 'left' });
-    y += 24;
+    y += short ? 22 : 24;
     CHARACTER_IDS.forEach((id, i) => {
       const x = cx - wrapW / 2 + (i % hcols) * (hw + gap) + hw / 2;
       const yy = y + Math.floor(i / hcols) * (hh + gap) + hh / 2;
       this.heroCard(id, x, yy, hw, hh, id === choice.character, heroUnlocked(save, id));
     });
-    y += (CHARACTER_IDS.length / hcols) * (hh + gap) + 10;
+    y += (CHARACTER_IDS.length / hcols) * (hh + gap) + (short ? 6 : 10);
 
     label(this, cx - wrapW / 2, y, t.select.stage, 15, { color: UI.muted, align: 'left' });
-    y += 24;
-    const sh = Math.min(62, (height - y - 90) / STAGE_IDS.length - gap);
+    y += short ? 22 : 24;
+    const by = short ? height - 28 : height - 36;
+    // Stage cards never shorter than their name (36 px); the description shows from 44 px.
+    const sh = Math.max(36, Math.min(62, (by - y - (short ? 30 : 54)) / STAGE_IDS.length - gap));
     STAGE_IDS.forEach((id, i) => {
       const yy = y + i * (sh + gap) + sh / 2;
       this.stageCard(id, cx, yy, wrapW, sh, id === choice.stage, stageUnlocked(save, id));
@@ -66,21 +75,22 @@ export class SelectScene extends Phaser.Scene {
     y += STAGE_IDS.length * (sh + gap) + 8;
 
     // The chosen hero, big, with what makes them different, in the space left above the buttons.
-    const room = height - 36 - 23 - 30 - y;
+    const room = by - 23 - 30 - y;
     if (room >= 78) this.heroDetail(choice.character, cx, y, wrapW, Math.min(170, room));
 
     const owned = heroUnlocked(save, choice.character);
     const cost = CHARACTERS[choice.character].cost;
     const bw = Math.min(200, (wrapW - gap) / 2);
-    const by = height - 36;
-    if (!this.sys.game.device.input.touch) label(this, cx, by - 38, t.select.keys, 12, { color: UI.muted });
-    button(this, cx - bw / 2 - gap / 2, by, bw, 46, () => this.scene.start(SCENES.menu), t.select.back);
+    const bh = short ? 44 : 46;
+    if (!this.sys.game.device.input.touch && !short)
+      label(this, cx, by - 38, t.select.keys, 12, { color: UI.muted });
+    button(this, cx - bw / 2 - gap / 2, by, bw, bh, () => this.scene.start(SCENES.menu), t.select.back);
     const go = button(
       this,
       cx + bw / 2 + gap / 2,
       by,
       bw,
-      46,
+      bh,
       () => this.go(),
       owned ? t.select.go : t.select.unlock(cost),
     );

@@ -33,23 +33,35 @@ export class LevelUpScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const w = this.world;
     const opts = w.upgradeOptions;
-    const cardW = Math.min(440, width - 24);
     // The HUD bars (XP and life) stay visible above the dimmed area.
     const keep = safeArea().top + HUD_BARS;
-    const cardH = Math.max(76, Math.min(100, (height - keep - 250) / opts.length - 12));
-    const top = Math.max(keep + 80, height / 2 - ((cardH + 12) * opts.length) / 2 - 10);
+    const n = opts.length;
+    // Short screens (phone lying down): the charge buttons go in a column beside the cards.
+    const side = height < keep + 480 && width >= 440 + 150 + 32;
+    const cardW = side ? Math.min(440, width - 32 - 150) : Math.min(440, width - 24);
+    const gap = side ? 10 : 12;
+    const bw = side ? 138 : Math.min(130, (cardW - 16) / 3);
+    const cardH = side
+      ? Math.max(60, Math.min(100, (height - keep - 88) / n - gap))
+      : Math.max(76, Math.min(100, (height - keep - 250) / n - 12));
+    const top = side ? keep + 54 : Math.max(keep + 80, height / 2 - ((cardH + gap) * n) / 2 - 10);
+    const cx = side ? width / 2 - (bw + 12) / 2 : width / 2;
 
     this.add
       .rectangle(0, keep, width, height - keep, UI.dim, 0.72)
       .setOrigin(0)
       .setInteractive();
-    label(this, width / 2, top - 44, t.levelUp.title, 30, { bold: true, color: UI.gold, stroke: true });
+    label(this, width / 2, side ? top - 28 : top - 44, t.levelUp.title, side ? 26 : 30, {
+      bold: true,
+      color: UI.gold,
+      stroke: true,
+    });
     const owned = w.weapons.map((o) => o.id);
     this.cards = opts.map((opt, i) => {
-      const y = top + i * (cardH + 12) + cardH / 2;
-      const card = button(this, width / 2, y, cardW, cardH, () => this.choose(i));
+      const y = top + i * (cardH + gap) + cardH / 2;
+      const card = button(this, cx, y, cardW, cardH, () => this.choose(i));
       const d = describeUpgrade(opt, owned);
-      const x0 = width / 2 - cardW / 2;
+      const x0 = cx - cardW / 2;
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;
       const textW = cardW - 62 - 12;
@@ -60,26 +72,30 @@ export class LevelUpScene extends Phaser.Scene {
         align: 'left',
         wrap: textW,
       });
-      if (d.recipe && desc.y + desc.height + 16 <= y + cardH / 2)
+      if (d.recipe && desc.y + desc.height + 24 <= y + cardH / 2)
         label(this, left, y + cardH / 2 - 7, d.recipe, 12, { color: UI.gold, align: 'left' }).setOrigin(0, 1);
       return card;
     });
 
-    const bottom = top + opts.length * (cardH + 12);
+    const bottom = top + n * (cardH + gap);
     const hint = this.banishing ? t.levelUp.banishHint : t.levelUp.hint;
-    label(this, width / 2, bottom + 14, hint, 14, { color: this.banishing ? UI.danger : UI.muted });
+    label(this, cx, bottom + (side ? 8 : 14), hint, 14, { color: this.banishing ? UI.danger : UI.muted });
 
-    // Trocar · Pular · Banir
-    const bw = Math.min(130, (cardW - 16) / 3);
+    // Trocar · Pular · Banir: a row under the cards, or a column beside them.
+    const bx = cx + cardW / 2 + 12 + bw / 2;
     CHARGES.forEach((key, i) => {
-      const n = w.charges[key];
-      const x = width / 2 + (i - 1) * (bw + 8);
-      const b = button(this, x, bottom + 54, bw, 40, () => this.useCharge(key), t.levelUp.charges[key](n));
-      if (n <= 0) disable(b);
+      const c = w.charges[key];
+      const x = side ? bx : width / 2 + (i - 1) * (bw + 8);
+      const y = side ? top + 22 + i * 52 : bottom + 54;
+      const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
+      if (c <= 0) disable(b);
       if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
     });
     if (!this.sys.game.device.input.touch)
-      label(this, width / 2, bottom + 90, t.levelUp.chargeKeys, 12, { color: UI.muted });
+      label(this, side ? bx : width / 2, side ? top + 22 + 3 * 52 : bottom + 90, t.levelUp.chargeKeys, 12, {
+        color: UI.muted,
+        wrap: side ? bw : undefined,
+      });
     this.highlight();
 
     bindKeys(this, (kb) => kb.on('keydown', this.onKey, this));

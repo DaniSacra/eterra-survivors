@@ -197,6 +197,24 @@ export class GameScene extends Phaser.Scene {
     const zoom = clamp(Math.min(width, height) / config.view.minWorldSide, 0.5, 4);
     this.cameras.main.setZoom(zoom);
     this.world.setView(width / zoom, height / zoom);
+    // Also while paused (no update runs): a phone turned on the pause screen must not show a black half.
+    this.placeView();
+  }
+
+  /** Centers the camera on the hero and makes the ground and decals cover the view. */
+  private placeView(): void {
+    const w = this.world;
+    const cam = this.cameras.main;
+    cam.centerOn(w.player.x, w.player.y);
+    // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
+    // (computed from the player, since cam.worldView only updates at render time)
+    const vw = cam.width / cam.zoom;
+    const vh = cam.height / cam.zoom;
+    const vx = w.player.x - vw / 2 - 2;
+    const vy = w.player.y - vh / 2 - 2;
+    this.ground.setPosition(vx, vy).setSize(vw + 4, vh + 4);
+    this.ground.setTilePosition(vx, vy);
+    this.decals.update(vx, vy, vw, vh);
   }
 
   override update(_time: number, delta: number): void {
@@ -205,8 +223,7 @@ export class GameScene extends Phaser.Scene {
     this.hud.joystick.setEnabled(w.state === 'playing');
     w.step(delta / 1000, this.controls.read());
 
-    const cam = this.cameras.main;
-    cam.centerOn(w.player.x, w.player.y);
+    this.placeView();
     // The hero bounces while walking and turns to where it goes.
     const step = w.player.moving ? Math.abs(Math.sin(w.time * 12)) : 0;
     const sx = ART_SCALE * (1 + step * 0.05);
@@ -228,15 +245,6 @@ export class GameScene extends Phaser.Scene {
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
     drawFx(this.fx, this.fxTop, w);
-    // Infinite ground: a tile sprite that always covers the camera view, scrolled by world position.
-    // (computed from the player, since cam.worldView only updates at render time)
-    const vw = cam.width / cam.zoom;
-    const vh = cam.height / cam.zoom;
-    const vx = w.player.x - vw / 2 - 2;
-    const vy = w.player.y - vh / 2 - 2;
-    this.ground.setPosition(vx, vy).setSize(vw + 4, vh + 4);
-    this.ground.setTilePosition(vx, vy);
-    this.decals.update(vx, vy, vw, vh);
     this.handleEvents();
     this.frameSounds();
   }

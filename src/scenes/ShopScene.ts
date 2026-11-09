@@ -4,7 +4,19 @@ import { SHOP, SHOP_IDS, type ShopDef, type ShopId } from '../data/shop';
 import { t } from '../i18n/pt-BR';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
-import { UI, bindKeys, button, disable, keyNav, label, restartOnResize } from '../render/ui';
+import {
+  UI,
+  backButton,
+  bindKeys,
+  button,
+  disable,
+  gridCols,
+  isShort,
+  keyNav,
+  label,
+  restartOnResize,
+  safeArea,
+} from '../render/ui';
 import { SCENES } from './keys';
 
 /** Permanent upgrades, bought with banked gold. */
@@ -31,16 +43,27 @@ export class ShopScene extends Phaser.Scene {
     const cx = width / 2;
     const save = loadSave();
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
-    label(this, cx, 34, t.shop.title, 28, { bold: true, color: UI.gold });
-    label(this, cx, 66, t.shop.intro, 14, { color: UI.muted, wrap: Math.min(520, width - 32) });
-    label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
+    const short = isShort(this);
+    if (short) {
+      // Phone lying down: title, gold and Back share the top row, so every card fits.
+      label(this, cx, 28, t.shop.title, 24, { bold: true, color: UI.gold });
+      label(this, width - safeArea().right - 16, 28, t.shop.gold(save.gold), 16, {
+        bold: true,
+        color: UI.gold,
+      }).setOrigin(1, 0.5);
+      label(this, cx, 60, t.shop.intro, 13, { color: UI.muted, wrap: width - 32 });
+    } else {
+      label(this, cx, 34, t.shop.title, 28, { bold: true, color: UI.gold });
+      label(this, cx, 66, t.shop.intro, 14, { color: UI.muted, wrap: Math.min(520, width - 32) });
+      label(this, cx, 100, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
+    }
 
     let focus = -1;
     const gap = 8;
-    const top = 124;
-    const avail = height - top - 70;
-    // One column on narrow screens, unless the list wouldn't fit in height.
-    const cols = width >= 640 || SHOP_IDS.length * (44 + gap) > avail ? 2 : 1;
+    const top = short ? 80 : 124;
+    const avail = height - top - (short ? 12 : 70);
+    // One column on narrow screens, more when the list wouldn't fit in height.
+    const cols = gridCols(SHOP_IDS.length, width, avail, 44, gap, width >= 640 ? 2 : 1);
     const cardW = Math.min(300, (width - 24 - gap * (cols - 1)) / cols);
     const rows = Math.ceil(SHOP_IDS.length / cols);
     const cardH = Math.max(40, Math.min(58, avail / rows - gap));
@@ -89,7 +112,7 @@ export class ShopScene extends Phaser.Scene {
     });
     // Back sits on a row of its own.
     while (cards.length % cols !== 0) cards.push(null);
-    cards.push(button(this, cx, height - 36, Math.min(220, width - 60), 44, () => this.back(), t.shop.back));
+    cards.push(backButton(this, t.shop.back, () => this.back()));
     keyNav(this, cards, cols, focus);
 
     bindKeys(this, (kb) => kb.once('keydown-ESC', () => this.back()));

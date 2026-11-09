@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
-import { UI, button, keyNav, label, restartOnResize } from '../render/ui';
+import { UI, button, isShort, keyNav, label, restartOnResize } from '../render/ui';
 import { ART_SCALE } from '../render/art/pen';
 import { CHARACTERS, CHARACTER_IDS } from '../data/characters';
 import { HERO_COLOR, TINT } from '../render/fx';
@@ -13,26 +13,42 @@ export class MenuScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
-    const cx = width / 2;
-    const wrap = Math.min(420, width - 40);
+    // Phone lying down: the title and the party on the left, the buttons on the right.
+    const side = isShort(this) && width >= 600;
+    const lx = side ? width * 0.29 : width / 2;
+    const rx = side ? width * 0.73 : width / 2;
+    const wrap = side ? Math.min(360, width * 0.5 - 32) : Math.min(420, width - 40);
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.6);
-    label(this, cx, height * 0.16, t.title, Math.min(44, width / 9), {
+    const ty = height * (side ? 0.17 : 0.16);
+    label(this, lx, ty, t.title, Math.min(44, (side ? wrap : width) / 9), {
       bold: true,
       color: UI.gold,
       stroke: true,
     });
-    label(this, cx, height * 0.16 + 42, t.subtitle, 18, { color: UI.muted });
-    this.party(cx, height * 0.16 + 74, height * 0.42 - 30, Math.min(wrap, 360));
-    label(this, cx, height * 0.42, t.menu.intro, 17, { wrap });
-    const bw = Math.min(260, width - 60);
+    label(this, lx, ty + 42, t.subtitle, side ? 16 : 18, { color: UI.muted });
+    const introY = height * (side ? 0.8 : 0.42);
+    const intro = label(this, lx, introY, t.menu.intro, side ? 15 : 17, { wrap });
+    this.party(lx, ty + 74, side ? intro.y - intro.height / 2 - 22 : introY - 30, Math.min(wrap, 360));
+
+    const touch = this.sys.game.device.input.touch;
+    const controls = touch ? t.menu.controlsTouch : t.menu.controlsDesktop;
+    const hintText = import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls;
+    const bw = side ? Math.min(260, width * 0.4) : Math.min(260, width - 60);
+    // Buttons block: 56 + 8 + 44 + 8 + 44 px, then the hint; centered on the right when lying down.
+    const hint = label(this, rx, 0, hintText, side ? 13 : 14, {
+      color: UI.muted,
+      wrap: side ? bw + 40 : wrap,
+    });
+    const by = side ? (height - 160 - 16 - hint.height) / 2 + 28 : height * 0.58;
+    hint.setY(by + (side ? 132 + 16 + hint.height / 2 : 172));
     keyNav(this, [
-      button(this, cx, height * 0.58, bw, 56, () => this.start(), t.menu.start),
-      button(this, cx, height * 0.58 + 64, bw, 44, () => this.scene.start(SCENES.shop), t.menu.shop),
+      button(this, rx, by, bw, 56, () => this.start(), t.menu.start),
+      button(this, rx, by + 64, bw, 44, () => this.scene.start(SCENES.shop), t.menu.shop),
       // Two smaller ones side by side: the book of Elos and the options.
       button(
         this,
-        cx - bw / 4 - 3,
-        height * 0.58 + 116,
+        rx - bw / 4 - 3,
+        by + 116,
         bw / 2 - 6,
         44,
         () => this.scene.start(SCENES.eloBook),
@@ -40,27 +56,14 @@ export class MenuScene extends Phaser.Scene {
       ),
       button(
         this,
-        cx + bw / 4 + 3,
-        height * 0.58 + 116,
+        rx + bw / 4 + 3,
+        by + 116,
         bw / 2 - 6,
         44,
         () => this.scene.start(SCENES.options),
         t.menu.options,
       ),
     ]);
-    const touch = this.sys.game.device.input.touch;
-    const controls = touch ? t.menu.controlsTouch : t.menu.controlsDesktop;
-    label(
-      this,
-      cx,
-      height * 0.58 + 172,
-      import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls,
-      14,
-      {
-        color: UI.muted,
-        wrap,
-      },
-    );
 
     restartOnResize(this);
     this.cameras.main.fadeIn(150);
