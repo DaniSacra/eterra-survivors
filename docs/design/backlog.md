@@ -1140,6 +1140,76 @@ Lore lida em `/home/dani/games/dungeon-rpg/docs/mundo/` (cânone, prólogo, cap�
 4. Lore sem uso, pronta para fases futuras: a Irmandade dos encapuzados (o olho cortado ao meio), Morvath e o
    túmulo arrombado, "O rei voltará".
 
+## Coleção e conquistas (2026-11-09)
+
+Pedido do Daniel: Bestiário, conquistas e registros por herói, para dar motivo de voltar (pilar 4). Desenho completo,
+pesquisa do gênero, lista das 35 conquistas, schema do save e telas em `docs/design/conquistas.md`. Ordem de
+implementação abaixo; cada item é um commit.
+
+**CC-01 · Contadores da partida** · impl · P · aprovado
+
+- O quê: `world.killsBy`, `world.seen`, `world.bestHit`, `player.hitsTaken` + `world.firstHitAt`; `core/records.ts`
+  com `summarizeRun(world, out?)`.
+- Aceite: testes em `tests/core/records.test.ts`; F4 com 700 inimigos sem perda de FPS.
+
+**CC-02 · Save v2 (registros, Bestiário, totais)** · impl · M · aprovado
+
+- O quê: `SAVE_VERSION` 2; `records`, `bestiary`, `totals`, `achievements`, `fresh`, `title`; migração de v0/v1
+  (semeia o Bestiário pelas fases vencidas); mescla com save de versão futura; `recordRun` puro em `core/meta.ts`.
+- Aceite: save v1 real continua com ouro, Loja, heróis, fases e Elos; testes de v0, lixo e versão futura.
+
+**CC-03 · Conquistas (dados e lógica)** · impl · M · aprovado
+
+- O quê: `src/data/achievements.ts` (35 entradas declarativas), `core/achievements.ts` (métricas, progresso,
+  checagem, conquista mais perto), textos em `pt-BR.ts`.
+- Aceite: ids únicos e com texto; cada uma destrancável num save sintético; ouro somado uma vez; retroativas no save
+  migrado.
+
+**CC-04 · Conquistas na tela final e calibração** · impl + bal · P · aprovado
+
+- O quê: `bank()` com `summarizeRun` + `recordRun`; tela final com conquistas novas e "Perto: ..."; sim imprime dano
+  e maior golpe; calibrar `damageRun`, `bossFast` e `hit120`.
+- Aceite: toda tela final mostra uma conquista nova ou a mais perto; números em `docs/balance-baseline.md`.
+
+**CC-05 · Tela Coleção com abas** · impl + ui · M · aprovado
+
+- O quê: `CollectionScene` (Bestiário · Elos · Conquistas · Heróis) no lugar do `EloBookScene`; botão "Coleção" no
+  menu com ponto de novidade.
+- Aceite: aba Elos idêntica ao Livro atual; teclado e toque trocam de aba; celular em pé e deitado.
+
+**CC-06 · Aba Bestiário** · impl + visual · M · aprovado
+
+- O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
+  (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
+- Aceite: os 16 inimigos aparecem; não vistos sem nenhum dado; nenhuma frase inventada.
+
+**CC-07 · Aba Conquistas** · impl + ui · M · aprovado
+
+- O quê: páginas por grupo, progresso com barra, novas destacadas, escolha de título.
+- Aceite: as 35 aparecem com progresso correto; abrir a aba limpa o ponto do menu.
+
+**CC-08 · Aba Heróis** · impl + ui · M · aprovado
+
+- O quê: cartão por herói (partidas, marcas de vitória por fase, melhor tempo, vitória mais rápida, nível, abates,
+  maior golpe, arma favorita, Elos) e totais globais; título na tela final.
+- Aceite: os registros batem com uma partida jogada de ponta a ponta.
+
+**CC-09 · Aviso de conquista na partida** · impl + vfx · P · aprovado
+
+- O quê: checagem uma vez por segundo, aviso pequeno no alto do HUD (2,5 s, fila), som `achievement`.
+- Aceite: não cobre o centro nem a barra do chefe; espera o level-up fechar; FPS igual.
+
+**CC-10 · Revisão visual e documentação** · visual + impl · P · aprovado
+
+- O quê: visual-director confere as abas e o aviso; `CLAUDE.md` com os arquivos novos; itens marcados aqui.
+
+**Perguntas abertas (CC)**
+
+1. Frases para os seis inimigos sem texto no original (Esqueleto, Aranha Tumular, Gosma Verde, Espectro, Golem de
+   Pedra, Cavaleiro Negro)?
+2. Ligar as três recompensas opcionais (+1 Trocar, +1 Pular, +1 Banir por partida) ou ficar só no ouro?
+3. Tudo bem usar as citações do original nos nomes (falas de vitória dos heróis, Seu Joaquim, "Ninguém mais desce")?
+
 ## Decisões já tomadas pelo plano do Daniel
 
 | Tema                        | Relatório propôs                         | Plano do Daniel decide                                                                               |
@@ -1177,7 +1247,7 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 - Objetivos na fase (proteger a fonte da cripta, escoltar algo na Estrada), quebrando o loop de 10 minutos.
 - Desafios e conquistas que liberam armas novas.
 - Novas fases do Capítulo 1 do original (Pasto do Vau, Vau do Corvo, caminho para Erukh), com lore do Daniel.
-- Tabela de recordes local por herói e fase.
+- Tabela de recordes local por herói e fase (virou CC-08, 2026-11-09).
 
 Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Daniel):
 
