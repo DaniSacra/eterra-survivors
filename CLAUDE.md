@@ -13,6 +13,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 ## Commands
 
 - `npm run dev` — dev server · `npm test` — unit tests · `npm run lint` · `npm run typecheck` · `npm run build`
+- `npm run lab` — weapon DPS table (solo and crowd, L1/Lmax/Elo) from `tests/lab/`, skipped by `npm test`
 - Every step must end with `npm test`, `npm run lint` and `npm run build` green, and the game running.
 
 ## Conventions
@@ -56,7 +57,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 
 ## Tuning and verification notes
 
-- Balance lives in `src/data` (waves, enemies, weapons, upgrades, config). Measured on 2026-11-08: core
+- Balance lives in `src/data` (waves, enemies, weapons, upgrades, config); the `balance-tester` agent audits it.
+- Orbit weapons test contact every frame; their `cooldown` is the re-hit delay per enemy (`Enemy.orbitReady`). Measured on 2026-11-08: core
   `World.step` costs ~0.5 ms with 700 enemies in Node; the browser held 60 FPS with 700 enemies at 4x CPU throttle.
 - A naive bot (circling, light avoidance, weapons-first picks) survives ~4–5 min, so the curve probably needs
   playtesting before it feels fair to reach the boss.
