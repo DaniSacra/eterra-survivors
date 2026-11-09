@@ -75,8 +75,8 @@ export const createEnemy = (): Enemy => ({
 export type DotKind = 'bleed' | 'burn';
 
 /**
- * Puts damage over time on an enemy (`dps` for `duration` s). The stronger one stays: a weaker one only refreshes
- * the time if it lasts longer.
+ * Puts damage over time on an enemy (`dps` for `duration` s). The stronger one stays, for its own time: a weaker
+ * one only refreshes the time if it lasts longer.
  */
 export function applyDot(
   e: Enemy,
@@ -87,10 +87,11 @@ export function applyDot(
 ): void {
   if (dps >= e.dotDps || e.dot <= 0) {
     if (e.dot <= 0) e.dotTick = config.dotTick;
+    // A stronger kind takes over with its own duration (it doesn't inherit a weaker one's longer time).
+    e.dot = kind === e.dotKind || e.dot <= 0 ? Math.max(e.dot, duration) : duration;
     e.dotDps = dps;
     e.dotKind = kind;
     e.dotBy = by;
-    e.dot = Math.max(e.dot, duration);
   } else e.dot = Math.max(e.dot, duration);
 }
 

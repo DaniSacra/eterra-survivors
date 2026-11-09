@@ -143,6 +143,16 @@ describe('damage over time', () => {
     expect(e.dotKind).toBe('bleed');
     expect(e.dot).toBe(3);
   });
+
+  it("a stronger kind takes over for its own time, not the weaker one's longer time", () => {
+    const w = bareWorld();
+    const e = tough(w, 300, 0);
+    applyDot(e, 'bleed', 5, 3, null);
+    applyDot(e, 'burn', 20, 0.5, null);
+    expect(e.dotKind).toBe('burn');
+    expect(e.dotDps).toBe(20);
+    expect(e.dot).toBe(0.5);
+  });
 });
 
 describe('Luz Sagrada: the light that kills heals', () => {
