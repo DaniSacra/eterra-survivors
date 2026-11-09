@@ -44,7 +44,7 @@ export interface ThrownLevel extends BaseLevel {
   knockback: number;
 }
 
-/** Blades circling Aldo; every `cooldown` each one hurts what it touches. */
+/** Blades circling the hero; each hurts what it touches, then waits `cooldown` before hitting that enemy again. */
 export interface OrbitLevel extends BaseLevel {
   count: number;
   orbitRadius: number;
@@ -99,7 +99,7 @@ export const WEAPONS = {
       { damage: 17, cooldown: 0.8, range: 90 },
       { damage: 21, arc: 2.7 },
       { damage: 25, cooldown: 0.7, range: 100 },
-      { damage: 32, range: 112, arc: 3 },
+      { damage: 36, range: 112, arc: 3 },
     ),
   },
   /** Luz de Elun: seeking motes of holy light. */
@@ -129,13 +129,13 @@ export const WEAPONS = {
   yahAura: {
     kind: 'aura',
     levels: levels<AuraLevel>(
-      { damage: 4, cooldown: 0.5, radius: 55 },
+      { damage: 3, cooldown: 0.5, radius: 55 },
       { radius: 65 },
-      { damage: 6 },
+      { damage: 5 },
       { radius: 75, cooldown: 0.45 },
-      { damage: 8 },
+      { damage: 7 },
       { radius: 90 },
-      { damage: 11, cooldown: 0.35 },
+      { damage: 9, cooldown: 0.35 },
     ),
   },
   /** Adagas de Andilla: knives thrown straight ahead. */
@@ -165,26 +165,26 @@ export const WEAPONS = {
   paladinSwords: {
     kind: 'orbit',
     levels: levels<OrbitLevel>(
-      { damage: 8, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
+      { damage: 10, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
       { count: 2 },
-      { damage: 11 },
+      { damage: 14 },
       { count: 3, spin: 3.5 },
       { orbitRadius: 82, radius: 14 },
       { count: 4 },
-      { damage: 15, spin: 4 },
+      { damage: 20, spin: 4 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
   frost: {
     kind: 'zone',
     levels: levels<ZoneLevel>(
-      { damage: 6, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
+      { damage: 4, cooldown: 3, count: 1, radius: 45, duration: 2.5 },
       { radius: 52 },
       { count: 2 },
-      { damage: 8, duration: 3 },
+      { damage: 6, duration: 3 },
       { radius: 60 },
       { count: 3 },
-      { damage: 11, cooldown: 2.5, duration: 3.5 },
+      { damage: 8, cooldown: 2.5, duration: 3.5 },
     ),
   },
   /** Raio de Lyra: lightning on random enemies. */
@@ -232,7 +232,7 @@ export const WEAPONS = {
         cooldown: 1.6,
         speed: 170,
         count: 2,
-        pierce: 2,
+        pierce: 1,
         lifetime: 4,
         radius: 7,
         turnRate: 4,
@@ -240,7 +240,7 @@ export const WEAPONS = {
       },
       { count: 3 },
       { damage: 8 },
-      { pierce: 3, lifetime: 5 },
+      { pierce: 2, lifetime: 5 },
       { count: 4 },
       { damage: 11 },
       { count: 5, cooldown: 1.3 },
@@ -265,7 +265,7 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 40, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
+    levels: [{ damage: 48, cooldown: 0.65, range: 125, arc: Math.PI * 2, knockback: 220, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
@@ -287,7 +287,7 @@ export const WEAPONS = {
   /** Chama de Yah: the halo becomes a wide pyre. */
   yahFlame: {
     kind: 'aura',
-    levels: [{ damage: 15, cooldown: 0.3, radius: 125 }],
+    levels: [{ damage: 12, cooldown: 0.3, radius: 125 }],
   },
   /** Leque de Facas: Andilla's fan of knives in every direction. */
   fan: {
@@ -316,12 +316,12 @@ export const WEAPONS = {
   /** Nevasca: frost everywhere. */
   blizzard: {
     kind: 'zone',
-    levels: [{ damage: 16, cooldown: 1.8, count: 5, radius: 75, duration: 4 }],
+    levels: [{ damage: 9, cooldown: 1.8, count: 4, radius: 75, duration: 4 }],
   },
   /** Tempestade: a storm over the battlefield. */
   storm: {
     kind: 'strike',
-    levels: [{ damage: 50, cooldown: 1, count: 8, radius: 44 }],
+    levels: [{ damage: 50, cooldown: 1, count: 6, radius: 44 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {
@@ -349,7 +349,7 @@ export const WEAPONS = {
         cooldown: 1,
         speed: 210,
         count: 8,
-        pierce: 6,
+        pierce: 4,
         lifetime: 6,
         radius: 10,
         turnRate: 5,
