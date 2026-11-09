@@ -28,13 +28,14 @@ export class MenuScene extends Phaser.Scene {
     keyNav(this, [
       button(this, cx, height * 0.58, bw, 56, () => this.start(), t.menu.start),
       button(this, cx, height * 0.58 + 68, bw, 48, () => this.scene.start(SCENES.shop), t.menu.shop),
+      button(this, cx, height * 0.58 + 126, bw, 44, () => this.scene.start(SCENES.options), t.menu.options),
     ]);
     const touch = this.sys.game.device.input.touch;
     const controls = touch ? t.menu.controlsTouch : t.menu.controlsDesktop;
     label(
       this,
       cx,
-      height * 0.58 + 130,
+      height * 0.58 + 184,
       import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls,
       14,
       {

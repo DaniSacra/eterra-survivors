@@ -5,7 +5,7 @@ import { setSetting, settings } from './settings';
 import { button } from './ui';
 
 /** The options shown as on/off buttons, in order. */
-const OPTIONS: (keyof Settings)[] = ['damageNumbers', 'calm'];
+const OPTIONS: (keyof Settings)[] = ['muted', 'damageNumbers', 'calm'];
 
 /** One toggle button per option, stacked from `y` down; returns them for keyNav. */
 export function optionButtons(

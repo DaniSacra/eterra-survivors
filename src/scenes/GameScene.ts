@@ -20,6 +20,7 @@ import { UI } from '../render/ui';
 import { Controls } from '../render/controls';
 import { DAMAGE_TEXT, HERO_COLOR, TINT, drawFx } from '../render/fx';
 import { settings } from '../render/settings';
+import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
 import { Mirror } from '../render/mirror';
 import { ART_SCALE } from '../render/art/pen';
@@ -46,6 +47,11 @@ export class GameScene extends Phaser.Scene {
   private fx!: Phaser.GameObjects.Graphics;
   private fxTop!: Phaser.GameObjects.Graphics;
   private banked = false;
+  /** world.tally as of the last frame, to turn new attacks, hits, kills and gems into sounds. */
+  private heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
+  /** Gems picked in a row (each chime a bit higher), and when the last one was. */
+  private gemStreak = 0;
+  private lastGem = 0;
   private choice!: RunChoice;
 
   constructor() {
@@ -59,6 +65,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.world = new World(undefined, { ...this.choice, bonuses: shopBonuses(loadSave()) });
     this.banked = false;
+    this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.decals = new Decals(this, this.world.stageId);
     this.gemMirror = new Mirror(
@@ -221,6 +228,26 @@ export class GameScene extends Phaser.Scene {
     this.ground.setTilePosition(vx, vy);
     this.decals.update(vx, vy, vw, vh);
     this.handleEvents();
+    this.frameSounds();
+  }
+
+  /** Sounds of frequent things, from the core's running counts (one sound per kind per frame at most). */
+  private frameSounds(): void {
+    const t = this.world.tally;
+    const h = this.heard;
+    if (t.attacks > h.attacks) sound.play('attack');
+    if (t.kills > h.kills) sound.play('kill');
+    else if (t.hits > h.hits) sound.play('hit');
+    if (t.gems > h.gems) {
+      const now = this.world.time;
+      this.gemStreak = now - this.lastGem < 0.4 ? Math.min(this.gemStreak + 1, 12) : 0;
+      this.lastGem = now;
+      sound.play('gem', 2 ** (this.gemStreak / 12));
+    }
+    h.attacks = t.attacks;
+    h.hits = t.hits;
+    h.gems = t.gems;
+    h.kills = t.kills;
   }
 
   /** A golden ring that bursts from the hero when a level is gained. */
@@ -265,22 +292,27 @@ export class GameScene extends Phaser.Scene {
     for (const e of w.events) {
       switch (e.type) {
         case 'levelUp':
+          sound.play('levelUp');
           this.levelUpPulse();
           this.scene.launch(SCENES.levelUp, { world: w });
           break;
         case 'playerHit':
+          sound.play('hurt');
           this.shake(120, 0.006);
           this.playerSprite.setTintFill(TINT.heroHurt);
           this.time.delayedCall(90, () => this.playerSprite.clearTint());
           break;
         case 'bossSpawned':
+          sound.play('boss');
           this.hud.announce(t.bossWarning(t.enemies[w.stage.boss.id]));
           this.shake(400, 0.01);
           break;
         case 'eliteSpawned':
+          sound.play('elite');
           this.hud.announce(t.eliteWarning);
           break;
         case 'chest': {
+          sound.play('chest');
           const name = describeUpgrade(e.reward).title;
           this.hud.announce(
             e.reward.kind === 'evolution' ? t.chest.evolved(name) : t.chest.gained(name),
@@ -290,7 +322,9 @@ export class GameScene extends Phaser.Scene {
           break;
         }
         case 'pickup':
+          if (e.id === 'gold') sound.play('pickup', 1.5);
           if (e.id === 'chest' || e.id === 'gold') break;
+          sound.play('pickup');
           this.hud.announce(t.pickups[e.id], true);
           if (e.id === 'bomb') {
             this.flash(200, 255, 240, 200);
@@ -299,6 +333,7 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'won':
         case 'lost': {
+          sound.play(e.type);
           const unlocked = this.bank();
           this.time.delayedCall(900, () => this.scene.launch(SCENES.end, { world: w, unlocked }));
           break;

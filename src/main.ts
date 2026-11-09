@@ -8,6 +8,8 @@ import { MenuScene } from './scenes/MenuScene';
 import { PauseScene } from './scenes/PauseScene';
 import { SelectScene } from './scenes/SelectScene';
 import { ShopScene } from './scenes/ShopScene';
+import { OptionsScene } from './scenes/OptionsScene';
+import { sound } from './render/sound';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -26,8 +28,11 @@ const game = new Phaser.Game({
     EndScene,
     ShopScene,
     SelectScene,
+    OptionsScene,
   ],
 });
+
+sound.init();
 
 // Dev-only handle for browser automation and console debugging.
 if (import.meta.env.DEV) (window as unknown as { game: Phaser.Game }).game = game;

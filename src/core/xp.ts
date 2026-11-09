@@ -67,6 +67,7 @@ export function updateGems(world: World, dt: number): void {
     const dSq = dx * dx + dy * dy;
     if (dSq <= pickupSq) {
       addPuff(world, p.x, p.y, 6, 'gem');
+      world.tally.gems++;
       addXp(world, g.value * p.stats.growth);
       world.gems.release(g);
       continue;

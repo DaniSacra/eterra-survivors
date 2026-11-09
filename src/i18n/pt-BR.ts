@@ -16,6 +16,7 @@ export const t = {
     intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Alguém precisa resistir até o amanhecer.',
     start: 'Começar',
     shop: 'Loja do Gaspar',
+    options: 'Opções',
     controlsDesktop: 'WASD ou setas para andar · Espaço ou Esc pausa',
     /** Only shown in development builds. */
     debugHint: 'F3 depuração · F4 +100 inimigos',
@@ -72,6 +73,7 @@ export const t = {
   },
 
   options: {
+    title: 'Opções',
     damageNumbers: (on: boolean) => `Números de dano: ${on ? 'sim' : 'não'}`,
     calm: (on: boolean) => `Tela calma (sem tremor): ${on ? 'sim' : 'não'}`,
     muted: (on: boolean) => `Som: ${on ? 'desligado' : 'ligado'}`,

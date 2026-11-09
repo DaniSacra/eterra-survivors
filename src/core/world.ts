@@ -79,6 +79,11 @@ export class World {
   boss: Enemy | null = null;
   /** Drained by the renderer each frame. */
   readonly events: GameEvent[] = [];
+  /**
+   * Running counts of frequent things (too many for events): the renderer compares them between frames
+   * (sounds). Never reset by the core.
+   */
+  readonly tally = { attacks: 0, hits: 0, gems: 0, kills: 0 };
   /** Visible world size (set by the renderer); spawning happens just outside it. */
   readonly view = { w: 480, h: 800 };
   /** Reusable query buffer, so per-frame code never allocates. */
@@ -192,6 +197,7 @@ export class World {
 
   onEnemyKilled(e: Enemy): void {
     this.kills++;
+    this.tally.kills++;
     addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
     if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);

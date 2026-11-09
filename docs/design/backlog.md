@@ -272,7 +272,7 @@ depois e registra em `docs/balance-baseline.md`.
 
 ## Etapa 4: Som
 
-**SND-01 · Módulo de som com mapa único** · impl · M
+**SND-01 · Módulo de som com mapa único** · impl · M · ✅ feito
 - Por quê: plano do Daniel; visual-director: zero áudio.
 - O quê: módulo em `src/render` que reage a `world.events`; efeitos curtos e fofos gerados por Web Audio; um mapa
   único de sons (como `assets.ts`) para trocar por arquivos depois: golpe, acerto, gema, subir de nível, baú,
@@ -280,7 +280,7 @@ depois e registra em `docs/balance-baseline.md`.
 - Aceite: cada evento da lista toca; com 500 inimigos não há estalo nem queda de FPS; o primeiro toque destrava o
   áudio no celular.
 
-**SND-02 · Mudo salvo** · impl · P
+**SND-02 · Mudo salvo** · impl · P · ✅ feito
 - Por quê: plano do Daniel.
 - O quê: botão de mudo no menu e na pausa, salvo no localStorage com try/catch; textos em `pt-BR.ts`.
 - Aceite: o mudo sobrevive ao recarregar e a uma localStorage bloqueada (aba anônima) sem erro.
@@ -333,7 +333,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: campo `version` no `MetaSave` com migração em `sanitizeSave`.
 - Aceite: teste carrega um save atual e um sem versão sem perder nada.
 
-**L-03 · Tela de opções mínima** · impl + visual · P
+**L-03 · Tela de opções mínima** · impl + visual · P · ✅ feito
 - Por quê: as opções de A-04, A-14 e SND-02 ficam espalhadas pela Pausa.
 - O quê: um painel de opções (menu e pausa) com números de dano, tremor e flash, som.
 - Aceite: todas as opções num lugar só, salvas.

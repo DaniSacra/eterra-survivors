@@ -75,7 +75,9 @@ export function updateWeapons(world: World, dt: number): void {
     if (w.timer > 0) continue;
     const s = weaponStats(w);
     const fire = FIRE[WEAPONS[w.id].kind] as Fire<WeaponKind>;
-    w.timer = fire(world, s, w) ? s.cooldown * world.player.stats.cooldown : config.weapons.idleRetry;
+    const fired = fire(world, s, w);
+    if (fired && WEAPONS[w.id].kind !== 'aura') world.tally.attacks++;
+    w.timer = fired ? s.cooldown * world.player.stats.cooldown : config.weapons.idleRetry;
   }
 }
 

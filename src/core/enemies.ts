@@ -115,6 +115,7 @@ export function damageEnemy(
 ): void {
   if (e.dead) return;
   if (source) source.damage += Math.min(amount, e.hp);
+  world.tally.hits++;
   e.hp -= amount;
   e.flash = config.enemies.hitFlash;
   const kb = knockback * (1 - e.def.knockbackResist);

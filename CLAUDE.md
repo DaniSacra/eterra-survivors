@@ -48,7 +48,13 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   code in `render/art/` (cartoon vector, `Pen`); swap an entry to an image URL to use real sprites.
   The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Game, Hud (overlay), LevelUp, Pause, End.
-- Communication core → render: `world.events` (drained by GameScene every frame).
+- Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
+  `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.
+- Sound: `render/sounds.ts` is the **single sound map** (Web Audio synth recipes today, swap an entry to a file
+  URL later); `render/sound.ts` plays them (unlocked on the first gesture, voice cap). Options (mute, damage
+  numbers, calm screen) live in `core/settings.ts` (pure) + `render/settings.ts` (localStorage).
+- Bosses: each has one telegraphed ability (`data/enemies.ts` `ability`, logic in `core/bosses.ts`, marker in
+  `render/fx.ts`).
 
 ## Performance rules (target: 500+ enemies at 60 FPS on phones)
 
