@@ -6,6 +6,7 @@ import type { StageId } from '../data/stages';
 import type { PickupId } from '../data/pickups';
 import type { ChargeKey, ShopId } from '../data/shop';
 import type { PassiveId } from '../data/upgrades';
+import type { RewardId } from '../data/rewards';
 import type { WeaponId } from '../data/weapons';
 
 /** A whole number with pt-BR thousands dots: 10000 -> "10.000". */
@@ -64,6 +65,7 @@ export const t = {
     level: (n: number) => `Nível ${n}`,
     heal: 'Pão e sopa da Berta',
     healDesc: (n: number) => `Recupera ${n} de vida`,
+    reward: 'Recompensa',
     hintTouch: 'Toque numa opção',
     hintKeys: 'Clique ou use 1, 2, 3',
     /** Card title with its key on keyboards ("1. Força"). */
@@ -77,8 +79,8 @@ export const t = {
     chargeKeys: 'R troca · X pula · B bane',
     evolution: 'Elo',
     evolvesWith: (passive: string) => `No máximo, com ${passive} e um baú, vira um Elo.`,
-    recipeHave: (passive: string) => `Forma Elo com ${passive} (você tem)`,
-    recipeNeed: (passive: string) => `Forma Elo com ${passive} (falta)`,
+    recipeHave: (passive: string) => `Elo: + ${passive} (você tem)`,
+    recipeNeed: (passive: string) => `Elo: + ${passive}`,
     eloReady: 'Elo pronto: pegue um baú',
     recipeFor: (weapon: string) => `Forma o Elo de ${weapon}`,
     /** Several weapons joined with `and` ("Maça de Ferro e Espadas dos Paladinos"). */
@@ -91,6 +93,37 @@ export const t = {
     untouched: '-',
     preview: (from: string, to: string) => `${from} → ${to}`,
   },
+
+  /** The Elo moments in a run: ready (notice, tip, arrows) and formed (the celebration screen). */
+  elo: {
+    ready: 'Elo pronto! Derrote uma elite para abrir o baú',
+    tip: 'Elo: arma no nível máximo + a passiva da receita. O próximo baú (as elites deixam um) transforma a arma.',
+    formed: 'Elo formado!',
+    power: (from: string, to: string) => `Dano por segundo: ${from} → ${to}`,
+    close: 'Toque, Espaço ou Enter para continuar',
+    /** One line per Elo on the celebration screen (written for the Survivors, no new lore facts). */
+    lines: {
+      fury: 'A Lâmina de Valmor não escolhe mais um lado: corta tudo em volta.',
+      holyLight: 'A luz de Elun se multiplica e atravessa a escuridão.',
+      yahFlame: 'O pequeno halo vira fogueira. Quem chega perto não volta.',
+      fan: 'Andilla abre a mão, e as facas se abrem em leque.',
+      vigil: 'Quatro espadas, quatro paladinos, nenhuma brecha.',
+      blizzard: 'O frio do sul desce inteiro sobre o campo.',
+      storm: 'Lyra chama o céu, e o céu responde.',
+      forgeFury: 'Da forja do Gaspar, martelos que não param.',
+      soulProcession: 'As luzes seguem em fila, como velas numa procissão.',
+      funeralToll: 'Os sinos dobram, e os mortos sabem que é por eles.',
+      jointBreaker: 'Ferro contra osso: as juntas cedem primeiro.',
+      fireSword: 'Aço e chama caem juntos do céu.',
+    } as Partial<Record<WeaponId, string>>,
+  },
+
+  /** Reward cards (data/rewards.ts): they fill the choice once weapons and passives run short. */
+  rewards: {
+    goldBag: { name: 'Bolsa de Ouro', desc: (gold: number) => `+${gold} de ouro` },
+    feast: { name: 'Banquete', desc: (pct: number) => `Recupera ${pct}% da vida` },
+    blessing: { name: 'Bênção de Yah', desc: (pct: number) => `+${pct}% de dano (acumula)` },
+  } satisfies Record<RewardId, { name: string; desc: (n: number) => string }>,
 
   chest: {
     evolved: (name: string) => `Elo: ${name}!`,
@@ -470,11 +503,14 @@ export const t = {
     forgeFury: { name: 'Fúria da Forja', desc: 'Martelos que não param, atravessando tudo.' },
     soulProcession: { name: 'Procissão das Almas', desc: 'Uma fila longa de luzes caminha pelo campo.' },
     funeralToll: { name: 'Dobre Fúnebre', desc: 'Os sinos dobram por tudo o que chega perto.' },
-    mace: { name: 'Maça de Ferro', desc: 'Uma maça pesada que esmaga quem está à frente e empurra longe.' },
+    mace: {
+      name: 'Maça de Ferro',
+      desc: 'Uma maça pesada que esmaga o inimigo mais próximo e faz o chão tremer em volta.',
+    },
     fire: { name: 'Fogo', desc: 'Chamas caem sobre os inimigos e queimam uma área larga.' },
     jointBreaker: {
       name: 'Quebra-Junta',
-      desc: 'Mira nas juntas: golpes enormes para a frente e para trás.',
+      desc: 'Mira nas juntas: duas pancadas enormes que racham o chão.',
     },
     fireSword: { name: 'Espada de Fogo', desc: 'Uma chuva de espadas em chamas sobre o campo.' },
   } satisfies Record<WeaponId, { name: string; desc: string }>,

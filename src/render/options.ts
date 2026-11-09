@@ -1,11 +1,10 @@
 import type Phaser from 'phaser';
-import type { Settings } from '../core/settings';
 import { t } from '../i18n/pt-BR';
 import { setSetting, settings } from './settings';
 import { button, label, seal } from './ui';
 
 /** The options shown as on/off buttons, in order. */
-const OPTIONS: (keyof Settings)[] = ['muted', 'damageNumbers', 'calm'];
+const OPTIONS: ('muted' | 'damageNumbers' | 'calm')[] = ['muted', 'damageNumbers', 'calm'];
 
 /** One toggle card per option (name on the left, on/off seal on the right), stacked from `y` down; for keyNav. */
 export function optionButtons(

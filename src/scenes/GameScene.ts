@@ -35,7 +35,7 @@ import {
   newMoments,
 } from '../render/fx';
 import { HIT_SPARK, SPARK, Sparks } from '../render/sparks';
-import { settings } from '../render/settings';
+import { setSetting, settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
 import { Mirror } from '../render/mirror';
@@ -148,6 +148,9 @@ export class GameScene extends Phaser.Scene {
     super(SCENES.game);
   }
 
+  /** An Elo became ready: its notice waits for the level-up to close. */
+  private eloNotice = false;
+
   init(data: Partial<RunChoice>): void {
     this.choice = { ...lastChoice(this.registry), ...data };
   }
@@ -160,6 +163,7 @@ export class GameScene extends Phaser.Scene {
     this.liveSave = loadSave();
     this.liveShown.clear();
     this.nextCheck = 1;
+    this.eloNotice = false;
     this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
     this.banked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
@@ -445,8 +449,14 @@ export class GameScene extends Phaser.Scene {
     const fresh = config.effects.slashTtl - this.stepDt - 1e-6;
     const sp = this.sparks;
     const p = this.world.player;
+    let thud = false;
     for (const s of this.world.slashes.active) {
       if (s.ttl < fresh) continue;
+      // A heavy blow (one with a shock wave) gives the screen a small thud.
+      if (s.shock > 0 && !thud) {
+        thud = true;
+        this.shake(90, s.weapon === 'mace' ? 0.003 : 0.005);
+      }
       const spark = SWING_SPARK[s.weapon];
       if (!spark) continue;
       for (let i = 0; i < spark[2]; i++) {
@@ -589,8 +599,21 @@ export class GameScene extends Phaser.Scene {
     this.scene.launch(SCENES.pause);
   }
 
+  /** "Elo pronto!" with (the first time ever) the tip on what an Elo is, once the game is running again. */
+  private showEloNotice(): void {
+    if (!this.eloNotice || this.world.state !== 'playing') return;
+    this.eloNotice = false;
+    sound.play('achievement');
+    this.hud.announce(t.elo.ready, true);
+    if (!settings().eloTipSeen) {
+      setSetting('eloTipSeen', true);
+      this.hud.hint(t.elo.tip);
+    }
+  }
+
   private handleEvents(): void {
     const w = this.world;
+    this.showEloNotice();
     for (const e of w.events) {
       switch (e.type) {
         case 'levelUp':
@@ -625,8 +648,17 @@ export class GameScene extends Phaser.Scene {
           this.moments.chest = w.time;
           this.moments.elo = e.reward.kind === 'evolution';
           this.rewardIcon.setTexture(describeUpgrade(e.reward).icon);
+          // The Elo moment: the game waits on the celebration screen.
+          if (e.reward.kind === 'evolution') {
+            this.hud.joystick.setEnabled(false);
+            this.scene.launch(SCENES.elo, { elo: e.reward.id });
+            this.scene.pause();
+          }
           break;
         }
+        case 'eloReady':
+          this.eloNotice = true; // shown once the level-up choice is closed
+          break;
         case 'pickup':
           if (e.id === 'gold') sound.play('pickup', 1.5);
           if (e.id === 'chest' || e.id === 'gold') break;

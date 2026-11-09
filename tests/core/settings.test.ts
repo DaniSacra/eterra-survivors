@@ -10,6 +10,7 @@ describe('settings', () => {
 
   it('keep valid stored values and ignore unknown keys', () => {
     const s = sanitizeSettings({ damageNumbers: false, muted: true, extra: 1 });
-    expect(s).toEqual({ damageNumbers: false, calm: false, muted: true });
+    expect(s).toEqual({ damageNumbers: false, calm: false, muted: true, eloTipSeen: false });
+    expect(sanitizeSettings({ eloTipSeen: true }).eloTipSeen).toBe(true);
   });
 });

@@ -6,9 +6,16 @@ export interface Settings {
   calm: boolean;
   /** All sound off. */
   muted: boolean;
+  /** The short "what is an Elo" tip was shown (it shows once, the first time an Elo is ready). */
+  eloTipSeen: boolean;
 }
 
-export const defaultSettings = (): Settings => ({ damageNumbers: true, calm: false, muted: false });
+export const defaultSettings = (): Settings => ({
+  damageNumbers: true,
+  calm: false,
+  muted: false,
+  eloTipSeen: false,
+});
 
 /** Whatever was stored (possibly old, partial or broken) as valid settings. */
 export function sanitizeSettings(raw: unknown): Settings {

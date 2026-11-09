@@ -37,8 +37,8 @@ const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fil
 const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
   blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none' },
   fury: { fill: 0xfff0b0, edge: 0xffa040, band: 0.62, fillAlpha: 0.45, mark: 'none' },
-  mace: { fill: 0xd8d0c4, edge: 0x8a8478, band: 0.78, fillAlpha: 0.15, mark: 'shock' },
-  jointBreaker: { fill: 0xf0c8a0, edge: 0xc86a3a, band: 0.74, fillAlpha: 0.15, mark: 'crack' },
+  mace: { fill: 0xb8b0a4, edge: 0x6a6458, band: 0.7, fillAlpha: 0.45, mark: 'shock' },
+  jointBreaker: { fill: 0xe8b890, edge: 0xc86a3a, band: 0.66, fillAlpha: 0.45, mark: 'crack' },
 };
 /** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
 const CLEAVE_STYLE: SwingStyle = {
@@ -323,6 +323,15 @@ export function drawFx(
       t,
       SWING_STYLE[s.weapon] ?? SWING_PLAIN,
     );
+    if (s.shock > 0)
+      drawImpact(
+        ground,
+        p.x + Math.cos(s.angle) * s.range,
+        p.y + Math.sin(s.angle) * s.range,
+        s.shock,
+        s.angle,
+        t,
+      );
   }
   for (const b of world.bolts.active) drawBolt(ground, top, b, 1 - b.ttl / config.effects.boltTtl);
 }
@@ -543,6 +552,39 @@ function drawSwing(
       x = nx;
       y = ny;
     }
+  }
+}
+
+/**
+ * Where a heavy blow lands: a dark crater with cracks running out, and a dusty ring opening to exactly the shock
+ * wave's radius (what it reaches). Drawn on the ground layer; `t` is the swing's 0 -> 1.
+ */
+function drawImpact(
+  under: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  r: number,
+  angle: number,
+  t: number,
+): void {
+  if (t < SWEEP * 0.7) return;
+  const k = (t - SWEEP * 0.7) / (1 - SWEEP * 0.7);
+  const fade = 1 - k * k;
+  under.fillStyle(0x3a2a24, 0.35 * fade);
+  disc(under, x, y, r * 0.35);
+  under.lineStyle(6 * (1 - k) + 1.5, 0xf0e8d8, 0.8 * (1 - k));
+  ring(under, x, y, r * (0.4 + 0.6 * k));
+  // Cracks fanning out from the crater, longest straight ahead.
+  under.lineStyle(3, 0x2a1e1a, 0.85 * fade);
+  for (let i = -2; i <= 2; i++) {
+    const a = angle + i * 0.9;
+    const len = r * (i === 0 ? 1 : 0.75);
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+    const mx = x + ux * len * 0.5 - uy * (i % 2 ? 4 : -4);
+    const my = y + uy * len * 0.5 + ux * (i % 2 ? 4 : -4);
+    under.lineBetween(x + ux * r * 0.2, y + uy * r * 0.2, mx, my);
+    under.lineBetween(mx, my, x + ux * len, y + uy * len);
   }
 }
 

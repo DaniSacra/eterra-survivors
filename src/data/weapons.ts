@@ -13,8 +13,12 @@ export interface ArcLevel extends BaseLevel {
   /** Width of the slash, radians. */
   arc: number;
   knockback: number;
-  /** 1 = front only, 2 = front and back. */
+  /** 1 = front only, 2 = front and back (or twice in front, see the weapon's `combo`). */
   swings: number;
+  /** Shock wave where the blow lands (at the tip of the reach): a fraction of `damage`, hitting what the swing missed. */
+  shock?: number;
+  /** Radius of that shock wave, world px. */
+  shockRadius?: number;
 }
 
 export interface HomingLevel extends BaseLevel {
@@ -83,8 +87,13 @@ export type WeaponDef = {
   [K in WeaponKind]: {
     kind: K;
     levels: LevelsByKind[K][];
-    /** Thrown weapons: 'nearest' aims at the closest enemy; 'facing' (default) flies where the hero walks. */
+    /**
+     * Thrown and arc weapons: 'nearest' aims at the boss or the closest enemy (an aimed arc waits until someone is
+     * within reach); 'facing' (default) goes where the hero walks.
+     */
     aim?: 'nearest' | 'facing';
+    /** Arc weapons: the second swing is a second blow in the same direction this many seconds later, not behind. */
+    combo?: number;
   };
 }[WeaponKind];
 
@@ -270,14 +279,25 @@ export const WEAPONS = {
   /** Maça de Ferro: a heavy iron mace, slow and wide, that crushes what is in front and throws it back. */
   mace: {
     kind: 'arc',
+    aim: 'nearest',
+    combo: 0.2,
     levels: levels<ArcLevel>(
-      { damage: 16, cooldown: 1.4, range: 88, arc: 2.1, knockback: 230, swings: 1 },
-      { damage: 21 },
+      {
+        damage: 21,
+        cooldown: 1.4,
+        range: 105,
+        arc: 2.1,
+        knockback: 120,
+        swings: 1,
+        shock: 0.5,
+        shockRadius: 40,
+      },
+      { damage: 28 },
       { swings: 2 },
-      { damage: 27, cooldown: 1.25 },
-      { range: 100, arc: 2.4 },
-      { damage: 35 },
-      { damage: 46, cooldown: 1.1, range: 110 },
+      { damage: 36, cooldown: 1.25 },
+      { range: 115, arc: 2.4, shockRadius: 46 },
+      { damage: 47 },
+      { damage: 72, cooldown: 1, range: 125 },
     ),
   },
   /** Fogo: flames falling on enemies, fewer than lightning but burning a wider patch. */
@@ -299,17 +319,17 @@ export const WEAPONS = {
   /** Fúria: Aldo spins the blade against everything around him. */
   fury: {
     kind: 'arc',
-    levels: [{ damage: 60, cooldown: 0.65, range: 150, arc: Math.PI * 2, knockback: 220, swings: 1 }],
+    levels: [{ damage: 110, cooldown: 0.5, range: 165, arc: Math.PI * 2, knockback: 160, swings: 1 }],
   },
   /** Luz Sagrada: Teo's holy light, a swarm of piercing motes. */
   holyLight: {
     kind: 'homing',
     levels: [
       {
-        damage: 24,
-        cooldown: 0.75,
+        damage: 36,
+        cooldown: 0.65,
         speed: 340,
-        count: 6,
+        count: 8,
         pierce: 4,
         lifetime: 3,
         radius: 8,
@@ -329,11 +349,11 @@ export const WEAPONS = {
     aim: 'nearest',
     levels: [
       {
-        damage: 15,
-        cooldown: 0.55,
+        damage: 36,
+        cooldown: 0.45,
         speed: 480,
-        count: 10,
-        pierce: 3,
+        count: 12,
+        pierce: 5,
         lifetime: 1.2,
         radius: 7,
         spread: 0.1,
@@ -345,38 +365,51 @@ export const WEAPONS = {
   vigil: {
     kind: 'orbit',
     levels: [
-      { damage: 28, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
+      { damage: 40, cooldown: 0.3, count: 6, orbitRadius: 105, radius: 18, spin: 4.5, knockback: 140 },
     ],
   },
   /** Nevasca: frost everywhere. */
   blizzard: {
     kind: 'zone',
-    levels: [{ damage: 9, cooldown: 1.8, count: 4, radius: 75, duration: 4 }],
+    levels: [{ damage: 20, cooldown: 1.4, count: 5, radius: 85, duration: 4 }],
   },
   /** Tempestade: a storm over the battlefield. */
   storm: {
     kind: 'strike',
-    levels: [{ damage: 50, cooldown: 1, count: 6, radius: 44 }],
+    levels: [{ damage: 75, cooldown: 0.8, count: 8, radius: 52 }],
   },
-  /** Quebra-Junta: the mace aims at the joints, front and back, with a huge blow. */
+  /** Quebra-Junta: the mace aims at the joints, two huge blows that crack the ground. */
   jointBreaker: {
     kind: 'arc',
-    levels: [{ damage: 75, cooldown: 1, range: 145, arc: 3, knockback: 320, swings: 2 }],
+    aim: 'nearest',
+    combo: 0.2,
+    levels: [
+      {
+        damage: 160,
+        cooldown: 0.8,
+        range: 160,
+        arc: 3.4,
+        knockback: 160,
+        swings: 2,
+        shock: 0.6,
+        shockRadius: 72,
+      },
+    ],
   },
   /** Espada de Fogo: a rain of burning swords over the field. */
   fireSword: {
     kind: 'strike',
-    levels: [{ damage: 38, cooldown: 1.1, count: 5, radius: 58 }],
+    levels: [{ damage: 80, cooldown: 0.8, count: 7, radius: 70 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {
     kind: 'thrown',
     levels: [
       {
-        damage: 70,
-        cooldown: 1.3,
+        damage: 115,
+        cooldown: 1,
         speed: 300,
-        count: 3,
+        count: 4,
         pierce: 999,
         lifetime: 1.8,
         radius: 18,
@@ -390,10 +423,10 @@ export const WEAPONS = {
     kind: 'homing',
     levels: [
       {
-        damage: 18,
-        cooldown: 1,
+        damage: 28,
+        cooldown: 0.9,
         speed: 210,
-        count: 8,
+        count: 9,
         pierce: 4,
         lifetime: 6,
         radius: 10,
@@ -406,7 +439,7 @@ export const WEAPONS = {
   funeralToll: {
     kind: 'orbit',
     levels: [
-      { damage: 45, cooldown: 0.6, count: 5, orbitRadius: 140, radius: 24, spin: 2.2, knockback: 320 },
+      { damage: 70, cooldown: 0.5, count: 6, orbitRadius: 140, radius: 26, spin: 2.2, knockback: 320 },
     ],
   },
 } satisfies Record<string, WeaponDef>;

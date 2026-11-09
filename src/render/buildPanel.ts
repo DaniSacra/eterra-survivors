@@ -42,6 +42,8 @@ export class BuildSlots {
   private readonly mark: Phaser.GameObjects.Graphics;
   private readonly icons: Phaser.GameObjects.Image[] = [];
   private readonly glowTween: Phaser.Tweens.Tween;
+  /** Some weapon's Elo is ready (the HUD then points at elites off screen). */
+  ready = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -161,6 +163,7 @@ export class BuildSlots {
       src.generateTexture(key, tw, th);
       img.setTexture(key);
     }
+    this.ready = ready;
     if (ready) this.glowTween.resume();
     else this.glowTween.pause();
     this.glowTex.setAlpha(1);

@@ -1,3 +1,4 @@
+import { weaponUsed } from '../../core/meta';
 import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../../data/evolutions';
 import { SIGNATURE_OWNER } from '../../data/characters';
 import { t } from '../../i18n/pt-BR';
@@ -9,7 +10,7 @@ import type { TabArea, TabContent } from './tab';
 const ICON = 22;
 const SYMBOL = 14;
 
-/** Livro de Elos: every Elo, with its recipe revealed once it has been formed in a run. */
+/** Livro de Elos: every Elo; its recipe shows once the base weapon was used in a run, its name once formed. */
 export function drawElos(a: TabArea): TabContent {
   const { scene, short } = a;
   const known = a.save.elos;
@@ -38,6 +39,8 @@ export function drawElos(a: TabArea): TabContent {
     const y = top + Math.floor(i / cols) * (cardH + gap) + cardH / 2;
     const evo = EVOLUTIONS[id] as Evolution;
     const seen = known.includes(id);
+    // The passive shows once the base weapon has been used in a run; the Elo itself only once formed.
+    const recipeKnown = seen || weaponUsed(a.save, evo.from);
     scene.add
       .rectangle(x, y, cardW, cardH, seen ? UI.panel : UI.panelOff)
       .setStrokeStyle(2, seen ? UI.accent : UI.borderOff);
@@ -55,7 +58,7 @@ export function drawElos(a: TabArea): TabContent {
     const step = ICON + SYMBOL;
     scene.add.image(lx + ICON / 2, rowY, `icon.${evo.from}`).setScale((ART_SCALE * ICON) / 28);
     label(scene, lx + ICON + SYMBOL / 2, rowY, t.elos.plus, 16, { bold: true, color: UI.muted });
-    if (seen)
+    if (recipeKnown)
       scene.add.image(lx + step + ICON / 2, rowY, `icon.${evo.passive}`).setScale((ART_SCALE * ICON) / 28);
     else {
       scene.add.circle(lx + step + ICON / 2, rowY, ICON / 2 - 1, UI.panel).setStrokeStyle(1.5, UI.border);
@@ -73,11 +76,11 @@ export function drawElos(a: TabArea): TabContent {
         color: UI.muted,
       }).setOrigin(1, 0.5);
     // Known: the recipe's names. Unknown: only the weapon it grows from (a hint, as in the original game).
-    const recipe = seen
+    const recipe = recipeKnown
       ? t.elos.recipe(t.weapons[evo.from].name, t.passives[evo.passive])
       : t.elos.hint(t.weapons[evo.from].name);
     label(scene, lx, rowY + ICON / 2 + 4, recipe, 12, {
-      color: seen ? UI.gold : UI.muted,
+      color: recipeKnown ? UI.gold : UI.muted,
       align: 'left',
       wrap: cardW - 20,
     });

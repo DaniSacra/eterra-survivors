@@ -32,6 +32,69 @@ describe('weapon data', () => {
   });
 });
 
+describe('Maça de Ferro (aimed arc, shock wave, combo)', () => {
+  const mace = WEAPONS.mace;
+
+  it('swings at the nearest enemy, even behind the way the hero walks', () => {
+    const w = prepared('mace');
+    w.player.facing.x = 1;
+    const back = spawnEnemy(w, 'slime', -50, 0);
+    updateWeapons(w, 1 / 60);
+    expect(back.hp).toBeLessThan(back.maxHp);
+  });
+
+  it('waits (no swing, short retry) while nobody is within reach', () => {
+    const w = prepared('mace');
+    spawnEnemy(w, 'slime', 400, 0);
+    updateWeapons(w, 1 / 60);
+    expect(w.slashes.size).toBe(0);
+    expect(w.weapons[0]!.timer).toBeCloseTo(config.weapons.idleRetry);
+  });
+
+  it('the blow sends a shock wave from the tip of its reach that hurts what the swing missed, for less', () => {
+    const w = prepared('mace');
+    const l = mace.levels[0]!;
+    const near = spawnEnemy(w, 'blackKnight', l.range * 0.5, 0);
+    // Past the reach but inside the wave around the tip.
+    const far = spawnEnemy(w, 'blackKnight', l.range + near.def.radius + l.shockRadius! * 0.5, 0);
+    updateWeapons(w, 1 / 60);
+    const crush = near.maxHp - near.hp;
+    const wave = far.maxHp - far.hp;
+    expect(crush).toBeCloseTo(l.damage);
+    expect(wave).toBeCloseTo(l.damage * l.shock!);
+  });
+
+  it('an enemy crushed by the swing is not hit again by the wave', () => {
+    const w = prepared('mace');
+    const l = mace.levels[0]!;
+    const e = spawnEnemy(w, 'blackKnight', l.range - 5, 0);
+    updateWeapons(w, 1 / 60);
+    expect(e.maxHp - e.hp).toBeCloseTo(l.damage);
+  });
+
+  it('from level 3 the second blow lands in the same direction a moment later, not behind', () => {
+    const w = prepared('mace');
+    w.weapons[0]!.level = 3;
+    const front = spawnEnemy(w, 'blackKnight', 60, 0);
+    const back = spawnEnemy(w, 'blackKnight', -130, 0); // outside the reach: only a back swing could hit it
+    updateWeapons(w, 1 / 60);
+    const one = front.maxHp - front.hp;
+    expect(one).toBeGreaterThan(0);
+    expect(w.slashes.size).toBe(1);
+    for (let t = 0; t < mace.combo! + 0.05; t += 1 / 60) updateWeapons(w, 1 / 60);
+    expect(front.maxHp - front.hp).toBeCloseTo(one * 2);
+    expect(back.hp).toBe(back.maxHp);
+  });
+
+  it('the Lâmina still swings where the hero faces', () => {
+    const w = prepared('blade');
+    w.player.facing.x = 1;
+    const back = spawnEnemy(w, 'slime', -40, 0);
+    updateWeapons(w, 1 / 60);
+    expect(back.hp).toBe(back.maxHp);
+  });
+});
+
 describe('Lâmina de Valmor (arc)', () => {
   it('hits enemies in front, not behind', () => {
     const w = prepared('blade');

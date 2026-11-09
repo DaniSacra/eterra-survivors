@@ -1,3 +1,4 @@
+import { REWARDS, type RewardDef, type RewardId } from '../data/rewards';
 import { ACHIEVEMENTS, type AchievementId } from '../data/achievements';
 import { config, type StatKey } from '../data/config';
 import { formatTime } from '../core/format';
@@ -56,6 +57,13 @@ export interface UpgradeText {
   /** Weapon cards: the recipe's passive is missing (the recipe reads muted). */
   recipeMissing: boolean;
 }
+
+/** Icon of each reward card. */
+const REWARD_ICON: Record<RewardId, string> = {
+  goldBag: 'pickup.gold',
+  feast: 'pickup.food',
+  blessing: 'icon.might',
+};
 
 /**
  * Texts and icon of a level-up card. `owned`: the hero's weapons, to tell which Elos a passive completes;
@@ -142,6 +150,20 @@ export function describeUpgrade(
             : names.length === 1
               ? t.levelUp.recipeFor(names[0] as string)
               : '',
+        recipeIcon: '',
+        recipeMissing: false,
+      };
+    }
+    case 'reward': {
+      const r: RewardDef = REWARDS[opt.id];
+      const text = t.rewards[opt.id];
+      const n = r.gold ?? Math.round((r.heal ?? r.might ?? 0) * 100);
+      return {
+        title: text.name,
+        tag: t.levelUp.reward,
+        desc: text.desc(n),
+        icon: REWARD_ICON[opt.id],
+        recipe: '',
         recipeIcon: '',
         recipeMissing: false,
       };

@@ -1,7 +1,7 @@
 import { it } from 'vitest';
 import { CHARACTERS, CHARACTER_IDS, SIGNATURE_OWNER } from '../../src/data/characters';
 import { EVOLUTIONS } from '../../src/data/evolutions';
-import { WEAPON_IDS } from '../../src/data/weapons';
+import { WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
 import { maxLevel } from '../../src/core/weapons';
 import { STAGE_IDS } from '../../src/data/stages';
 import { shopBonuses, newSave } from '../../src/core/meta';
@@ -80,17 +80,52 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
         .map((id) => `${id} ${pct(results.filter((r) => r.owned.includes(id)).length / results.length)}`)
         .join(' · '),
   );
-  // Real DPS in the runs: each Elo, and each base weapon held at max level (runs that hold it, average).
+  // Real DPS in the runs, measured only while at that level (at least MIN_LEVEL_TIME there): each base weapon at
+  // max level (its own runs, or the minute before it became an Elo) and each Elo.
+  const MIN_LEVEL_TIME = 30;
+  const avgOf = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+  const atMax = (id: WeaponId) =>
+    results.flatMap((r) =>
+      r.dps.flatMap((d) => {
+        if (d.id === id && d.level === maxLevel(id) && d.levelTime >= MIN_LEVEL_TIME) return [d.levelDps];
+        if (EVOLUTIONS[d.id]?.from === id && d.prevDps > 0) return [d.prevDps];
+        return [];
+      }),
+    );
   out.push(
     'REAL DPS ' +
       WEAPON_IDS.map((id) => {
-        const ds = results.flatMap((r) => r.dps.filter((d) => d.id === id && d.level === maxLevel(id)));
+        const ds = EVOLUTIONS[id]
+          ? results.flatMap((r) =>
+              r.dps.filter((d) => d.id === id && d.levelTime >= MIN_LEVEL_TIME).map((d) => d.levelDps),
+            )
+          : atMax(id);
         return ds.length
-          ? `${id}${EVOLUTIONS[id] ? '' : ':max'} ${Math.round(ds.reduce((a, d) => a + d.dps, 0) / ds.length)}`
+          ? `${id}${EVOLUTIONS[id] ? '' : ':max'} ${Math.round(avgOf(ds))} (${ds.length})`
           : '';
       })
         .filter(Boolean)
         .join(' · '),
+  );
+  // Each Elo against its base at max level in the same runs (goal: >= 2.5x).
+  out.push(
+    'ELO X    ' +
+      WEAPON_IDS.filter((id) => EVOLUTIONS[id])
+        .map((id) => {
+          const rs = results.flatMap((r) =>
+            r.dps
+              .filter((d) => d.id === id && d.levelTime >= MIN_LEVEL_TIME && d.prevDps > 0)
+              .map((d) => d.levelDps / d.prevDps),
+          );
+          return rs.length ? `${id} ${avgOf(rs).toFixed(1)}x` : '';
+        })
+        .filter(Boolean)
+        .join(' · '),
+  );
+  const short = results.filter((r) => r.poolShortLevel > 0);
+  out.push(
+    `POOL     ran short of 3 cards in ${short.length}/${results.length} runs, ` +
+      `at level ${avgOf(short.map((r) => r.poolShortLevel)).toFixed(1)} on average`,
   );
   // Achievement calibration (docs/design/conquistas.md): goals meant for about half of the bot's victories.
   const wins = results.filter((r) => r.won);

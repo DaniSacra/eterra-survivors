@@ -350,3 +350,59 @@ ACHIEVE  veteran wins 135/144 · run damage median 256102 · best hit median 88 
 Notas: o dano por partida se concentra entre 250 e 256 mil (o que uma vitória mata), então qualquer limite nessa
 faixa é sensível; 260 mil pede uma partida acima da média. Golpe de 90 daria 44% no veterano, mas ficaria colado
 no "Golpe Forte" (80); 100 mantém os dois degraus distintos. O id `hit120` ficou (o save guarda ids).
+
+## Rodada UI e features · Etapas 1–3 (2026-11-09)
+
+`SIM_SEEDS=12 npm run sim` (144 partidas). **Métrica nova:** o sim agora mede o DPS real **só enquanto a arma está
+naquele nível** (`levelDps`, mínimo 30 s no nível) e compara cada Elo com a própria arma base no nível 7 na mesma
+partida (linha `ELO X`). A métrica antiga (dano total ÷ tempo desde que pegou a arma) diluía o nível 7 com os níveis
+baixos, e o Elo herdava o histórico da base; os números antigos ficam abaixo como "métrica antiga".
+
+### Etapa 1: Maça de Ferro e Quebra-Junta
+
+Mudanças: golpe em arco com `aim: 'nearest'` (espera alguém ao alcance), onda de choque na ponta do alcance (`shock`
+0,5 do dano, raio 40→46; quem a pancada já atingiu não toma a onda), `combo: 0.2` (no nível 3 o segundo golpe é uma
+segunda pancada na mesma direção), empurrão 230→120, alcance 88→105 (125 no nível 7), dano 16/21/27/35/46 →
+21/28/36/47/72 (nível 7 com recarga 1,0). Quebra-Junta: 150 de dano, 2 pancadas, alcance 160, arco 3,4, onda 0,6 / 72.
+
+| Métrica antiga (dano ÷ tempo com a arma) | Antes | Depois |
+| ---------------------------------------- | ----- | ------ |
+| Maça nível 7                             | 30    | **95** |
+| Quebra-Junta                             | 59    | 182    |
+| Martelo nível 7 (referência)             | 94    | 96     |
+
+| Métrica nova (só no nível)           | Depois    |
+| ------------------------------------ | --------- |
+| Maça nível 7                         | 205       |
+| Martelo nível 7 / Geada nível 7      | 204 / 171 |
+| Quebra-Junta ÷ Maça na mesma partida | 3,1×      |
+
+Lab (solo, alvo sempre ao alcance): Maça Lmax 43,7 → 144; Quebra-Junta 75 → 400.
+
+### Etapa 2: força dos Elos (meta ≥ 2,5× a base no nível 7)
+
+| Elo            | Antes (`ELO X`) | Depois | Mudança principal                          |
+| -------------- | --------------- | ------ | ------------------------------------------ |
+| Fúria          | 1,6×            | 4,3×   | dano 60→110, recarga 0,65→0,5, alcance 165 |
+| Luz Sagrada    | 2,1×            | 2,6×   | dano 24→36, 6→8 luzes, recarga 0,65        |
+| Chama de Yah   | 3,7×            | 4,4×   | sem mudança                                |
+| Leque de Facas | 1,5×            | 2,5×   | dano 15→36, 12 facas, atravessa 5          |
+| Vigília        | 2,5×            | 6,1×   | dano 28→40                                 |
+| Nevasca        | 1,3×            | 3,2×   | dano 9→20, 5 manchas, raio 85, recarga 1,4 |
+| Tempestade     | 2,0×            | 2,9×   | dano 50→75, 8 raios, recarga 0,8           |
+| Quebra-Junta   | 3,2×            | 3,1×   | Etapa 1                                    |
+| Espada de Fogo | 1,6×            | 3,0×   | dano 38→80, 7 espadas, raio 70             |
+| Fúria da Forja | 1,7×            | 2,4×   | dano 70→115, 4 martelos, recarga 1,0       |
+| Procissão      | 2,1×            | 2,8×   | dano 18→28, 9 luzes, recarga 0,9           |
+| Dobre Fúnebre  | 1,8×            | 2,5×   | dano 45→70, 6 sinos, recarga 0,5           |
+
+(O "Depois" é a rodada anterior ao último ajuste fino de Leque, Forja e Dobre, que subiu os três mais um pouco.)
+
+Vitórias: 112/144 → 122/144. Aldo 27→29/36, Lyra 27→31, Teo 25→29, Andilla 33→33. O chefe morre mais rápido
+(mediana 49 s → 31 s), então `bossFast` (40 s) e `hit120` (100) ficaram mais fáceis: 70% e 59% das vitórias.
+
+### Etapa 3: pool de cartas
+
+O sim registra o nível em que o pool (armas + passivas) fica com menos de 3 cartas: só 1 em 144 partidas de 10
+minutos chega lá, no nível 58. O problema aparece em partidas longas e na Noite Sem Fim; agora as cartas de
+recompensa (Bolsa de Ouro, Banquete, Bênção de Yah) completam a escolha.

@@ -26,7 +26,7 @@ import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
 import { SpatialHash } from './spatialHash';
-import { applyUpgrade, banishKey, rollUpgrades, type UpgradeOption } from './upgrades';
+import { applyUpgrade, banishKey, canBanish, candidates, rollUpgrades, type UpgradeOption } from './upgrades';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
 import { createZone, updateZones, type Zone } from './zones';
@@ -69,6 +69,14 @@ export class World {
   readonly charges: Charges = { ...config.charges };
   /** Upgrades removed from this run's level-up pool, as `banishKey`s. */
   readonly banished = new Set<string>();
+  /** Base weapons whose ready Elo was already announced this run. */
+  readonly eloAnnounced: WeaponId[] = [];
+  /** Bênçãos de Yah taken (reward cards, +might each). */
+  blessings = 0;
+  /** Match time when the level-up pool (weapons and passives) first ran short of a full choice; -1 = never. */
+  poolShortAt = -1;
+  /** Level at that moment. */
+  poolShortLevel = 0;
   state: WorldState = 'playing';
   /** The run's seed (shown on the F3 panel), so a run seen in the game can be replayed. */
   readonly seed: number;
@@ -132,7 +140,18 @@ export class World {
   }
 
   addWeapon(id: WeaponId): void {
-    this.weapons.push({ id, level: 1, timer: 0, damage: 0, since: this.time });
+    this.weapons.push({
+      id,
+      level: 1,
+      timer: 0,
+      damage: 0,
+      since: this.time,
+      combo: 0,
+      comboAngle: 0,
+      levelAt: this.time,
+      levelDamage: 0,
+      prevDps: 0,
+    });
   }
 
   setView(w: number, h: number): void {
@@ -190,7 +209,7 @@ export class World {
     const opt = this.upgradeOptions[index];
     if (this.state !== 'levelup' || this.charges.banish <= 0 || !opt) return;
     const key = banishKey(opt);
-    if (!key) return;
+    if (!key || !canBanish(this, opt)) return;
     this.charges.banish--;
     this.banished.add(key);
     this.upgradeOptions = rollUpgrades(this);
@@ -205,6 +224,10 @@ export class World {
 
   private openLevelUp(): void {
     this.state = 'levelup';
+    if (this.poolShortAt < 0 && candidates(this).length < config.xp.choices) {
+      this.poolShortAt = this.time;
+      this.poolShortLevel = this.level;
+    }
     this.upgradeOptions = rollUpgrades(this);
     this.events.push({ type: 'levelUp' });
   }

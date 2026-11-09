@@ -380,6 +380,11 @@ export function discoverElos(save: MetaSave, ids: readonly WeaponId[]): WeaponId
 }
 
 /** The cheapest thing still to buy (a shop level, or a hero while heroes are sold), for the end screen. */
+/** Whether any hero has held this base weapon in a run (the Livro de Elos then reveals its Elo's passive). */
+export function weaponUsed(save: MetaSave, id: WeaponId): boolean {
+  return Object.values(save.records).some((r) => (r?.weaponRuns[id] ?? 0) > 0);
+}
+
 export function nextGoal(
   save: MetaSave,
 ): { kind: 'shop'; id: ShopId; cost: number } | { kind: 'hero'; id: CharacterId; cost: number } | null {

@@ -25,6 +25,8 @@ export interface Slash extends Timed {
   range: number;
   /** The weapon that swung it (each is drawn in its own colors). */
   weapon: WeaponId;
+  /** Radius of the shock wave where it lands (0 = none). */
+  shock: number;
 }
 export const createSlash = (): Slash => ({
   poolIndex: -1,
@@ -33,6 +35,7 @@ export const createSlash = (): Slash => ({
   arc: 0,
   range: 0,
   weapon: 'blade',
+  shock: 0,
 });
 
 /** Something falling from the sky (lightning, fire) and hitting the ground for a moment (purely visual). */

@@ -33,9 +33,10 @@ export function maybeDropRandom(world: World, x: number, y: number): void {
   else if (world.rng.next() < config.gold.dropChance) dropPickup(world, 'gold', x, y);
 }
 
-const addGold = (world: World, amount: number): void => {
+/** Gold collected in the run, scaled by greed. */
+export function addGold(world: World, amount: number): void {
   world.gold += Math.round(amount * world.player.stats.greed);
-};
+}
 
 /** What each pickup does when collected. */
 const COLLECT: Record<PickupId, (world: World) => void> = {

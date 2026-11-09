@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
 import { dropPickup } from '../../src/core/pickups';
-import { candidates, chestReward, readyEvolution } from '../../src/core/upgrades';
-import { maxLevel } from '../../src/core/weapons';
+import { applyUpgrade, candidates, chestReward, readyEvolution } from '../../src/core/upgrades';
+import { maxLevel, weaponPower } from '../../src/core/weapons';
+import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
+import { newRunSummary } from '../../src/core/records';
 import { EVOLUTIONS, EVOLVED_IDS } from '../../src/data/evolutions';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
 import { WEAPONS } from '../../src/data/weapons';
@@ -71,9 +73,9 @@ describe('chests', () => {
     }
   });
 
-  it('heal when nothing can be levelled', () => {
+  it('a reward card when nothing can be levelled', () => {
     const w = maxBlade();
-    expect(chestReward(w)).toEqual({ kind: 'heal' });
+    expect(chestReward(w).kind).toBe('reward');
   });
 
   it('stay on the ground until touched', () => {
@@ -102,5 +104,35 @@ describe('elites', () => {
     expect(w.enemies.active.filter((e) => e.def.elite)).toHaveLength(1);
     expect(w.events).toContainEqual({ type: 'eliteSpawned' });
     for (const el of ELITES) expect((ENEMIES[el.id] as EnemyDef).elite).toBe(true);
+  });
+});
+
+describe('Elo moments', () => {
+  it('announces a ready Elo once, when the last piece of the recipe is taken', () => {
+    const w = quietWorld();
+    w.weapons[0]!.level = maxLevel('blade') - 1;
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: 1 });
+    expect(w.events.filter((e) => e.type === 'eloReady')).toEqual([]);
+    applyUpgrade(w, { kind: 'weapon', id: 'blade', level: maxLevel('blade') });
+    expect(w.events.filter((e) => e.type === 'eloReady')).toEqual([{ type: 'eloReady', weapon: 'blade' }]);
+    applyUpgrade(w, { kind: 'passive', id: 'might', level: 2 });
+    expect(w.events.filter((e) => e.type === 'eloReady')).toHaveLength(1);
+  });
+
+  it('weapon power: damage x hits per cast / cooldown, and every Elo beats its base at max level', () => {
+    const blade = WEAPONS.blade.levels[0]!;
+    expect(weaponPower('blade')).toBeCloseTo((blade.damage * blade.swings) / blade.cooldown);
+    for (const id of EVOLVED_IDS) {
+      const from = EVOLUTIONS[id]!.from;
+      expect(weaponPower(id)).toBeGreaterThan(weaponPower(from, maxLevel(from)));
+    }
+  });
+
+  it('the Livro de Elos knows a recipe once its base weapon was used in a run', () => {
+    const save = newSave();
+    expect(weaponUsed(save, 'mace')).toBe(false);
+    recordRun(save, { ...newRunSummary(), hero: 'lyra', weapons: ['lightning', 'mace'] });
+    expect(weaponUsed(save, 'mace')).toBe(true);
+    expect(weaponUsed(save, 'bells')).toBe(false);
   });
 });

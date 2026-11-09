@@ -38,7 +38,9 @@ export interface SimResult {
   snaps: { t: number; level: number; enemies: number; hp: number }[];
   top: string[];
   /** Real DPS of every weapon held at the end, at its final level. */
-  dps: { id: WeaponId; level: number; dps: number }[];
+  dps: { id: WeaponId; level: number; dps: number; levelDps: number; prevDps: number; levelTime: number }[];
+  /** Level at which the level-up pool first ran short of 3 weapon/passive cards (0 = never). */
+  poolShortLevel: number;
   /** Base weapons owned at the end (an Elo counts as its base). */
   owned: WeaponId[];
   maxEnemies: number;
@@ -64,6 +66,8 @@ function score(w: World, o: UpgradeOption): number {
       const i = PASSIVE_PRIORITY.indexOf(o.id);
       return i >= 0 ? 20 - i : 5;
     }
+    case 'reward':
+      return o.id === 'feast' && w.player.hp < w.player.stats.maxHp * 0.5 ? 2 : o.id === 'blessing' ? 1 : 0.5;
     case 'heal':
       return 0;
   }
@@ -200,6 +204,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     snaps: [],
     top: [],
     dps: [],
+    poolShortLevel: 0,
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
@@ -252,7 +257,15 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     res.bossHpLeft = w.boss ? w.boss.hp / w.boss.maxHp : 0;
   }
   const report = weaponReport(w);
-  res.dps = report.map((r) => ({ id: r.id, level: r.level, dps: r.dps }));
+  res.dps = report.map((r) => ({
+    id: r.id,
+    level: r.level,
+    dps: r.dps,
+    levelDps: r.levelDps,
+    prevDps: r.prevDps,
+    levelTime: r.levelTime,
+  }));
+  res.poolShortLevel = w.poolShortAt >= 0 ? w.poolShortLevel : 0;
   res.top = report
     .sort((a, b) => b.damage - a.damage)
     .slice(0, 3)
