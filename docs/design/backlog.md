@@ -328,7 +328,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: silhuetas diferentes para Badalada, Pedra-Ímã e Sopro de Geada; todas com tinta.
 - Aceite: os seis itens do chão são distintos em miniatura (32 px).
 
-**A-10 · Chãos com decalques** · visual · M · ↩ reaberto na Revisão 2026-11-08 · aprovado
+**A-10 · Chãos com decalques** · visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
 - Por quê: plano do Daniel: repetição visível do tile.
 - O quê: decalques determinísticos por posição: Valmor com lápides fofas, montinhos de neve, galhos, flores de gelo;
@@ -339,6 +339,8 @@ depois e registra em `docs/balance-baseline.md`.
   repete a cada 128 px. Novo O quê: sulcos fora do tile (ou decal curto e curvo); pedras do tile sem brilho, em tom
   próximo do chão (`~0x4e566e`), volume só no `decal.stones`; musgo da Cripta com metade dos pontos e alfa 0.15.
   Aceite novo: captura da luta do Lobo Velho em 420x820 e 1000x680 sem listras nem grade de pedras visíveis.
+- Feito na R5: tile da Estrada sem sulcos, pedras chatas em `0x4e566e` sem brilho, montes de neve a 0.45; sulcos
+  viraram o decal curto e curvo `decal.ruts`; musgo da Cripta com 3 pontos a 0.15. Custo por quadro zero (textura).
 
 **A-11 · Subida de nível com ícone e receita de Elo** · visual + impl · M · ✅ feito
 

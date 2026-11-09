@@ -6,7 +6,7 @@ import { ART_SCALE } from './art/pen';
 const STAGE_DECALS: Record<StageId, string[]> = {
   valmor: ['decal.grave', 'decal.snowMound', 'decal.twigs', 'decal.iceFlower', 'decal.snowMound'],
   crypt: ['decal.candle', 'decal.bonePile', 'decal.crack', 'decal.web', 'decal.crack'],
-  southRoad: ['decal.puddle', 'decal.bush', 'decal.fence', 'decal.stones', 'decal.stones'],
+  southRoad: ['decal.puddle', 'decal.bush', 'decal.fence', 'decal.stones', 'decal.ruts', 'decal.stones'],
 };
 
 /** World cell size; each cell holds at most one decal, picked by a hash of the cell. */

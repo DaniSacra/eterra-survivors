@@ -54,26 +54,26 @@ export const TILE_ART: Record<string, ArtDef> = {
           p.fill(0xffffff, 0.03).fillRect(x + 4, row * h + 4, h * 2 - 8, 3);
         }
       }
-      for (let i = 0; i < 6; i++)
-        p.fill(0x3a9a8a, 0.22).fillEllipse(r() * SIZE, r() * SIZE, 10 + r() * 14, 4 + r() * 4);
+      for (let i = 0; i < 3; i++)
+        p.fill(0x3a9a8a, 0.15).fillEllipse(r() * SIZE, r() * SIZE, 10 + r() * 14, 4 + r() * 4);
     },
   },
-  /** Estrada do Sul: packed snow with wheel ruts and grey stones. */
+  /**
+   * Estrada do Sul: packed snow with flat pebbles close to the ground's tone (no full-width ruts, no bright stones:
+   * they lined up in a grid; ruts and stones with volume are decals).
+   */
   'tile.road': {
     w: SIZE,
     h: SIZE,
     draw(p) {
       const r = rng(23);
       p.fill(0x3a4258).fillRect(0, 0, SIZE, SIZE);
-      p.fill(0x2e3548).fillRect(0, 38, SIZE, 7).fillRect(0, 84, SIZE, 7);
       for (let i = 0; i < 8; i++)
-        p.fill(0x4a5470, 0.7).fillEllipse(r() * SIZE, r() * SIZE, 26 + r() * 26, 10 + r() * 10);
+        p.fill(0x4a5470, 0.45).fillEllipse(r() * SIZE, r() * SIZE, 26 + r() * 26, 10 + r() * 10);
       for (let i = 0; i < 6; i++) {
         const x = r() * SIZE;
         const y = r() * SIZE;
-        p.fill(0x1e2230, 0.6).fillEllipse(x + 1, y + 2, 9, 5);
-        p.fill(0x7a7a82).fillEllipse(x, y, 9, 6);
-        p.fill(0xa2a2ac).fillEllipse(x - 1.5, y - 1.5, 4, 2.5);
+        p.fill(0x4e566e, 0.8).fillEllipse(x, y, 7 + r() * 4, 4 + r() * 2);
       }
       for (let i = 0; i < 24; i++)
         p.fill(0xe8eff8, 0.2 + r() * 0.3).fillCircle(r() * SIZE, r() * SIZE, 0.8 + r());
@@ -209,6 +209,19 @@ export const DECAL_ART: Record<string, ArtDef> = {
       p.rrect(1, 8, 32, 3, 1, 0x8a6a48);
       p.ink();
       p.fill(0xe8eff8, 0.85).fillEllipse(5, 4, 6, 2).fillEllipse(29, 6, 6, 2);
+    },
+  },
+  'decal.ruts': {
+    // A short stretch of wheel ruts, gently curved (the tile has none, so they never line up).
+    w: 56,
+    h: 22,
+    draw(p) {
+      for (const y of [6, 16])
+        p.g
+          .lineStyle(4, 0x2e3548, 0.7)
+          .beginPath()
+          .arc(28, y + 60, 62, -Math.PI / 2 - 0.42, -Math.PI / 2 + 0.42)
+          .strokePath();
     },
   },
   'decal.stones': {
