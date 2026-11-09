@@ -1109,6 +1109,37 @@ da Estrada), descritos nos próprios itens.
 
 ---
 
+## Lore: conferência com o original (2026-11-09)
+
+Lore lida em `/home/dani/games/dungeon-rpg/docs/mundo/` (cânone, prólogo, capítulo 1) e no `src/data.js` do original.
+
+**RL-01 · Elenco das fases como no original** · impl · P · ✅ feito
+
+- Por quê: no original, o cemitério de Valmor tem Ossadas, morcegos cinzentos e Ratos de Cova; a cripta tem Rato
+  Gigante, Morcego Vampiro e Gosma Verde. Aqui Valmor tinha Esqueleto, Aranha e Gosma, e a Ossada estava na Cripta.
+- Feito: Valmor = Ossada (básico), Morcego (rápido), Esqueleto maior (resistente, arte 1.3x, raio 14), Rato de Cova
+  (extra, novo: rato cinza 0.75x). Cripta = Rato Gigante (básico), Aranha Tumular (rápido), Gosma Verde (resistente),
+  Espectro (extra). O Sineiro continua erguendo Ossadas. Sim 12 sementes antes/depois: Valmor 38→38/48,
+  Cripta 34→34/48, Estrada 40→40/48; Aldo em Valmor 8→10/12.
+
+**RL-02 · Vitória em Valmor sem contradizer a história** · impl · P · ✅ feito
+
+- Por quê: quem acorda os mortos é o sino do Sineiro, então eles não "voltam a dormir" ao fim de Valmor.
+- Feito: "O Cavaleiro Negro caiu. Mas o sino da igreja velha continua tocando."
+
+**RL-03 · Correções no CLAUDE.md e no game-director** · impl · P · ✅ feito
+
+- Aldo nasceu em Hyarmeth (não é de Valmor); o Elo do original é a combinação de dois heróis (o nome foi
+  emprestado, a mecânica não); a lore fica só na cópia local do original, não no GitHub.
+
+**Perguntas abertas para o Daniel (lore)**
+
+1. "Aura de Yah" e "Chama de Yah": Yah é o Criador no cânone. Usar o nome numa arma de fogo incomoda?
+2. Elos: manter como evolução de arma, ou aproximar do original (ex.: Espada de Fogo do Aldo = Lâmina + Fogo)?
+3. Chefe de Valmor: manter o Cavaleiro Negro (só existe na tabela de dados do original) ou outro do cemitério?
+4. Lore sem uso, pronta para fases futuras: a Irmandade dos encapuzados (o olho cortado ao meio), Morvath e o
+   túmulo arrombado, "O rei voltará".
+
 ## Decisões já tomadas pelo plano do Daniel
 
 | Tema                        | Relatório propôs                         | Plano do Daniel decide                                                                               |

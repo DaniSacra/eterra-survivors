@@ -27,8 +27,9 @@ rápida, mil jeitos de montar."
    Always a "só mais uma" reason visible on the end screen.
 5. **Caos legível**: hundreds of enemies, still readable on a phone screen. Feedback (flash, numbers, shake) is
    juicy but never hides threats.
-6. **Eterra de verdade**: names, places and characters come from Crônicas de Eterra. Read the original repo
-   (`gh api repos/danisacra/cronicas-de-eterra/contents/...`, especially `src/data.js` and `docs/`) before
+6. **Eterra de verdade**: names, places and characters come from Crônicas de Eterra. Read the lore in the
+   local original repo, `/home/dani/games/dungeon-rpg/docs/mundo/` (`canone.md`, `historias/`, `pendencias.md`;
+   the GitHub copy has only code), plus its `src/data.js` for the original cast, before
    proposing anything with lore. Daniel owns the world: when lore is missing, propose it as an open question,
    never as fact.
 
