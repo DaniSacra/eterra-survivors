@@ -784,3 +784,43 @@ Fúria em 2,3x: as bases ficaram fortes no jogo real com a curva nova.
 | Custo da Loja inteira             | 21.650 | 40.300          |
 | Ouro médio por partida (sim)      | 689    | 739             |
 | Partidas médias para comprar tudo | 31     | 54 (alvo 40–60) |
+
+# Rodada dos Elos
+
+## Etapa 1 · nova regra de formação
+
+Mudanças: o Elo se forja na hora em que a arma (7/7) e a passiva da receita estão no nível máximo; não há mais
+carta de Elo nem Elo pelo baú. O baú de elite dá ouro (25), um nível de algo que o herói já tem e 25% de cura
+(`CHEST` em `data/pickups.ts`). As cartas que avançam uma receita do herói saem 3x mais (`config.xp.recipeWeight`)
+e mostram o progresso ("Elo Fúria: arma 6/7 · Força 5/5"). O bot passou a perseguir a passiva da receita.
+
+### Elos no sim (antes = regra do baú, 288 partidas por lado)
+
+| Loja    | 1º Elo (mediana) antes | depois  | partidas com Elo antes | depois | Elos/partida antes | depois |
+| ------- | ---------------------- | ------- | ---------------------- | ------ | ------------------ | ------ |
+| nenhuma | 9,0 min                | 4,6 min | 2%                     | 7%     | 0,0                | 0,2    |
+| metade  | 6,7 min                | 5,8 min | 47%                    | 52%    | 1,1                | 2,5    |
+| inteira | 6,7 min                | 5,8 min | 93%                    | 89%    | 2,6                | 4,3    |
+
+Meta do primeiro Elo (5–7 min na mediana) cumprida com loja. Sem loja quase ninguém chega lá: o herói morre antes
+(Valmor sem loja morre aos ~6 min, como pede a meta de dificuldade).
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  0/32 0%           6.1 min       181  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         valmor    half  19/32 59%        10.1 min       702  aldo 38%! · lyra 63% · teo 38%! · andilla 100%!
+         valmor    full  30/32 94%        12.6 min      1007  aldo 88% · lyra 100% · teo 88% · andilla 100%
+         crypt     none  0/32 0%           4.1 min       132  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         crypt     half  6/32 19%          9.0 min       829  aldo 13% · lyra 13% · teo 38% · andilla 13%
+         crypt     full  27/32 84%        10.1 min      1476  aldo 63%! · lyra 88% · teo 88% · andilla 100%
+         southRoad none  0/32 0%           1.7 min        41  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         southRoad half  0/32 0%           4.3 min       435  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         southRoad full  15/32 47%         5.5 min      1660  aldo 13%! · lyra 63% · teo 50% · andilla 63%
+
+
+ELOS     none: first Elo median 4.6 min (7% of runs), 0.2/run · half: first Elo median 5.8 min (52% of runs), 2.5/run · full: first Elo median 5.8 min (89% of runs), 4.3/run
+ELO X    fury 1.4x · holyLight 5.8x · yahFlame 1.6x · vigil 0.4x · blizzard 1.2x · storm 1.8x · jointBreaker 1.7x · fireSword 3.8x · forgeFury 5.4x · soulProcession 4.1x · valmorWall 3.4x · lyraStar 4.8x
+```
+
+O ELO X do sim (Elo contra a base no máximo, nas mesmas partidas) ficou instável: com a regra nova a base fica
+pouco tempo no nível máximo. A Etapa 7 passa a garantir o 2,5x pelo lab.
