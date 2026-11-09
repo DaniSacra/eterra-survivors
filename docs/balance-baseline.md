@@ -756,31 +756,31 @@ Fúria em 2,3x: as bases ficaram fortes no jogo real com a curva nova.
 
 ### Vitórias do bot por fase x perfil de loja
 
-| Fase | Loja | Antes (Etapa 0) | Depois (Etapa 6) | Alvo |
-| --- | --- | --- | --- | --- |
-| Valmor | nenhuma | 91% | 6% (morte aos 6,1 min) | 0–15%, morte 6–8 min |
-| Valmor | metade | 97% | 58% | 40–60% |
-| Valmor | inteira | 88% | 98% | 85%+ |
-| Cripta | nenhuma | 72% | 0% (morte aos 3,6 min) | 0%, morte antes de 6 min |
-| Cripta | metade | 97% | 16% | 15–35% |
-| Cripta | inteira | 97% | 86% | 70–85% |
-| Estrada | nenhuma | 100% | 0% (morte aos 1,7 min) | 0%, morte antes de 5 min |
-| Estrada | metade | 97% | 2% | 0–10% |
-| Estrada | inteira | 97% | 47% | 35–55% |
+| Fase    | Loja    | Antes (Etapa 0) | Depois (Etapa 6)       | Alvo                     |
+| ------- | ------- | --------------- | ---------------------- | ------------------------ |
+| Valmor  | nenhuma | 91%             | 6% (morte aos 6,1 min) | 0–15%, morte 6–8 min     |
+| Valmor  | metade  | 97%             | 58%                    | 40–60%                   |
+| Valmor  | inteira | 88%             | 98%                    | 85%+                     |
+| Cripta  | nenhuma | 72%             | 0% (morte aos 3,6 min) | 0%, morte antes de 6 min |
+| Cripta  | metade  | 97%             | 16%                    | 15–35%                   |
+| Cripta  | inteira | 97%             | 86%                    | 70–85%                   |
+| Estrada | nenhuma | 100%            | 0% (morte aos 1,7 min) | 0%, morte antes de 5 min |
+| Estrada | metade  | 97%             | 2%                     | 0–10%                    |
+| Estrada | inteira | 97%             | 47%                    | 35–55%                   |
 
 ### DPS por categoria no lab (multidão, nível máximo, % da melhor `aimed`)
 
-| Categoria | Faixa | Antes | Depois |
-| --- | --- | --- | --- |
-| aimed | 85–100% | 63–100% | 87–100% |
-| auto | 50–65% | 16–53% | 55–56% |
-| area | 40–55% | 42–65% | 44–46% |
+| Categoria                  | Faixa               | Antes   | Depois  |
+| -------------------------- | ------------------- | ------- | ------- |
+| aimed                      | 85–100%             | 63–100% | 87–100% |
+| auto                       | 50–65%              | 16–53%  | 55–56%  |
+| area                       | 40–55%              | 42–65%  | 44–46%  |
 | Elos (vs melhor Elo aimed) | mesma faixa da base | 16–100% | 46–100% |
 
 ### Loja
 
-| | Antes | Depois |
-| --- | --- | --- |
-| Custo da Loja inteira | 21.650 | 40.300 |
-| Ouro médio por partida (sim) | 689 | 739 |
-| Partidas médias para comprar tudo | 31 | 54 (alvo 40–60) |
+|                                   | Antes  | Depois          |
+| --------------------------------- | ------ | --------------- |
+| Custo da Loja inteira             | 21.650 | 40.300          |
+| Ouro médio por partida (sim)      | 689    | 739             |
+| Partidas médias para comprar tudo | 31     | 54 (alvo 40–60) |
