@@ -1,4 +1,4 @@
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
 import { eloReady } from '../core/upgrades';
 import { isElo } from '../core/weapons';
 import type { World } from '../core/world';
@@ -14,6 +14,9 @@ import { UI, label } from './ui';
 const BADGE = 28;
 const GAP = 4;
 const PIP_H = 3;
+/** Margin around the baked textures for frames drawn just outside a slot. */
+const BLEED = 4;
+let nextId = 0;
 
 /** A slot to point at in the level-up preview: the one the focused card fills (`fresh` = a new slot). */
 export interface SlotFocus {
@@ -29,8 +32,13 @@ export interface SlotFocus {
  */
 export class BuildSlots {
   readonly container: Phaser.GameObjects.Container;
+  /** Drawn off-screen, then baked into textures: a Graphics would re-tessellate its rounded rects every frame. */
   private readonly frames: Phaser.GameObjects.Graphics;
   private readonly glow: Phaser.GameObjects.Graphics;
+  private readonly framesTex: Phaser.GameObjects.Image;
+  private readonly glowTex: Phaser.GameObjects.Image;
+  /** Texture keys of this strip's baked layers (one strip per scene can coexist with another). */
+  private readonly keys: [string, string];
   private readonly mark: Phaser.GameObjects.Graphics;
   private readonly icons: Phaser.GameObjects.Image[] = [];
   private readonly glowTween: Phaser.Tweens.Tween;
@@ -40,14 +48,23 @@ export class BuildSlots {
     /** Weapon slot side in px; passive slots are a bit smaller. */
     private size = 24,
   ) {
-    this.frames = scene.add.graphics();
-    this.glow = scene.add.graphics();
+    this.frames = scene.make.graphics({}, false);
+    this.glow = scene.make.graphics({}, false);
+    const id = nextId++;
+    this.keys = [`buildSlots.frames.${id}`, `buildSlots.glow.${id}`];
+    this.framesTex = scene.add.image(-BLEED, -BLEED, '__DEFAULT').setOrigin(0);
+    this.glowTex = scene.add.image(-BLEED, -BLEED, '__DEFAULT').setOrigin(0);
     this.mark = scene.add.graphics();
     const n = config.weapons.maxOwned + config.weapons.maxPassives;
     for (let i = 0; i < n; i++) this.icons.push(scene.add.image(0, 0, 'icon.blade').setVisible(false));
-    this.container = scene.add.container(0, 0, [this.frames, ...this.icons, this.glow, this.mark]);
+    this.container = scene.add.container(0, 0, [this.framesTex, ...this.icons, this.glowTex, this.mark]);
+    this.container.once(Phaser.GameObjects.Events.DESTROY, () => {
+      this.frames.destroy();
+      this.glow.destroy();
+      for (const key of this.keys) if (scene.textures.exists(key)) scene.textures.remove(key);
+    });
     this.glowTween = scene.tweens.add({
-      targets: this.glow,
+      targets: this.glowTex,
       alpha: { from: 1, to: 0.3 },
       duration: 520,
       yoyo: true,
@@ -86,8 +103,8 @@ export class BuildSlots {
 
   /** Redraws the slots from the world (call when `world.buildRev` changes). */
   refresh(world: World, focus: SlotFocus | null = null): void {
-    const g = this.frames.clear();
-    const glow = this.glow.clear();
+    const g = this.frames.clear().translateCanvas(BLEED, BLEED);
+    const glow = this.glow.clear().translateCanvas(BLEED, BLEED);
     this.mark.clear();
     const S = this.size;
     const P = this.small;
@@ -132,9 +149,21 @@ export class BuildSlots {
     }
     for (let i = icon; i < this.icons.length; i++) this.icons[i]?.setVisible(false);
 
+    // Bake both layers into textures (drawn BLEED px in, so frames just outside a slot are not cut).
+    const tw = this.width + BLEED * 2;
+    const th = this.height + BLEED * 2;
+    const [fk, gk] = this.keys;
+    for (const [img, src, key] of [
+      [this.framesTex, g, fk],
+      [this.glowTex, glow, gk],
+    ] as const) {
+      if (img.scene.textures.exists(key)) img.scene.textures.remove(key);
+      src.generateTexture(key, tw, th);
+      img.setTexture(key);
+    }
     if (ready) this.glowTween.resume();
     else this.glowTween.pause();
-    glow.setAlpha(1);
+    this.glowTex.setAlpha(1);
 
     if (focus) {
       const side = focus.kind === 'weapon' ? S : P;
