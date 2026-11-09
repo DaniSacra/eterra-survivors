@@ -21,6 +21,9 @@ export const ELEMENTS = [
 ] as const;
 export type ElementId = (typeof ELEMENTS)[number];
 
+/** Gold banked the first time each Elo is forged (the Livro de Elos records it). */
+export const ELO_DISCOVERY_GOLD = 40;
+
 export interface Evolution {
   from: WeaponId;
   passive: PassiveId;

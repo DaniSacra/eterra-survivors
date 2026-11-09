@@ -319,7 +319,7 @@ export class BuildSlots {
  * A braided chain from (ax, ay) to (bx, by): two strands crossing each other every few px, over a dark outline so
  * it reads on any ground. `width` is the strand's (the glow layer draws it thicker).
  */
-function chain(
+export function chain(
   g: Phaser.GameObjects.Graphics,
   ax: number,
   ay: number,

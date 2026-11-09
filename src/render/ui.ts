@@ -199,10 +199,11 @@ export function gridCols(
   gap = 8,
   start = 1,
   minW = 180,
+  maxCols = 3,
 ): number {
   let cols = start;
   while (
-    cols < 3 &&
+    cols < maxCols &&
     Math.ceil(n / cols) * (rowH + gap) > avail &&
     (width - 24 - gap * cols) / (cols + 1) >= minW
   )

@@ -15,7 +15,7 @@ export type AchievementGroup =
  * - totalKills, totalDamage: the totals; enemyKills: bestiary kills of `enemies`;
  * - closeWin: 1 once a victory ended with `at` or less of the HP; bossFast: 1 once a boss fell within `at` seconds
  *   of arriving; soloWins: victories with only the starting weapon;
- * - elosFound: Elos discovered; sharedUsed: shared weapons ever held; heroWins: victories of `hero`;
+ * - elosFound: Elos discovered; heroElos: most different Elos formed by one hero; sharedUsed: shared weapons ever held; heroWins: victories of `hero`;
  *   heroesWon: heroes with a victory; heroAllStages: most stages won by one hero; stagesCleared; seen: bestiary
  *   size; shopLevels: shop levels bought; vigil: the longest Noite Sem Fim, seconds.
  */
@@ -32,6 +32,7 @@ export type Metric =
   | 'bestLevel'
   | 'elosFound'
   | 'runElos'
+  | 'heroElos'
   | 'runMaxed'
   | 'sharedUsed'
   | 'soloWins'
@@ -90,6 +91,7 @@ const DEFS = {
   // Armas e Elos
   eloFirst: { group: 'weapons', metric: 'elosFound', goal: 1, gold: 50, charge: 'reroll' },
   elosRun3: { group: 'weapons', metric: 'runElos', goal: 3, gold: 100 },
+  elosHero: { group: 'weapons', metric: 'heroElos', goal: EVOLVED_IDS.length, gold: 200, title: true },
   maxed4: { group: 'weapons', metric: 'runMaxed', goal: 4, gold: 75 },
   allShared: { group: 'weapons', metric: 'sharedUsed', goal: SHARED_WEAPONS.length, gold: 100 },
   soloWin: { group: 'weapons', metric: 'soloWins', goal: 1, gold: 150, title: true },

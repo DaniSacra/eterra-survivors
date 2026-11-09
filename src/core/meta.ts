@@ -3,7 +3,7 @@ import { config, type Stats } from '../data/config';
 import { SHOP, SHOP_IDS, type ChargeKey, type ShopDef, type ShopId } from '../data/shop';
 import { STAGES, STAGE_IDS, stageCast, type StageId } from '../data/stages';
 import { ENEMY_IDS, type EnemyId } from '../data/enemies';
-import { EVOLVED_IDS } from '../data/evolutions';
+import { ELO_DISCOVERY_GOLD, EVOLVED_IDS } from '../data/evolutions';
 import { WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { ACHIEVEMENTS, ACHIEVEMENT_IDS, type AchievementId } from '../data/achievements';
 import { checkAchievements } from './achievements';
@@ -431,6 +431,7 @@ export function recordVigil(save: MetaSave, run: RunSummary, before: RunSummary)
 export function discoverElos(save: MetaSave, ids: readonly WeaponId[]): WeaponId[] {
   const fresh = ids.filter((id) => EVOLVED_IDS.includes(id) && !save.elos.includes(id));
   save.elos.push(...fresh);
+  save.gold += fresh.length * ELO_DISCOVERY_GOLD;
   return fresh;
 }
 

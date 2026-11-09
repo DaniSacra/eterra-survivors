@@ -1,4 +1,5 @@
 import type { StatKey } from '../data/config';
+import type { ElementId } from '../data/evolutions';
 import type { AchievementGroup, AchievementId } from '../data/achievements';
 import type { CharacterId } from '../data/characters';
 import type { EnemyId } from '../data/enemies';
@@ -269,6 +270,24 @@ export const t = {
     plus: '+',
     equals: '=',
     mystery: '?',
+    /** A formed Elo's page: its element, what it does, its line, and the way back to the grid. */
+    element: (name: string) => `Elemento: ${name}`,
+    effect: 'O que faz',
+    open: 'Toque num Elo descoberto para ver a página dele.',
+    back: 'Voltar ao Livro',
+    elements: {
+      fury: 'Fúria',
+      fire: 'Fogo',
+      forge: 'Forja',
+      shadow: 'Sombra',
+      ice: 'Gelo',
+      storm: 'Tempestade',
+      holy: 'Sagrado',
+      arcane: 'Arcano',
+      earth: 'Terra',
+      soul: 'Alma',
+      steel: 'Aço',
+    } satisfies Record<ElementId, string>,
   },
 
   options: {
@@ -297,7 +316,7 @@ export const t = {
     lost: 'Fim de jogo',
     lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
-    newElo: (name: string) => `Elo descoberto: ${name}! Veja na Coleção.`,
+    newElo: (name: string, gold: number) => `Elo descoberto: ${name}! +${gold} de ouro. Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,
     /** The long-term goal: the most expensive thing left in the Loja. */
     toBuy: (name: string, missing: number) => `Faltam ${int(missing)} para ${name}`,
@@ -365,6 +384,7 @@ export const t = {
       vigil5: { name: 'Até o Amanhecer', desc: 'Aguente 5 minutos na Noite Sem Fim.' },
       eloFirst: { name: 'Primeiro Elo', desc: 'Forme um Elo.' },
       elosRun3: { name: 'Corrente Inteira', desc: (n) => `Forme ${n} Elos numa partida.` },
+      elosHero: { name: 'Um Herói, Todos os Elos', desc: 'Forme todos os Elos com um mesmo herói.' },
       maxed4: {
         name: 'Mãos de Ferreiro',
         desc: (n) => `Termine uma partida com ${n} armas no nível máximo (Elos contam).`,
@@ -401,6 +421,7 @@ export const t = {
       winAll: 'Um dos Quatro',
       seenAll: 'Caçador das Covas',
       elosAll: 'Mestre dos Elos',
+      elosHero: 'Forjador de Elos',
     } as Partial<Record<AchievementId, string>>,
     reward: (gold: number) => `+${gold} ouro`,
     /** The in-run notice. */
@@ -551,19 +572,43 @@ export const t = {
       desc: 'Escudos girando perto do herói, que empurram quem acertam.',
     },
     lightning: { name: 'Raio', desc: 'Raios caem sobre inimigos ao acaso.' },
-    fury: { name: 'Fúria', desc: 'Aldo gira a espada contra todos ao redor.' },
-    holyLight: { name: 'Luz Sagrada', desc: 'Um enxame de luzes que atravessa os mortos.' },
-    yahFlame: { name: 'Chama de Yah', desc: 'O halo vira uma fogueira larga.' },
+    fury: {
+      name: 'Fúria',
+      desc: 'A espada gira contra todos ao redor e, a cada terceiro golpe, solta uma onda cortante à frente.',
+    },
+    holyLight: {
+      name: 'Luz Sagrada',
+      desc: 'Um enxame de luzes que atravessa os mortos. Cada abate pela luz cura um pouco.',
+    },
+    yahFlame: {
+      name: 'Chama de Yah',
+      desc: 'O halo vira uma fogueira larga que, a cada 3 segundos, solta uma onda que empurra tudo para longe.',
+    },
     fan: {
       name: 'Leque de Facas',
-      desc: 'Um leque largo de facas, mais rápido, e acertos em cheio que cortam fundo.',
+      desc: 'Cada faca ricocheteia até 3 vezes no inimigo mais próximo. Acertos em cheio fazem sangrar.',
     },
-    vigil: { name: 'Vigília dos Quatro', desc: 'Os quatro paladinos montam guarda em volta do herói.' },
-    blizzard: { name: 'Nevasca', desc: 'O inverno cobre o campo inteiro.' },
-    storm: { name: 'Tempestade', desc: 'O céu inteiro desaba sobre os mortos.' },
-    forgeFury: { name: 'Fúria da Forja', desc: 'Martelos que não param, atravessando tudo.' },
-    soulProcession: { name: 'Procissão das Almas', desc: 'Uma fila longa de luzes caminha pelo campo.' },
-    valmorWall: { name: 'Muralha de Valmor', desc: 'Um anel de escudos largo e cerrado em volta do herói.' },
+    vigil: {
+      name: 'Vigília dos Quatro',
+      desc: 'Espadas em volta do herói que, uma vez por volta, avançam até o inimigo mais perto e voltam.',
+    },
+    blizzard: {
+      name: 'Nevasca',
+      desc: 'Geada que deixa os inimigos lentos. Quem morre dentro dela se estilhaça e fere quem está perto.',
+    },
+    storm: { name: 'Tempestade', desc: 'Raios caem sobre os mortos e cada um pula para mais 2 inimigos.' },
+    forgeFury: {
+      name: 'Fúria da Forja',
+      desc: 'Martelos que atravessam tudo e voltam como bumerangue, acertando de novo na volta.',
+    },
+    soulProcession: {
+      name: 'Procissão das Almas',
+      desc: 'Uma fila de luzes caminha pelo campo. Cada abate soma mais uma luz por alguns segundos.',
+    },
+    valmorWall: {
+      name: 'Muralha de Valmor',
+      desc: 'Um anel de escudos e uma proteção que segura um golpe a cada 10 segundos e devolve a pancada.',
+    },
     mace: {
       name: 'Maça de Ferro',
       desc: 'O golpe abre uma fenda à frente e, logo depois, o chão treme onde a maça bateu. Quem é atingido fica tonto.',
@@ -571,10 +616,16 @@ export const t = {
     fire: { name: 'Fogo', desc: 'Chamas caem sobre os inimigos e queimam uma área larga.' },
     jointBreaker: {
       name: 'Quebra-Junta',
-      desc: 'Duas fendas de uma vez, e um tremor que sacode toda a frente.',
+      desc: 'A fenda se abre em três, cada tremor acorda outro menor, e quem já está tonto leva mais dano.',
     },
-    fireSword: { name: 'Espada de Fogo', desc: 'Uma chuva de espadas em chamas sobre o campo.' },
-    lyraStar: { name: 'Estrela de Lyra', desc: 'Três orbes grandes de cada vez, com explosões largas.' },
+    fireSword: {
+      name: 'Espada de Fogo',
+      desc: 'Espadas em chamas caem sobre o campo, e o chão onde caem queima e põe fogo em quem passa.',
+    },
+    lyraStar: {
+      name: 'Estrela de Lyra',
+      desc: 'O orbe explode e se parte em estrelas pequenas, que caem em volta e explodem de novo.',
+    },
   } satisfies Record<WeaponId, { name: string; desc: string }>,
 
   passives: {

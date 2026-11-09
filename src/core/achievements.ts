@@ -74,6 +74,15 @@ export const METRICS: Record<
   bestLevel: (s, _d, r) => Math.max(best(s, 'bestLevel'), r?.level ?? 0),
   elosFound: (s, _d, r) => s.elos.length + (r?.elos.filter((id) => !s.elos.includes(id)).length ?? 0),
   runElos: (s, _d, r) => Math.max(best(s, 'maxElos'), r?.elos.length ?? 0),
+  heroElos: (s, _d, r) =>
+    Math.max(
+      0,
+      ...CHARACTER_IDS.map((h) => {
+        const known = s.records[h]?.elos ?? [];
+        const live = r?.hero === h ? r.elos.filter((id) => !known.includes(id)).length : 0;
+        return known.length + live;
+      }),
+    ),
   runMaxed: (s, _d, r) => Math.max(best(s, 'maxMaxed'), r?.maxed ?? 0),
   sharedUsed: (s, _d, r) =>
     SHARED_WEAPONS.filter(

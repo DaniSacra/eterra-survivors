@@ -1,3 +1,4 @@
+import { ELO_DISCOVERY_GOLD } from '../data/evolutions';
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
 import { almostElo, passiveReport, weaponReport } from '../core/report';
@@ -259,7 +260,8 @@ export class EndScene extends Phaser.Scene {
         : t.end.almostEloUnknown(weapon);
       line(text, 15, UI.gold, true);
     }
-    for (const id of this.newElos) line(t.end.newElo(t.weapons[id].name), 15, UI.gold, true);
+    for (const id of this.newElos)
+      line(t.end.newElo(t.weapons[id].name, ELO_DISCOVERY_GOLD), 15, UI.gold, true);
     // Achievements: up to three new ones; with none, the one closest to done (the next "one more run").
     const fresh = this.newAchievements;
     for (const id of fresh.slice(0, 3)) {

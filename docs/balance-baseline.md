@@ -875,3 +875,12 @@ Lab em multidão, % da melhor Elo `aimed` (antes da etapa → só efeitos → re
 
 O lab usa alvos imortais, então cura, estilhaço, almas e a proteção não aparecem nele; o sim mede o efeito real
 na Etapa 7.
+
+## Etapa 6 · Livro de Elos
+
+- Cada Elo forjado pela primeira vez rende **40 de ouro** (`ELO_DISCOVERY_GOLD` em `data/evolutions.ts`), avisado
+  na tela final.
+- O Livro (Coleção → Elos) mostra a corrente na cor do elemento entre a passiva e o Elo; um Elo descoberto abre a
+  página dele: elemento, receita acorrentada, o que faz (o texto novo de cada Elo) e a frase dele.
+- Conquistas: Primeiro Elo (`eloFirst`), Corrente Inteira (3 Elos numa partida, `elosRun3`), Livro Completo
+  (`elosAll`) já existiam; nova **Um Herói, Todos os Elos** (`elosHero`, 200 de ouro, título "Forjador de Elos").

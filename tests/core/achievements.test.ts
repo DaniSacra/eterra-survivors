@@ -52,6 +52,7 @@ const MEET: Record<Metric, (s: MetaSave, d: AchievementDef) => void> = {
   bestLevel: (s, d) => void (s.records.teo = { ...newHeroRecord(), bestLevel: d.goal }),
   elosFound: (s, d) => void (s.elos = EVOLVED_IDS.slice(0, d.goal)),
   runElos: (s, d) => void (s.records.aldo = { ...newHeroRecord(), maxElos: d.goal }),
+  heroElos: (s, d) => void (s.records.lyra = { ...newHeroRecord(), elos: EVOLVED_IDS.slice(0, d.goal) }),
   runMaxed: (s, d) => void (s.records.aldo = { ...newHeroRecord(), maxMaxed: d.goal }),
   sharedUsed: (s) => {
     s.records.aldo = { ...newHeroRecord(), weaponRuns: { [SHARED_WEAPONS[0]!]: 1 } };
@@ -75,12 +76,12 @@ const MEET: Record<Metric, (s: MetaSave, d: AchievementDef) => void> = {
 };
 
 describe('achievement data', () => {
-  it('36 achievements in 7 groups, 3.700 gold and 6 titles, every one with its texts', () => {
-    expect(ACHIEVEMENT_IDS).toHaveLength(36);
-    expect(new Set(ACHIEVEMENT_IDS).size).toBe(36);
-    expect(ACHIEVEMENT_IDS.reduce((n, id) => n + ACHIEVEMENTS[id].gold, 0)).toBe(3700);
+  it('37 achievements in 7 groups, 3.900 gold and 7 titles, every one with its texts', () => {
+    expect(ACHIEVEMENT_IDS).toHaveLength(37);
+    expect(new Set(ACHIEVEMENT_IDS).size).toBe(37);
+    expect(ACHIEVEMENT_IDS.reduce((n, id) => n + ACHIEVEMENTS[id].gold, 0)).toBe(3900);
     const titled = ACHIEVEMENT_IDS.filter((id) => ACHIEVEMENTS[id].title);
-    expect(titled).toHaveLength(6);
+    expect(titled).toHaveLength(7);
     expect(Object.keys(t.achievements.titles).sort()).toEqual([...titled].sort());
     for (const g of ACHIEVEMENT_GROUPS) {
       expect(ACHIEVEMENT_IDS.some((id) => ACHIEVEMENTS[id].group === g)).toBe(true);
