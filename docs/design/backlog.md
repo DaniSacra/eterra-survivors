@@ -41,7 +41,7 @@ com tom sombrio.
 
 ## Etapa 0: Simulador (medir antes de mexer)
 
-**S-01 · Simulador de partidas completas** · impl · M
+**S-01 · Simulador de partidas completas** · impl · M · ✅ feito
 - Por quê: o bot atual do balance-tester é fraco (corridas de 4 a 6 min, "ler como relativo"); sem um bot
   estável, cada ajuste vira chute.
 - O quê: `tests/lab/sim.test.ts` (pulado no `npm test`, como o lab) e script `"sim"` no `package.json`.
@@ -54,7 +54,7 @@ com tom sombrio.
 - Aceite: `npm run sim` roda as 48 partidas em menos de 2 min no Node, é determinístico por semente e o
   `npm test` continua sem rodá-lo.
 
-**S-02 · Linha de base** · bal · P
+**S-02 · Linha de base** · bal · P · ✅ feito
 - Por quê: Forma de trabalho, item 3.
 - O quê: criar `docs/balance-baseline.md` com a saída do sim e do `npm run lab` no commit atual, antes de qualquer
   mudança de dados.

@@ -13,7 +13,9 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 ## Commands
 
 - `npm run dev` — dev server · `npm test` — unit tests · `npm run lint` · `npm run typecheck` · `npm run build`
-- `npm run lab` — weapon DPS table (solo and crowd, L1/Lmax/Elo) from `tests/lab/`, skipped by `npm test`
+- `npm run lab` — weapon DPS table (solo and crowd, L1/Lmax/Elo) from `tests/lab/weapons.test.ts`
+- `npm run sim` — 48 full runs (4 heroes x 3 stages x 4 seeds) with the bot in `tests/lab/bot.ts`; `SIM_HERO`,
+  `SIM_STAGE`, `SIM_SEEDS` narrow it. Both are skipped by `npm test`; results go in `docs/balance-baseline.md`
 - Every step must end with `npm test`, `npm run lint` and `npm run build` green, and the game running.
 
 ## Conventions
