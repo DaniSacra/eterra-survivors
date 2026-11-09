@@ -37,18 +37,61 @@ export interface EnemyDef {
   /** Elites are rare and tough, and drop a chest. */
   elite?: boolean;
   ability?: BossAbility;
+  /**
+   * A way of moving of its own (core/behaviours.ts): zigzag weaves sideways; charge crouches then dashes;
+   * phase passes through the others and now and then fades out (harmless and untouchable for a moment).
+   */
+  move?: 'zigzag' | 'charge' | 'phase';
 }
 
 export const ENEMIES = {
   skeleton: { sprite: 'enemy.skeleton', radius: 11, hp: 10, speed: 70, damage: 5, xp: 1, knockbackResist: 0 },
-  spider: { sprite: 'enemy.spider', radius: 9, hp: 5, speed: 120, damage: 4, xp: 1, knockbackResist: 0 },
+  spider: {
+    sprite: 'enemy.spider',
+    radius: 9,
+    hp: 5,
+    speed: 120,
+    damage: 4,
+    xp: 1,
+    knockbackResist: 0,
+    move: 'zigzag',
+  },
   slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 8, xp: 3, knockbackResist: 0.6 },
   // Cripta da Igreja Velha
   bones: { sprite: 'enemy.bones', radius: 11, hp: 12, speed: 65, damage: 5, xp: 1, knockbackResist: 0 },
   bat: { sprite: 'enemy.bat', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
-  ghost: { sprite: 'enemy.ghost', radius: 15, hp: 38, speed: 55, damage: 8, xp: 3, knockbackResist: 0.7 },
+  ghost: {
+    sprite: 'enemy.ghost',
+    radius: 15,
+    hp: 38,
+    speed: 55,
+    damage: 8,
+    xp: 3,
+    knockbackResist: 0.7,
+    move: 'phase',
+  },
+  /** Rato Gigante: the big rats of the crypt (Crônicas de Eterra), darting at whoever comes close. */
+  rat: {
+    sprite: 'enemy.rat',
+    radius: 12,
+    hp: 16,
+    speed: 80,
+    damage: 6,
+    xp: 2,
+    knockbackResist: 0.1,
+    move: 'charge',
+  },
   // Estrada do Sul
-  hooded: { sprite: 'enemy.hooded', radius: 11, hp: 11, speed: 72, damage: 5, xp: 1, knockbackResist: 0 },
+  hooded: {
+    sprite: 'enemy.hooded',
+    radius: 11,
+    hp: 11,
+    speed: 72,
+    damage: 5,
+    xp: 1,
+    knockbackResist: 0,
+    move: 'charge',
+  },
   crow: { sprite: 'enemy.crow', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
   frostWolf: {
     sprite: 'enemy.frostWolf',

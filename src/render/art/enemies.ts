@@ -143,6 +143,26 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
+  'enemy.rat': {
+    w: 34,
+    h: 24,
+    draw(p) {
+      const fur = 0x8a7a6e;
+      p.shadow(17, 21, 22, 5);
+      p.line(6, 15, 1, 9, 2.6, INK).line(6, 15, 1, 9, 1.2, 0xe8a0a8); // tail
+      p.rrect(9, 16, 4, 5, 2, fur).rrect(19, 16, 4, 5, 2, fur); // legs
+      p.ellipse(15, 13, 18, 11, fur); // body
+      p.poly([21, 8, 31, 12, 30, 15, 21, 17], fur); // snout
+      p.circle(21, 6, 3.5, fur); // ear
+      p.ink();
+      p.fill(0xe8a0a8).fillCircle(21, 6, 1.8).fillCircle(31, 13, 1.4);
+      p.fill(shade(fur, 1.25)).fillEllipse(14, 16, 11, 4);
+      p.eye(25, 11, 2);
+      p.fill(0xffffff).fillRect(28.5, 15, 1.4, 2);
+      p.shine(11, 10, 5, 2.5, 0.3);
+    },
+  },
+
   // ---- Estrada do Sul ----
   'enemy.hooded': {
     w: 26,

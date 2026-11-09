@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { DamageNumber } from '../core/effects';
 import { BossAct } from '../core/bosses';
+import { isFaded } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
@@ -151,6 +152,7 @@ export class GameScene extends Phaser.Scene {
         else if (this.world.freeze > 0) img.setTint(TINT.frozen);
         else if (e.slow > 0) img.setTint(TINT.slowed);
         else img.clearTint();
+        img.setAlpha(isFaded(e) ? 0.3 : 1); // a fading ghost: harmless and untouchable for a moment
       },
     );
 

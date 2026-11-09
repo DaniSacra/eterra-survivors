@@ -242,6 +242,7 @@ export const t = {
     bones: 'Ossada',
     bat: 'Morcego',
     ghost: 'Espectro',
+    rat: 'Rato Gigante',
     hooded: 'Encapuzado',
     crow: 'Corvo',
     frostWolf: 'Lobo da Geada',

@@ -2,6 +2,7 @@ import { config } from '../data/config';
 import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/enemies';
 import { TAU } from './math';
 import { updateBoss } from './bosses';
+import { behaviourStep, isFaded } from './behaviours';
 import { hurtPlayer } from './player';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
@@ -53,6 +54,8 @@ export const createEnemy = (): Enemy => ({
 });
 
 let nextUid = 1;
+/** Reused output of behaviourStep. */
+const STEP = { x: 0, y: 0 };
 
 export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hpMult = 1): Enemy {
   const e = world.enemies.acquire();
@@ -66,7 +69,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.kbx = e.kby = e.flash = e.slow = 0;
   e.orbitReady.fill(0);
   e.act = 0;
-  e.actT = def.ability ? def.ability.every / 2 : 0;
+  e.actT = def.ability ? def.ability.every / 2 : def.move ? 2 : 0;
   e.aimX = 1;
   e.aimY = 0;
   e.dead = false;
@@ -113,7 +116,7 @@ export function damageEnemy(
   knockback = 0,
   source: OwnedWeapon | null = null,
 ): void {
-  if (e.dead) return;
+  if (e.dead || isFaded(e)) return;
   if (source) source.damage += Math.min(amount, e.hp);
   world.tally.hits++;
   e.hp -= amount;
@@ -158,8 +161,24 @@ export function updateEnemies(world: World, dt: number): void {
       e.slow -= dt;
       speed *= config.zones.slowFactor;
     }
-    let mx = (dx / dist) * speed;
-    let my = (dy / dist) * speed;
+    let mx: number;
+    let my: number;
+    if (e.def.move && !frozen) {
+      behaviourStep(world, e, dt, dx / dist, dy / dist, dist, speed, STEP);
+      mx = STEP.x;
+      my = STEP.y;
+      if (e.def.move === 'phase') {
+        // Passes through the crowd: no separation.
+        e.x += mx + e.kbx * dt;
+        e.y += my + e.kby * dt;
+        e.kbx *= decay;
+        e.kby *= decay;
+        continue;
+      }
+    } else {
+      mx = (dx / dist) * speed;
+      my = (dy / dist) * speed;
+    }
 
     // Separation from overlapping neighbours, weighted by size so the big ones shove the small.
     const r = e.def.radius;
@@ -200,7 +219,7 @@ export function updateEnemies(world: World, dt: number): void {
     const minD = config.player.radius + e.def.radius;
     const cx = p.x - e.x;
     const cy = p.y - e.y;
-    if (cx * cx + cy * cy < minD * minD && hurtPlayer(p, e.def.damage)) {
+    if (cx * cx + cy * cy < minD * minD && !isFaded(e) && hurtPlayer(p, e.def.damage)) {
       world.events.push({ type: 'playerHit' });
       break;
     }

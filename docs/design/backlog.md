@@ -304,7 +304,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: tela que lista os 10 Elos, com receita revelada após a primeira descoberta (salvo em `core/meta.ts`).
 - Aceite: descobrir um Elo o marca no livro e o save antigo continua válido (`sanitizeSave`).
 
-**D-04 · Um inimigo com comportamento novo por fase** · impl + bal · G
+**D-04 · Um inimigo com comportamento novo por fase** · impl + bal · G · ✅ feito
 - Por quê: todos os inimigos só perseguem; falta variedade que peça movimento (pilar 2).
 - O quê: um comportamento simples, data-driven: Encapuzado que investe em linha; Espectro que atravessa e some.
   Na Cripta, considerar o Rato Gigante (do elenco original da cripta, hoje sem uso).

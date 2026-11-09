@@ -28,7 +28,7 @@ export const STAGES = {
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
   crypt: {
     tile: 'tile.crypt',
-    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'ghost' }),
+    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'ghost', extra: 'rat' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
