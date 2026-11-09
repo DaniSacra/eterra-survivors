@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, spawnEnemy, spawnRadius, updateEnemies } from '../../src/core/enemies';
 import { ENEMIES } from '../../src/data/enemies';
+import { STAGES } from '../../src/data/stages';
 import type { OwnedWeapon } from '../../src/core/weapons';
 import { bareWorld as quietWorld, quietWorld as armedWorld, still } from './helpers';
 
@@ -27,7 +28,9 @@ describe('enemies', () => {
     spawnEnemy(w, 'skeleton', 5, 0);
     spawnEnemy(w, 'skeleton', -5, 0);
     updateEnemies(w, 1 / 60);
-    expect(w.player.hp).toBe(w.player.stats.maxHp - ENEMIES.skeleton.damage);
+    expect(w.player.hp).toBeCloseTo(
+      w.player.stats.maxHp - ENEMIES.skeleton.damage * STAGES.valmor.mult.damage,
+    );
     expect(w.events).toEqual([{ type: 'playerHit' }]);
   });
 

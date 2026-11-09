@@ -20,6 +20,7 @@ export class Spawner {
     if (world.endless) return this.vigil(world, dt);
     const stage = world.stage;
     const seg = segmentAt(world.time, stage.waves);
+    world.enemyDamage = seg.damage;
     this.timer -= dt;
     while (this.timer <= 0) {
       this.timer += seg.interval;
@@ -49,7 +50,7 @@ export class Spawner {
     const seg = waves[waves.length - 2] as WaveSegment;
     const min = (world.time - world.vigilStart) / 60;
     const hp = seg.hpMult * (1 + v.hpPerMinute * min);
-    world.enemyDamage = 1 + v.damagePerMinute * min;
+    world.enemyDamage = seg.damage * (1 + v.damagePerMinute * min);
     const base = seg.batch + Math.floor(v.batchPerMinute * min);
     this.timer -= dt;
     while (this.timer <= 0) {

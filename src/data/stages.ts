@@ -48,7 +48,7 @@ export const STAGES = {
   valmor: {
     tile: 'tile',
     layout: { kind: 'open' },
-    mult: { hp: 1, damage: 1, speed: 1, spawn: 1, gold: 1 },
+    mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'blackKnight', at: config.matchDuration },
@@ -57,7 +57,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 1.6, damage: 1.4, speed: 1.05, spawn: 1.15, gold: 1.5 },
+    mult: { hp: 1.2, damage: 1.65, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
     elites: elites('golem', 'goblin'),
     boss: { id: 'bellRinger', at: config.matchDuration },
@@ -66,7 +66,7 @@ export const STAGES = {
   southRoad: {
     tile: 'tile.road',
     layout: { kind: 'corridor', width: 520, sides: 0.2 },
-    mult: { hp: 2.3, damage: 1.8, speed: 1.1, spawn: 1.25, gold: 2 },
+    mult: { hp: 2.3, damage: 2.1, speed: 1.1, spawn: 1.25, gold: 2 },
     waves: buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostWolf' }),
     elites: elites('goblin', 'golem'),
     boss: { id: 'oldWolf', at: config.matchDuration },

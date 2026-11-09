@@ -168,7 +168,7 @@ describe('stage multipliers', () => {
       w.player.hp = 1000;
       updateEnemies(w, 1 / 60);
     }
-    expect(1000 - c.player.hp).toBeCloseTo((1000 - v.player.hp) * m.damage);
+    expect(1000 - c.player.hp).toBeCloseTo(((1000 - v.player.hp) * m.damage) / STAGES.valmor.mult.damage);
     // Gold.
     addGold(v, 100);
     addGold(c, 100);

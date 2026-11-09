@@ -178,7 +178,7 @@ describe('checkAchievements', () => {
       hero: 'teo',
       stage: 'crypt',
       won: true,
-      time: 630,
+      time: 610,
       hpLeft: 0.08,
       weapons: ['mace'],
     });

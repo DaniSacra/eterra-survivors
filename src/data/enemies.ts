@@ -138,7 +138,7 @@ export const ENEMIES = {
   bellRinger: {
     sprite: 'enemy.bellRinger',
     radius: 30,
-    hp: 13000,
+    hp: 20000,
     speed: 85,
     damage: 18,
     xp: 0,
@@ -159,7 +159,7 @@ export const ENEMIES = {
   oldWolf: {
     sprite: 'enemy.oldWolf',
     radius: 30,
-    hp: 10500,
+    hp: 14000,
     speed: 115,
     damage: 18,
     xp: 0,
@@ -171,7 +171,7 @@ export const ENEMIES = {
   blackKnight: {
     sprite: 'enemy.blackKnight',
     radius: 34,
-    hp: 14000,
+    hp: 18000,
     speed: 95,
     damage: 20,
     xp: 0,

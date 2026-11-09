@@ -194,8 +194,7 @@ export class World {
     if (this.player.hp <= 0) {
       if (this.revives > 0) this.revive();
       else this.end('lost');
-    }
-    else if (this.pendingLevelUps > 0) this.openLevelUp();
+    } else if (this.pendingLevelUps > 0) this.openLevelUp();
   }
 
   /** Picks one of `upgradeOptions`. Opens the next choice if more level-ups are queued. */

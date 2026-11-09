@@ -77,9 +77,9 @@ const DEFS = {
   // Dano (weapon hits only: a bomb is no build)
   hit80: { group: 'damage', metric: 'bestHit', goal: 80, gold: 50 },
   // Calibrated with the sim (docs/balance-baseline.md, CC-04): about half of the veteran bot's victories.
-  hit120: { group: 'damage', metric: 'bestHit', goal: 100, gold: 100 },
-  damageRun: { group: 'damage', metric: 'runDamage', goal: 260_000, gold: 100 },
-  damageTotal: { group: 'damage', metric: 'totalDamage', goal: 1_000_000, gold: 150 },
+  hit120: { group: 'damage', metric: 'bestHit', goal: 200, gold: 100 },
+  damageRun: { group: 'damage', metric: 'runDamage', goal: 750_000, gold: 100 },
+  damageTotal: { group: 'damage', metric: 'totalDamage', goal: 5_000_000, gold: 150 },
   // Sobrevivência
   survive5: { group: 'survival', metric: 'bestTime', goal: 300, gold: 25 },
   survive10: { group: 'survival', metric: 'bestTime', goal: 600, gold: 50 },
@@ -104,8 +104,8 @@ const DEFS = {
   bossKnight: { group: 'stages', metric: 'enemyKills', enemies: ['blackKnight'], goal: 1, gold: 50 },
   bossRinger: { group: 'stages', metric: 'enemyKills', enemies: ['bellRinger'], goal: 1, gold: 75 },
   bossWolf: { group: 'stages', metric: 'enemyKills', enemies: ['oldWolf'], goal: 1, gold: 75 },
-  // Calibrated like hit120: the veteran bot's median boss fight is 34 s (49 s without the shop).
-  bossFast: { group: 'stages', metric: 'bossFast', at: 40, goal: 1, gold: 100 },
+  // Calibrated like hit120: the veteran bot's median boss fight is 16 s after the Etapa 6 curve (was 34 s).
+  bossFast: { group: 'stages', metric: 'bossFast', at: 15, goal: 1, gold: 100 },
   allStages: { group: 'stages', metric: 'stagesCleared', goal: STAGE_IDS.length, gold: 150 },
   // Coleção
   seen8: { group: 'collection', metric: 'seen', goal: 8, gold: 25 },
