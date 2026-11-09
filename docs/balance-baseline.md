@@ -421,3 +421,59 @@ DPS real no nível (Martelo 198, Geada 191); Quebra-Junta 528 (3,1× a Maça).
 Noite Sem Fim (`SIM_VIGIL=1 SIM_SEEDS=4`, `config.vigil` HP +200%/min, dano de contato +150%/min): o bot aguenta
 em média 11:30 de vigília e 68% das vitórias passam dos 5:00 (Até o Amanhecer). Curvas mais suaves testadas: +50%
 de HP sem dano → 31 min (todas), +80%/+40% → 24 min, +150%/+100% → 15:40.
+
+---
+
+# Rodada de balanceamento e identidade (2026-11-09)
+
+Metas por fase × perfil de loja (bot, 8 sementes por herói): ver `CLAUDE.md`. Perfis: `none` (nenhuma compra),
+`half` (cada item da loja na metade dos níveis, arredondado para baixo), `full` (tudo comprado). `SIM_SHOP=all
+npm run sim` roda os três (288 partidas, ~2 min). "death (median)" é a mediana do minuto em que o herói caiu nas
+derrotas; 15 min = o chefe não caiu até o limite do sim.
+
+## Etapa 0 · linha de base (antes de tudo)
+
+### Vitórias por fase e perfil de loja
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  29/32 91%         7.1 min       516  aldo 75% · lyra 100% · teo 88% · andilla 100%
+         valmor    half  31/32 97%        15.0 min       699  aldo 88% · lyra 100% · teo 100% · andilla 100%
+         valmor    full  28/32 88%        12.7 min       879  aldo 75% · lyra 88% · teo 100% · andilla 88%
+         crypt     none  23/32 72%         6.8 min       421  aldo 75% · lyra 63% · teo 50%! · andilla 100%!
+         crypt     half  31/32 97%         9.3 min       684  aldo 100% · lyra 88% · teo 100% · andilla 100%
+         crypt     full  31/32 97%        15.0 min       888  aldo 100% · lyra 100% · teo 88% · andilla 100%
+         southRoad none  32/32 100%              -       535  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         southRoad half  31/32 97%        15.0 min       696  aldo 100% · lyra 100% · teo 100% · andilla 88%
+         southRoad full  31/32 97%        15.0 min       892  aldo 100% · lyra 100% · teo 100% · andilla 88%
+
+```
+
+Total: 267/288. Sem loja: Valmor 91%, Cripta 72%, Estrada 100%. A Estrada do Sul, que devia ser a mais
+difícil, é a mais fácil.
+
+### DPS real nas partidas (nível máximo e Elos)
+
+```
+REAL DPS blade:max 121 (63) · elunLight:max 370 (63) · yahAura:max 22 (99) · daggers:max 230 (68) · paladinSwords:max 39 (108) · frost:max 156 (107) · lightning:max 167 (64) · hammer:max 134 (115) · wisps:max 274 (101) · bells:max 79 (110) · mace:max 133 (100) · fire:max 179 (101) · fury 364 (39) · holyLight 907 (50) · yahFlame 92 (67) · fan 661 (51) · vigil 91 (77) · blizzard 442 (64) · storm 453 (46) · jointBreaker 402 (36) · fireSword 438 (43) · forgeFury 387 (61) · soulProcession 706 (60) · funeralToll 207 (56)
+ELO X    fury 3.9x · holyLight 2.5x · yahFlame 8.0x · fan 3.0x · vigil 4.7x · blizzard 3.2x · storm 2.7x · jointBreaker 3.4x · fireSword 2.7x · forgeFury 3.8x · soulProcession 2.7x · funeralToll 3.4x
+```
+
+### Lab por categoria (multidão a cada 64 px, nível máximo; % da melhor arma `aimed`)
+
+```
+cat    weapon          crowd L1   Lmax  solo Lmax   %best  band     | Elo            crowd  solo  %best  x base
+aimed  mace                  55    576        144    100%  85-100%  | jointBreaker     5520   400   100%  9.6x
+aimed  blade                 35    418         52     73%! 85-100%  | fury             4290   215    78%  10.3x
+aimed  daggers               54    361        122     63%! 85-100%  | fan              2308   619    42%  6.4x
+aimed  hammer                48    360         94     63%! 85-100%  | forgeFury        1840   460    33%  5.1x
+area   paladinSwords         39    372         47     65%! 40-55%  | vigil             872   116    16%  2.3x
+area   bells                 29    370         32     64%! 40-55%  | funeralToll      1596   133    29%  4.3x
+area   frost                  8    346         24     60%! 40-55%  | blizzard         5026   120    91%  14.5x
+area   yahAura                0    242         30     42%  40-55%  | yahFlame          896    45    16%  3.7x
+auto   fire                   7    308         23     53%  50-65%  | fireSword        3256   100    59%  10.6x
+auto   elunLight             14    275        125     48%! 50-65%  | holyLight        1537   446    28%  5.6x
+auto   wisps                 20    207         81     36%! 50-65%  | soulProcession   1026   284    19%  5.0x
+auto   lightning              9     91         23     16%! 50-65%  | storm            3499    94    63%  38.4x
+
+```
