@@ -169,3 +169,64 @@ arc     mace           L1    72.0  Lmax  1136.2  Elo(jointBreaker)   3150.0
   solo fire           L1     7.0  Lmax    19.2  Elo     36.1
 strike  fire           L1    49.0  Lmax   667.2  Elo(fireSword)   2114.7
 ```
+
+## Revisão 2026-11-08 · R1, nova linha de base (2026-11-09, commit 0eb1666)
+
+Linha de base da R2, com **12 sementes** (`SIM_SEEDS=12 npm run sim`, 144 corridas). As sementes mudaram de
+desenrolar em relação às tabelas acima por dois motivos, sem mudança de dados: RT-01 (o número de dano não sorteia
+mais com o `Rng` da partida, o desvio vem do `uid`) e RB-02/RB-03 (o fantasma esmaecido não come projéteis nem atrai
+a mira, e fica sólido no Sopro de Geada). Compare a R2 com esta tabela, não com as anteriores.
+
+Resumo: 109 de 144 vitórias (Aldo 18/36, Lyra 28/36, Teo 30/36, Andilla 33/36). Por fase: Valmor 31/48, Cripta
+42/48, Estrada 36/48. 1º Elo em média aos 7:49 (116 corridas com Elo; 32 formam o primeiro antes das 7:00). Luta de
+chefe com mediana de 67 s nas vitórias. Das 35 derrotas, 14 entre 6 e 8 min.
+
+### Sim
+
+```
+SUMMARY  hero    stage     wins  avg time  avg lvl  reached10  elos/run  gold/min  fast dmg
+         aldo    valmor    4/12      7:39     29.6          5       1.0      21.1       14%
+         aldo    crypt     10/12     9:21     41.3         10       1.9      38.3       11%
+         aldo    southRoad 4/12      8:31     36.1          7       1.1      27.9       11%
+         lyra    valmor    8/12      8:48     39.0          8       1.5      38.0       23%
+         lyra    crypt     10/12     9:24     44.3         10       1.9      42.1       26%
+         lyra    southRoad 10/12     9:36     45.5         11       2.4      46.1       31%
+         teo     valmor    9/12      9:13     41.1          9       1.6      32.3       14%
+         teo     crypt     11/12    10:00     47.6         12       2.3      45.5       12%
+         teo     southRoad 10/12     9:47     41.8         10       2.1      43.1       13%
+         andilla valmor    10/12    10:00     47.8         12       2.2      58.5       44%
+         andilla crypt     11/12    10:00     48.5         12       2.7      60.3       16%
+         andilla southRoad 12/12    10:00     47.3         12       2.3      67.0       18%
+
+PICKS    yahAura 52% · paladinSwords 49% · frost 47% · hammer 53% · wisps 51% · bells 41% · mace 49% · fire 51%
+UNLOCK   second hero (800 gold) after 2 runs of Aldo in Valmor
+```
+
+### Lab
+
+```
+  solo blade          L1    11.5  Lmax    52.2  Elo     93.0
+arc     blade          L1   115.0  Lmax  1983.6  Elo(fury)   5115.0
+  solo elunLight      L1    14.4  Lmax   125.0  Elo    194.4
+homing  elunLight      L1    14.4  Lmax   375.0  Elo(holyLight)    970.8
+  solo yahAura        L1     7.8  Lmax    30.3  Elo     44.8
+aura    yahAura        L1    62.4  Lmax   695.8  Elo(yahFlame)   2195.2
+  solo daggers        L1    30.0  Lmax   121.8  Elo     27.0
+thrown  daggers        L1    60.0  Lmax   487.2  Elo(fan)   1064.3
+  solo paladinSwords  L1     5.0  Lmax    46.0  Elo     81.2
+orbit   paladinSwords  L1    86.5  Lmax  1242.0  Elo(vigil)   2630.6
+  solo frost          L1     8.0  Lmax    24.4  Elo     42.3
+zone    frost          L1    67.2  Lmax   914.8  Elo(blizzard)   3314.7
+  solo lightning      L1     9.0  Lmax    22.8  Elo     50.0
+strike  lightning      L1    36.0  Lmax   423.7  Elo(storm)   2512.5
+  solo hammer         L1    12.1  Lmax    93.6  Elo    168.0
+thrown  hammer         L1    48.4  Lmax   556.8  Elo(forgeFury)   2352.0
+  solo wisps          L1    10.4  Lmax    81.0  Elo    144.0
+homing  wisps          L1    20.8  Lmax   328.5  Elo(soulProcession)    720.0
+  solo bells          L1     4.2  Lmax    32.0  Elo     69.8
+orbit   bells          L1   147.7  Lmax  1384.0  Elo(funeralToll)   3944.3
+  solo mace           L1    12.0  Lmax    43.7  Elo     75.0
+arc     mace           L1    72.0  Lmax  1136.2  Elo(jointBreaker)   3150.0
+  solo fire           L1     7.0  Lmax    19.2  Elo     36.1
+strike  fire           L1    49.0  Lmax   670.4  Elo(fireSword)   2124.2
+```

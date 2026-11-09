@@ -543,6 +543,8 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
   a semente (`Date.now() >>> 0`), passa ao `World` e a mostra no painel F3 e no `window.game` de dev.
 - Aceite: teste: mudar `maxDamageNumbers` não muda o resultado de uma corrida com a mesma semente; a semente aparece
   no F3. **Depois deste passo, rodar o sim de 12 sementes e gravar a nova linha de base** (início da R2).
+- Feito: nova linha de base (12 sementes) em `docs/balance-baseline.md`, seção "Revisão 2026-11-08 · R1": 109/144
+  vitórias, Valmor 31, Cripta 42, Estrada 36; 1º Elo médio 7:49.
 
 **RT-02 · Alocação por quadro no GameScene** · impl · P · aprovado
 
