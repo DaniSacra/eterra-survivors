@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { heroUnlocked, markCleared, newSave, stageUnlocked, unlockHero } from '../../src/core/meta';
+import { heroUnlocked, markCleared, newSave, playtest, stageUnlocked, unlockHero } from '../../src/core/meta';
 import { World } from '../../src/core/world';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { config } from '../../src/data/config';
@@ -27,9 +27,16 @@ describe('characters', () => {
 });
 
 describe('unlocks', () => {
-  it('playtest switch opens every hero', () => {
-    if (!config.unlockAllHeroes) return;
-    for (const id of CHARACTER_IDS) expect(heroUnlocked(newSave(), id)).toBe(true);
+  it('test mode (?dev) opens every hero and stage, and only while it is on', () => {
+    playtest.unlockAll = true;
+    try {
+      for (const id of CHARACTER_IDS) expect(heroUnlocked(newSave(), id)).toBe(true);
+      for (const id of STAGE_IDS) expect(stageUnlocked(newSave(), id)).toBe(true);
+    } finally {
+      playtest.unlockAll = false;
+    }
+    expect(heroUnlocked(newSave(), 'lyra')).toBe(config.unlockAllHeroes);
+    expect(stageUnlocked(newSave(), 'crypt')).toBe(config.unlockAllStages);
   });
 
   it.skipIf(config.unlockAllHeroes)('free heroes are open; the others are bought once with gold', () => {
@@ -42,11 +49,6 @@ describe('unlocks', () => {
     expect(save.gold).toBe(1);
     expect(heroUnlocked(save, 'lyra')).toBe(true);
     expect(unlockHero(save, 'lyra')).toBe(false);
-  });
-
-  it('playtest switch opens every stage', () => {
-    if (!config.unlockAllStages) return;
-    for (const id of STAGE_IDS) expect(stageUnlocked(newSave(), id)).toBe(true);
   });
 
   it.skipIf(config.unlockAllStages)('each stage opens when the previous one is cleared', () => {

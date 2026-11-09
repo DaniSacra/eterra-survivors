@@ -434,7 +434,7 @@ depois e registra em `docs/balance-baseline.md`.
   compartilhadas e o bot pegando 4, a média esperada é ~50%; aceite trocado por "nenhuma arma compartilhada 15
   pontos acima ou abaixo da média do PICKS". Maça 49% e Fogo 48%: cumprido.
 
-**D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto (decisão do Daniel)
+**D-06 · Heróis voltam a ser comprados** · impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · ✅ feito (Daniel aprovou)
 
 - Por quê: com a renda de E-10, comprar heróis vira uma meta curta e boa.
 - O quê: `config.unlockAllHeroes` e `config.unlockAllStages` false quando o Daniel encerrar os testes; revisar custos (300, 300, 500).
@@ -1386,7 +1386,7 @@ um teste dentro da multidão** (não só com um inimigo sozinho).
 
 ### Situação em 2026-11-09 (noite)
 
-Daniel pediu só bugs e quick wins. Feitos: toda a **N1** (NB-01 a NB-13 e RB-05; o D-06 continua com ele) e os
+Daniel pediu só bugs e quick wins. Feitos: toda a **N1** (NB-01 a NB-13 e RB-05) e, com a aprovação do Daniel, o D-06 (heróis e fases trancados no jogo publicado) com o NT-02 e os
 quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do NT-03 e do NU-08. O resto fica
 `· proposto` para ele revisar, junto com as decisões do topo de `docs/reviews/2026-11-09/07-direcao.md`.
 
@@ -1563,7 +1563,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: `grep -n "forEach\|for (const" ` nos laços por quadro de `GameScene.ts`, `render/fx.ts` e `core/elos.ts` sem
   ocorrência; F4 igual ou melhor.
 
-**NT-02 · Teste do `playtest.unlockAll`** · impl · P · proposto
+**NT-02 · Teste do `playtest.unlockAll`** · impl · P · ✅ feito
 
 - Por quê: 02-code #9. Os testes "playtest switch opens every hero/stage" (`characters.test.ts:30`, `:47`) testam
   `config.unlockAll*`, não o interruptor do `?dev` (`core/meta.ts:444`), que não tem teste.
