@@ -492,7 +492,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - O quê: ao congelar (`core/pickups.ts`), todo fantasma esmaecido volta a sólido (`act = Idle`). Teste.
 - Aceite: fantasma esmaecido dentro da Aura leva dano durante o congelamento.
 
-**RB-04 · Som some no iPhone depois de trocar de app** · impl · P · aprovado
+**RB-04 · Som some no iPhone depois de trocar de app** · impl · P · ✅ feito
 
 - Por quê: 02-code #3: `unlock` é registrado com `{ once: true }` (`render/sound.ts:112-119`); quando o iOS suspende o
   `AudioContext` (troca de app, tela bloqueada), ninguém chama `resume()` de novo e o jogo fica mudo. É o celular, o

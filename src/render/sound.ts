@@ -13,19 +13,32 @@ class SoundPlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private voices = 0;
+  private hooked = false;
   private readonly last: Partial<Record<SoundId, number>> = {};
   private readonly buffers = new Map<string, AudioBuffer>();
 
-  /** Hooks the unlock to the first user gesture. Safe to call more than once. */
+  /**
+   * Hooks the unlock to user gestures. The listeners stay on: iOS suspends the context when the player switches
+   * apps or locks the screen, and only a new gesture may resume it. Safe to call more than once.
+   */
   init(): void {
-    if (typeof window === 'undefined') return;
-    const unlock = () => {
-      this.ensure();
-      void this.ctx?.resume();
-    };
-    window.addEventListener('pointerdown', unlock, { once: true, capture: true });
-    window.addEventListener('keydown', unlock, { once: true, capture: true });
+    if (typeof window === 'undefined' || this.hooked) return;
+    this.hooked = true;
+    const opts = { capture: true, passive: true };
+    for (const type of ['pointerdown', 'pointerup', 'touchend', 'keydown'])
+      window.addEventListener(type, this.wake, opts);
+    // Coming back to the tab: try right away (some browsers allow it without a new gesture).
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && this.ctx) this.wake();
+    });
   }
+
+  /** Creates or resumes the context unless it is already running. Cheap when it is. */
+  private readonly wake = (): void => {
+    this.ensure();
+    const ctx = this.ctx;
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  };
 
   private ensure(): void {
     if (this.ctx) return;
