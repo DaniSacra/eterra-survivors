@@ -167,7 +167,8 @@ export class HudScene extends Phaser.Scene {
       this.debug.setText(
         `${d.fps} ${Math.round(this.game.loop.actualFps)}\n` +
           `${w.enemies.size} ${d.enemies} · ${w.projectiles.size} ${d.projectiles}\n` +
-          `${w.gems.size} ${d.gems} · ${w.damageNumbers.size} ${d.numbers}`,
+          `${w.gems.size} ${d.gems} · ${w.damageNumbers.size} ${d.numbers}\n` +
+          `${d.seed} ${w.seed}`,
       );
     }
   }

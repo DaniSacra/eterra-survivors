@@ -194,6 +194,7 @@ export const t = {
     projectiles: 'projéteis',
     gems: 'gemas',
     numbers: 'números',
+    seed: 'semente',
   },
 
   weapons: {

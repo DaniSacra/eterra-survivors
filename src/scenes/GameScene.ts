@@ -72,7 +72,7 @@ export class GameScene extends Phaser.Scene {
     this.controls = null;
     this.gemStreak = 0;
     this.lastGem = -1;
-    this.world = new World(undefined, { ...this.choice, bonuses: shopBonuses(loadSave()) });
+    this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(loadSave()) });
     this.banked = false;
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);

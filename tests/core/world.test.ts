@@ -56,3 +56,32 @@ describe('tally', () => {
     expect(w.tally.gems).toBe(1);
   });
 });
+
+describe('seed', () => {
+  /** Plays 90 s of a real run (spawner on, first option at every level-up) and sums it up. */
+  function play(seed: number): string {
+    const w = new World(seed);
+    for (let i = 0; i < 90 * 60 && w.state !== 'lost'; i++) {
+      if (w.state === 'levelup') w.chooseUpgrade(0);
+      w.step(1 / 60, { x: Math.cos(i / 90), y: Math.sin(i / 90) });
+    }
+    return JSON.stringify([w.kills, w.level, w.player.hp, w.enemies.size, w.gems.size, w.rng.next()]);
+  }
+
+  it('is kept by the world', () => {
+    expect(new World(1234).seed).toBe(1234);
+  });
+
+  it('visual effects never change how a seed plays out', () => {
+    const fx = config.effects as { maxDamageNumbers: number };
+    const before = fx.maxDamageNumbers;
+    const a = play(7);
+    fx.maxDamageNumbers = 0;
+    try {
+      expect(play(7)).toBe(a);
+    } finally {
+      fx.maxDamageNumbers = before;
+    }
+  });
+});
+

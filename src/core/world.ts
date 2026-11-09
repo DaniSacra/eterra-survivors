@@ -59,6 +59,8 @@ export class World {
   /** Upgrades removed from this run's level-up pool, as `banishKey`s. */
   readonly banished = new Set<string>();
   state: WorldState = 'playing';
+  /** The run's seed (shown on the F3 panel), so a run seen in the game can be replayed. */
+  readonly seed: number;
   readonly rng: Rng;
   readonly player: Player = createPlayer();
   readonly enemies = new Pool<Enemy>(createEnemy, 256);
@@ -93,7 +95,8 @@ export class World {
   readonly targetsScratch: number[] = [];
 
   constructor(seed?: number, setup: RunSetup = {}) {
-    this.rng = new Rng(seed);
+    this.seed = (seed ?? Date.now()) >>> 0;
+    this.rng = new Rng(this.seed);
     this.character = setup.character ?? 'aldo';
     this.stageId = setup.stage ?? 'valmor';
     this.stage = STAGES[this.stageId];

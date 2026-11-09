@@ -87,7 +87,8 @@ export function addDamageNumber(world: World, uid: number, x: number, y: number,
   }
   if (world.damageNumbers.size >= fx.maxDamageNumbers) return;
   const d = world.damageNumbers.acquire();
-  d.x = x + (world.rng.next() - 0.5) * 10;
+  // Spread from the enemy's uid: purely visual, so it must never draw from the run's Rng.
+  d.x = x + ((uid * 7919) % 11) - 5;
   d.y = y;
   d.value = value;
   d.uid = uid;

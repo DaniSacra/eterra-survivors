@@ -534,7 +534,7 @@ mediana de 45 a 90 s e no máximo 3 mortes por tempo esgotado na Estrada.
 - O quê: zerar os três no início do `create()`; lançar a LevelUp só se `!this.scene.isActive(SCENES.levelUp)`.
 - Aceite: segunda partida começa com o tom de gema base; com 3 level-ups em fila, um restart por escolha.
 
-**RT-01 · Efeitos não consomem o `Rng` da partida; semente registrada** · impl · P · aprovado
+**RT-01 · Efeitos não consomem o `Rng` da partida; semente registrada** · impl · P · ✅ feito
 
 - Por quê: 02-code #7: `addDamageNumber` sorteia o deslocamento com `world.rng`; qualquer ajuste visual muda todas as
   sementes do sim e a linha de base deixa de ser comparável. Partidas reais não guardam a semente. 04-visual #3: os
