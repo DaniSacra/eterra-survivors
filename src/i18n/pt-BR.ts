@@ -16,7 +16,7 @@ export const t = {
     intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Alguém precisa resistir até o amanhecer.',
     start: 'Começar',
     shop: 'Loja do Gaspar',
-    controlsDesktop: 'WASD ou setas para andar · Esc pausa · F3 depuração',
+    controlsDesktop: 'WASD ou setas para andar · Espaço ou Esc pausa · F3 depuração',
     controlsTouch: 'Toque e arraste em qualquer lugar para andar',
   },
 
