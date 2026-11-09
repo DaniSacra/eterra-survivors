@@ -2,6 +2,7 @@ import { it } from 'vitest';
 import { CHARACTERS, CHARACTER_IDS, SIGNATURE_OWNER } from '../../src/data/characters';
 import { EVOLUTIONS } from '../../src/data/evolutions';
 import { WEAPON_IDS } from '../../src/data/weapons';
+import { maxLevel } from '../../src/core/weapons';
 import { STAGE_IDS } from '../../src/data/stages';
 import { simulate, type SimResult } from './bot';
 
@@ -62,6 +63,18 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
     '\nPICKS    ' +
       shared
         .map((id) => `${id} ${pct(results.filter((r) => r.owned.includes(id)).length / results.length)}`)
+        .join(' · '),
+  );
+  // Real DPS in the runs: each Elo, and each base weapon held at max level (runs that hold it, average).
+  out.push(
+    'REAL DPS ' +
+      WEAPON_IDS.map((id) => {
+        const ds = results.flatMap((r) => r.dps.filter((d) => d.id === id && d.level === maxLevel(id)));
+        return ds.length
+          ? `${id}${EVOLUTIONS[id] ? '' : ':max'} ${Math.round(ds.reduce((a, d) => a + d.dps, 0) / ds.length)}`
+          : '';
+      })
+        .filter(Boolean)
         .join(' · '),
   );
   // A new player: Aldo in Valmor, run after run, until the cheapest hero is affordable.

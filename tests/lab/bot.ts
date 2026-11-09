@@ -34,6 +34,8 @@ export interface SimResult {
   /** Every 120 s: level, active enemies, hero HP. */
   snaps: { t: number; level: number; enemies: number; hp: number }[];
   top: string[];
+  /** Real DPS of every weapon held at the end, at its final level. */
+  dps: { id: WeaponId; level: number; dps: number }[];
   /** Base weapons owned at the end (an Elo counts as its base). */
   owned: WeaponId[];
   maxEnemies: number;
@@ -192,6 +194,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     elos: [],
     snaps: [],
     top: [],
+    dps: [],
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
@@ -241,7 +244,9 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     res.bossTime = Math.round(w.time - bossAt);
     res.bossHpLeft = w.boss ? w.boss.hp / w.boss.maxHp : 0;
   }
-  res.top = weaponReport(w)
+  const report = weaponReport(w);
+  res.dps = report.map((r) => ({ id: r.id, level: r.level, dps: r.dps }));
+  res.top = report
     .sort((a, b) => b.damage - a.damage)
     .slice(0, 3)
     .map((r) => `${r.id}:${r.level}=${Math.round(r.dps)}`);
