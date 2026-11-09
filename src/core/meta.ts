@@ -2,15 +2,23 @@ import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters'
 import { config, type Stats } from '../data/config';
 import { SHOP, SHOP_IDS, type ChargeKey, type ShopDef, type ShopId } from '../data/shop';
 import { STAGE_IDS, type StageId } from '../data/stages';
+import { EVOLVED_IDS } from '../data/evolutions';
+import type { WeaponId } from '../data/weapons';
+
+/** Bump when the save shape changes, and migrate older saves in `sanitizeSave`. */
+export const SAVE_VERSION = 1;
 
 /** What survives between runs. Persisted by render/save.ts. */
 export interface MetaSave {
+  version: number;
   gold: number;
   shop: Partial<Record<ShopId, number>>;
   /** Heroes bought (free ones are always available). */
   heroes: CharacterId[];
   /** Stages won at least once. */
   cleared: StageId[];
+  /** Elos ever formed (the Livro de Elos shows their recipes). */
+  elos: WeaponId[];
 }
 
 export type Charges = Record<ChargeKey, number>;
@@ -21,13 +29,23 @@ export interface RunBonuses {
   charges: Charges;
 }
 
-export const newSave = (): MetaSave => ({ gold: 0, shop: {}, heroes: [], cleared: [] });
+export const newSave = (): MetaSave => ({
+  version: SAVE_VERSION,
+  gold: 0,
+  shop: {},
+  heroes: [],
+  cleared: [],
+  elos: [],
+});
 
-/** Accepts anything (old or broken saves) and returns a valid save. */
+/**
+ * Accepts anything (old, versionless or broken saves) and returns a valid save of the current version.
+ * Version 0 (no `version` field) had no Elos list: it simply starts empty, nothing else is lost.
+ */
 export function sanitizeSave(raw: unknown): MetaSave {
   const save = newSave();
   if (!raw || typeof raw !== 'object') return save;
-  const r = raw as { gold?: unknown; shop?: unknown; heroes?: unknown; cleared?: unknown };
+  const r = raw as { gold?: unknown; shop?: unknown; heroes?: unknown; cleared?: unknown; elos?: unknown };
   if (typeof r.gold === 'number' && r.gold >= 0) save.gold = Math.floor(r.gold);
   if (r.shop && typeof r.shop === 'object') {
     for (const id of SHOP_IDS) {
@@ -39,7 +57,31 @@ export function sanitizeSave(raw: unknown): MetaSave {
     Array.isArray(list) ? ids.filter((id) => list.includes(id)) : [];
   save.heroes = known(r.heroes, CHARACTER_IDS);
   save.cleared = known(r.cleared, STAGE_IDS);
+  save.elos = known(r.elos, EVOLVED_IDS);
   return save;
+}
+
+/** Marks Elos as discovered; returns the ones that were new. */
+export function discoverElos(save: MetaSave, ids: readonly WeaponId[]): WeaponId[] {
+  const fresh = ids.filter((id) => EVOLVED_IDS.includes(id) && !save.elos.includes(id));
+  save.elos.push(...fresh);
+  return fresh;
+}
+
+/** The cheapest thing still to buy (a shop level, or a hero while heroes are sold), for the end screen. */
+export function nextGoal(
+  save: MetaSave,
+): { kind: 'shop'; id: ShopId; cost: number } | { kind: 'hero'; id: CharacterId; cost: number } | null {
+  let best: ReturnType<typeof nextGoal> = null;
+  for (const id of SHOP_IDS) {
+    const cost = shopCost(save, id);
+    if (cost !== null && (!best || cost < best.cost)) best = { kind: 'shop', id, cost };
+  }
+  for (const id of CHARACTER_IDS) {
+    const cost = CHARACTERS[id].cost;
+    if (!heroUnlocked(save, id) && (!best || cost < best.cost)) best = { kind: 'hero', id, cost };
+  }
+  return best;
 }
 
 export const heroUnlocked = (save: MetaSave, id: CharacterId): boolean =>

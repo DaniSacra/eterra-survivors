@@ -9,6 +9,7 @@ import { PauseScene } from './scenes/PauseScene';
 import { SelectScene } from './scenes/SelectScene';
 import { ShopScene } from './scenes/ShopScene';
 import { OptionsScene } from './scenes/OptionsScene';
+import { EloBookScene } from './scenes/EloBookScene';
 import { sound } from './render/sound';
 
 const game = new Phaser.Game({
@@ -29,6 +30,7 @@ const game = new Phaser.Game({
     ShopScene,
     SelectScene,
     OptionsScene,
+    EloBookScene,
   ],
 });
 

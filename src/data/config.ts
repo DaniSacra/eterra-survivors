@@ -85,6 +85,8 @@ export const config = {
   },
   weapons: {
     maxOwned: 6,
+    /** Different passives a run can hold; once full, only the owned ones level up (choices keep weight). */
+    maxPassives: 6,
     /** Homing shots look for targets within this distance. */
     seekRange: 420,
     /** Retry delay when a weapon had nothing to shoot at. */

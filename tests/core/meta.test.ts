@@ -1,10 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { buy, newSave, sanitizeSave, shopBonuses, shopCost } from '../../src/core/meta';
+import {
+  SAVE_VERSION,
+  buy,
+  discoverElos,
+  newSave,
+  nextGoal,
+  sanitizeSave,
+  shopBonuses,
+  shopCost,
+} from '../../src/core/meta';
 import { dropPickup } from '../../src/core/pickups';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { CHARACTERS } from '../../src/data/characters';
-import { SHOP } from '../../src/data/shop';
+import { SHOP, SHOP_IDS } from '../../src/data/shop';
 import { quietWorld, still } from './helpers';
 
 describe('shop', () => {
@@ -44,7 +53,7 @@ describe('shop', () => {
         heroes: ['lyra', 'ghost'],
         cleared: 'valmor',
       }),
-    ).toEqual({ gold: 12, shop: { maxHp: SHOP.maxHp.maxLevel }, heroes: ['lyra'], cleared: [] });
+    ).toEqual({ ...newSave(), gold: 12, shop: { maxHp: SHOP.maxHp.maxLevel }, heroes: ['lyra'] });
     // Saves from before heroes and stages still load.
     expect(sanitizeSave({ gold: 5, shop: {} })).toEqual({ ...newSave(), gold: 5 });
   });
@@ -113,5 +122,32 @@ describe('level-up helpers', () => {
     l.charges.skip = 0;
     l.skipLevelUp();
     expect(l.state).toBe('levelup');
+  });
+});
+
+describe('save versions and Elos', () => {
+  it('loads a versionless save without losing anything, at the current version', () => {
+    const old = { gold: 340, shop: { might: 2 }, heroes: ['teo'], cleared: ['valmor'] };
+    const s = sanitizeSave(old);
+    expect(s).toEqual({ ...newSave(), gold: 340, shop: { might: 2 }, heroes: ['teo'], cleared: ['valmor'] });
+    expect(s.version).toBe(SAVE_VERSION);
+  });
+
+  it('keeps known Elos and drops unknown ids', () => {
+    expect(sanitizeSave({ elos: ['fury', 'blade', 'nope'] }).elos).toEqual(['fury']);
+  });
+
+  it('discovers Elos once and reports only the new ones', () => {
+    const s = newSave();
+    expect(discoverElos(s, ['fury', 'storm'])).toEqual(['fury', 'storm']);
+    expect(discoverElos(s, ['fury', 'blade'])).toEqual([]);
+    expect(s.elos).toEqual(['fury', 'storm']);
+  });
+
+  it('the next goal is the cheapest thing left to buy', () => {
+    const s = newSave();
+    const goal = nextGoal(s)!;
+    const cheapest = Math.min(...SHOP_IDS.map((id) => SHOP[id].baseCost));
+    expect(goal.cost).toBe(cheapest);
   });
 });

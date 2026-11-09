@@ -27,15 +27,33 @@ export class MenuScene extends Phaser.Scene {
     const bw = Math.min(260, width - 60);
     keyNav(this, [
       button(this, cx, height * 0.58, bw, 56, () => this.start(), t.menu.start),
-      button(this, cx, height * 0.58 + 68, bw, 48, () => this.scene.start(SCENES.shop), t.menu.shop),
-      button(this, cx, height * 0.58 + 126, bw, 44, () => this.scene.start(SCENES.options), t.menu.options),
+      button(this, cx, height * 0.58 + 64, bw, 44, () => this.scene.start(SCENES.shop), t.menu.shop),
+      // Two smaller ones side by side: the book of Elos and the options.
+      button(
+        this,
+        cx - bw / 4 - 3,
+        height * 0.58 + 116,
+        bw / 2 - 6,
+        44,
+        () => this.scene.start(SCENES.eloBook),
+        t.menu.elos,
+      ),
+      button(
+        this,
+        cx + bw / 4 + 3,
+        height * 0.58 + 116,
+        bw / 2 - 6,
+        44,
+        () => this.scene.start(SCENES.options),
+        t.menu.options,
+      ),
     ]);
     const touch = this.sys.game.device.input.touch;
     const controls = touch ? t.menu.controlsTouch : t.menu.controlsDesktop;
     label(
       this,
       cx,
-      height * 0.58 + 184,
+      height * 0.58 + 172,
       import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls,
       14,
       {

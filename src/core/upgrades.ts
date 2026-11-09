@@ -35,9 +35,10 @@ export function candidates(world: World, newThings = true): UpgradeOption[] {
     else if (!owned && canAddWeapon && !(evolved && world.hasWeapon(evolved.id)))
       out.push({ kind: 'weapon', id, level: 1 });
   }
+  const canAddPassive = newThings && Object.keys(world.passives).length < config.weapons.maxPassives;
   for (const id of PASSIVE_IDS) {
     const level = world.passives[id] ?? 0;
-    if (level < PASSIVES[id].maxLevel && (newThings || level > 0))
+    if (level < PASSIVES[id].maxLevel && (canAddPassive || level > 0))
       out.push({ kind: 'passive', id, level: level + 1 });
   }
   return world.banished.size > 0 ? out.filter((o) => !world.banished.has(banishKey(o) as string)) : out;

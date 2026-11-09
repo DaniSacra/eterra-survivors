@@ -17,6 +17,7 @@ export const t = {
     start: 'Começar',
     shop: 'Loja do Gaspar',
     options: 'Opções',
+    elos: 'Livro de Elos',
     controlsDesktop: 'WASD ou setas para andar · Espaço ou Esc pausa',
     /** Only shown in development builds. */
     debugHint: 'F3 depuração · F4 +100 inimigos',
@@ -72,6 +73,16 @@ export const t = {
     quit: 'Desistir',
   },
 
+  elos: {
+    title: 'Livro de Elos',
+    count: (n: number, total: number) => `${n} de ${total} Elos descobertos`,
+    unknown: '???',
+    rule: 'Arma no nível máximo + a passiva certa, e depois um baú.',
+    recipe: (weapon: string, passive: string) => `${weapon} + ${passive}`,
+    hint: (weapon: string) => `Nasce de ${weapon}`,
+    owner: (hero: string) => `Só ${hero}`,
+  },
+
   options: {
     title: 'Opções',
     damageNumbers: (on: boolean) => `Números de dano: ${on ? 'sim' : 'não'}`,
@@ -84,6 +95,10 @@ export const t = {
     lost: 'Fim de jogo',
     lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
+    newElo: (name: string) => `Elo descoberto: ${name}! Veja no Livro de Elos.`,
+    banked: (gold: number) => `No cofre: ${gold} ouro`,
+    toBuy: (name: string, missing: number) => `Faltam ${missing} de ouro para ${name}`,
+    canBuy: (name: string, cost: number) => `Já dá para comprar ${name} (${cost}) na Loja!`,
     run: (stage: string, hero: string) => `${stage} · ${hero}`,
     weapon: 'Arma',
     weaponLevel: 'Nv',

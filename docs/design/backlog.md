@@ -287,18 +287,18 @@ depois e registra em `docs/balance-baseline.md`.
 
 ## Etapa 5: Profundidade e retenção (fora do plano atual, propor depois da Etapa 4)
 
-**D-01 · Limite de passivas por partida** · impl + bal · P
+**D-01 · Limite de passivas por partida** · impl + bal · P · ✅ feito
 - Por quê: hoje as armas têm limite (6) mas as passivas não; no fim da partida o jogador pega todas e a escolha
   perde peso (pilar 2).
 - O quê: `config.weapons.maxPassives` 6 em `core/upgrades.ts` `candidates()`.
 - Aceite: teste de candidatos; no sim, builds diferentes por semente (passivas finais variam).
 
-**D-02 · Tela final com "só mais uma"** · impl · P
+**D-02 · Tela final com "só mais uma"** · impl · P · ✅ feito
 - Por quê: pilar 4: a derrota precisa mostrar o que avançou.
 - O quê: no EndScene, ouro ganho contra o próximo item da Loja ao alcance e Elos descobertos nesta partida.
 - Aceite: toda tela de fim mostra pelo menos uma meta próxima.
 
-**D-03 · Livro de Elos** · impl + visual · M
+**D-03 · Livro de Elos** · impl + visual · M · ✅ feito
 - Por quê: descobrir Elos é o objetivo de longo prazo do gênero; o jogo original já tem a ideia de Elos conhecidos
   com dica (`src/elos.js`).
 - O quê: tela que lista os 10 Elos, com receita revelada após a primeira descoberta (salvo em `core/meta.ts`).
@@ -328,7 +328,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: rodar F4 no celular do Daniel e no Chrome com CPU 4x; registrar no `docs/balance-baseline.md`.
 - Aceite: 60 FPS com 500 inimigos depois do juice e do som.
 
-**L-02 · Versão do save** · impl · P
+**L-02 · Versão do save** · impl · P · ✅ feito
 - Por quê: Livro de Elos e novas metas mudam o save; o jogador não pode perder ouro.
 - O quê: campo `version` no `MetaSave` com migração em `sanitizeSave`.
 - Aceite: teste carrega um save atual e um sem versão sem perder nada.

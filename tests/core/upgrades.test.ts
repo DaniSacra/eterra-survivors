@@ -90,3 +90,14 @@ describe('level-up flow', () => {
     expect(w.state).toBe('playing');
   });
 });
+
+describe('passive limit', () => {
+  it('once maxPassives are owned, only those level up', () => {
+    const w = quietWorld();
+    const owned = PASSIVE_IDS.slice(0, config.weapons.maxPassives);
+    for (const id of owned) applyUpgrade(w, { kind: 'passive', id, level: 1 });
+    const passives = candidates(w).filter((o) => o.kind === 'passive');
+    expect(passives.length).toBeGreaterThan(0);
+    for (const o of passives) expect(owned).toContain(o.id);
+  });
+});

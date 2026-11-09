@@ -3,6 +3,9 @@ import { formatTime } from '../core/format';
 import { passiveReport, weaponReport } from '../core/report';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
+import type { WeaponId } from '../data/weapons';
+import { nextGoal } from '../core/meta';
+import { loadSave } from '../render/save';
 import { t } from '../i18n/pt-BR';
 import { formatCompact, formatDecimal } from '../render/describe';
 import { UI, button, dim, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
@@ -12,14 +15,16 @@ import { SCENES } from './keys';
 export class EndScene extends Phaser.Scene {
   private world!: World;
   private unlocked: StageId | null = null;
+  private newElos: WeaponId[] = [];
 
   constructor() {
     super(SCENES.end);
   }
 
-  init(data: { world: World; unlocked?: StageId | null }): void {
+  init(data: { world: World; unlocked?: StageId | null; newElos?: WeaponId[] }): void {
     this.world = data.world;
     this.unlocked = data.unlocked ?? null;
+    this.newElos = data.newElos ?? [];
   }
 
   create(): void {
@@ -120,6 +125,30 @@ export class EndScene extends Phaser.Scene {
         color: UI.gold,
       }).setOrigin(0.5, 0);
       y += 28;
+    }
+
+    // "Só mais uma": what this run brought closer.
+    y += 4;
+    for (const id of this.newElos) {
+      label(this, cx, y, t.end.newElo(t.weapons[id].name), 15, { bold: true, color: UI.gold }).setOrigin(
+        0.5,
+        0,
+      );
+      y += 22;
+    }
+    const save = loadSave();
+    const goal = nextGoal(save);
+    const bank = label(this, cx, y, t.end.banked(save.gold), 14, { color: UI.text }).setOrigin(0.5, 0);
+    y += bank.height + 4;
+    if (goal) {
+      const name = goal.kind === 'shop' ? t.shop.items[goal.id] : t.characters[goal.id].name;
+      const text =
+        save.gold >= goal.cost ? t.end.canBuy(name, goal.cost) : t.end.toBuy(name, goal.cost - save.gold);
+      label(this, cx, y, text, 14, {
+        color: save.gold >= goal.cost ? UI.gold : UI.muted,
+        wrap: pw - 28,
+      }).setOrigin(0.5, 0);
+      y += 22;
     }
 
     const bw = (pw - 36) / 2;
