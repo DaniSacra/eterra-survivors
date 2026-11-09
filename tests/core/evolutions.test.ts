@@ -134,6 +134,10 @@ describe('chests', () => {
     w.passives.might = PASSIVES.might.maxLevel;
     openChest(w);
     expect(w.weapons[0]!.id).toBe('fury');
+    // The chest opens plain and first; the forge is the moment (no "Lâmina de Valmor nível 7").
+    const types = w.events.map((e) => e.type);
+    expect(types.indexOf('chest')).toBeLessThan(types.indexOf('eloForged'));
+    expect(w.events).toContainEqual({ type: 'chest', reward: null });
   });
 
   it('only gold and the heal when nothing can be levelled', () => {

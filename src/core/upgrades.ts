@@ -174,6 +174,7 @@ export function statPreview(
 /** An elite's chest (data CHEST): gold, a level of something owned (which may forge an Elo) and a heal. */
 export function openChest(world: World): void {
   let reward: UpgradeOption | null = null;
+  const mark = world.events.length;
   for (let i = 0; i < CHEST.levels; i++) {
     const opt = world.rng.pick(candidates(world, false));
     if (!opt) break;
@@ -183,7 +184,10 @@ export function openChest(world: World): void {
   addGold(world, CHEST.gold);
   const p = world.player;
   p.hp = Math.min(p.stats.maxHp, p.hp + p.stats.maxHp * CHEST.heal);
-  world.events.push({ type: 'chest', reward });
+  // A level that forged an Elo is the Elo's moment: the chest opens first and plain, and the forge follows it.
+  let forged = false;
+  for (let i = mark; i < world.events.length; i++) if (world.events[i]?.type === 'eloForged') forged = true;
+  world.events.splice(mark, 0, { type: 'chest', reward: forged ? null : reward });
 }
 
 /** Applies a choice or a chest reward. Anything that changes the build bumps `world.buildRev` (the HUD redraws). */
