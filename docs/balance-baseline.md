@@ -623,3 +623,34 @@ ELO X    fury 1.5x · holyLight 3.0x · yahFlame 10.0x · fan 3.1x · vigil 6.6x
 ```
 
 266/288 (antes 259): pouca mudança, como esperado. A dificuldade de verdade vem das Etapas 4 e 6.
+
+## Etapa 4 · fases com identidade
+
+Mudanças: Cripta com obstáculos por semente (lápides, colunas, ossos; célula 170, 40%, nada a 260 px do início) que
+barram herói e inimigos, mas não os tiros; Estrada do Sul vira um corredor de 520 px entre florestas, com inimigos
+vindo das duas pontas e 20% saindo da mata pelos lados. Multiplicadores por fase (`StageDef.mult`: vida, dano,
+velocidade, densidade, ouro): Valmor 1; Cripta 1,6 / 1,4 / 1,05 / 1,15 / 1,5; Estrada 2,3 / 1,8 / 1,1 / 1,25 / 2. A
+vigília herda os multiplicadores. Lab sem mudança (as armas não mudaram).
+
+### Vitórias por fase e perfil de loja (depois)
+
+```
+TARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)
+         valmor    none  24/32 75%        10.2 min       565  aldo 88% · lyra 75% · teo 75% · andilla 63%
+         valmor    half  27/32 84%        10.3 min       704  aldo 75% · lyra 75% · teo 88% · andilla 100%
+         valmor    full  32/32 100%              -       883  aldo 100% · lyra 100% · teo 100% · andilla 100%
+         crypt     none  4/32 13%          3.6 min       269  aldo 0% · lyra 25% · teo 25% · andilla 0%
+         crypt     half  18/32 56%         5.0 min       787  aldo 38% · lyra 50% · teo 75% · andilla 63%
+         crypt     full  28/32 88%        10.2 min      1415  aldo 100% · lyra 88% · teo 75% · andilla 88%
+         southRoad none  0/32 0%           1.7 min        95  aldo 0% · lyra 0% · teo 0% · andilla 0%
+         southRoad half  2/32 6%           2.6 min       285  aldo 0% · lyra 0% · teo 13% · andilla 13%
+         southRoad full  22/32 69%        10.1 min      1850  aldo 63% · lyra 50% · teo 75% · andilla 88%
+
+
+REAL DPS blade:max 127 (72) · elunLight:max 446 (65) · yahAura:max 25 (59) · daggers:max 399 (96) · staff:max 413 (76) · paladinSwords:max 30 (49) · frost:max 306 (65) · lightning:max 482 (59) · hammer:max 260 (58) · wisps:max 438 (56) · shields:max 43 (69) · mace:max 117 (84) · fire:max 300 (52) · fury 208 (54) · holyLight 1516 (40) · yahFlame 167 (33) · fan 1117 (60) · vigil 184 (25) · blizzard 643 (30) · storm 660 (35) · jointBreaker 349 (31) · fireSword 671 (19) · forgeFury 704 (24) · soulProcession 1000 (29) · valmorWall 204 (21) · lyraStar 628 (22)
+ELO X    fury 1.5x · holyLight 3.2x · yahFlame 7.8x · fan 2.8x · vigil 8.2x · blizzard 1.6x · storm 1.6x · jointBreaker 3.3x · fireSword 1.8x · forgeFury 3.0x · soulProcession 2.8x · valmorWall 4.5x · lyraStar 1.9x
+```
+
+157/288 (antes 266). A curva por fase já aparece: Cripta sem loja 13% (morte em 3,6 min) e Estrada sem loja 0% (1,7
+min), enquanto Valmor quase não muda. Valmor sem loja segue alto (75%, alvo 0–15%) e a Estrada com loja inteira
+fica perto do alvo (69%, alvo 35–55%). Isso fica para a Etapa 6.
