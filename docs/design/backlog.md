@@ -654,12 +654,15 @@ sementes depois de cada lote e registrar.
   o Leque mira no mais próximo e acerta pelo menos 3 facas a 90 px; o anel do B-01 continua testado para qualquer
   arremesso que cubra o círculo. Descrição no pt-BR atualizada.
 
-**RE-07 · Pequenos acertos de curva** · impl + bal · P · aprovado
+**RE-07 · Pequenos acertos de curva** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D10: Fogo solo cresce só 2,7x de L1 a Lmax (a menor DPS solo no máximo); D11: Mãos Ligeiras
   (+1 de quantidade em todas as armas, +25% a +100% de DPS) custa 2000 contra 1500 da Recarga inteira.
 - O quê: `fire` L7 `damage` 32 para 38; `SHOP.amount` `baseCost` 2000 para 3000.
 - Aceite: lab: Fogo solo Lmax perto de 23; economia do sim: Loja e heróis ainda dentro de 40 a 80 corridas.
+- Feito (lote 2): lab Fogo solo Lmax 19,2 para **22,8**, multidão 670 para 796. Economia: Loja inteira mais os três
+  heróis custam 25450 de ouro; com ~500 de ouro por corrida no sim (sem contar a Ganância comprada), cerca de 50
+  corridas, dentro de 40 a 80. O segundo herói continua a 2 corridas do Aldo em Valmor.
 
 **E-08 (reaberto) · Elos mais cedo** · lote 3. Ver o item na Etapa 2.
 

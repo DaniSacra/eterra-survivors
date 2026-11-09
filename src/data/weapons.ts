@@ -290,7 +290,7 @@ export const WEAPONS = {
       { radius: 48, cooldown: 1.8 },
       { damage: 24 },
       { count: 3 },
-      { damage: 32, radius: 56 },
+      { damage: 38, radius: 56 },
     ),
   },
 

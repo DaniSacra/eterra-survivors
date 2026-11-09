@@ -23,7 +23,7 @@ export const SHOP = {
   magnet: { stat: 'magnet', perLevel: 15, maxLevel: 3, baseCost: 80 },
   growth: { stat: 'growth', perLevel: 0.05, maxLevel: 5, baseCost: 150 },
   greed: { stat: 'greed', perLevel: 0.1, maxLevel: 5, baseCost: 100 },
-  amount: { stat: 'amount', perLevel: 1, maxLevel: 1, baseCost: 2000 },
+  amount: { stat: 'amount', perLevel: 1, maxLevel: 1, baseCost: 3000 },
   reroll: { charge: 'reroll', perLevel: 1, maxLevel: 5, baseCost: 120 },
   skip: { charge: 'skip', perLevel: 1, maxLevel: 5, baseCost: 80 },
   banish: { charge: 'banish', perLevel: 1, maxLevel: 5, baseCost: 150 },
