@@ -22,7 +22,7 @@ export const STAGES = {
   valmor: {
     tile: 'tile',
     waves: buildWaves({ basic: 'skeleton', fast: 'spider', tank: 'slime' }),
-    elites: elites('goblin', 'golem'),
+    elites: elites('golem', 'goblin'),
     boss: { id: 'blackKnight', at: config.matchDuration },
   },
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */

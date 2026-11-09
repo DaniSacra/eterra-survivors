@@ -602,7 +602,7 @@ sementes depois de cada lote e registrar.
   `maxHp` não foi necessária. Lab: Lâmina multidão Lmax 1984 para 2349, Fúria 5115 para 7254; DPS real da Fúria no sim
   86 para 95.
 
-**RE-02 · Cada fase pelo menos tão difícil quanto a anterior** · impl + bal · P · aprovado
+**RE-02 · Cada fase pelo menos tão difícil quanto a anterior** · impl + bal · P · ✅ feito
 
 - Por quê: 01-balance D6: Cripta 38/48 e nível 43,6 contra Valmor 29/48 e 37,9. Em Valmor o Goblin (440 HP,
   velocidade 100) chega às 1:40 e mata builds fracas; o Rato Gigante dá 0,125 XP por HP (Ossos 0,083) e passa metade
@@ -610,6 +610,8 @@ sementes depois de cada lote e registrar.
 - O quê: Valmor `elites('golem', 'goblin')` (`data/stages.ts:25`); `rat.xp` 2 para 1 (`data/enemies.ts`). Medido
   separado: Valmor 29 para 33/48; Cripta 38 para 36/48.
 - Aceite: vitórias Valmor ≥ Cripta ≥ Estrada, com folga de 3.
+- Feito (lote 1, sim de 12 sementes): vitórias Valmor 31 para **38/48**, Cripta 42 para **37/48**, Estrada 36 para
+  **37/48** (ordem certa, dentro da folga de 3). Lyra na Cripta caiu de 10 para 7/12.
 
 **RE-05 · Parede dos 6:30** · impl + bal · P · aprovado
 

@@ -77,7 +77,7 @@ export const ENEMIES = {
     hp: 16,
     speed: 80,
     damage: 6,
-    xp: 2,
+    xp: 1,
     knockbackResist: 0.1,
     move: 'charge',
   },
