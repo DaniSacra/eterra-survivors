@@ -101,7 +101,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   The victory is banked when the boss falls; `recordVigil` adds only what the vigil brought, and each hero keeps
   the longest vigil per stage (`HeroRecord.vigil`, Heróis tab, achievement `vigil5`).
 - `src/render/` — Phaser-side drawing. `assets.ts` is the **single asset map**: every texture is drawn from
-  code in `render/art/` (cartoon vector, `Pen`); swap an entry to an image URL to use real sprites.
+  code in `render/art/` (`Pen`, placeholder until real sprites); swap an entry to an image URL to use real sprites.
+  Art direction since 2026-11-10: dark, lit fantasy (darkness layer, lights, detailed tiles and props, sprites).
   The visual standard (art and layout) lives in `.claude/agents/visual-director.md`; follow it for any visual work.
   UI/UX proposals (what the player sees and when) come from the `ui-designer` agent, based on the reference
   screenshots in `docs/design/ui-references/`; the visual-director implements them.

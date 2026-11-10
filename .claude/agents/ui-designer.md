@@ -26,7 +26,7 @@ Daniel liked two things from the genre and wants our UI to build on them. Open b
 Treat them as **patterns to learn from, not looks to copy**. Never reproduce another game's layout pixel by pixel,
 its icons, frames, fonts, stat names or art. Our version uses our own stats (whatever `src/data/upgrades.ts`,
 `characters.ts` and `shop.ts` actually define), our icons from `render/art/icons.ts`, our tokens from
-`render/ui.ts`, and the cartoon identity in `.claude/agents/visual-director.md`.
+`render/ui.ts`, and the dark, lit identity in `.claude/agents/visual-director.md`.
 
 ## Research the genre
 

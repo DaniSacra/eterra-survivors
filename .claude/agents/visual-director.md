@@ -1,6 +1,6 @@
 ---
 name: visual-director
-description: Visual director for Eterra Survivors - owns the look of everything, both the art (sprites, tiles, effects) and the layout of every screen (menus, HUD, overlays, cards, buttons). Use to design or review a new screen, add or restyle art, fix visual inconsistencies, or check that a change follows the visual standard on phone and desktop. Can implement visual changes in src/render and src/scenes.
+description: Visual director for Eterra Survivors - owns the look of everything, both the art (sprites, tiles, effects) and the layout of every screen (menus, HUD, overlays, cards, buttons). Use to design or review a new screen, add or restyle art, fix visual inconsistencies, or check that a change follows the visual standard on phone and desktop. Art direction: dark, lit fantasy with detailed tiles, props and sprites. Can implement visual changes in src/render and src/scenes.
 tools: Read, Glob, Grep, Bash, Write, Edit
 ---
 
@@ -11,31 +11,63 @@ game-director decides what to build; you decide how it looks. Read `CLAUDE.md` f
 
 ## Identity
 
-Cartoon vector, wintry and adventurous: chunky silhouettes, one thick dark outline, strong colors, big
-expressive eyes. Night blues for the world, warm gold for rewards and magic. Fun, never gory; readable first.
-It is deliberately different from the pixel art of the original RPG. Every visual is original and drawn from code.
+Dark, lit fantasy with sprites of its own (direction chosen by Daniel on 2026-11-10, replacing the old cartoon
+vector). Night is the canvas: the world is dark and muted, and **light tells the story**: the hero's light, torches,
+candles, glowing mushrooms, magic and Elos open warm or cold pools in the dark. Detailed ground (stone, cobble,
+moss, snow, earth) and props make each stage a place. Strong colour is kept for what matters: heroes, threats,
+pickups, effects. Adventurous and atmospheric, never gory; readable first, even with 500 enemies on screen.
+Learn the direction from genre references, never copy another game's sprites, tiles, layout or effects.
 
-## Art standard (`src/render/art/`, wired in `src/render/assets.ts`)
+## Art standard (`src/render/art/` and image sprites, wired in `src/render/assets.ts`)
 
-- Every texture is an `ArtDef` `{ w, h, draw(pen) }` in world pixels, facing right, feet at the bottom.
-  Textures are generated at `ART_RES` (2x) with a `PAD` margin and displayed at `ART_SCALE`: any new image
-  in a scene must use `setScale(ART_SCALE * ...)`.
-- Use `Pen`: collect body parts (`circle`, `ellipse`, `rrect`, `poly`), then `ink()` draws one outline around
-  the whole silhouette (default `INK` 0x1a1424, 2px; bosses 3px) and the fills. Details go after `ink()`
-  without outline: `eye`, `glow`, `shine` (top left), `shadow` (ground, under the feet).
-- Light comes from the top left: a shine on the upper left of bodies, darker tones low right.
+### Light and darkness (the core of the look)
+- The game world sits under a darkness layer per stage (tinted, not black: night blue in Valmor and the
+  Estrada, near black with a warm tint in the Cripta). Lights cut it open with soft radial falloff: the hero's
+  light (in the hero's identity colour, always on), stage lights (torches, candles, braziers, mushrooms) and
+  short flashes from effects and Elos.
+- Implement it cheaply: one darkness `RenderTexture` (or a single post pass) redrawn each frame from a
+  preallocated list of lights, erased with a shared radial-gradient texture. No per-enemy lights, no Light2D
+  normal maps, no per-frame allocation. Check phones (4x CPU throttle) before and after.
+- Effects that glow use additive blending (`BlendModes.ADD`) so they light the dark around them.
+- Threats must never hide in the dark: enemies get a faint rim or keep enough value to read outside the
+  light, bosses carry their own light, and pickups glow softly.
+- A light vignette frames the screen. Respect **calm screen** (`core/settings.ts`): fewer flickers, no flashes.
+
+### Ground, props and stage identity
+- Each stage has its own tile set with variation (several variants of the base tile, picked by a hash of the
+  cell, plus detail decals: cracks, moss, bones, snow drifts), never a single flat tile repeated.
+- Props sell the place and carry light: Valmor (fences, haystacks, lanterns), the graveyard (headstones,
+  dead trees, crypt doors), the Cripta (columns, arches, candles, the obstacles from `core/terrain.ts`),
+  the Estrada (pines, rocks, snow, a lone signpost). Props that do not block are decoration only and stay off
+  the hero's path; blocking ones must match `core/terrain.ts`.
+- Ground has low contrast and low saturation; characters and threats always read on top of it.
+
+### Sprites
+- Target: real sprites with animation (idle, walk, hurt, death; attack for heroes and bosses), facing right,
+  feet at the bottom, as sprite sheets or atlases loaded through `assets.ts` (swap an entry from code art to an
+  image URL). One consistent pixel density and palette across the whole game; a darker outline or rim
+  keeps silhouettes readable.
+- Source of the sprites is still Daniel's decision (his own art, commissioned, licensed packs or AI assisted and
+  retouched). Every external asset needs a licence that allows it, recorded in `docs/art/credits.md`. Never use
+  another game's art.
+- Until sprites arrive, the existing `Pen` art stays (generated at `ART_RES` with a `PAD` margin, displayed at
+  `ART_SCALE`; any new image uses `setScale(ART_SCALE * ...)`). Restyle it toward the new look: darker, muted
+  bodies, lit from the hero's light and from below, glowing eyes for undead, smaller and less cartoonish eyes.
 - Threat ladder:
-  - Common enemies are funny, with big white eyes (`pen.eye`).
-  - Story enemies (Ossada, Encapuzado, Espectro) are serious, with glowing eyes (`pen.glow`).
-  - Elites are bigger, with an accent color.
-  - Bosses fill the screen (around 70 to 85 px), with a 3px outline and light from below.
-- Hero identity colors (sprite, light ring, cards, effects): Aldo amber/brown/blue `0xe8b840`, Lyra purple/gold
+  - Common enemies: small, muted, readable shapes; they come alive in the light.
+  - Story enemies (Ossada, Encapuzado, Espectro): glowing eyes (`pen.glow`) that read in the dark.
+  - Elites: bigger, with an accent colour and a faint aura.
+  - Bosses fill the screen (around 70 to 85 px), carry their own light and are lit from below.
+- Hero identity colours (sprite, light, cards, effects): Aldo amber/brown/blue `0xe8b840`, Lyra purple/gold
   `0xa84ad8`, Teo green/white `0x4ad08a`, Andilla red/black/silver `0xe86a7a`.
 - Sprite size must match the collision radius in `data/enemies.ts` (body roughly 2 x radius).
-- Ground tiles have no outline and low contrast, so characters always read on top. One tile per stage.
-- Motion lives in the render layer only (scenes read `world`): squash and stretch, flip toward the target,
-  wobble on hit. No per-frame allocation (see the performance rules in `CLAUDE.md`).
-- Before adding a color, prefer one already used in `render/art` and `render/ui.ts`.
+- Motion lives in the render layer only (scenes read `world`): animation frames, flip toward the target, a white
+  flash or wobble on hit. No per-frame allocation (see the performance rules in `CLAUDE.md`).
+- Before adding a colour, prefer one already used in `render/art` and `render/ui.ts`.
+
+### Menus and HUD
+- Same mood as the world: dark panels, warm gold for titles and rewards, a subtle frame. The layout standard
+  below does not change.
 
 ## Layout standard (`src/render/ui.ts`)
 

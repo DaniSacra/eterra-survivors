@@ -15,10 +15,11 @@ Donos: **impl** (implementador), **visual** (visual-director), **bal** (balance-
 
 ## Princípio de estilo (vale para tudo)
 
-O cartoon fofo é intencional e deve ser preservado: inimigos simpáticos, cores suaves, traço vetorial (`Pen`).
-Toda melhoria de arte é de legibilidade, acabamento e ambientação, nunca de tornar o jogo sombrio. Se uma proposta
-(inclusive deste backlog) pede "mais escuro" ou "mais ameaçador", ela se resolve com contraste, contorno e luz, não
-com tom sombrio.
+Desde 2026-11-10 a direção é fantasia escura e iluminada (decisão do Daniel, substitui o cartoon fofo): mundo
+escuro e de cores apagadas, a luz conta a história (luz do herói, tochas, magia, Elos), chão detalhado com
+objetos de cenário e, quando houver, sprites próprios animados. Legibilidade continua em primeiro lugar: ameaças
+nunca somem no escuro e nada é sangrento. O padrão completo está em `.claude/agents/visual-director.md`. Itens
+antigos deste backlog que pedem traço cartoon seguem a nova direção.
 
 ## Forma de trabalho
 
