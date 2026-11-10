@@ -123,8 +123,6 @@ export type WeaponDef = {
     category?: WeaponCategory;
     /** Slam weapons: every this many blows the shock wave runs out (1 = every blow). */
     waveEvery?: number;
-    /** Arc weapons: every `every`-th swing is a thrust instead, longer (x`range`), narrow (`arc`) and harder (x`damage`). */
-    thrust?: { every: number; range: number; arc: number; damage: number };
     /** Thrown weapons: the chance of a critical hit, and its damage multiplier. */
     crit?: { chance: number; mult: number };
     /**
@@ -183,19 +181,18 @@ function levels<L>(first: L, ...changes: Partial<L>[]): L[] {
 }
 
 export const WEAPONS = {
-  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front and, every other blow, a long thrust. */
+  /** Lâmina de Valmor: Aldo's village steel, a wide slash in front. */
   blade: {
     kind: 'arc',
     category: 'aimed',
-    thrust: { every: 2, range: 1.6, arc: 0.25, damage: 3.5 },
     levels: levels<ArcLevel>(
-      { damage: 13, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
-      { damage: 17, range: 98 },
+      { damage: 16, cooldown: 0.9, range: 95, arc: 2.5, knockback: 140, swings: 1 },
+      { damage: 21, range: 98 },
       { swings: 2 },
-      { damage: 22, cooldown: 0.8, range: 100 },
+      { damage: 25, cooldown: 0.8, range: 100 },
       { damage: 28, arc: 2.7 },
-      { damage: 32, cooldown: 0.7, range: 110 },
-      { damage: 46, range: 122, arc: 3 },
+      { damage: 30, cooldown: 0.7, range: 110 },
+      { damage: 43, range: 122, arc: 3 },
     ),
   },
 

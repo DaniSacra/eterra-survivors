@@ -976,3 +976,19 @@ Vigília, cura que não levanta herói caído) e dos ajustes NE-03 (Martelo 500,
 Todas dentro, exceto a Cripta com a Loja inteira, 1 ponto acima (ruído). ELO X: Tempestade 1,6x (antes 1,2x), ainda abaixo
 de 2,5x (NE-02, proposto); as outras de 2,6x (Fúria) a 17,8x. Vigília com Loja inteira (8 sementes): média de 353 s e
 nenhuma travada pelo Quebra-Junta. Primeiro Elo aos 5,6 min com a Loja inteira; Loja inteira em 57 corridas.
+
+## Lâmina de Valmor sem estocada (2026-11-10)
+
+O Daniel não gostou de a arma do Aldo ter dois ataques: ficou só o golpe em arco (meia-lua). Sem a estocada, a
+multidão ganha (o golpe largo acerta mais que a estocada estreita: 501 para 534 no lab) e o alvo único perde (147 para
+62, a estocada dava 3,5x). Dano no nível máximo 46 para 43 (multidão de volta a 499, todas as faixas iguais) e níveis
+iniciais mais fortes (13/17/22/28 para 16/21/25/28), porque sem a estocada o Aldo começava fraco (Valmor sem Loja
+13% para 0%, meia Loja 56% para 31%).
+
+Sim só com o Aldo (16 sementes; Valmor com 24 deu 8% / 50% / 96%):
+
+| Fase    | Antes           | Depois          | Meta               |
+| ------- | --------------- | --------------- | ------------------ |
+| Valmor  | 13% / 56% / 94% | 13% / 50% / 94% | 0–15 / 40–60 / 85+ |
+| Cripta  | 0% / 6% / 81%   | 0% / 0% / 75%   | 0 / 15–35 / 70–85  |
+| Estrada | 0% / 0% / 50%   | 0% / 0% / 50%   | 0 / 0–10 / 35–55   |

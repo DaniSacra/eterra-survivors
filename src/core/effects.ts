@@ -21,11 +21,11 @@ export function expire<T extends Timed>(pool: Pool<T>, dt: number): void {
 /** A sword swing drawn around the player for a moment (purely visual). */
 export interface Slash extends Timed {
   /**
-   * `swing`: an arc around the hero (follows them); `thrust`: a narrow stab along `angle`. `smash`: a mace blow of
+   * `swing`: an arc around the hero (follows them). `smash`: a mace blow of
    * radius `shock` landing at (x, y), facing `angle`; `shock`: its shock wave running out to `shock`. `pulse`: a
    * wave running out to `shock` around the hero (Chama de Yah).
    */
-  form: 'swing' | 'thrust' | 'smash' | 'shock' | 'pulse';
+  form: 'swing' | 'smash' | 'shock' | 'pulse';
   x: number;
   y: number;
   width: number;

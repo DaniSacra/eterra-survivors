@@ -561,7 +561,7 @@ export const t = {
   weapons: {
     blade: {
       name: 'Lâmina de Valmor',
-      desc: 'Golpe em arco à frente. A cada dois golpes, uma estocada longa e mais forte.',
+      desc: 'Golpe largo em arco à frente.',
     },
     elunLight: { name: 'Luz de Elun', desc: 'Uma luz sagrada que busca o inimigo mais próximo.' },
     yahAura: { name: 'Aura de Yah', desc: 'Queima tudo o que chega perto.' },

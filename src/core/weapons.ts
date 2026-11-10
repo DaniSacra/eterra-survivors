@@ -34,7 +34,7 @@ export interface OwnedWeapon {
   damage: number;
   /** Match time when it was picked up. */
   since: number;
-  /** Attacks made so far (a thrust or a Fúria wave comes every `every`). */
+  /** Attacks made so far (a Fúria wave comes every `every`). */
   swings: number;
   /** Seconds until a shock wave's aftershock (Quebra-Junta; 0 = none pending), and where. */
   after: number;
@@ -178,16 +178,6 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
   const p = world.player;
   const def = WEAPONS[w.id] as WeaponDef;
   const facing = Math.atan2(p.facing.y, p.facing.x);
-  // Every few blows, a thrust instead: long, narrow and harder.
-  const th = def.kind === 'arc' ? def.thrust : undefined;
-  if (th && ++w.swings % th.every === 0) {
-    THRUST.damage = s.damage * th.damage;
-    THRUST.range = s.range * th.range;
-    THRUST.arc = th.arc;
-    THRUST.knockback = s.knockback;
-    swingArc(world, THRUST, w, facing, true, 'thrust');
-    return true;
-  }
   for (let k = 0; k < s.swings; k++) swingArc(world, s, w, facing + k * Math.PI, k === 0);
   // Fúria: every few blows a cutting wave runs ahead, through everything in its way.
   const wave = def.kind === 'arc' ? def.wave : undefined;
@@ -202,9 +192,6 @@ function fireArc(world: World, s: ArcLevel, w: OwnedWeapon): boolean {
   }
   return true;
 }
-
-/** The level a thrust swings with (filled from the weapon's level and `thrust` on each one). */
-const THRUST: ArcLevel = { damage: 0, cooldown: 0, range: 0, arc: 0, knockback: 0, swings: 1 };
 
 /**
  * A slam: the mace comes down in front of the hero. Everything within `radius` of the impact point is hit, pushed
@@ -328,13 +315,12 @@ function swingArc(
   w: OwnedWeapon,
   angle: number,
   touch: boolean,
-  form: 'swing' | 'thrust' = 'swing',
 ): void {
   const p = world.player;
   const range = s.range * p.stats.area;
   const list = world.enemies.active;
   const slash = world.slashes.acquire();
-  slash.form = form;
+  slash.form = 'swing';
   slash.angle = angle;
   slash.arc = s.arc;
   slash.range = range;

@@ -52,8 +52,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   role), `stages.ts`, `characters.ts`, `upgrades.ts` (passives), `pickups.ts`, `shop.ts`, `config.ts`.
   A new weapon (of an existing `kind`) or enemy = new data entry + its name in `pt-BR.ts` + an asset key.
   A brand-new weapon behaviour = a new `kind` with one fire function in `core/weapons.ts`.
-  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike, slam. Arc weapons swing around the hero (the blade
-  adds a `thrust` every few swings); thrown weapons can fly where the hero faces (`aim: 'facing'`), burst on the
+  Weapon kinds: arc, homing, aura, thrown, orbit, zone, strike, slam. Arc weapons swing around the hero; thrown weapons can fly where the hero faces (`aim: 'facing'`), burst on the
   first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) land a heavy blow in front that
   stuns (bosses only `config.weapons.bossStun`; a stun running is never renewed, and it does not stop a boss's ability),
   and every `waveEvery` blows a shock wave that throws enemies back (waves hit and push, only the blow stuns).

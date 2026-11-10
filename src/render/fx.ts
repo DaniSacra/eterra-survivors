@@ -130,18 +130,6 @@ const DENT = 0x3a2a24;
 const SLAM_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
 /** Part of a mace blow's mark spent with the head coming down. */
 const DROP = 0.18;
-/** Reused corners of a thrust's shape (no allocation per frame). */
-const QUAD = [
-  { x: 0, y: 0 },
-  { x: 0, y: 0 },
-  { x: 0, y: 0 },
-  { x: 0, y: 0 },
-];
-function setCorner(i: number, x: number, y: number): void {
-  const c = QUAD[i] as { x: number; y: number };
-  c.x = x;
-  c.y = y;
-}
 /** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
 const FIRE_SWORD: OrbitStyle = { color: 0xffd890, dark: 0xff6a20, blade: true };
 /** Part of a strike's life spent falling, before the burst on the ground. */
@@ -393,10 +381,6 @@ export function drawFx(
     }
     if (s.form === 'shock') {
       drawShock(ground, top, s, 1 - s.ttl / config.effects.shockTtl);
-      continue;
-    }
-    if (s.form === 'thrust') {
-      drawThrust(g, p.x, p.y, s, 1 - s.ttl / config.effects.slashTtl, SWING_STYLE[s.weapon] ?? SWING_PLAIN);
       continue;
     }
     if (s.form === 'pulse') {
@@ -761,52 +745,6 @@ function drawShock(
     disc(top, s.x + Math.cos(a) * r, s.y + Math.sin(a) * r, 2.5);
   }
 }
-
-/**
- * The blade's thrust, `t` 0 -> 1: a long narrow stab shoots out from the hero to its full reach (the length it
- * hits), a bright point at the tip, and pulls back as it fades. Not a thin slice of a swing: a lunge.
- */
-function drawThrust(
-  g: Phaser.GameObjects.Graphics,
-  cx: number,
-  cy: number,
-  s: Slash,
-  t: number,
-  st: SwingStyle,
-): void {
-  const ux = Math.cos(s.angle);
-  const uy = Math.sin(s.angle);
-  const out = Math.min(1, t / 0.3);
-  const len = s.range * (1 - (1 - out) * (1 - out));
-  const fade = t < 0.5 ? 1 : 1 - (t - 0.5) / 0.5;
-  const half = Math.max(7, s.range * Math.tan(s.arc / 2) * 0.8);
-  const back = 14;
-  // The stab: a long diamond from just behind the hero to the tip, widest two thirds of the way out.
-  setCorner(0, cx - ux * back, cy - uy * back);
-  setCorner(1, cx + ux * len * 0.65 - uy * half, cy + uy * len * 0.65 + ux * half);
-  setCorner(2, cx + ux * len, cy + uy * len);
-  setCorner(3, cx + ux * len * 0.65 + uy * half, cy + uy * len * 0.65 - ux * half);
-  g.fillStyle(st.edge, 0.55 * fade);
-  g.fillPoints(QUAD, true);
-  g.lineStyle(2, INK, 0.5 * fade);
-  g.strokePoints(QUAD, true);
-  // The white core along the blade and a glint at the point.
-  g.lineStyle(3, 0xffffff, 0.95 * fade);
-  g.lineBetween(cx, cy, cx + ux * len * 0.97, cy + uy * len * 0.97);
-  if (t < 0.5) star(g, cx + ux * len, cy + uy * len, 5 + 7 * (1 - t * 2), 0xffffff, fade);
-  // Speed lines beside it.
-  g.lineStyle(1.5, st.fill, 0.7 * fade);
-  for (const side of SIDES) {
-    const o = side * (half + 6);
-    g.lineBetween(
-      cx + ux * len * 0.25 - uy * o,
-      cy + uy * len * 0.25 + ux * o,
-      cx + ux * len * 0.7 - uy * o,
-      cy + uy * len * 0.7 + ux * o,
-    );
-  }
-}
-const SIDES = [1, -1] as const;
 
 /** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
 const AURA_CORE: readonly [number, number][] = [

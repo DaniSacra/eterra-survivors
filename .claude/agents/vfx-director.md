@@ -46,8 +46,7 @@ fire: flame tongues on the rim, embers, a hotter core.
   heal crosses, bleed drops, burn embers, frozen shards, Valmor's guard bubble with its recharge arc.
 - The **forge moment** (`GameScene.forgeMoment`): 0.5 s slow motion, the `forge` sound, element sparks, HUD
   notice and the braided chain in the build strip. Reuse it, do not compete with it.
-- The blade's thrust (every other swing) reads as a **stab**, a long blade from the hero with a bright tip,
-  not as a thin slice of the arc. The Maça de Ferro is a heavy blow in front that stuns, with a **shock wave**
+- The Lâmina de Valmor is only its wide slash (Daniel removed the thrust on 2026-11-10). The Maça de Ferro is a heavy blow in front that stuns, with a **shock wave**
   every third blow (Quebra-Junta: every blow plus a smaller echo); Daniel disliked the old ground crack.
 - A push must look like a push: knockback travels about knockback / 10 px, and the shields really throw enemies
   ~60 px. If an effect says "pushes" and the enemy does not move, it is a data bug to report, not to hide.

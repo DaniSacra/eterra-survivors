@@ -194,26 +194,6 @@ describe('Martelo do Gaspar: the push', () => {
   });
 });
 
-describe('Lâmina de Valmor: the thrust', () => {
-  const blade = WEAPONS.blade;
-
-  it('every few blows (thrust.every) is a long, narrow thrust that hits harder', () => {
-    const w = prepared('blade');
-    w.player.facing.x = 1;
-    const l = blade.levels[0]!;
-    const far = spawnEnemy(w, 'blackKnight', l.range * blade.thrust.range - 20, 0);
-    far.hp = far.maxHp = 1e6;
-    for (let i = 0; i < blade.thrust.every - 1; i++) {
-      w.weapons[0]!.timer = 0;
-      updateWeapons(w, 1 / 60);
-    }
-    expect(far.hp).toBe(far.maxHp); // beyond a normal swing
-    w.weapons[0]!.timer = 0;
-    updateWeapons(w, 1 / 60);
-    expect(far.maxHp - far.hp).toBeCloseTo(l.damage * blade.thrust.damage);
-  });
-});
-
 describe('Lâmina de Valmor (arc)', () => {
   it('hits enemies in front, not behind', () => {
     const w = prepared('blade');
@@ -425,8 +405,7 @@ describe('rhythm texts match the data', () => {
     const m = /a cada (\S+) golpe/i.exec(desc);
     return m ? words[m[1]!.toLowerCase()] : undefined;
   };
-  it('Lâmina, Fúria and Maça say the rhythm they have', () => {
-    expect(said(t.weapons.blade.desc)).toBe(WEAPONS.blade.thrust.every);
+  it('Fúria and Maça say the rhythm they have', () => {
     expect(said(t.weapons.fury.desc)).toBe(WEAPONS.fury.wave.every);
     expect(said(t.weapons.mace.desc)).toBe(WEAPONS.mace.waveEvery);
   });
