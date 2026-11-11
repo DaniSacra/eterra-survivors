@@ -440,8 +440,11 @@ export function weaponUsed(save: MetaSave, id: WeaponId): boolean {
   return Object.values(save.records).some((r) => (r?.weaponRuns[id] ?? 0) > 0);
 }
 
-/** Test mode (`?dev`, set by the render layer): every hero and stage open, whatever the config says. */
-export const playtest = { unlockAll: false };
+/**
+ * Test mode (`?dev`, set by the render layer): every hero and stage open, whatever the config says, and the boss
+ * arrives at `bossAt` seconds (null: the stage's own time) so it can be seen without playing ten minutes.
+ */
+export const playtest: { unlockAll: boolean; bossAt: number | null } = { unlockAll: false, bossAt: null };
 
 export const heroUnlocked = (save: MetaSave, id: CharacterId): boolean =>
   playtest.unlockAll || config.unlockAllHeroes || CHARACTERS[id].cost === 0 || save.heroes.includes(id);

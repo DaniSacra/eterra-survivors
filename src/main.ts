@@ -13,8 +13,10 @@ import { CollectionScene } from './scenes/CollectionScene';
 import { sound } from './render/sound';
 import { DEV_MODE } from './render/dev';
 import { playtest } from './core/meta';
+import { config } from './data/config';
 
 playtest.unlockAll = DEV_MODE;
+playtest.bossAt = DEV_MODE ? config.devBossAt : null;
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,

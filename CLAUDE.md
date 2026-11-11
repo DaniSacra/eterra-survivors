@@ -149,4 +149,4 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
 - **Test mode** (`?dev` at the end of the URL, also on the published game; `render/dev.ts`): every hero and stage
   open (`playtest.unlockAll` in `core/meta.ts`), the Loja sets any level for free (− / +, keys + and −, the whole
   Loja at max or zero; `setShopLevel`), a "MODO DEV" tag on Menu, Preparação and Loja, and its own save key
-  (`eterra-survivors.save.dev`), so the player's real progress is never touched.
+  (`eterra-survivors.save.dev`), so the player's real progress is never touched and the boss arrives at 5:00 (`config.devBossAt`, `playtest.bossAt`), so it can be seen without playing ten minutes.

@@ -101,3 +101,22 @@ describe('waves', () => {
     expect(bite(4.8)).toBeCloseTo(bite(1));
   });
 });
+
+describe('test mode boss time', () => {
+  it('?dev brings the boss at config.devBossAt, and only then', async () => {
+    const { playtest } = await import('../../src/core/meta');
+    const w = new World(1);
+    playtest.bossAt = config.devBossAt;
+    try {
+      w.time = config.devBossAt + 0.1;
+      w.spawner.update(w, 1 / 60);
+      expect(w.boss).not.toBeNull();
+    } finally {
+      playtest.bossAt = null;
+    }
+    const n = new World(1);
+    n.time = config.devBossAt + 0.1;
+    n.spawner.update(n, 1 / 60);
+    expect(n.boss).toBeNull();
+  });
+});

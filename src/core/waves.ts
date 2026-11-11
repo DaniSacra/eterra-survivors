@@ -4,6 +4,7 @@ import type { WaveSegment } from '../data/waves';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import { spawnOnRing, type Enemy } from './enemies';
 import { riseAt } from './marks';
+import { playtest } from './meta';
 import { spawnPoint } from './terrain';
 import type { World } from './world';
 
@@ -59,7 +60,7 @@ export class Spawner {
       world.events.push({ type: 'eliteSpawned' });
     }
     if (!this.bossSpawned) this.specials(world, seg.hpMult);
-    if (!this.bossSpawned && world.time >= stage.boss.at) {
+    if (!this.bossSpawned && world.time >= (playtest.bossAt ?? stage.boss.at)) {
       this.bossSpawned = true;
       clearCrowd(world);
       world.boss = spawnOnRing(world, stage.boss.id);

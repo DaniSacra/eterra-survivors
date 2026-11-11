@@ -1,6 +1,7 @@
 /** Global tuning. Content (weapons, enemies, waves, upgrades) lives in its own data files. */
 export const config = {
   matchDuration: 600, // seconds; the boss arrives at the end
+  devBossAt: 300, // seconds; in test mode (?dev) the boss comes at 5:00
   /**
    * Noite Sem Fim (after beating the boss): the last full wave keeps growing. Per minute of vigil: enemy HP
    * x(1 + hpPerMinute) and contact damage x(1 + damagePerMinute), one more enemy per batch every minute, batches a bit faster (down to minInterval); an
