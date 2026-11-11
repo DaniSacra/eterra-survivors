@@ -74,7 +74,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   fall and burst again, `fuse` projectiles), Quebra-Junta `waveEvery: 1` / `aftershock` / `crush`, Leque de Facas
   `ricochet` / `bleed`, Luz Sagrada `mend`, Chama de Yah `pulse`, Vigília `dart` (`bladeRadius`, shared with the
   renderer), Nevasca `shatter` (queued, burst in `updateShatters`), Tempestade `chain`, Fúria da Forja
-  `boomerang`, Procissão `swell`, Muralha de Valmor `ward` (`hurtHero`) and Espada de Fogo `ground` (burning
+  `boomerang`, Escudos de Valmor and the Muralha `loop` (a thrown shield flies a circle through the hero and the target, on a random side, and hits again on the way home; the Muralha throws eight at once), Procissão `swell`, Muralha de Valmor `ward` (`hurtHero`) and Espada de Fogo `ground` (burning
   zones). Kill and hit hooks live in `core/elos.ts`; damage over time (bleed, burn) is `applyDot` in
   `core/enemies.ts`. The lab's dummies are immortal and ignore knockback, so effects that hang on kills, travel or
   pushes must also be checked in `npm run sim` (`REAL DPS`). The first forge of each Elo banks

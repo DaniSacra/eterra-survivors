@@ -164,22 +164,6 @@ describe('Maça de Ferro (slam: a blow in front, a shock wave every few)', () =>
   });
 });
 
-describe('Escudos de Valmor: the push', () => {
-  it('a shield throws the enemy it hits back by a real distance', () => {
-    const w = prepared('shields');
-    const s = WEAPONS.shields.levels[0]!;
-    const e = spawnEnemy(w, 'bones', s.orbitRadius, 0);
-    e.hp = e.maxHp = 1e6;
-    w.time = 0; // the shield starts at angle 0, right on it
-    updateWeapons(w, 1 / 60);
-    expect(e.hp).toBeLessThan(e.maxHp);
-    const x0 = e.x;
-    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
-    // Pushed outward more than it could walk back in half a second.
-    expect(e.x - x0).toBeGreaterThan(20);
-  });
-});
-
 describe('Martelo do Gaspar: the push', () => {
   it('throws what it hits back by a real distance (~knockback / 10 px)', () => {
     const w = prepared('hammer');

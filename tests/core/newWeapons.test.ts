@@ -197,47 +197,53 @@ describe('Cajado de Lyra (thrown, bursts)', () => {
   });
 });
 
-describe('Escudos de Valmor (a wall, not a spin)', () => {
+const TWO_PI = Math.PI * 2;
+
+describe('Escudos de Valmor (a thrown loop)', () => {
   const still0 = (e: ReturnType<typeof spawnEnemy>) => {
     e.hp = e.maxHp = 1e6;
-    e.def = { ...e.def, speed: 0, knockbackResist: 0 };
+    e.def = { ...e.def, speed: 0, knockbackResist: 1 };
   };
 
-  it('the shields stand in front of the walking direction and turn with it', () => {
+  it('flies a closed curve through the target and back to where it was thrown', () => {
     const w = prepared('shields');
-    w.weapons[0]!.level = 7;
-    w.player.facing.x = 0;
-    w.player.facing.y = 1; // walking down
-    for (let i = 0; i < 90; i++) w.step(1 / 60, still);
-    const aim = w.weapons[0]!.aim;
-    expect(Math.sin(aim)).toBeGreaterThan(0.99);
-    // They do not spin: the heading stays put with the hero standing still.
-    const before = w.weapons[0]!.aim;
-    for (let i = 0; i < 60; i++) w.step(1 / 60, still);
-    expect(w.weapons[0]!.aim).toBeCloseTo(before, 5);
+    const e = spawnEnemy(w, 'bones', 200, 0);
+    still0(e);
+    w.step(1 / 60, still);
+    const shot = w.projectiles.active[0]!;
+    expect(shot.curve).not.toBe(0);
+    const ttl0 = shot.ttl;
+    let far = 0;
+    for (let i = 0; i < Math.round(ttl0 * 60) - 3 && !shot.dead; i++) {
+      w.step(1 / 60, still);
+      far = Math.max(far, Math.hypot(shot.x, shot.y));
+    }
+    // Out to about the target's distance, then home: it ends near the hero again.
+    expect(far).toBeGreaterThan(120);
+    expect(Math.hypot(shot.x, shot.y)).toBeLessThan(60);
   });
 
-  it('the bash throws back what is in front, not what is behind', () => {
+  it('hits an enemy in its path on the way out and again on the way back', () => {
     const w = prepared('shields');
-    w.player.facing.x = 1;
-    w.player.facing.y = 0;
-    const front = spawnEnemy(w, 'bones', 90, 0);
-    const behind = spawnEnemy(w, 'bones', -90, 0);
-    still0(front);
-    still0(behind);
-    for (let i = 0; i < 40; i++) w.step(1 / 60, still);
-    expect(front.x).toBeGreaterThan(90 + 20);
-    expect(behind.x).toBeCloseTo(-90, 0);
+    const e = spawnEnemy(w, 'bones', 150, 0);
+    still0(e);
+    for (let i = 0; i < 400; i++) w.step(1 / 60, still);
+    const dmg = WEAPONS.shields.levels[0]!.damage;
+    expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(dmg * 2 - 1);
   });
 
-  it('the Muralha de Valmor closes the ring: it bashes on every side', () => {
+  it('the Muralha de Valmor throws a ring of shields out on every side', () => {
     const w = prepared('valmorWall');
-    const a = spawnEnemy(w, 'bones', 110, 0);
-    const b = spawnEnemy(w, 'bones', -110, 0);
-    still0(a);
-    still0(b);
-    for (let i = 0; i < 40; i++) w.step(1 / 60, still);
-    expect(a.x).toBeGreaterThan(110 + 20);
-    expect(b.x).toBeLessThan(-110 - 20);
+    const e = spawnEnemy(w, 'bones', 150, 0);
+    still0(e);
+    w.step(1 / 60, still);
+    const shots = w.projectiles.active;
+    expect(shots).toHaveLength(WEAPONS.valmorWall.levels[0]!.count);
+    // Where each one is aimed (a quarter turn from its heading) is spread over the whole circle.
+    const aims = shots.map((s) => {
+      const a = s.angle + Math.sign(s.curve) * (Math.PI / 2);
+      return Math.round((((a % TWO_PI) + TWO_PI) % TWO_PI) / (TWO_PI / 8)) % 8;
+    });
+    expect(new Set(aims).size).toBe(8);
   });
 });

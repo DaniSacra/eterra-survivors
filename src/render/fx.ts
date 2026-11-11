@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
 import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponDef, type WeaponId } from '../data/weapons';
-import { bladeRadius, isElo, pieceAngle, weaponStats } from '../core/weapons';
+import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { wardReady } from '../core/elos';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW, bossAbility } from '../core/bosses';
@@ -64,8 +64,6 @@ interface OrbitStyle {
   blade: boolean;
 }
 const ORBIT_STYLE: Partial<Record<WeaponId, OrbitStyle>> = {
-  shields: { color: 0x8aa8c8, dark: 0x8a5a24, blade: false },
-  valmorWall: { color: ELEMENT_COLOR.steel, dark: 0x5a6478, blade: false },
   vigil: { color: 0xfff6e0, dark: ELEMENT_COLOR.holy, blade: true },
 };
 const SWORDS: OrbitStyle = { color: 0xcbd8ec, dark: 0x9a6232, blade: true };
@@ -210,7 +208,6 @@ export const newMoments = (): Moments => ({
 export const ZONE_FILL_MAX = 0.35;
 /** Texture width of the shield sprite (art px). */
 /** Width of the shield art and length of the sword art, in art px. */
-const SHIELD_ART = 24;
 const SWORD_ART = 40;
 export const HEAL_COLOR = 0x7ae890;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
@@ -309,7 +306,7 @@ export function drawFx(
       const trail = elo ? 1 : 1.1;
       const dir = s.spin >= 0 ? 1 : -1;
       for (let i = 0; i < count; i++) {
-        const a = pieceAngle(w, world.time, s, i, count, r, orbitR);
+        const a = orbitAngle(world.time, s.spin, i, count);
         // Vigília's swords dart out toward the nearest enemy and back.
         const br = bladeRadius(w, a, orbitR);
         const x = p.x + Math.cos(a) * br;
@@ -357,7 +354,7 @@ export function drawFx(
           if (elo) drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
           // The pixel sword points the way it turns (its tip is up in the art).
           else fxSprites.put('fx.sword', x, y, a + (dir * Math.PI) / 2 + Math.PI / 2, (r * 6) / SWORD_ART);
-        } else drawShield(x, y, r, a);
+        }
       }
     }
   }
@@ -479,6 +476,8 @@ const TRAIL: Partial<Record<WeaponId, Trail>> = {
   daggers: { color: HERO_COLOR.andilla, core: 0xffffff, width: 3, len: 0.05, dots: false, star: false },
   fan: { color: ELEMENT_COLOR.shadow, core: 0xe0ffe8, width: 3, len: 0.05, dots: false, star: false },
   hammer: { color: 0xcbd8ec, core: 0xffffff, width: 10, len: 0.12, dots: false, star: false },
+  shields: { color: 0x8aa8c8, core: 0xffffff, width: 9, len: 0.2, dots: false, star: false },
+  valmorWall: { color: ELEMENT_COLOR.steel, core: 0xffffff, width: 11, len: 0.2, dots: false, star: false },
   forgeFury: { color: ELEMENT_COLOR.forge, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
   wisps: { color: 0x40e0d8, core: 0xe8ffff, width: 4, len: 0.12, dots: true, star: false },
   soulProcession: { color: ELEMENT_COLOR.soul, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
@@ -946,7 +945,7 @@ function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm
       const r = s.radius * p.stats.area;
       const elo = isElo(w.id);
       for (let i = 0; i < count; i++) {
-        const a = pieceAngle(w, world.time, s, i, count, r, orbitR);
+        const a = orbitAngle(world.time, s.spin, i, count);
         const br = bladeRadius(w, a, orbitR);
         const bx = p.x + Math.cos(a) * br;
         const by = p.y + Math.sin(a) * br;
@@ -2295,9 +2294,4 @@ function drawSword(
   g.closePath();
   g.fillPath();
   g.strokePath();
-}
-
-/** A round shield of hit radius `r`: the pixel shield, grown to the size of the hit. */
-function drawShield(x: number, y: number, r: number, rot = 0): void {
-  fxSprites.put('fx.shield', x, y, rot, (r * 2.2) / SHIELD_ART);
 }

@@ -33,6 +33,8 @@ export interface Projectile extends Poolable {
   /** Fúria da Forja: at this much `ttl` left the hammer turns back (0 = never); `home` once it does. */
   back: number;
   home: boolean;
+  /** Escudos de Valmor: the heading turns at this rad/s (signed), so the shot flies a loop (0 = straight). */
+  curve: number;
   /** Asset key (one per weapon). */
   sprite: string;
   /** The weapon credited with its damage. */
@@ -63,6 +65,7 @@ export const createProjectile = (): Projectile => ({
   fuse: false,
   back: 0,
   home: false,
+  curve: 0,
   sprite: '',
   source: null,
   target: null,
@@ -146,7 +149,14 @@ export function updateProjectiles(world: World, dt: number): void {
       }
       continue;
     }
-    if (p.back > 0 && p.ttl <= p.back) {
+    if (p.curve !== 0) {
+      p.angle += p.curve * dt;
+      if (p.back > 0 && p.ttl <= p.back) {
+        // Halfway round the loop the shield may hit everyone again.
+        p.back = 0;
+        p.hits.length = 0;
+      }
+    } else if (p.back > 0 && p.ttl <= p.back) {
       // Halfway: the hammer turns home, and may hit everything again on the way back.
       p.back = 0;
       p.home = true;

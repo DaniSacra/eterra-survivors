@@ -195,23 +195,26 @@ describe('stage multipliers', () => {
 });
 
 describe('obstacles never wall the hero in', () => {
-  it.each(['valmor', 'crypt', 'southRoad'] as const)('%s: neighbours leave a gap the hero fits through', (stage) => {
-    const layout = STAGES[stage].layout;
-    const scatter = scatterOf(layout);
-    expect(scatter).toBeDefined();
-    const found: Obstacle[] = [];
-    for (let cx = -12; cx <= 12; cx++)
-      for (let cy = -12; cy <= 12; cy++) {
-        const o: Obstacle = { x: 0, y: 0, r: 0, kind: 0 };
-        if (obstacleAt(9, scatter!, cx, cy, o)) found.push(o);
-      }
-    expect(found.length).toBeGreaterThan(0);
-    for (let i = 0; i < found.length; i++)
-      for (let j = i + 1; j < found.length; j++) {
-        const a = found[i]!;
-        const b = found[j]!;
-        const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
-        expect(gap).toBeGreaterThan(2 * config.player.radius);
-      }
-  });
+  it.each(['valmor', 'crypt', 'southRoad'] as const)(
+    '%s: neighbours leave a gap the hero fits through',
+    (stage) => {
+      const layout = STAGES[stage].layout;
+      const scatter = scatterOf(layout);
+      expect(scatter).toBeDefined();
+      const found: Obstacle[] = [];
+      for (let cx = -12; cx <= 12; cx++)
+        for (let cy = -12; cy <= 12; cy++) {
+          const o: Obstacle = { x: 0, y: 0, r: 0, kind: 0 };
+          if (obstacleAt(9, scatter!, cx, cy, o)) found.push(o);
+        }
+      expect(found.length).toBeGreaterThan(0);
+      for (let i = 0; i < found.length; i++)
+        for (let j = i + 1; j < found.length; j++) {
+          const a = found[i]!;
+          const b = found[j]!;
+          const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
+          expect(gap).toBeGreaterThan(2 * config.player.radius);
+        }
+    },
+  );
 });

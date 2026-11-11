@@ -668,7 +668,7 @@ export const t = {
     wisps: { name: 'Fogos-Fátuos', desc: 'Luzes lentas que perseguem os mortos por muito tempo.' },
     shields: {
       name: 'Escudos de Valmor',
-      desc: 'Escudos girando perto do herói, que empurram quem acertam.',
+      desc: 'Um escudo girando que voa em curva até o inimigo mais próximo e volta pelo outro lado, acertando todos no caminho.',
     },
     lightning: { name: 'Raio', desc: 'Raios caem sobre inimigos ao acaso.' },
     fury: {
@@ -706,7 +706,7 @@ export const t = {
     },
     valmorWall: {
       name: 'Muralha de Valmor',
-      desc: 'Um anel de escudos e uma proteção que segura um golpe a cada 10 segundos e devolve a pancada.',
+      desc: 'Oito escudos lançados para todos os lados, em curvas largas, e uma proteção que segura um golpe a cada 10 segundos e devolve a pancada.',
     },
     mace: {
       name: 'Maça de Ferro',

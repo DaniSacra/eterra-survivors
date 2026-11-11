@@ -98,7 +98,12 @@ const HOVER = 13;
 const HERO_BAR_W = 44;
 
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
-const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
+const SPIN: Record<string, boolean> = {
+  'proj.hammer': true,
+  'proj.forgeFury': true,
+  'proj.shields': true,
+  'proj.valmorWall': true,
+};
 /** Each Elo's projectile sprite, tinted with its element's colour. */
 
 /** The thief rat's outline (gold) and the glow of the gems it carries. */

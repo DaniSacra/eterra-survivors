@@ -152,24 +152,15 @@ export type WeaponDef = {
      * enemy (over `window` of the turn).
      */
     dart?: { reach: number; window: number };
-    /**
-     * Shields that do not spin: they stand as a wall in front of the hero (`arc` = 2 PI closes the ring), turning
-     * after the walking direction at `turn` rad/s. Every `every` s the wall bashes: it surges out `reach` px for
-     * `window` s and throws everything in front of it back (`push`, x`damage` of a shield's blow).
-     */
-    wall?: {
-      arc: number;
-      turn: number;
-      every: number;
-      window: number;
-      reach: number;
-      push: number;
-      damage: number;
-    };
     /** Nevasca: an enemy that dies inside its frost shatters, hurting all around it (x`damage` of a tick). */
     shatter?: { damage: number; radius: number };
     /** Tempestade: each bolt jumps to `count` more enemies within `range`, x`damage` each. */
     chain?: { count: number; range: number; damage: number };
+    /**
+     * Thrown weapons (Escudos de Valmor): the shot flies a closed curve (a circle of a radius between `minRadius`
+     * and `maxRadius`, on a random side, whose far point is the target) and may hit everything again on the way back.
+     */
+    loop?: { minRadius: number; maxRadius: number };
     /** Fúria da Forja: the hammer turns back halfway and hits again on the way home. */
     boomerang?: boolean;
     /** Procissão: each kill adds a wisp to the next casts, up to `cap`, for `duration` s after the last kill. */
@@ -391,19 +382,33 @@ export const WEAPONS = {
       { count: 5, damage: 26, cooldown: 1.1 },
     ),
   },
-  /** Escudos de Valmor: round shields circling close, shoving back whatever they hit. */
+  /**
+   * Escudos de Valmor: a shield thrown at the nearest enemy that spins out in a wide curve, loops round and comes
+   * back to where it started, hitting everyone along the way (twice: out and home).
+   */
   shields: {
-    kind: 'orbit',
-    category: 'area',
-    wall: { arc: 2.4, turn: 7, every: 3.2, window: 0.28, reach: 36, push: 900, damage: 3 },
-    levels: levels<OrbitLevel>(
-      { damage: 11.3, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 0, knockback: 600 },
-      { damage: 14.4 },
+    kind: 'thrown',
+    category: 'auto',
+    aim: 'nearest',
+    loop: { minRadius: 70, maxRadius: 130 },
+    levels: levels<ThrownLevel>(
+      {
+        damage: 22,
+        cooldown: 1.6,
+        speed: 330,
+        count: 1,
+        pierce: 999,
+        lifetime: 2,
+        radius: 18,
+        spread: 0.5,
+        knockback: 220,
+      },
+      { damage: 10.4 },
       { count: 2 },
-      { orbitRadius: 88, radius: 12 },
-      { damage: 19.2, cooldown: 0.7 },
+      { radius: 20, cooldown: 1.45 },
+      { damage: 13.7 },
       { count: 3 },
-      { damage: 27.6 },
+      { damage: 18.5, cooldown: 1.3 },
     ),
   },
   /** Maça de Ferro: a heavy blow in front that leaves enemies reeling; every third, a shock wave throws them back. */
@@ -582,12 +587,25 @@ export const WEAPONS = {
       },
     ],
   },
-  /** Muralha de Valmor: a ring of shields, wide and close-set, that the dead can't get through. */
+  /** Muralha de Valmor: a ring of shields thrown out on every side at once, and a guard that holds one blow. */
   valmorWall: {
-    kind: 'orbit',
-    wall: { arc: Math.PI * 2, turn: 0, every: 3, window: 0.3, reach: 44, push: 1100, damage: 1.5 },
+    kind: 'thrown',
+    aim: 'nearest',
+    loop: { minRadius: 90, maxRadius: 140 },
     ward: { every: 10, damage: 3 },
-    levels: [{ damage: 37, cooldown: 0.5, count: 10, orbitRadius: 72, radius: 21, spin: 0, knockback: 750 }],
+    levels: [
+      {
+        damage: 21,
+        cooldown: 1.5,
+        speed: 330,
+        count: 8,
+        pierce: 999,
+        lifetime: 2,
+        radius: 24,
+        spread: (Math.PI * 2) / 8,
+        knockback: 500,
+      },
+    ],
   },
   /** Estrela de Lyra: the orb bursts and splits into small stars that fall around it and burst again. */
   lyraStar: {
