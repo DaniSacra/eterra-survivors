@@ -41,6 +41,8 @@ export interface Enemy extends Poolable {
   orbitReady: number[];
   /** Seconds left rallied by a banner (FT-06): faster and harder-hitting (config.rally). */
   rally: number;
+  /** Nests: how many it has raised so far. */
+  spawned: number;
   /** Bosses: which of `abilities` comes next (round and round). */
   abilityIdx: number;
   /** Bosses only (core/bosses.ts): ability phase, seconds left in it, and the direction it aimed. */
@@ -80,6 +82,7 @@ export const createEnemy = (): Enemy => ({
   actT: 0,
   aimX: 1,
   rally: 0,
+  spawned: 0,
   abilityIdx: 0,
   vanished: false,
   aimY: 0,
@@ -144,6 +147,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.aimX = 1;
   e.aimY = 0;
   e.rally = 0;
+  e.spawned = 0;
   e.abilityIdx = 0;
   e.dead = e.vanished = false;
   world.seen[type] = true;

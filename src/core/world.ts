@@ -306,9 +306,10 @@ export class World {
     this.tally.kills++;
     addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
-    if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);
-    else if (e.def.loot) dropLoot(this, e.def.loot, e.x, e.y);
-    else if (!e.def.boss) maybeDropRandom(this, e.x, e.y);
+    const loot = e.def.loot;
+    if (e.def.elite || loot?.chest) dropPickup(this, 'chest', e.x, e.y);
+    if (loot) dropLoot(this, loot, e.x, e.y);
+    else if (!e.def.elite && !e.def.boss) maybeDropRandom(this, e.x, e.y);
     if (e === this.boss) {
       this.boss = null;
       openArena(this);

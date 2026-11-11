@@ -207,7 +207,10 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     draw(p) {
       p.shadow(22, 31, 34, 6);
       const fur = 0x4e586c;
-      p.rrect(9, 22, 5, 9, 2, fur).rrect(15, 23, 5, 8, 2, fur).rrect(26, 23, 5, 8, 2, fur).rrect(32, 22, 5, 9, 2, fur);
+      p.rrect(9, 22, 5, 9, 2, fur)
+        .rrect(15, 23, 5, 8, 2, fur)
+        .rrect(26, 23, 5, 8, 2, fur)
+        .rrect(32, 22, 5, 9, 2, fur);
       p.ellipse(21, 18, 32, 18, fur); // body
       p.circle(36, 18, 9, fur); // head
       p.poly([40, 15, 46, 18, 45, 23, 39, 23], 0x5c667a); // snout
@@ -233,6 +236,21 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.fill(0xff7a2a).fillEllipse(16, 3, 11, 6);
       p.fill(0xffd060).fillEllipse(16, 3, 6, 3.5);
       p.line(20, 22, 27, 21, 1.4, 0x7a1a24).line(20, 30, 26, 31, 1.4, 0x7a1a24); // red marks on the cloth
+    },
+  },
+
+  /** Ninho de Aranha (provisional): a web bundle on the ground with pale sacs glowing a sick acid yellow-green (FT-09). */
+  'enemy.spiderNest': {
+    w: 40,
+    h: 36,
+    draw(p) {
+      p.shadow(20, 32, 32, 6);
+      p.ellipse(20, 20, 34, 22, 0xb8b4a8); // the bundle of web
+      p.circle(12, 17, 7, 0xd8d4c4).circle(26, 14, 8, 0xd8d4c4).circle(22, 24, 7, 0xc8c4b4); // sacs
+      p.ink();
+      p.line(3, 24, 37, 12, 1, 0x7a766a).line(6, 12, 34, 28, 1, 0x7a766a).line(20, 5, 20, 33, 1, 0x7a766a);
+      p.glow(12, 17, 2.4, 0xc8e040).glow(26, 14, 2.8, 0xc8e040).glow(22, 24, 2.2, 0xc8e040);
+      p.shine(14, 9, 10, 3, 0.3);
     },
   },
 

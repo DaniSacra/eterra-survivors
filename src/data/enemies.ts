@@ -1,3 +1,5 @@
+import type { PickupId } from './pickups';
+
 /**
  * A boss's telegraphed attack (core/bosses.ts). Every `every` seconds, once the hero is within `trigger`, the boss
  * stops for `windup` seconds while a marker shows where it will hit, then:
@@ -66,7 +68,7 @@ export interface EnemyDef {
    * shoot keeps its distance and throws slow shots; leap marks the hero's spot and lands there; pack comes in from
    * the side; still stands where it is.
    */
-  move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still';
+  move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still' | 'flee';
   /** Most of this type alive at once: the spawner sends the stage's basic instead, specials wait. */
   max?: number;
   /** charge: its own numbers instead of the default (core/behaviours.ts CHARGE). */
@@ -89,8 +91,16 @@ export interface EnemyDef {
   pack?: { flank: number; close: number };
   /** banner: every `tick` s, the enemies within `radius` are rallied (config.rally) for a little over a tick. */
   banner?: { radius: number; tick: number };
-  /** Besides its gem: gold (before greed and the stage's mult) and a random floor item. */
-  loot?: { gold?: number; item?: boolean };
+  /**
+   * nest (FT-09): stands still; while the hero is within `range` px, every `every` s raises `count` of `spawn` beside
+   * it (each out of a spawn mark), up to `total` in all. `once`: it is gone after the last batch (an egg hatching).
+   */
+  nest?: { spawn: string; every: number; count: number; total: number; range: number; once?: boolean };
+  /**
+   * Besides its gem: gold (before greed and the stage's mult), a random floor item, a chest (an elite always drops
+   * one) and a given pickup.
+   */
+  loot?: { gold?: number; item?: boolean; chest?: boolean; pickup?: PickupId };
 }
 
 /** A charge's numbers: within `trigger` px it crouches `windup` s, dashes `dash` s at x`speedMult`, rests `rest` s. */
@@ -223,6 +233,20 @@ export const ENEMIES = {
     max: 2,
     banner: { radius: 150, tick: 0.25 },
     loot: { gold: 15, item: true },
+  },
+  /** Ninho de Aranha (provisional name): a web bundle that keeps hatching spiders until it is broken (FT-09). */
+  spiderNest: {
+    sprite: 'enemy.spiderNest',
+    radius: 18,
+    hp: 60,
+    speed: 0,
+    damage: 0,
+    xp: 8,
+    knockbackResist: 1,
+    move: 'still',
+    max: 3,
+    nest: { spawn: 'spider', every: 4, count: 2, total: 10, range: 520 },
+    loot: { gold: 10, item: true },
   },
   // Elites (stage `elites`): drop a chest.
   /** Golem de Pedra: heavy, and it leaps, landing on a wide circle (FT-04). */

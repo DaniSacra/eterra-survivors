@@ -1,11 +1,14 @@
 import { config } from '../data/config';
-import { MAX_ENEMY_RADIUS } from '../data/enemies';
+import { MAX_ENEMY_RADIUS, type EnemyId } from '../data/enemies';
 import type { Enemy } from './enemies';
 import { addPuff } from './effects';
 import { fireEnemyShot } from './enemyShots';
 import { hurtHero } from './elos';
 import type { World } from './world';
 import { BossAct as Act } from './bosses';
+import { riseAt } from './marks';
+import { TAU } from './math';
+import { segmentAt } from './waves';
 
 /**
  * Movement of the enemies with a behaviour of their own (data/enemies.ts `move`). Uses the enemy's `act`, `actT`
@@ -105,6 +108,7 @@ export function behaviourStep(
     case 'still':
       out.x = out.y = 0;
       if (e.def.banner) rally(world, e, dt);
+      else if (e.def.nest) nest(world, e, dt, dist);
       return;
   }
 }
@@ -207,4 +211,26 @@ function rally(world: World, e: Enemy, dt: number): void {
     if (o === e || o.dead || o.def.boss) continue;
     if ((o.x - e.x) ** 2 + (o.y - e.y) ** 2 <= b.radius * b.radius) o.rally = b.tick * 1.6;
   }
+}
+
+/**
+ * Nest (FT-09): while the hero is within `range`, every `every` s raises `count` of `spawn` in a ring beside it (out
+ * of spawn marks, so never on top of the hero), up to `total`. Far away it waits, silent.
+ */
+function nest(world: World, e: Enemy, dt: number, dist: number): void {
+  const n = e.def.nest;
+  if (!n) return;
+  if (dist > n.range) return;
+  e.actT -= dt;
+  if (e.actT > 0) return;
+  e.actT = n.every;
+  const hpMult = segmentAt(world.time, world.stage.waves).hpMult;
+  const start = world.rng.next() * TAU;
+  for (let i = 0; i < n.count && e.spawned < n.total && world.enemies.size < config.enemies.maxActive; i++) {
+    const a = start + (i * TAU) / n.count;
+    const r = e.def.radius + 16;
+    riseAt(world, n.spawn as EnemyId, e.x + Math.cos(a) * r, e.y + Math.sin(a) * r, hpMult);
+    e.spawned++;
+  }
+  if (e.spawned >= n.total && n.once) e.dead = e.vanished = true;
 }

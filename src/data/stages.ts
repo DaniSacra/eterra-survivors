@@ -53,6 +53,7 @@ export const STAGES = {
     mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
     elites: elites('golem'),
+    specials: [{ id: 'spiderNest', from: 45, every: 30 }],
     boss: { id: 'blackKnight', at: config.matchDuration },
   },
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */

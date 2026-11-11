@@ -2397,7 +2397,7 @@ cemitério para os **celeiros, cercas e campos** em volta da vila, na neve (os o
 Valmor: cercas, montes de feno, lampiões). Alternativas de nome para o Daniel: "Celeiros de Valmor", "Campos de
 Valmor" (provisórios).
 
-**FT-09 · Ninho: parado, gera inimigos até ser destruído** · impl + vfx · P · proposto
+**FT-09 · Ninho: parado, gera inimigos até ser destruído** · impl + vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: o alvo que chama o jogador para fora do círculo. Ignorar custa aranhas; quebrar paga.
 - O quê: `move: 'still'`, `nest`. Enquanto o herói está a menos de `range` px, a cada `every` s marca (FT-02) e gera

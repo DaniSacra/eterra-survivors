@@ -446,6 +446,17 @@ export class GameScene extends Phaser.Scene {
         if (e.def.banner && !e.dead) l.flame(e.x, e.y - 30, 160, 0xff8a3a, w.time, this.calm);
       }
     }
+    // A nest's sacs pulse a sick acid light, faster in the last second before each batch (FT-09).
+    if (w.alive.spiderNest) {
+      const foes = w.enemies.active;
+      for (let i = 0; i < foes.length; i++) {
+        const e = foes[i] as (typeof foes)[number];
+        if (!e.def.nest || e.dead) continue;
+        const soon = e.actT < 1 && e.spawned < e.def.nest.total;
+        const pulse = this.calm ? 0.6 : 0.5 + 0.3 * Math.sin(w.time * (soon ? 18 : 4));
+        l.add(e.x, e.y, 90, 0xc8e040, pulse);
+      }
+    }
     const zones = w.zones.active;
     for (let i = 0; i < zones.length; i++) {
       const z = zones[i] as (typeof zones)[number];

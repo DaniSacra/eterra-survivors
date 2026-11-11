@@ -229,6 +229,8 @@ export const t = {
       pack: 'Cerca pelos lados',
       still: 'Não sai do lugar',
       banner: 'Fortalece quem está perto',
+      nest: 'Gera aranhas até cair',
+      flee: 'Foge com suas gemas',
       elite: 'Deixa um baú',
       cleave: 'Corte Brutal',
       toll: 'Badalada',
@@ -258,6 +260,8 @@ export const t = {
       // written for the Survivors (provisional, FT-07)
       frostBoar: 'Abaixa a cabeça, raspa o gelo e vem. Na estrada estreita, só resta o lado.',
       warBanner: 'Enquanto o pano estiver de pé, eles não recuam.',
+      // written for the Survivors (provisional, FT-09)
+      spiderNest: 'Um novelo de teia que pulsa. Cada pulso é mais uma aranha.',
       // canone.md, Criaturas e povos [C]
       goblin: 'Os goblins fizeram um acordo com os Nekaren: a Aliança Negra.',
       // original src/data.js (`sineiro.say.intro`)
@@ -693,6 +697,7 @@ export const t = {
     goblin: 'Goblin Lanceiro',
     frostBoar: 'Javali da Geada',
     warBanner: 'Estandarte da Aliança Negra',
+    spiderNest: 'Ninho de Aranha',
     golem: 'Golem de Pedra',
     bellRinger: 'O Sineiro',
     oldWolf: 'Lobo Velho',
