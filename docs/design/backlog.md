@@ -1633,7 +1633,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - O quê: `config.pickups.bombDamage` 250 → **600**.
 - Aceite: teste/lab: a Badalada mata básico e rápido das três fases até as 10:00; sim sem mudança fora do ruído.
 
-**NE-05 · Luta do chefe de 30 a 45 s** · bal + impl · P · proposto (decisão 5 do Daniel)
+**NE-05 · Luta do chefe de 30 a 45 s** · bal + impl · P · ⏸ precisa do Daniel (medido 2026-11-11)
 
 - Por quê: 01-balance: mediana de **13 s** com Loja inteira e 16 s com meia (a meta da R2 era 45 a 90 s; ontem ~28 s);
   o clímax da partida é uma corrida de DPS. Em Valmor com meia Loja, 18 de 49 corridas que chegam ao chefe morrem 4 a
@@ -1643,6 +1643,11 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   vitórias.
 - Aceite: mediana da luta 30 a 45 s (Loja inteira); as nove metas de fase x Loja continuam dentro; `bossFast` em 40% a
   60% das vitórias.
+- Medido (2026-11-11, Loja inteira, 96 corridas): vida dos chefes x2,5 → luta 37 s, mas vitórias Valmor 94% → 53%,
+  Cripta 69% → 31%, Estrada 44% → 3%; x1,5 → luta 15 s, Cripta 59%, Estrada 22%. A luta é tudo ou nada: o chefe cai
+  rápido ou a onda em campo mata o herói, então mais vida só troca lutas longas por derrotas. Pergunta para o
+  Daniel: diminuir as ondas enquanto o chefe vive (ex.: só o chefe e sua escolta) para a luta durar 30–45 s?
+  Revertido.
 
 **NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · proposto (decisão 3 do Daniel)
 
