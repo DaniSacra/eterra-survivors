@@ -40,6 +40,18 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(DECAL_ART, ART_RES),
   ...art(OBSTACLE_ART, ART_RES),
   ...art(ICON_ART, ART_RES),
+  ...pixelEnemies([
+    'bones',
+    'skeleton',
+    'emberBones',
+    'bonePile',
+    'ghost',
+    'coldSpirit',
+    'slime',
+    'vampireBat',
+    'gravedigger',
+    'bellRinger',
+  ]),
   ...pixelHero('aldo', FRAME_HIBIT, 8, 4),
   ...pixelHero('lyra', FRAME_48, 8, 4),
   ...pixelHero('teo', FRAME_48, 8, 4),
@@ -53,6 +65,13 @@ const MENU_HERO_H = (38 + PAD * 2) * ART_RES;
 export function heroFit(key: string): number {
   const walk = ASSETS[`${key}.walk`];
   return walk?.kind === 'sheet' ? MENU_HERO_H / walk.h : 1;
+}
+
+/** Pixel-art enemies (PixelLab): still frames facing right, already upscaled to ART_RES, in public/sprites/enemies/. */
+function pixelEnemies(ids: string[]): Record<string, AssetDef> {
+  return Object.fromEntries(
+    ids.map((id) => [`enemy.${id}`, { kind: 'image', url: `sprites/enemies/${id}.png` } as AssetDef]),
+  );
 }
 
 /**
