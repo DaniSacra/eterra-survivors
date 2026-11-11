@@ -24,8 +24,51 @@ const LIGHTS: readonly (readonly [number, number, number])[] = [
   [489, 98, 22],
   [160, 132, 20],
 ];
-/** Standing order on the snow: Aldo in the middle and in front, the others around him. */
-const PARTY: readonly CharacterId[] = ['lyra', 'teo', 'aldo', 'andilla'];
+/**
+ * The heroes' huddle (offsets from the middle and the feet line at scale 1, in px): Teo and Aldo face the left, Lyra
+ * and Andilla the right, Aldo a step in front.
+ */
+const PARTY: readonly { id: CharacterId; dx: number; dy: number; left: boolean }[] = [
+  { id: 'teo', dx: -74, dy: -6, left: true },
+  { id: 'andilla', dx: 82, dy: -4, left: false },
+  { id: 'lyra', dx: 34, dy: 2, left: false },
+  { id: 'aldo', dx: -28, dy: 8, left: true },
+];
+
+/** What closes in (offsets from the middle and the feet line, measured on the desktop layout where the heroes' scale is 1.5; `size` relative to the heroes). */
+const SIEGE: readonly {
+  key: string;
+  dx: number;
+  dy: number;
+  size: number;
+  depth: number;
+  left: boolean;
+  fly?: boolean;
+  alpha?: number;
+}[] = [
+  // Behind the pines on the left and right: only the upper body shows over them.
+  { key: 'enemy.skeleton', dx: -520, dy: -75, size: 0.7, depth: -3.5, left: false },
+  { key: 'enemy.witch', dx: -440, dy: -85, size: 0.4, depth: -3.6, left: false },
+  { key: 'enemy.emberBones', dx: 500, dy: -70, size: 0.9, depth: -3.5, left: true },
+  { key: 'enemy.golem', dx: 290, dy: 5, size: 0.6, depth: -3.4, left: true },
+  // In the air over the village.
+  { key: 'enemy.vampireBat', dx: -140, dy: -330, size: 0.45, depth: -2.5, left: false, fly: true },
+  { key: 'enemy.vampireBat', dx: -125, dy: -255, size: 0.45, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.vampireBat', dx: -35, dy: -280, size: 0.45, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.ghost', dx: 390, dy: -290, size: 0.6, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.blackKnight', dx: 240, dy: -250, size: 0.5, depth: -2.6, left: true, fly: true },
+  { key: 'enemy.oldWolf', dx: 500, dy: -250, size: 0.5, depth: -4.6, left: true, fly: true, alpha: 0.55 },
+  {
+    key: 'enemy.spiderMother',
+    dx: -510,
+    dy: -250,
+    size: 0.45,
+    depth: -5.2,
+    left: false,
+    fly: true,
+    alpha: 0.8,
+  },
+];
 
 /** The home: a painted dusk over Valmor in layers (mountains, village, snow), the party in front and the buttons. */
 export class MenuScene extends Phaser.Scene {
@@ -293,44 +336,75 @@ export class MenuScene extends Phaser.Scene {
     label(this, x, y + size * 0.85, t.subtitle, size > 36 ? 18 : 16, { color: '#d8cce8', stroke: true });
   }
 
-  /** The four heroes facing us on the snow, each on a pool of their own colour, Aldo big in the middle. */
+  /**
+   * The siege: the four heroes huddled back to back on the snow (Teo and Aldo facing left, Lyra and Andilla right),
+   * the dead and the monsters closing in around them: some behind the foreground pines, some hovering over the village.
+   */
   private party(cx: number, top: number, bottom: number, w: number): void {
     const room = bottom - top;
     if (room < 60) return;
     const aldoK = Phaser.Math.Clamp(Math.floor(room / 74), 1, w < 600 ? 3 : 4);
-    const otherK = Math.max(1, aldoK - (aldoK > 2 ? 1 : 0));
-    // Aldo stands out by his place in front, not by size: the same scale as the others.
-    // A little further back, on the village snow rather than at the buttons' feet.
+    // Display scale of the 2x pixel sprites: 1 shows them at their art size doubled (80 art px = 160 px tall).
+    const sc = Math.max(0.5, (aldoK > 2 ? aldoK - 1 : aldoK) * 0.5);
     const feet = bottom - 4 - Math.min(40, room * 0.14);
-    const gap = Math.min(w / 4.2, 64 * otherK * 0.95);
-    PARTY.forEach((id, i) => {
-      const big = id === 'aldo';
-      const k = otherK;
-      const x = cx + (i - 1.5) * gap + (big ? 0 : (i < 2 ? -1 : 1) * 18);
-      // Still, standing on the snow: Aldo a step in front, the others on a shallow arc behind him.
-      const y = feet - (big ? 0 : 6 + (i === 1 || i === 3 ? 0 : 4) * k * 0.5);
+    // Sideways spread follows the screen's width, never past the desktop layout.
+    const spread = Math.min(1, w / 700);
+    PARTY.forEach(({ id, dx, dy, left }) => {
+      const x = cx + dx * sc * Math.max(spread, 0.7);
+      const y = feet + dy * sc;
       const colour = HERO_COLOR[id];
-      // Lyra and Andilla stand just behind the foreground pines (depth -3), Teo and Aldo in front of them.
-      const behind = id === 'lyra' || id === 'andilla';
-      const d = behind ? -3.5 : big ? 1 : 0;
-      const key = `${CHARACTERS[id].sprite}.front`;
-      const pad = this.bottomPad(key);
+      const key = `${CHARACTERS[id].sprite}`;
+      const d = id === 'aldo' ? 0.4 : 0.2;
       this.add
         .image(x, y, GLOW)
-        .setDisplaySize(130 * k * 0.8, 36 * k * 0.8)
+        .setDisplaySize(130 * sc, 36 * sc)
         .setTint(colour)
         .setAlpha(0.35)
         .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(d);
-      this.add.ellipse(x, y, 30 * k, 8 * k, 0x05040f, 0.5).setDepth(d);
-      const hero = this.add
-        .image(x, y + pad * k, key)
-        .setOrigin(0.5, 1)
-        .setScale(k)
-        .setDepth(behind ? -3.4 : d + 0.2)
-        .setTint(0xdcd8f4);
-      hero.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        .setDepth(d - 0.1);
+      this.add.ellipse(x, y, 34 * sc, 9 * sc, 0x05040f, 0.5).setDepth(d - 0.1);
+      this.prop(key, x, y, sc, d, 0xdcd8f4, left);
     });
+    for (const f of SIEGE) {
+      const x = cx + f.dx * (sc / 1.5) * spread;
+      const y = Math.max(top + 56, feet + f.dy * (sc / 1.5));
+      const img = this.prop(f.key, x, y, sc * f.size, f.depth, 0xcfc8ee, f.left, f.alpha ?? 1, f.fly);
+      // The ones in the air drift slowly (the ground ones stand still).
+      if (f.fly && !settings().calm)
+        this.tweens.add({
+          targets: img,
+          y: img.y - 7,
+          duration: 1500 + (f.dx % 400),
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+    }
+  }
+
+  /** A pixel sprite standing (feet on y) or hovering (centred on y), mirrored to face left when asked. */
+  private prop(
+    key: string,
+    x: number,
+    y: number,
+    scale: number,
+    depth: number,
+    tint: number,
+    left: boolean,
+    alpha = 1,
+    fly = false,
+  ): Phaser.GameObjects.Image {
+    const pad = fly ? 0 : this.bottomPad(key);
+    const img = this.add
+      .image(x, fly ? y : y + pad * scale, key)
+      .setOrigin(0.5, fly ? 0.5 : 1)
+      .setScale(scale)
+      .setFlipX(left)
+      .setDepth(depth)
+      .setTint(tint)
+      .setAlpha(alpha);
+    img.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+    return img;
   }
 
   /** Transparent rows under a sprite's feet (px), so its shadow and feet line up. */
