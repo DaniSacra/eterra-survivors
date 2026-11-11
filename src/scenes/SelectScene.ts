@@ -1,3 +1,4 @@
+import { heroFit } from '../render/assets';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { heroUnlocked, lastRun, stageUnlocked, unlockHero } from '../core/meta';
@@ -175,7 +176,7 @@ export class SelectScene extends Phaser.Scene {
     this.add
       .image(x - w / 2 + 23, top + Math.min(58, h - 2), CHARACTERS[id].sprite)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * 1.2)
+      .setScale(ART_SCALE * 1.2 * heroFit(CHARACTERS[id].sprite))
       .setAlpha(owned ? 1 : 0.4);
     label(this, x - w / 2 + 46, top + 9, c.name, 16, { bold: true, align: 'left' });
     label(this, x - w / 2 + 46, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
@@ -212,7 +213,7 @@ export class SelectScene extends Phaser.Scene {
     this.add
       .image(left + 52, top + h - 16, def.sprite)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * big);
+      .setScale(ART_SCALE * big * heroFit(def.sprite));
     const x = left + 108;
     // Short panels (wide screens) drop the role line, which the hero card already shows.
     const compact = h < 120;

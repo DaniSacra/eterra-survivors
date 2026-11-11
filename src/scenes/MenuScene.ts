@@ -1,3 +1,4 @@
+import { heroFit } from '../render/assets';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { t } from '../i18n/pt-BR';
@@ -104,7 +105,7 @@ export class MenuScene extends Phaser.Scene {
       const hero = this.add
         .image(x, feet + pad + 2, CHARACTERS[id].sprite)
         .setOrigin(0.5, 1)
-        .setScale(scale)
+        .setScale(scale * heroFit(CHARACTERS[id].sprite))
         .setFlipX(i >= 2); // the two on the right face the others
       this.tweens.add({
         targets: hero,

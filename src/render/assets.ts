@@ -42,6 +42,14 @@ export const ASSETS: Record<string, AssetDef> = {
   ...pixelHero('aldo', 8, 4),
 };
 
+/** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
+const HERO_FIT = ((38 + PAD * 2) * ART_RES) / HERO_FRAME.h;
+
+/** Scale factor that shows hero `key` at the size the menus were laid out for. */
+export function heroFit(key: string): number {
+  return ASSETS[key]?.kind === 'image' ? HERO_FIT : 1;
+}
+
 /**
  * A pixel-art hero (PixelLab, AR-05): a still frame facing right that replaces the code-drawn one everywhere, and
  * walk and idle strips for the run (`<key>.walk`, `<key>.idle`). Files in public/sprites/, upscaled to ART_RES.

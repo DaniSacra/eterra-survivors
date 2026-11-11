@@ -1,3 +1,4 @@
+import { heroFit } from '../../render/assets';
 import type Phaser from 'phaser';
 import { formatTime } from '../../core/format';
 import { heroUnlocked, newHeroRecord } from '../../core/meta';
@@ -88,7 +89,7 @@ function heroCard(
   const hero = scene.add
     .image(px, feet + 4, CHARACTERS[id].sprite)
     .setOrigin(0.5, 1)
-    .setScale(ART_SCALE * 1.15);
+    .setScale(ART_SCALE * 1.15 * heroFit(CHARACTERS[id].sprite));
   if (!owned) hero.setTint(UI.border);
   const tx = x + pad + 46;
   label(scene, tx, y + pad, t.characters[id].name, 16, {
