@@ -1806,7 +1806,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 - Aceite: teste; captura da tela final com a peça.
 
-**NU-06 · Segunda Chance visível no HUD** · ui + impl · P · proposto
+**NU-06 · Segunda Chance visível no HUD** · ui + impl · P · ✅ feito (2026-11-11: ícone e número antes do ouro, na linha dos contadores, porque ao lado da barra de vida batia no tempo em 360 px)
 
 - Por quê: 05-ui #8. Quem comprou a Segunda Chance (2.000 de ouro) só descobre que tem ao morrer; saber da rede muda o
   quanto o jogador arrisca.

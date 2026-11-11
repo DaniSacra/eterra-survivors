@@ -58,6 +58,8 @@ export const t = {
     kills: (n: number) => `${n}`,
     gold: (n: number) => `${n}`,
     hp: (hp: number, max: number) => `${hp}/${max}`,
+    /** Segunda Chance left, next to its icon. */
+    revives: (n: number) => `${n}`,
   },
 
   levelUp: {

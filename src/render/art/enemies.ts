@@ -112,7 +112,7 @@ function wolf(fur: number, belly: number, eyes: number, scale: number, scar = fa
 
 export const ENEMY_ART: Record<string, ArtDef> = {
   // ---- Arredores de Valmor ----
-  'enemy.skeleton': skeleton(0xe8e0c8, null, 1.3), // the sturdy dead of the graveyard: bigger than an Ossada
+  'enemy.skeleton': skeleton(0xe8e0c8, 0xa8d8ff, 1.3), // the sturdy dead of the graveyard: bigger, cold glowing eyes
   'enemy.spider': {
     w: 30,
     h: 24,

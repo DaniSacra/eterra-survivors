@@ -309,13 +309,7 @@ function slamHit(
  * One swing at `angle`. `touch`: enemies hugging the hero are hit even outside the cone (only on the first
  * swing, so a front-and-back slash hits a hugging enemy once).
  */
-function swingArc(
-  world: World,
-  s: ArcLevel,
-  w: OwnedWeapon,
-  angle: number,
-  touch: boolean,
-): void {
+function swingArc(world: World, s: ArcLevel, w: OwnedWeapon, angle: number, touch: boolean): void {
   const p = world.player;
   const range = s.range * p.stats.area;
   const list = world.enemies.active;

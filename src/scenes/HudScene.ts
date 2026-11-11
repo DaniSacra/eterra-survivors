@@ -49,6 +49,9 @@ export class HudScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
   private coinIcon!: Phaser.GameObjects.Image;
   private skullIcon!: Phaser.GameObjects.Image;
+  /** Segunda Chance left (NU-06): an icon and its count before the gold, only while there is one. */
+  private reviveIcon!: Phaser.GameObjects.Image;
+  private revives!: Phaser.GameObjects.Text;
   /** Where the boss bar goes (under the build strip), set by layout(). */
   private bossY = 0;
   /** The build strip (weapons and passives with level pips), redrawn only when `world.buildRev` changes. */
@@ -74,7 +77,7 @@ export class HudScene extends Phaser.Scene {
   private toastOn = false;
   /** The notice showing now (put back at the head of the queue when an overlay hushes the HUD). */
   private toastNow: Toast | null = null;
-  private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
+  private shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1, revives: -1 };
   /** Safe-area insets, refreshed on layout. */
   private inset = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -84,7 +87,7 @@ export class HudScene extends Phaser.Scene {
 
   init(data: { world: World }): void {
     this.world = data.world;
-    this.shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1 };
+    this.shown = { time: -1, level: -1, kills: -1, gold: -1, hp: -1, maxHp: -1, revives: -1 };
     this.shownRev = -1;
     this.toastQueue = [];
     this.toastOn = false;
@@ -104,6 +107,10 @@ export class HudScene extends Phaser.Scene {
     this.gold = label(this, 0, 0, '', 15, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
     this.coinIcon = this.add.image(0, 0, 'pickup.gold').setScale(ART_SCALE * 1.25);
     this.skullIcon = this.add.image(0, 0, 'icon.kills').setScale(ART_SCALE * 1.1);
+    this.reviveIcon = this.add.image(0, 0, 'icon.revive').setDisplaySize(24, 24).setVisible(false);
+    this.revives = label(this, 0, 0, '', 15, { bold: true, color: UI.danger, stroke: true })
+      .setOrigin(1, 0.5)
+      .setVisible(false);
     this.hpText = label(this, 0, 0, '', 14, { bold: true, stroke: true });
     this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 15, {
       bold: true,
@@ -194,6 +201,8 @@ export class HudScene extends Phaser.Scene {
     this.skullIcon.setPosition(right - this.kills.width - 11, y);
     this.gold.setPosition(right - this.kills.width - 28, y);
     this.coinIcon.setPosition(this.gold.x - this.gold.width - 11, y);
+    this.revives.setPosition(this.coinIcon.x - 17, y);
+    this.reviveIcon.setPosition(this.revives.x - this.revives.width - 13, y);
   }
 
   private hpWidth(): number {
@@ -343,9 +352,12 @@ export class HudScene extends Phaser.Scene {
     const sec = Math.floor(w.time);
     if (sec !== this.shown.time) this.timer.setText(formatTime((this.shown.time = sec)));
     if (w.level !== this.shown.level) this.level.setText(t.hud.level((this.shown.level = w.level)));
-    if (w.gold !== this.shown.gold || w.kills !== this.shown.kills) {
+    if (w.gold !== this.shown.gold || w.kills !== this.shown.kills || w.revives !== this.shown.revives) {
       this.gold.setText(t.hud.gold((this.shown.gold = w.gold)));
       this.kills.setText(t.hud.kills((this.shown.kills = w.kills)));
+      const r = (this.shown.revives = w.revives);
+      this.revives.setText(t.hud.revives(r)).setVisible(r > 0);
+      this.reviveIcon.setVisible(r > 0);
       this.placeCounters();
     }
 

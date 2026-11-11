@@ -168,7 +168,7 @@ export class Lighting {
    */
   flame(x: number, y: number, radius: number, color: number, time: number, calm: boolean): void {
     const f = calm ? 0 : Math.sin(time * 11 + x * 0.7) * 0.5 + Math.sin(time * 17 + y * 0.3) * 0.5;
-    this.add(x, y, radius * (1 + 0.06 * f), color, 0.8 + 0.1 * f, 0.3 + 0.05 * f);
+    this.add(x, y, radius * (1 + 0.06 * f), color, 0.8 + 0.1 * f, 0.22 + 0.04 * f);
   }
 
   /** A short light that fades over `seconds` (skipped by the caller with the calm screen). */
@@ -249,7 +249,7 @@ export class Lighting {
     for (let i = 0; i < this.count; i++) {
       const g = this.gs[i] as number;
       if (g <= 0) continue;
-      const r = (this.rs[i] as number) * RES * 0.7;
+      const r = (this.rs[i] as number) * RES * 0.55;
       const x = ((this.xs[i] as number) - vx) * RES;
       const y = ((this.ys[i] as number) - vy) * RES;
       if (x + r < 0 || y + r < 0 || x - r > w || y - r > h) continue;
