@@ -52,6 +52,10 @@ export const ASSETS: Record<string, AssetDef> = {
     'gravedigger',
     'bellRinger',
   ]),
+  // The home's painted layers (PixelLab, 512 px wide, transparent sky), see scenes/MenuScene.ts.
+  'home.mountains': { kind: 'image', url: 'home/mountains.png' },
+  'home.village': { kind: 'image', url: 'home/village.png' },
+  'home.foreground': { kind: 'image', url: 'home/foreground.png' },
   ...pixelHero('aldo', FRAME_HIBIT, 8, 4),
   ...pixelHero('lyra', FRAME_48, 8, 4),
   ...pixelHero('teo', FRAME_48, 8, 4),
@@ -65,6 +69,11 @@ const MENU_HERO_H = (38 + PAD * 2) * ART_RES;
 export function heroFit(key: string): number {
   const walk = ASSETS[`${key}.walk`];
   return walk?.kind === 'sheet' ? MENU_HERO_H / walk.h : 1;
+}
+
+/** `heroFit` for the front-facing pose, which is stored at native size (half of ART_RES). */
+export function frontFit(key: string): number {
+  return heroFit(key) * ART_RES;
 }
 
 /**
@@ -116,6 +125,8 @@ function pixelHero(
     [`player.${id}`]: { kind: 'image', url: `sprites/${id}.png` },
     [`player.${id}.walk`]: { kind: 'sheet', url: `sprites/${id}-walk.png`, ...frame, fps: walk },
     [`player.${id}.idle`]: { kind: 'sheet', url: `sprites/${id}-idle.png`, ...frame, fps: idle },
+    // The hero facing the viewer (PixelLab south view, native size), for the selection screen.
+    [`player.${id}.front`]: { kind: 'image', url: `sprites/${id}-front.png` },
   };
 }
 

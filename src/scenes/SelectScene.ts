@@ -1,4 +1,4 @@
-import { heroFit } from '../render/assets';
+import { frontFit } from '../render/assets';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { heroUnlocked, lastRun, newHeroRecord, stageUnlocked, unlockHero, type MetaSave } from '../core/meta';
@@ -177,9 +177,9 @@ export class SelectScene extends Phaser.Scene {
     const top = y - h / 2;
     // The hero standing in the card's corner, feet on its line, big enough to tell who it is.
     this.add
-      .image(x - w / 2 + 23, top + Math.min(58, h - 2), CHARACTERS[id].sprite)
+      .image(x - w / 2 + 23, top + Math.min(58, h - 2), `${CHARACTERS[id].sprite}.front`)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * 1.2 * heroFit(CHARACTERS[id].sprite))
+      .setScale(ART_SCALE * 1.2 * frontFit(CHARACTERS[id].sprite))
       .setAlpha(owned ? 1 : 0.4);
     label(this, x - w / 2 + 46, top + 9, c.name, 16, { bold: true, align: 'left' });
     label(this, x - w / 2 + 46, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
@@ -223,9 +223,9 @@ export class SelectScene extends Phaser.Scene {
     const left = cx - w / 2;
     this.add.ellipse(left + 52, top + h - 18, 70, 18, HERO_COLOR[id], 0.3);
     this.add
-      .image(left + 52, top + h - 16, def.sprite)
+      .image(left + 52, top + h - 16, `${def.sprite}.front`)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * big * heroFit(def.sprite));
+      .setScale(ART_SCALE * big * frontFit(def.sprite));
     const x = left + 108;
     // Short panels (wide screens) drop the role line, which the hero card already shows.
     const compact = h < 120;
