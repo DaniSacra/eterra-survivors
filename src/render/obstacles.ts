@@ -5,11 +5,11 @@ import { ART_SCALE } from './art/pen';
 import type { Lighting } from './lighting';
 
 /** Where each obstacle sprite's foot is (a fraction of its texture height): that point sits on the hit circle. */
-const FOOT = [0.71, 0.53, 0.61];
+const FOOT = [0.92, 0.8, 0.82];
 const MAX = 60;
-/** The column with a torch (render/art/tiles.ts) and its flame's height over the foot (world px). */
+/** The column with a torch (public/sprites/obstacles/0t.png) and its flame's height over the foot (world px). */
 const TORCH = 'obstacle.0t';
-const TORCH_DY = 39;
+const TORCH_DY = 49;
 
 /**
  * The Cripta's obstacles on screen: like the decals, a fixed set of reused images laid out over the view's cells,

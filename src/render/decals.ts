@@ -3,7 +3,7 @@ import type { StageId } from '../data/stages';
 import { ART_SCALE } from './art/pen';
 import type { Lighting } from './lighting';
 
-/** Which decals (render/art/tiles.ts DECAL_ART) each stage scatters over its ground. */
+/** Which decals (public/sprites/decals) each stage scatters over its ground. */
 const STAGE_DECALS: Record<StageId, string[]> = {
   valmor: [
     'decal.grave',
@@ -35,9 +35,9 @@ const STAGE_DECALS: Record<StageId, string[]> = {
 
 /** Decals that carry a flame: its light (radius world px, colour) and height of the flame over the decal's centre. */
 const DECAL_LIGHT: Record<string, { radius: number; color: number; dy: number }> = {
-  'decal.candle': { radius: 120, color: 0xffb860, dy: -5 },
-  'decal.lantern': { radius: 170, color: 0xffc070, dy: -8 },
-  'decal.campfire': { radius: 230, color: 0xff9040, dy: -2 },
+  'decal.candle': { radius: 120, color: 0xffb860, dy: -9 },
+  'decal.lantern': { radius: 170, color: 0xffc070, dy: -2 },
+  'decal.campfire': { radius: 230, color: 0xff9040, dy: -4 },
 };
 
 /** World cell size; each cell holds at most one decal, picked by a hash of the cell. */

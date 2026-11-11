@@ -5,7 +5,7 @@ import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
 import { ART_RES, Pen } from './art/pen';
-import { DECAL_ART, OBSTACLE_ART, TILE_ART } from './art/tiles';
+import { TILE_ART } from './art/tiles';
 import type { ArtDef } from './art/types';
 
 /**
@@ -32,13 +32,35 @@ const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef
 /** PixelLab canvas sizes of the heroes (art px; files are at ART_RES). */
 const FRAME_HIBIT = { w: 64, h: 80 };
 
+const DECALS = [
+  'grave',
+  'snowMound',
+  'twigs',
+  'iceFlower',
+  'candle',
+  'slab',
+  'moss',
+  'bonePile',
+  'crack',
+  'web',
+  'puddle',
+  'bush',
+  'lantern',
+  'campfire',
+  'fence',
+  'ruts',
+  'stones',
+];
+const OBSTACLES = ['0', '0t', '1', '2'];
+
 export const ASSETS: Record<string, AssetDef> = {
   ...art(TILE_ART, 1),
   ...art(HERO_ART, ART_RES),
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
-  ...art(DECAL_ART, ART_RES),
-  ...art(OBSTACLE_ART, ART_RES),
+  // Ground decals and the Cripta's obstacles: PixelLab pixel art (files already at ART_RES), see decals.ts / obstacles.ts.
+  ...props('decals', DECALS),
+  ...props('obstacles', OBSTACLES),
   ...art(ICON_ART, ART_RES),
   ...pixelEnemies([
     'bones',
@@ -64,6 +86,14 @@ export const ASSETS: Record<string, AssetDef> = {
   ...pixelHero('teo', FRAME_HIBIT, 8, 4),
   ...pixelHero('andilla', FRAME_HIBIT, 8, 4),
 };
+
+/** Pixel props by folder: key `decal.<name>` / `obstacle.<name>`, file `sprites/<folder>/<name>.png`. */
+function props(folder: 'decals' | 'obstacles', names: string[]): Record<string, AssetDef> {
+  const key = folder === 'decals' ? 'decal' : 'obstacle';
+  return Object.fromEntries(
+    names.map((n) => [`${key}.${n}`, { kind: 'image', url: `sprites/${folder}/${n}.png` } as AssetDef]),
+  );
+}
 
 /** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
 const MENU_HERO_H = (38 + PAD * 2) * ART_RES;
