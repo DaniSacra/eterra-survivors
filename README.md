@@ -1,4 +1,4 @@
-# Eterra Survivors
+# Valmor Resiste (repo and code name: Eterra Survivors)
 
 Spin-off de sobrevivência das **Crônicas de Eterra**. A geada chegou cedo a Valmor e os mortos se
 levantaram. Aldo precisa resistir por 10 minutos e derrotar o **Cavaleiro Negro**.

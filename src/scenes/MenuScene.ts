@@ -322,7 +322,7 @@ export class MenuScene extends Phaser.Scene {
     this.events.once('shutdown', () => this.events.off('update', update));
   }
 
-  /** "Eterra Survivors" in gold over a warm glow, with the subtitle under it. */
+  /** "Valmor Resiste" in gold over a warm glow, with the subtitle under it. */
   private title(x: number, y: number, w: number): void {
     const size = Math.min(48, w / 8.5);
     this.add

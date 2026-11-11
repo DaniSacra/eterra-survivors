@@ -1,4 +1,4 @@
-# Eterra Survivors
+# Valmor Resiste (repo and code name: Eterra Survivors)
 
 Survivors-like spin-off of **Crônicas de Eterra** (repo `danisacra/cronicas-de-eterra`). Playable heroes are the
 original party: **Aldo** (default), Lyra, Teo and Andilla. Valmor is a village in the frozen south of Imladrin

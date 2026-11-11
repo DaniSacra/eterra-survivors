@@ -37,7 +37,7 @@ export const t = {
     /** Current out of max ("Nível 2/7"). */
     of: (a: string, b: number) => `${a}/${b}`,
   },
-  title: 'Eterra Survivors',
+  title: 'Valmor Resiste',
   subtitle: 'Crônicas de Eterra',
 
   menu: {
