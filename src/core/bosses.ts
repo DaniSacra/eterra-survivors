@@ -1,6 +1,6 @@
 import { config } from '../data/config';
 import type { BossAbility, EnemyId } from '../data/enemies';
-import { markIce } from './arena';
+import { markIce, markWeb } from './arena';
 import type { Enemy } from './enemies';
 import { riseAt } from './marks';
 import { TAU, angleDiff } from './math';
@@ -49,6 +49,7 @@ export function updateBoss(world: World, e: Enemy, dt: number): boolean {
       e.aimX = dx / (d || 1);
       e.aimY = dy / (d || 1);
       if (ab.kind === 'frost') markIce(world, e, ab);
+      else if (ab.kind === 'web') markWeb(world, e, ab);
       return true;
     }
     case BossAct.Windup:
@@ -90,6 +91,16 @@ function release(world: World, e: Enemy, ab: BossAbility): boolean {
       e.actT = CLEAVE_SHOW;
       return true;
     }
+    case 'eggs': {
+      // Egg sacs in a ring around her, rising out of marks; each hatches by itself unless broken (FT-12).
+      const n = ab.count ?? 4;
+      for (let i = 0; i < n && world.enemies.size < config.enemies.maxActive; i++) {
+        const a = (i * TAU) / n + world.rng.next() * 0.4;
+        riseAt(world, ab.summon as EnemyId, e.x + Math.cos(a) * ab.range, e.y + Math.sin(a) * ab.range, 1);
+      }
+      rest(e, ab);
+      return false;
+    }
     case 'toll': {
       const n = ab.count ?? 6;
       const hpMult = segmentAt(world.time, world.stage.waves).hpMult;
@@ -107,6 +118,7 @@ function release(world: World, e: Enemy, ab: BossAbility): boolean {
       rest(e, ab);
       return false;
     }
+    case 'web':
     case 'frost':
       // The ice formed with the howl (core/arena.ts); the screen shakes in the render.
       rest(e, ab);

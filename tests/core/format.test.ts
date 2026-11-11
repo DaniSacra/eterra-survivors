@@ -61,9 +61,13 @@ describe('enemyTraits (bestiary sheet)', () => {
 describe('bestiaryOrder', () => {
   it('lists every enemy once: stages in order, then elites, then bosses', () => {
     const order = bestiaryOrder();
-    expect([...order].sort()).toEqual([...ENEMY_IDS].sort());
-    expect(order.slice(0, 4)).toEqual(['bones', 'bat', 'skeleton', 'graveRat']);
-    expect(order.slice(-4)).toEqual(['golem', 'blackKnight', 'bellRinger', 'oldWolf']);
+    // The Cavaleiro Negro and the Gosma Verde are in no stage for now: not listed until met.
+    const retired = ['blackKnight', 'slime'];
+    expect([...order].sort()).toEqual(ENEMY_IDS.filter((id) => !retired.includes(id)).sort());
+    expect(order.slice(0, 4)).toEqual(['graveRat', 'bat', 'rat', 'spider']);
+    expect(order.slice(-5)).toEqual(['witch', 'golem', 'spiderMother', 'bellRinger', 'oldWolf']);
+    // Whoever met them still finds them, after the rest.
+    expect(bestiaryOrder({ blackKnight: true }).slice(-1)).toEqual(['blackKnight']);
   });
 });
 

@@ -1,8 +1,8 @@
 import { CHARACTER_IDS, type CharacterId } from './characters';
-import { ENEMY_IDS, type EnemyId } from './enemies';
+import type { EnemyId } from './enemies';
 import { EVOLUTIONS, EVOLVED_IDS } from './evolutions';
 import type { ChargeKey } from './shop';
-import { STAGE_IDS } from './stages';
+import { STAGE_IDS, bestiaryOrder } from './stages';
 import { WEAPON_IDS } from './weapons';
 
 /** The Coleção's achievement pages. */
@@ -103,7 +103,7 @@ const DEFS = {
   winAll: { group: 'heroes', metric: 'heroesWon', goal: CHARACTER_IDS.length, gold: 200, title: true },
   heroAllStages: { group: 'heroes', metric: 'heroAllStages', goal: STAGE_IDS.length, gold: 150 },
   // Fases
-  bossKnight: { group: 'stages', metric: 'enemyKills', enemies: ['blackKnight'], goal: 1, gold: 50 },
+  bossKnight: { group: 'stages', metric: 'enemyKills', enemies: ['spiderMother'], goal: 1, gold: 50 },
   bossRinger: { group: 'stages', metric: 'enemyKills', enemies: ['bellRinger'], goal: 1, gold: 75 },
   bossWolf: { group: 'stages', metric: 'enemyKills', enemies: ['oldWolf'], goal: 1, gold: 75 },
   // Calibrated like hit120: the veteran bot's median boss fight is 16 s after the Etapa 6 curve (was 34 s).
@@ -114,7 +114,7 @@ const DEFS = {
   seenAll: {
     group: 'collection',
     metric: 'seen',
-    goal: ENEMY_IDS.length,
+    goal: bestiaryOrder().length,
     gold: 150,
     title: true,
     charge: 'skip',

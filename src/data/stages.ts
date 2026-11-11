@@ -1,5 +1,5 @@
 import { config } from './config';
-import type { EnemyId } from './enemies';
+import { ENEMIES, ENEMY_IDS, type EnemyDef, type EnemyId } from './enemies';
 import { buildWaves, type WaveSegment } from './waves';
 
 /**
@@ -46,25 +46,28 @@ const elites = (...ids: EnemyId[]) =>
   ELITE_TIMES.map((at, i) => ({ id: ids[i % ids.length] as EnemyId, at }));
 
 export const STAGES = {
-  /** Arredores de Valmor: the village graveyard in the frozen south (cast as in the original's graveyard). */
+  /** Arredores de Valmor: barns, fences and fields around the village, in the snow, taken by rats and spiders (FT-13). */
   valmor: {
     tile: 'tile',
     layout: { kind: 'open' },
-    mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
-    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
+    mult: { hp: 0.9, damage: 0.95, speed: 1, spawn: 1, gold: 1 },
+    waves: buildWaves({ basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' }),
     elites: elites('witch'),
     specials: [
       { id: 'spiderNest', from: 45, every: 30 },
       { id: 'thiefRat', from: 150, every: 120 },
     ],
-    boss: { id: 'blackKnight', at: config.matchDuration },
+    boss: { id: 'spiderMother', at: config.matchDuration },
   },
-  /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
+  /**
+   * Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. Provisional cast until FT-16 (the
+   * rats and spiders went to the first stage; the Gosma Verde waits for its place as a hazard).
+   */
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
     mult: { hp: 1.35, damage: 1.85, speed: 1.05, spawn: 1.15, gold: 1.5 },
-    waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
+    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'ghost' }),
     elites: elites('golem'),
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
@@ -90,6 +93,13 @@ export type StageId = keyof typeof STAGES;
 /** In unlock order: clearing one opens the next. */
 export const STAGE_IDS = Object.keys(STAGES) as StageId[];
 
+/** What a boss raises out of the ground (its abilities' `summon`), so those join the stage's cast. */
+function bossSummons(id: EnemyId): EnemyId[] {
+  const def: EnemyDef = ENEMIES[id];
+  const list = def.abilities ?? (def.ability ? [def.ability] : []);
+  return list.flatMap((a) => (a.summon ? [a.summon as EnemyId] : []));
+}
+
 /** Every enemy a stage sends (its wave cast in role order, then its elites and boss), without repeats. */
 export function stageCast(id: StageId): EnemyId[] {
   const s: StageDef = STAGES[id];
@@ -98,19 +108,29 @@ export function stageCast(id: StageId): EnemyId[] {
     ...(s.specials ?? []).map((e) => e.id),
     ...s.elites.map((e) => e.id),
     s.boss.id,
+    ...bossSummons(s.boss.id),
   ];
   return [...new Set(ids)];
 }
 
-/** The bestiary's order: each stage's wave cast in stage order, then every elite, then the bosses. */
-export function bestiaryOrder(): EnemyId[] {
+/**
+ * The bestiary's order: each stage's wave cast in stage order (with what the boss raises), then every elite, then
+ * the bosses. An enemy no stage sends any more (the Cavaleiro Negro, the Gosma Verde for now) is listed, last, only
+ * for whoever already met it (`seen`: the save's bestiary).
+ */
+export function bestiaryOrder(seen: Partial<Record<EnemyId, unknown>> = {}): EnemyId[] {
   const ids = [
     ...STAGE_IDS.flatMap((id) => {
       const s: StageDef = STAGES[id];
-      return [...s.waves.flatMap((w) => w.enemies.map((e) => e.id)), ...(s.specials ?? []).map((e) => e.id)];
+      return [
+        ...s.waves.flatMap((w) => w.enemies.map((e) => e.id)),
+        ...(s.specials ?? []).map((e) => e.id),
+        ...bossSummons(s.boss.id),
+      ];
     }),
     ...STAGE_IDS.flatMap((id) => STAGES[id].elites.map((e) => e.id)),
     ...STAGE_IDS.map((id) => STAGES[id].boss.id),
   ];
-  return [...new Set(ids)];
+  const placed = new Set(ids);
+  return [...placed, ...ENEMY_IDS.filter((id) => !placed.has(id) && seen[id])];
 }

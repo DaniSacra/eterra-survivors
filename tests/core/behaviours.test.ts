@@ -55,12 +55,12 @@ describe('enemy behaviours', () => {
     expect(isFaded(e)).toBe(false);
   });
 
-  it('each stage keeps the cast of the original: graveyard dead in Valmor, rats and slime in the Crypt', () => {
+  it('each stage has its own cast: rats and spiders in Valmor, the dead in the (provisional) Crypt', () => {
     const cast = (stage: keyof typeof STAGES) =>
       new Set(STAGES[stage].waves.flatMap((s) => s.enemies.map((x) => x.id)));
-    expect([...cast('valmor')]).toEqual(expect.arrayContaining(['bones', 'bat', 'graveRat']));
-    expect([...cast('crypt')]).toEqual(expect.arrayContaining(['rat', 'slime']));
-    expect(cast('valmor').has('rat')).toBe(false);
+    expect([...cast('valmor')]).toEqual(expect.arrayContaining(['graveRat', 'bat', 'rat', 'spider']));
+    expect([...cast('crypt')]).toEqual(expect.arrayContaining(['bones', 'bat', 'skeleton']));
+    expect(cast('valmor').has('bones')).toBe(false);
     // The Espectro (extra role) joins the Crypt from the third minute.
     const ids = (from: number) =>
       STAGES.crypt.waves.find((s) => s.from === from)?.enemies.map((x) => x.id) ?? [];

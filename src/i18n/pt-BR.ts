@@ -239,7 +239,14 @@ export const t = {
       toll: 'Badalada',
       lunge: 'Mordida Funda',
       frost: 'Uivo da Geada',
+      web: 'Teia',
+      eggs: 'Ovos',
     },
+    /** A boss with several abilities lists them by name (the same kind can have another name in another boss). */
+    bossAbilities: {
+      oldWolf: ['Mordida Funda', 'Uivo da Geada'],
+      spiderMother: ['Ferroada', 'Teia', 'Ovos'],
+    } as Partial<Record<EnemyId, string[]>>,
     /** A line about each enemy: from the original where it has one, else written for the Survivors (docs/design/conquistas.md). */
     quote: (line: string) => `"${line}"`,
     /** A line someone says: "..." (Seu Joaquim). */
@@ -264,6 +271,9 @@ export const t = {
       frostBoar: 'Abaixa a cabeça, raspa o gelo e vem. Na estrada estreita, só resta o lado.',
       warBanner: 'Enquanto o pano estiver de pé, eles não recuam.',
       // written for the Survivors (provisional, FT-09)
+      // written for the Survivors (provisional, FT-12)
+      spiderMother: 'Os ovos ficam nas cercas. A mãe fica onde é mais escuro.',
+      spiderEgg: 'Quebre antes que trinque.',
       // written for the Survivors (provisional, FT-11)
       witch: 'Ri sozinha mexendo o caldeirão. Derrube a velha e a última poção é sua.',
       // written for the Survivors (provisional, FT-10)
@@ -442,7 +452,8 @@ export const t = {
         desc: 'Vença com os quatro heróis. Os paladinos que fecharam a cripta eram quatro.',
       },
       heroAllStages: { name: 'De Ponta a Ponta', desc: 'Vença as três fases com o mesmo herói.' },
-      bossKnight: { name: 'O Cavaleiro Caiu', desc: 'Derrote o Cavaleiro Negro.' },
+      // The id kept from the Cavaleiro Negro's days, so whoever had it still has it (FT-13); the name is provisional.
+      bossKnight: { name: 'Ninho Desfeito', desc: 'Derrote a Mãe-Aranha.' },
       bossRinger: { name: 'Ninguém Mais Desce', desc: 'Derrote O Sineiro.' },
       bossWolf: { name: 'O Velho da Matilha', desc: 'Derrote o Lobo Velho.' },
       bossFast: {
@@ -569,8 +580,8 @@ export const t = {
   stages: {
     valmor: {
       name: 'Arredores de Valmor',
-      desc: 'O cemitério da vila, na neve do sul.',
-      won: 'O Cavaleiro Negro caiu. Mas o sino da igreja velha continua tocando.',
+      desc: 'Celeiros, cercas e campos na neve, tomados por ratos e aranhas.',
+      won: 'A Mãe-Aranha caiu. Mas o sino da igreja velha continua tocando.',
     },
     crypt: {
       name: 'Cripta da Igreja Velha',
@@ -707,6 +718,8 @@ export const t = {
     spiderNest: 'Ninho de Aranha',
     thiefRat: 'Rato Ladrão',
     witch: 'Bruxa do Caldeirão',
+    spiderEgg: 'Ovo de Aranha',
+    spiderMother: 'Mãe-Aranha',
     golem: 'Golem de Pedra',
     bellRinger: 'O Sineiro',
     oldWolf: 'Lobo Velho',

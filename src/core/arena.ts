@@ -1,6 +1,6 @@
 import type { BossAbility } from '../data/enemies';
 import type { Enemy } from './enemies';
-import type { Mark } from './marks';
+import { addPatch, type Mark } from './marks';
 import type { World } from './world';
 
 /**
@@ -91,14 +91,38 @@ export function markIce(world: World, boss: Enemy, ab: BossAbility): void {
   meltOldest(world, ab.cap ?? 6);
 }
 
-function meltOldest(world: World, cap: number): void {
+/**
+ * Teia (FT-12): marks `count` webs during the windup, one right on the hero (they are warned, so it is fair) and the
+ * rest `near`..`far` px around; each forms when the windup ends and slows the hero for `life` s. Over `cap`, the
+ * oldest goes.
+ */
+export function markWeb(world: World, boss: Enemy, ab: BossAbility): void {
+  const p = world.player;
+  const r = ab.radius ?? 60;
+  for (let i = 0; i < (ab.count ?? 3); i++) {
+    let x = p.x;
+    let y = p.y;
+    if (i > 0) {
+      const a = world.rng.next() * Math.PI * 2;
+      const d = world.rng.range(ab.near ?? 60, ab.far ?? 200);
+      x += Math.cos(a) * d;
+      y += Math.sin(a) * d;
+    }
+    addPatch(world, 'web', x, y, r, ab.windup, ab.life ?? 8, ab.slow ?? 0.55, 0, boss.x, boss.y);
+    const m = world.marks.active[world.marks.size - 1];
+    if (m) m.born = world.time + i * 1e-3;
+  }
+  meltOldest(world, ab.cap ?? 6, 'web');
+}
+
+function meltOldest(world: World, cap: number, kind: Mark['kind'] = 'ice'): void {
   const list = world.marks.active;
   for (;;) {
     let n = 0;
     let oldest: Mark | null = null;
     for (let i = 0; i < list.length; i++) {
       const m = list[i] as Mark;
-      if (m.kind !== 'ice') continue;
+      if (m.kind !== kind) continue;
       n++;
       if (!oldest || m.born < oldest.born) oldest = m;
     }

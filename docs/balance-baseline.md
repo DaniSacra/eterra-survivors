@@ -1031,3 +1031,16 @@ Sim completo (8 sementes, 288 corridas), nenhuma / meia / inteira:
 | Estrada | 0% / 0% / 47%    | 0 / 0–10 / 35–55   |
 
 Luta do chefe (Loja inteira, 12 sementes): mediana 29 s em cada fase (meia Loja 64 s).
+
+## FT-09 a FT-13 (2026-11-11): Valmor com ratos e aranhas
+
+`SIM_SEEDS=16 SIM_SHOP=all`, Valmor depois do ajuste do `mult` (hp 0.9, damage 0.95; antes 1 e 1.05):
+
+| Perfil | Vitórias | Meta |
+| --- | --- | --- |
+| none | 3% | 0–15% |
+| half | 48% | 40–60% |
+| full | 97% | 85%+ |
+
+Fonte de dano em Valmor: contato 92%, chão (poças) 6%, chefe 2%. Primeiro Elo mediano em 5,7 min (half). Cripta provisória
+(Ossada, Morcego, Esqueleto, Espectro): 0% / 16% / 84%. Estrada: sem mudança. Linha `LOJA`: 55 corridas médias.

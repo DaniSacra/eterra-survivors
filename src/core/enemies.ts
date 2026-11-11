@@ -151,7 +151,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.orbitReady.fill(0);
   e.act = 0;
   // A banner rallies at once; the others wait a little before their first move.
-  e.actT = def.ability ? def.ability.every / 2 : def.move && !def.banner ? 2 : 0;
+  e.actT = def.ability ? def.ability.every / 2 : def.nest ? def.nest.every : def.move && !def.banner ? 2 : 0;
   e.aimX = 1;
   e.aimY = 0;
   e.rally = 0;

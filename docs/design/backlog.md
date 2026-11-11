@@ -2472,7 +2472,7 @@ Valmor" (provisórios).
 - Aceite: testes: poção cai no ponto marcado, poças alternam, `brew` cura e fortalece só no raio, Elixir no chão ao
   morrer; sim: `ground` abaixo de 30% do dano em Valmor; 1º Elo entre 5 e 7 min.
 
-**FT-12 · Mãe-Aranha: Ferroada, Teia e Ovos** · impl + vfx + bal · M · proposto
+**FT-12 · Mãe-Aranha: Ferroada, Teia e Ovos** · impl + vfx + bal · M · ✅ feito (2026-11-11)
 
 - Por quê: chefe novo da fase 1 (o Cavaleiro Negro sai). Três habilidades em ciclo, cada uma pedindo uma resposta:
   sair da linha (Ferroada), sair da área (Teia), quebrar antes que choque (Ovos).
@@ -2507,7 +2507,7 @@ Valmor" (provisórios).
 - Aceite: testes de cada habilidade (aviso, área, teto de teias, ovo que choca e ovo quebrado); sim: luta de 45 a 90 s,
   `boss` abaixo de 30% do dano, nenhuma habilidade mata sozinha de vida cheia.
 
-**FT-13 · Fase 1 montada: elenco, textos, Cavaleiro fora e Cripta provisória** · impl + bal + visual · M · proposto
+**FT-13 · Fase 1 montada: elenco, textos, Cavaleiro fora e Cripta provisória** · impl + bal + visual · M · ✅ feito (2026-11-11)
 
 - Por quê: junta FT-09 a FT-12 numa fase e resolve o que a troca quebra (conquista, bestiário, Cripta).
 - O quê:
@@ -2542,7 +2542,7 @@ Valmor" (provisórios).
 
 Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depende das respostas 4 e 10.
 
-**FT-14 · Explode ao morrer** · impl + vfx · P · proposto (com a Cripta)
+**FT-14 · Explode ao morrer** · impl + vfx · P · proposto (espera as respostas 4 e 10)
 
 - O quê: `burst`. Ao morrer, deixa uma marca que estoura em `delay` s: fere o herói no raio (contato x `damage`) e os
   inimigos no raio (`foes` da vida máxima do próprio estourador, que já cresce com o `hpMult`). Atrair a multidão para o

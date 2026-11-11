@@ -33,7 +33,7 @@ function portrait(
  */
 export function drawBestiary(a: TabArea): TabContent {
   const { scene, save } = a;
-  const order = bestiaryOrder();
+  const order = bestiaryOrder(save.bestiary);
   const seenCount = order.filter((id) => save.bestiary[id]).length;
   const side = a.w >= 640;
   const sheetW = side ? Math.min(380, a.w * 0.42) : a.w;
@@ -138,7 +138,9 @@ class Sheet {
       [t.bestiary.damage, String(tr.damage)],
       [t.bestiary.push, t.bestiary.pushes[tr.push]],
     ];
-    if (tr.way) rows.push([t.bestiary.way, t.bestiary.ways[tr.way]]);
+    const abilities = t.bestiary.bossAbilities[id];
+    if (abilities) rows.push([t.bestiary.way, abilities.join(', ')]);
+    else if (tr.way) rows.push([t.bestiary.way, t.bestiary.ways[tr.way]]);
     const fs = roomy ? 14 : 13;
     const step = roomy ? 21 : 18;
     for (const [k, v] of rows) {

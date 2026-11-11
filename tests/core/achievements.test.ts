@@ -27,7 +27,7 @@ import {
 } from '../../src/data/achievements';
 import { CHARACTER_IDS } from '../../src/data/characters';
 import { config } from '../../src/data/config';
-import { ENEMY_IDS } from '../../src/data/enemies';
+import { bestiaryOrder } from '../../src/data/stages';
 import { EVOLVED_IDS } from '../../src/data/evolutions';
 import { STAGE_IDS } from '../../src/data/stages';
 import { t } from '../../src/i18n/pt-BR';
@@ -69,7 +69,7 @@ const MEET: Record<Metric, (s: MetaSave, d: AchievementDef) => void> = {
     void (s.records.aldo = { ...newHeroRecord(), fastestWin: config.matchDuration + (d.at ?? 0) }),
   stagesCleared: (s) => void (s.cleared = [...STAGE_IDS]),
   seen: (s, d) => {
-    for (const id of ENEMY_IDS.slice(0, d.goal)) s.bestiary[id] = { kills: 0, stage: 'valmor' };
+    for (const id of bestiaryOrder().slice(0, d.goal)) s.bestiary[id] = { kills: 0, stage: 'valmor' };
   },
   shopLevels: (s) => void (s.shop = { might: 5, maxHp: 5 }),
   vigil: (s, d) => void (s.records.teo = { ...newHeroRecord(), vigil: { crypt: d.goal } }),

@@ -276,6 +276,55 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
+  /** Ovo de Aranha (provisional): a pale sac in a cradle of web, a faint light inside (FT-12). */
+  'enemy.spiderEgg': {
+    w: 22,
+    h: 24,
+    draw(p) {
+      p.shadow(11, 21, 18, 4);
+      p.line(2, 20, 11, 12, 1.2, 0xb8b4a8).line(20, 20, 11, 12, 1.2, 0xb8b4a8); // web
+      p.ellipse(11, 12, 15, 17, 0xe8e4d4); // the sac
+      p.ink();
+      p.fill(0xc8c4b0, 0.7).fillEllipse(11, 16, 11, 6);
+      p.glow(10, 10, 1.6, 0xc8e040);
+      p.shine(8, 6, 5, 3, 0.5);
+    },
+  },
+
+  /**
+   * Mãe-Aranha (provisional): huge, dark, a pale mark on the abdomen, eight eyes that glow, light from below (FT-12).
+   */
+  'enemy.spiderMother': {
+    w: 84,
+    h: 70,
+    draw(p) {
+      p.shadow(42, 62, 70, 10);
+      const leg = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number) => {
+        p.line(x1, y1, x2, y2, 7, INK).line(x2, y2, x3, y3, 7, INK);
+        p.line(x1, y1, x2, y2, 4, 0x3a2a30).line(x2, y2, x3, y3, 4, 0x3a2a30);
+      };
+      leg(34, 36, 18, 14, 4, 52);
+      leg(36, 40, 12, 32, 6, 60);
+      leg(40, 44, 20, 50, 14, 66);
+      leg(46, 46, 36, 56, 30, 68);
+      leg(52, 36, 66, 12, 80, 50);
+      leg(50, 40, 74, 30, 78, 60);
+      leg(46, 44, 64, 50, 70, 66);
+      p.ellipse(32, 36, 42, 32, 0x2a1e26); // abdomen
+      p.ellipse(54, 38, 24, 22, 0x3a2a34); // head
+      p.ink();
+      // The pale mark that lights before each ability.
+      p.poly([32, 24, 38, 36, 32, 50, 26, 36], 0xd8d0c0);
+      p.fill(0x7a1a24).fillCircle(32, 36, 3);
+      for (let i = 0; i < 4; i++) {
+        p.glow(58 + (i % 2) * 5, 30 + i * 3.5, 1.4, 0xff4a3a);
+        p.glow(52 + (i % 2) * 5, 31 + i * 3.5, 1.1, 0xff4a3a);
+      }
+      p.fill(0xe8e4d4).fillTriangle(62, 46, 64, 46, 63, 53).fillTriangle(55, 47, 57, 47, 56, 54);
+      p.shine(24, 22, 14, 5, 0.25);
+    },
+  },
+
   /**
    * Bruxa do Caldeirão (provisional): a stout hunched old woman in a dark shawl, long nose and hands lit from below
    * by the iron cauldron's sick acid glow (FT-11).

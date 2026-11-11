@@ -1477,6 +1477,7 @@ function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
 /** Patch colours (FT-11): poison is a sick acid green-yellow, tar is dark amber; neither is Teo's green nor a gem's cyan. */
 const POISON = 0xa8c030;
 const TAR = 0x6a4a1a;
+const WEB = 0xe4e4ec;
 
 /**
  * Patches an enemy leaves on the ground (poison, tar). In flight a potion arcs from the thrower to the marked spot
@@ -1486,15 +1487,16 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
   for (let i = 0; i < list.length; i++) {
     const m = list[i] as (typeof list)[number];
-    if (m.kind !== 'poison' && m.kind !== 'tar') continue;
+    if (m.kind !== 'poison' && m.kind !== 'tar' && m.kind !== 'web') continue;
     const r = m.radius;
-    const color = m.kind === 'poison' ? POISON : TAR;
+    const color = m.kind === 'poison' ? POISON : m.kind === 'web' ? WEB : TAR;
     if (m.ttl > 0) {
       const k = 1 - m.ttl / m.total; // 0 -> 1
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
       disc(g, m.x, m.y, r);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
       dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (world.time * (30 + 50 * k)) % (DASH * 2));
+      if (m.kind === 'web') continue;
       // The flask in its arc.
       const fx = m.fromX + (m.x - m.fromX) * k;
       const fy = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
@@ -1505,6 +1507,18 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
       continue;
     }
     const fade = Math.min(1, m.life / 0.6);
+    if (m.kind === 'web') {
+      // Grey-white spokes and rings, a faint sheen: the exact size of the slow.
+      g.fillStyle(WEB, 0.22 * fade);
+      disc(g, m.x, m.y, r);
+      g.lineStyle(1.5, WEB, 0.8 * fade);
+      for (let s = 0; s < 8; s++) {
+        const a = (s * Math.PI) / 4 + m.x * 0.01;
+        g.lineBetween(m.x, m.y, m.x + Math.cos(a) * r, m.y + Math.sin(a) * r);
+      }
+      for (let k = 1; k <= 3; k++) ring(g, m.x, m.y, (r * k) / 3);
+      continue;
+    }
     g.fillStyle(color, (m.kind === 'tar' ? 0.7 : 0.5) * fade);
     disc(g, m.x, m.y, r);
     g.lineStyle(2, INK, 0.6 * fade);
@@ -1666,6 +1680,7 @@ function drawBossWarning(
       }
       break;
     }
+    case 'eggs':
     case 'toll': {
       // Rings ripple out from the bell; small marks show where the dead will rise.
       const r = ab.range * (0.4 + 0.6 * k);

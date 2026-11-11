@@ -447,7 +447,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
     // A nest's sacs pulse a sick acid light, faster in the last second before each batch (FT-09).
-    if (w.alive.spiderNest) {
+    if (w.alive.spiderNest || w.alive.spiderEgg) {
       const foes = w.enemies.active;
       for (let i = 0; i < foes.length; i++) {
         const e = foes[i] as (typeof foes)[number];

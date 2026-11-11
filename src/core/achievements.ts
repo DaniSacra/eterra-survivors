@@ -8,9 +8,8 @@ import {
 } from '../data/achievements';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
 import { config } from '../data/config';
-import { ENEMY_IDS } from '../data/enemies';
 import { SHOP_IDS } from '../data/shop';
-import { STAGE_IDS } from '../data/stages';
+import { STAGE_IDS, bestiaryOrder } from '../data/stages';
 import type { HeroRecord, MetaSave } from './meta';
 import type { RunSummary } from './records';
 
@@ -113,7 +112,7 @@ export const METRICS: Record<
   },
   stagesCleared: (s, _d, r) =>
     STAGE_IDS.filter((id) => s.cleared.includes(id) || (r?.won && r.stage === id)).length,
-  seen: (s, _d, r) => ENEMY_IDS.filter((id) => s.bestiary[id] || r?.seen.includes(id)).length,
+  seen: (s, _d, r) => bestiaryOrder().filter((id) => s.bestiary[id] || r?.seen.includes(id)).length,
   shopLevels: (s) => SHOP_IDS.reduce((n, id) => n + (s.shop[id] ?? 0), 0),
   vigil: (s, _d, r) =>
     Math.max(r?.vigil ?? 0, ...CHARACTER_IDS.flatMap((h) => Object.values(s.records[h]?.vigil ?? {}))),

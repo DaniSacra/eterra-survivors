@@ -33,11 +33,12 @@ describe('save v2 migration', () => {
       records: {},
     });
     // Valmor's cast first seen in Valmor; the Crypt's own cast in the Crypt; Valmor's own elite is the witch since FT-11, so the golem is first met in the Crypt.
-    expect(s.bestiary.bones).toEqual({ kills: 0, stage: 'valmor' });
+    expect(s.bestiary.graveRat).toEqual({ kills: 0, stage: 'valmor' });
+    expect(s.bestiary.bones).toEqual({ kills: 0, stage: 'crypt' });
     expect(s.bestiary.witch).toEqual({ kills: 0, stage: 'valmor' });
     expect(s.bestiary.golem).toEqual({ kills: 0, stage: 'crypt' });
-    expect(s.bestiary.rat).toEqual({ kills: 0, stage: 'crypt' });
-    expect(s.bestiary.blackKnight).toEqual({ kills: 1, stage: 'valmor' });
+    expect(s.bestiary.rat).toEqual({ kills: 0, stage: 'valmor' });
+    expect(s.bestiary.spiderMother).toEqual({ kills: 1, stage: 'valmor' });
     expect(s.bestiary.bellRinger).toEqual({ kills: 1, stage: 'crypt' });
     expect(s.bestiary.oldWolf).toBeUndefined();
     expect(Object.keys(s.bestiary).sort()).toEqual(
@@ -49,7 +50,7 @@ describe('save v2 migration', () => {
   it('a versionless save is seeded the same way', () => {
     const s = sanitizeSave({ gold: 5, cleared: ['valmor'] });
     expect(s.gold).toBe(5);
-    expect(s.bestiary.blackKnight?.kills).toBe(1);
+    expect(s.bestiary.spiderMother?.kills).toBe(1);
     expect(s.totals.wins).toBe(1);
   });
 
@@ -94,7 +95,7 @@ describe('save v2 migration', () => {
       closestWin: 1,
       fastestWin: 0,
     });
-    expect(s.bestiary).toEqual({ bones: { kills: 0, stage: 'valmor' }, rat: { kills: 4, stage: 'crypt' } });
+    expect(s.bestiary).toEqual({ bones: { kills: 0, stage: 'crypt' }, rat: { kills: 4, stage: 'crypt' } });
     expect(s.totals).toEqual({ runs: 3, wins: 0, kills: 0, damage: 12.5, gold: 0, time: 0 });
   });
 

@@ -23,8 +23,8 @@ describe('stages', () => {
     expect(s.boss.at).toBe(config.matchDuration);
   });
 
-  it('Valmor keeps the Cavaleiro Negro as its boss', () => {
-    expect(STAGES.valmor.boss.id).toBe('blackKnight');
+  it('Valmor ends with the Mãe-Aranha', () => {
+    expect(STAGES.valmor.boss.id).toBe('spiderMother');
   });
 });
 

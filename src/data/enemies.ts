@@ -7,10 +7,13 @@ import type { PickupId } from './pickups';
  * - toll: `count` `summon`s rise in a ring of radius `range` around the boss (no direct damage);
  * - lunge: dashes `range` px straight at where it aimed, hurting the hero it runs into;
  * - frost: howls, and `count` patches of ice of `radius` form where it marked (`near`..`far` px from the hero, never
- *   under them), slowing the hero to `slow` until the fight ends; at most `cap` (the oldest melts).
+ *   under them), slowing the hero to `slow` until the fight ends; at most `cap` (the oldest melts);
+ * - web: `count` webs of `radius` (one right on the hero, the rest `near`..`far` px around), each slowing to `slow`
+ *   for `life` s once the windup is over; at most `cap` at once (the oldest goes);
+ * - eggs: `count` `summon`s (egg sacs) in a ring of radius `range` around the boss, hatching on their own.
  */
 export interface BossAbility {
-  kind: 'cleave' | 'toll' | 'lunge' | 'frost';
+  kind: 'cleave' | 'toll' | 'lunge' | 'frost' | 'web' | 'eggs';
   every: number;
   windup: number;
   trigger: number;
@@ -28,6 +31,8 @@ export interface BossAbility {
   near?: number;
   far?: number;
   slow?: number;
+  /** web: seconds a web lasts once formed. */
+  life?: number;
 }
 
 /** Mordida Funda: the Lobo Velho crouches, then lunges in a straight line. */
@@ -39,6 +44,17 @@ const DEEP_BITE: BossAbility = {
   range: 280,
   damage: 22,
   dash: 0.5,
+};
+
+/** Ferroada: the Mãe-Aranha's short lunge (the Aranha Tumular's skill in the original). */
+const STING: BossAbility = {
+  kind: 'lunge',
+  every: 3.5,
+  windup: 0.6,
+  trigger: 220,
+  range: 170,
+  damage: 22,
+  dash: 0.3,
 };
 
 /** Enemy roster, from the original Crônicas de Eterra cast. Names live in i18n under `enemies`. */
@@ -147,17 +163,17 @@ export const ENEMIES = {
     knockbackResist: 0.6,
   },
   /** Rato de Cova: the small grey rats of the graveyard (Crônicas de Eterra). */
-  graveRat: { sprite: 'enemy.graveRat', radius: 9, hp: 6, speed: 100, damage: 4, xp: 1, knockbackResist: 0 },
+  graveRat: { sprite: 'enemy.graveRat', radius: 9, hp: 9, speed: 78, damage: 4, xp: 1, knockbackResist: 0 },
   // Cripta da Igreja Velha: the original crypt's giant rats and green slime, with tomb spiders and ghosts.
   /** Rato Gigante: the big rats of the crypt (Crônicas de Eterra), darting at whoever comes close. */
   rat: {
     sprite: 'enemy.rat',
-    radius: 12,
-    hp: 14,
-    speed: 80,
-    damage: 6,
-    xp: 1,
-    knockbackResist: 0.1,
+    radius: 15,
+    hp: 42,
+    speed: 55,
+    damage: 8,
+    xp: 3,
+    knockbackResist: 0.5,
     move: 'charge',
   },
   spider: {
@@ -283,6 +299,18 @@ export const ENEMIES = {
     flee: { keep: 200, life: 16, steal: true },
     loot: { chest: true },
   },
+  /** Ovo de Aranha (provisional name): hatches three spiders in a few seconds unless broken first (FT-12). */
+  spiderEgg: {
+    sprite: 'enemy.spiderEgg',
+    radius: 10,
+    hp: 40,
+    speed: 0,
+    damage: 0,
+    xp: 1,
+    knockbackResist: 1,
+    move: 'still',
+    nest: { spawn: 'spider', every: 3.5, count: 3, total: 3, range: 9999, once: true },
+  },
   // Elites (stage `elites`): drop a chest.
   /** Golem de Pedra: heavy, and it leaps, landing on a wide circle (FT-04). */
   golem: {
@@ -382,6 +410,50 @@ export const ENEMIES = {
       },
     ],
     arena: 450,
+  },
+  /**
+   * Mãe-Aranha (provisional name): Ferroada (a short lunge), Teia (webs that slow), Ferroada, Ovos (sacs that hatch
+   * unless broken), round and round (FT-12).
+   */
+  spiderMother: {
+    sprite: 'enemy.spiderMother',
+    radius: 32,
+    hp: 81000,
+    speed: 90,
+    damage: 18,
+    xp: 0,
+    knockbackResist: 1,
+    boss: true,
+    ability: STING,
+    abilities: [
+      STING,
+      {
+        kind: 'web',
+        every: 4,
+        windup: 0.9,
+        trigger: 500,
+        range: 100,
+        damage: 0,
+        count: 3,
+        radius: 60,
+        life: 8,
+        slow: 0.55,
+        cap: 6,
+        near: 60,
+        far: 200,
+      },
+      STING,
+      {
+        kind: 'eggs',
+        every: 4,
+        windup: 1,
+        trigger: 600,
+        range: 110,
+        damage: 0,
+        summon: 'spiderEgg',
+        count: 4,
+      },
+    ],
   },
   blackKnight: {
     sprite: 'enemy.blackKnight',

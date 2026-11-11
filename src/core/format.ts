@@ -26,6 +26,8 @@ export type EnemyWay =
   | 'elite'
   | 'cleave'
   | 'frost'
+  | 'web'
+  | 'eggs'
   | 'toll'
   | 'lunge';
 
