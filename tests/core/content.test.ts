@@ -7,6 +7,7 @@ import { PICKUPS, PICKUP_IDS } from '../../src/data/pickups';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { STAGES, STAGE_IDS } from '../../src/data/stages';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
+import { weaponCategory } from '../../src/data/evolutions';
 import {
   describeUpgrade,
   formatCompact,
@@ -67,7 +68,11 @@ describe('upgrade descriptions', () => {
   });
 
   it('describes new weapons, weapon levels, passives and heal', () => {
-    expect(describeUpgrade({ kind: 'weapon', id: 'elunLight', level: 1 }).tag).toBe(t.levelUp.newWeapon);
+    // A new weapon's card says how it fights (NU-07): every category has its label.
+    expect(describeUpgrade({ kind: 'weapon', id: 'elunLight', level: 1 }).tag).toBe(
+      t.levelUp.newWeaponOf(t.levelUp.category[weaponCategory('elunLight')]),
+    );
+    for (const id of WEAPON_IDS) expect(t.levelUp.category[weaponCategory(id)]).toBeTruthy();
     expect(describeUpgrade({ kind: 'weapon', id: 'blade', level: 2 }).desc).toMatch(
       new RegExp(`^Dano ${WEAPONS.blade.levels[0]!.damage} → ${WEAPONS.blade.levels[1]!.damage}`),
     );

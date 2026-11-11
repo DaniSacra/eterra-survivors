@@ -1814,7 +1814,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   quando muda.
 - Aceite: captura em 360x640 e 420x820 sem invadir o centro do HUD.
 
-**NU-07 · Categoria na carta de arma nova** · ui + impl · P · proposto
+**NU-07 · Categoria na carta de arma nova** · ui + impl · P · ✅ feito na carta (2026-11-11; "Nova arma · Mira / Automática / Em volta", e o nome longo encolhe para não encostar; falta o Livro de Elos)
 
 - Por quê: 05-ui #7. Toda arma tem `category` com faixa testada, mas o jogador não vê; no celular de um polegar,
   saber "precisa mirar andando" contra "acerta sozinha" pesa na escolha da 3ª e 4ª arma (pilar 3).

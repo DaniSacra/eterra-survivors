@@ -65,6 +65,9 @@ export const t = {
   levelUp: {
     title: 'Subiu de nível!',
     newWeapon: 'Nova arma',
+    newWeaponOf: (category: string) => `Nova arma · ${category}`,
+    /** How a weapon fights, on its new-weapon card. */
+    category: { aimed: 'Mira', auto: 'Automática', area: 'Em volta' },
     level: (n: number) => `Nível ${n}`,
     heal: 'Pão e sopa da Berta',
     healDesc: (n: number) => `Recupera ${n} de vida`,

@@ -2,7 +2,7 @@ import { REWARDS, type RewardDef, type RewardId } from '../data/rewards';
 import { ACHIEVEMENTS, type AchievementId } from '../data/achievements';
 import { config, type StatKey } from '../data/config';
 import { formatTime } from '../core/format';
-import { evolutionOf } from '../data/evolutions';
+import { evolutionOf, weaponCategory } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { WEAPONS, type WeaponId } from '../data/weapons';
 import { weaponLevelDiff, type UpgradeOption } from '../core/upgrades';
@@ -108,7 +108,8 @@ export function describeUpgrade(
       if (opt.level === 1)
         return {
           title: w.name,
-          tag: t.levelUp.newWeapon,
+          // How it fights: aimed (walk to aim it), automatic or around the hero (NU-07).
+          tag: t.levelUp.newWeaponOf(t.levelUp.category[weaponCategory(opt.id)]),
           desc: w.desc,
           icon,
           recipe,

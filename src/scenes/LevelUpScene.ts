@@ -136,11 +136,24 @@ export class LevelUpScene extends Phaser.Scene {
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;
       const textW = cardW - 62 - 12;
-      label(this, left, y - cardH / 2 + 9, touch ? d.title : t.levelUp.numbered(i + 1, d.title), 18, {
-        bold: true,
-        align: 'left',
-      });
-      label(this, x0 + cardW - 12, y - cardH / 2 + 19, d.tag, 13, { color: UI.gold }).setOrigin(1, 0.5);
+      const title = label(
+        this,
+        left,
+        y - cardH / 2 + 9,
+        touch ? d.title : t.levelUp.numbered(i + 1, d.title),
+        18,
+        {
+          bold: true,
+          align: 'left',
+        },
+      );
+      const tag = label(this, x0 + cardW - 12, y - cardH / 2 + 19, d.tag, 13, { color: UI.gold }).setOrigin(
+        1,
+        0.5,
+      );
+      // A long name next to a long tag (narrow phones): the name shrinks until they no longer touch.
+      for (let size = 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
+        title.setFontSize(size);
       const desc = label(this, left, y - cardH / 2 + 33, d.desc, 14, {
         color: UI.muted,
         align: 'left',
