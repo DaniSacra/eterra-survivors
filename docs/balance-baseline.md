@@ -992,3 +992,18 @@ Sim só com o Aldo (16 sementes; Valmor com 24 deu 8% / 50% / 96%):
 | Valmor  | 13% / 56% / 94% | 13% / 50% / 94% | 0–15 / 40–60 / 85+ |
 | Cripta  | 0% / 6% / 81%   | 0% / 0% / 75%   | 0 / 15–35 / 70–85  |
 | Estrada | 0% / 0% / 50%   | 0% / 0% / 50%   | 0 / 0–10 / 35–55   |
+
+## Maça de Ferro: mais alcance, menos dano (NE-01, 2026-11-11)
+
+Decisão 4 do Daniel. `radius` 48/48/52/52/56/56/60 → 60/60/65/65/70/70/75 e `damage` 27/34/34/43/43/54/70 →
+20/26/26/32/32/41/53. Lab (multidão, nível máximo): 468 (94%) → 455 (91%), L1 74 → 100; Quebra-Junta 1832 (4,0x).
+Sim só com o Teo (24 sementes, nenhuma / meia / inteira):
+
+| Fase    | Antes           | Depois           | Meta               |
+| ------- | --------------- | ---------------- | ------------------ |
+| Valmor  | 13% / 50% / 88% | 8% / 54% / 100%  | 0–15 / 40–60 / 85+ |
+| Cripta  | 0% / 21% / 71%  | 0% / 21% / 67%   | 0 / 15–35 / 70–85  |
+| Estrada | 0% / 4% / 21%   | 0% / 0% / 33%    | 0 / 0–10 / 35–55   |
+
+Sim completo depois (8 sementes, 288 corridas): Valmor 16% / 50% / 94%, Cripta 0% / 22% / 69%, Estrada 0% / 0% /
+44%; luta do chefe mediana 14 s (NE-05 continua aberto).

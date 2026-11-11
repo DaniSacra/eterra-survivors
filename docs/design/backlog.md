@@ -1608,7 +1608,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   faixa `auto` passar do teto no sim, reajustar no lab.
 - Aceite: todas as Elos ≥ 2,5x no sim; bandas verdes; metas de fase dentro.
 
-**NE-01 · Maça de Ferro: mais alcance, menos dano** · impl + bal · P · proposto (decisão 4 do Daniel)
+**NE-01 · Maça de Ferro: mais alcance, menos dano** · impl + bal · P · ✅ feito (2026-11-11: lab 91%, Teo Valmor meia Loja 54%; `docs/balance-baseline.md`)
 
 - Por quê: 01-balance. A maça nova rende **87** de DPS real no máximo (antes 129; outras `aimed` 208 a 650); o bot
   acerta alguém em 62% das pancadas; o Teo, que começa com ela, caiu de 56% para **31%** em Valmor com meia Loja. A
