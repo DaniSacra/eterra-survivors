@@ -5,7 +5,7 @@ import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
-import { describeUpgrade } from '../render/describe';
+import { describeUpgrade, formatStatValue } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
 import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
 import type { HudScene } from './HudScene';
@@ -132,6 +132,16 @@ export class LevelUpScene extends Phaser.Scene {
         this.highlight();
       });
       const d = describeUpgrade(opt, owned, w.passives);
+      // Without the stat panel, a passive's card carries the total itself: "Vida máxima +20 (180 → 200)" (NU-04).
+      const pv = panel ? null : statPreview(w, opt);
+      if (pv) {
+        const base = config.player.stats[pv.stat];
+        const total = t.levelUp.preview(
+          formatStatValue(pv.stat, pv.from, base),
+          formatStatValue(pv.stat, pv.to, base),
+        );
+        d.desc = t.levelUp.withTotal(d.desc, total);
+      }
       const x0 = cx - cardW / 2;
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;

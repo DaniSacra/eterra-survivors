@@ -8,6 +8,7 @@ import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { STAGES, STAGE_IDS } from '../../src/data/stages';
 import { WEAPONS, WEAPON_IDS } from '../../src/data/weapons';
 import { weaponCategory } from '../../src/data/evolutions';
+import { weaponLevelDiff } from '../../src/core/upgrades';
 import {
   describeUpgrade,
   formatCompact,
@@ -65,6 +66,13 @@ describe('upgrade descriptions', () => {
     expect(formatStatDelta('maxHp', 20)).toBe('Vida máxima +20');
     expect(formatStatDelta('cooldown', -0.08)).toBe('Recarga −8%');
     expect(formatStatDelta('regen', 0.3)).toBe('Regeneração +0,3/s');
+  });
+
+  it('every weapon level names everything it changes (NU-04: no hidden change on a card)', () => {
+    for (const id of WEAPON_IDS)
+      for (let level = 2; level <= WEAPONS[id].levels.length; level++)
+        for (const d of weaponLevelDiff(id, level))
+          expect(t.weaponStats[d.stat], `${id} ${level} ${d.stat}`).toBeTruthy();
   });
 
   it('describes new weapons, weapon levels, passives and heal', () => {

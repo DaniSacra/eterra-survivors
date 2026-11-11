@@ -1790,7 +1790,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   `options.calmShort: 'Calma'`.
 - Aceite: capturas em 360x640, 420x820, 640x360 e 1000x680 com a build visível e Desistir inteiro.
 
-**NU-04 · A carta mostra toda a melhora** · ui + impl · P · proposto
+**NU-04 · A carta mostra toda a melhora** · ui + impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 05-ui #6 (carta de passiva sem o total quando não há painel, 360x640: só "Vida máxima +20") e 02-code #10
   (Fogos-Fátuos nível 4 muda `lifetime`, que não tem rótulo em `t.weaponStats`).

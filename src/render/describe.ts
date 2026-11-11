@@ -15,7 +15,8 @@ const num = (v: number): string => String(Math.round(v * 100) / 100).replace('.'
 
 function weaponValue(stat: string, v: number): string {
   if (stat === 'arc') return t.units.degrees(String(Math.round((v * 180) / Math.PI)));
-  if (stat === 'cooldown' || stat === 'duration' || stat === 'stun') return t.units.seconds(num(v));
+  if (stat === 'cooldown' || stat === 'duration' || stat === 'stun' || stat === 'lifetime')
+    return t.units.seconds(num(v));
   return num(v);
 }
 

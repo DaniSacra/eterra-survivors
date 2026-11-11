@@ -93,6 +93,8 @@ export const t = {
     /** A stat still at its base value. */
     untouched: '-',
     preview: (from: string, to: string) => `${from} → ${to}`,
+    /** A passive's change with the total it leads to, on cards without the stat panel. */
+    withTotal: (change: string, total: string) => `${change} (${total})`,
   },
 
   /** The Elo moments in a run: the recipe progress and the forge notice. */
@@ -729,5 +731,6 @@ export const t = {
     waveRadius: 'Alcance da onda',
     waveKnockback: 'Empurrão da onda',
     stun: 'Tontura',
+    lifetime: 'Permanência',
   } as Record<string, string>,
 } as const;
