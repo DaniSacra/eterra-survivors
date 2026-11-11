@@ -1740,7 +1740,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   herói. Estrela: pulinho em arco (`sin(pi * k)`) no y das estrelinhas.
 - Aceite: capturas mostrando o aviso antes do pulso e as almas acumuladas; custo por quadro igual.
 
-**NF-09 · Fogo pousa com o dano** · vfx · P · proposto
+**NF-09 · Fogo pousa com o dano** · vfx · P · ✅ (queda em 0,12 da vida)
 
 - Por quê: 06-vfx #9. O Fogo cai ~55 ms depois do dano. (A estocada da Lâmina saiu do jogo em 2026-11-10, a pedido do
   Daniel: a arma do Aldo é só o golpe em arco.)

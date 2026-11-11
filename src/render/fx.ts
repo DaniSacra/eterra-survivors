@@ -132,8 +132,8 @@ const SLAM_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COL
 const DROP = 0.18;
 /** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
 const FIRE_SWORD: OrbitStyle = { color: 0xffd890, dark: 0xff6a20, blade: true };
-/** Part of a strike's life spent falling, before the burst on the ground. */
-const FALL = 0.25;
+/** Part of a strike's life spent falling, before the burst on the ground (short: it lands with the damage, NF-09). */
+const FALL = 0.12;
 const PUFF_COLOR = 0xf4f6fb;
 const PUFF_SHADE = 0xb8c0d8;
 /** Death puffs this big are bosses (radius 30 and up; elites are 18 to 26). */
