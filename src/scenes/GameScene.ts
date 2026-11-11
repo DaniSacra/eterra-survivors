@@ -8,7 +8,7 @@ import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
-import { SPRITE_SCALE } from '../render/assets';
+import { FLYERS, SPRITE_SCALE } from '../render/assets';
 import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
@@ -85,12 +85,16 @@ const RISE_SQUASH = 0.25;
 
 /** Dust and earth kicked up by bosses. */
 const DUST = 0xc8bca8;
+/** Distance from the hero's centre to their feet (world px), where the contact shadow sits. */
+const HERO_FEET = 36;
+/** Flyers hover this high (px) over the spot they threaten, bob a little and flap fast. */
+const HOVER = 13;
+/** Width of the hero's life bar (px). */
+const HERO_BAR_W = 44;
 
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
 /** Each Elo's projectile sprite, tinted with its element's colour. */
-/** How long the hero's outline shows the danger colour after a hit (s). */
-const HURT_OUTLINE = 0.12;
 
 /** Light colours (the light map multiplies the ground by them). */
 const PROJECTILE_LIGHT = 0xffe8b0;
@@ -175,8 +179,10 @@ export class GameScene extends Phaser.Scene {
   private playerSprite!: Phaser.GameObjects.Sprite;
   /** The hero's walk and idle animations when they have pixel-art strips (else null: the code art bounces). */
   private heroAnims: { walk: string; idle: string } | null = null;
-  /** A light silhouette behind the hero: a permanent outline that reads over any crowd. */
-  private playerOutline!: Phaser.GameObjects.Sprite;
+  /** Contact shadows on the ground (hero, flyers), redrawn each frame under the enemies. */
+  private shadows!: Phaser.GameObjects.Graphics;
+  /** The hero's life bar, under their feet and over the crowd. */
+  private heroBar!: Phaser.GameObjects.Graphics;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
   private projectileMirror!: Mirror<Projectile, ProjImage>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
@@ -231,8 +237,6 @@ export class GameScene extends Phaser.Scene {
   private bossAb: BossAbility | undefined;
   private obstacles!: Obstacles;
   private lighting!: Lighting;
-  /** World time of the last hit on the hero (the outline flashes the danger colour). */
-  private hurtAt = -1;
   /** The view rectangle the ground covers this frame (world px), for the light map. */
   private view = { x: 0, y: 0, w: 1, h: 1 };
   private forest: Phaser.GameObjects.TileSprite[] = [];
@@ -253,7 +257,6 @@ export class GameScene extends Phaser.Scene {
     // The scene instance is reused by "play again": nothing may leak from the last run.
     this.controls = null;
     this.gemStreak = 0;
-    this.hurtAt = -1;
     this.lastGem = -1;
     this.liveSave = loadSave();
     this.liveShown.clear();
@@ -311,11 +314,8 @@ export class GameScene extends Phaser.Scene {
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
     const heroSprite = CHARACTERS[this.world.character].sprite;
-    // Above enemies and effects, with a thick outline in the hero's own color.
-    this.playerOutline = this.add
-      .sprite(0, 0, heroSprite)
-      .setDepth(13)
-      .setTintFill(HERO_COLOR[this.world.character]);
+    this.shadows = this.add.graphics().setDepth(4.5);
+    this.heroBar = this.add.graphics().setDepth(13.2);
     this.playerSprite = this.add.sprite(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
     const walk = `${heroSprite}.walk`;
     this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
@@ -407,8 +407,19 @@ export class GameScene extends Phaser.Scene {
           sx -= 0.18 * rise;
           sy += 0.3 * rise;
         }
+        // A flyer hovers above the ground with a small shadow below, bobbing and beating its wings.
+        let hover = 0;
+        if (FLYERS[key]) {
+          const t = w.freeze > 0 ? 0 : w.time;
+          hover = HOVER + Math.sin(t * 5 + e.uid) * 2.5;
+          const flap = Math.sin(t * 24 + e.uid * 1.3);
+          sx += flap * 0.1;
+          sy -= flap * 0.12;
+          const sw = 14 - (hover - HOVER) * 0.6;
+          this.shadows.fillStyle(0x000000, 0.3).fillEllipse(e.x, e.y + 8, sw, sw * 0.32);
+        }
         img
-          .setPosition(e.x + shake, e.y - lift)
+          .setPosition(e.x + shake, e.y - lift - hover)
           .setScale(ART_SCALE * sx * (SPRITE_SCALE[key] ?? 1), ART_SCALE * sy * (SPRITE_SCALE[key] ?? 1))
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
@@ -627,19 +638,21 @@ export class GameScene extends Phaser.Scene {
     const sx = ART_SCALE * (1 + step * 0.05);
     const sy = ART_SCALE * (1 - step * 0.05);
     this.playerSprite.setPosition(w.player.x, w.player.y - step * 2.5).setScale(sx, sy);
-    // Hurt (invulnerable): the outline blinks white instead of the hero fading into the crowd.
-    const blink = w.player.iframes > 0 && Math.sin(w.time * 40) > 0;
-    const hurt = w.time - this.hurtAt < HURT_OUTLINE;
-    this.playerOutline
-      .setPosition(w.player.x, w.player.y - step * 2.5 + 1)
-      // Pixel art already has its own dark outline: a thin rim in the hero's colour is enough.
-      .setScale(sx * (anims ? 1.07 : 1.22), sy * (anims ? 1.04 : 1.16))
-      .setTintFill(hurt ? UI.dangerHex : blink ? TINT.blink : HERO_COLOR[w.character]);
-    if (anims) this.playerOutline.setTexture(this.playerSprite.texture.key, this.playerSprite.frame.name);
-    if (w.player.facing.x !== 0) {
-      this.playerSprite.setFlipX(w.player.facing.x < 0);
-      this.playerOutline.setFlipX(w.player.facing.x < 0);
-    }
+    // Hurt (invulnerable): the hero blinks instead of fading into the crowd.
+    this.playerSprite.setAlpha(w.player.iframes > 0 && Math.sin(w.time * 40) > 0 ? 0.55 : 1);
+    if (w.player.facing.x !== 0) this.playerSprite.setFlipX(w.player.facing.x < 0);
+    // A discreet contact shadow under the hero's feet.
+    this.shadows.clear();
+    this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET, 26, 8);
+    // Life under the feet: wide, framed in dark, always over the crowd; blinks coral when low.
+    const hpK = Math.max(0, w.player.hp / w.player.stats.maxHp);
+    const bx = w.player.x - HERO_BAR_W / 2;
+    const by = w.player.y + HERO_FEET + 8;
+    const bar = this.heroBar.clear();
+    bar.fillStyle(0x0a0810, 0.9).fillRoundedRect(bx - 2, by - 2, HERO_BAR_W + 4, 10, 3);
+    bar.fillStyle(0x3a1018, 1).fillRect(bx, by, HERO_BAR_W, 6);
+    const low = hpK <= 0.35 && Math.sin(w.time * 12) > 0;
+    bar.fillStyle(low ? UI.dangerHex : UI.hp, 1).fillRect(bx, by, HERO_BAR_W * hpK, 6);
     this.addLights();
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
@@ -1151,9 +1164,7 @@ export class GameScene extends Phaser.Scene {
         case 'playerHit':
           sound.play('hurt');
           this.shake(120, 0.006);
-          // The hurt shows on the outline (danger colour, then blinking white): the hero keeps their own colours,
-          // with only a faint warm flash for a tenth of a second (NF-05).
-          this.hurtAt = w.time;
+          // The hero keeps their own colours, with only a faint warm flash for a tenth of a second (NF-05).
           if (this.nearCold && this.nearShot < 60)
             this.sparks.burst(w.player.x, w.player.y, 6, 150, 7, 0x7ac8ff, SPARK.flake, 0.45, true);
           this.playerSprite.setTint(TINT.heroHurt);
