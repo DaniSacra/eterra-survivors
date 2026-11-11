@@ -3223,7 +3223,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
   estalo de sombra na troca. Duas artes PixelLab do mesmo personagem; regra no core com teste (a forma escura só depois
   do primeiro sumiço e vale até morrer). Troca também o fantasma da tela inicial. **Depende do Daniel:** o nome da forma
   escura (provisório até a aprovação).
-- **DD-08 · Gosma Verde menos fofa** · visual · P. Duas propostas mostradas ao Daniel antes de trocar.
+- **DD-08 · Gosma Verde menos fofa** · visual · P. Duas propostas mostradas ao Daniel antes de trocar. ✅
 
 ### Fase 4 · Armas de órbita
 

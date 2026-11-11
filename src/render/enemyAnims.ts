@@ -58,7 +58,7 @@ export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.ghost': anim(40, 44, [5], 6),
   'enemy.ghostDark': anim(40, 44, [5], 10),
   'enemy.coldSpirit': anim(50, 59, [5], 6),
-  'enemy.slime': anim(58, 48, [5], 6),
+  'enemy.slime': anim(56, 48, [5], 6),
   'enemy.vampireBat': anim(32, 32, [5], 12),
 };
 
