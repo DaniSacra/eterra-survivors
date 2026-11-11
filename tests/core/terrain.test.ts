@@ -151,15 +151,16 @@ describe('stage multipliers', () => {
     const v = stageWorld('valmor');
     const c = stageWorld('crypt');
     const m = STAGES.crypt.mult;
+    const b = STAGES.valmor.mult;
     const ev = spawnEnemy(v, 'skeleton', 300, 0, 2);
     const ec = spawnEnemy(c, 'skeleton', 300, 0, 2);
-    expect(ec.maxHp).toBeCloseTo(ev.maxHp * m.hp);
-    expect(ev.maxHp).toBeCloseTo(ENEMIES.skeleton.hp * 2);
+    expect(ec.maxHp).toBeCloseTo((ev.maxHp * m.hp) / b.hp);
+    expect(ev.maxHp).toBeCloseTo(ENEMIES.skeleton.hp * 2 * b.hp);
     // Speed: the same walk for one frame, farther in the crypt.
     v.player.x = c.player.x = 0;
     updateEnemies(v, 1 / 60);
     updateEnemies(c, 1 / 60);
-    expect(300 - ec.x).toBeCloseTo((300 - ev.x) * m.speed);
+    expect(300 - ec.x).toBeCloseTo(((300 - ev.x) * m.speed) / b.speed);
     // Contact damage.
     for (const w of [v, c]) {
       const e = spawnEnemy(w, 'skeleton', w.player.x, w.player.y);
@@ -172,7 +173,7 @@ describe('stage multipliers', () => {
     // Gold.
     addGold(v, 100);
     addGold(c, 100);
-    expect(c.gold).toBe(Math.round(v.gold * m.gold));
+    expect(c.gold).toBe(Math.round((v.gold * m.gold) / b.gold));
   });
 
   it('spawn density: more enemies per batch on average', () => {

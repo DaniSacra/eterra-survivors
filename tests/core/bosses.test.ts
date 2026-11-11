@@ -4,6 +4,7 @@ import { spawnEnemy, type Enemy } from '../../src/core/enemies';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { config } from '../../src/data/config';
 import { ENEMIES, type BossAbility, type EnemyId } from '../../src/data/enemies';
+import { STAGES } from '../../src/data/stages';
 import { bareWorld, still } from './helpers';
 
 const STEP = 1 / 60;
@@ -54,7 +55,9 @@ describe('boss abilities', () => {
     const again = withBoss('blackKnight');
     again.w.step(STEP, still);
     for (let t = 0; t < ab.windup + 0.1; t += STEP) again.w.step(STEP, still);
-    expect(again.w.player.hp).toBeLessThanOrEqual(again.w.player.stats.maxHp - ab.damage + 1);
+    expect(again.w.player.hp).toBeLessThanOrEqual(
+      again.w.player.stats.maxHp - ab.damage * STAGES.valmor.mult.damage + 1,
+    );
   });
 
   it('Corte Brutal: stepping out of the marked arc avoids it', () => {
