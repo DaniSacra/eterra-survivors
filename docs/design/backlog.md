@@ -1724,7 +1724,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   primeiro décimo de segundo.
 - Aceite: captura dos quatro heróis cercados, cada um reconhecível pela roupa.
 
-**NF-06 · O acerto diz quão forte foi; crítico visível** · vfx + impl · P · proposto
+**NF-06 · O acerto diz quão forte foi; crítico visível** · vfx + impl · P · ✅ feito (2026-11-11: `hitAmount`/`hitCrit`, estrela maior e anel no forte, estrela dupla na cor da arma no crítico)
 
 - Por quê: 06-vfx #4. Um acerto de 13 e um de 161 têm a mesma faísca e o mesmo squash; o crítico de Adagas e Leque só
   aparece pelo número e some com os números desligados.

@@ -62,6 +62,19 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   lyraStar: [SPARK.cross, 0xfff0c0],
 };
 const HIT_PLAIN: readonly [SparkKind, number] = [SPARK.star, 0xffffff];
+/** A critical hit's double star takes its weapon's colour (only thrown weapons crit). */
+const CRIT_COLOR: Partial<Record<WeaponId, number>> = { daggers: 0xffe070, fan: 0xff5a6a };
+const CRIT_PLAIN = 0xffe070;
+
+/** How hard a hit was, for its spark (NF-06). */
+export const HitWeight = {
+  Plain: 0,
+  /** At least `config.effects.strongHit`: a bigger star and a small ring. */
+  Strong: 1,
+  /** A critical hit: a double star in the weapon's colour. */
+  Crit: 2,
+} as const;
+type HitWeight = (typeof HitWeight)[keyof typeof HitWeight];
 
 export class Sparks {
   private readonly items: Spark[] = [];
@@ -129,13 +142,22 @@ export class Sparks {
   }
 
   /** A hit by `weapon` on something at (x, y): its spark, popping up and out. */
-  hit(x: number, y: number, weapon: WeaponId | null, size: number): void {
+  hit(x: number, y: number, weapon: WeaponId | null, size: number, weight: HitWeight = HitWeight.Plain): void {
     if (!this.room) return;
     const st = (weapon && HIT_SPARK[weapon]) || HIT_PLAIN;
     const a = this.rand() * Math.PI * 2;
     const ox = Math.cos(a) * size * 0.4;
     const oy = Math.sin(a) * size * 0.4 - size * 0.3;
-    this.add(x + ox, y + oy, ox * 3, oy * 3 - 20, 0.22, 4 + size * 0.15, st[1], st[0]);
+    const r = 4 + size * 0.15;
+    if (weight === HitWeight.Crit) {
+      // Two crossed stars, big, in the weapon's colour: the crit reads without the damage numbers.
+      const c = (weapon && CRIT_COLOR[weapon]) ?? CRIT_PLAIN;
+      this.add(x + ox, y + oy, ox * 2, oy * 2 - 20, 0.3, r * 1.9, c, SPARK.star);
+      this.add(x - ox * 0.5, y + oy - 4, -ox * 2, oy * 2 - 30, 0.26, r * 1.3, 0xffffff, SPARK.star);
+      return;
+    }
+    this.add(x + ox, y + oy, ox * 3, oy * 3 - 20, 0.22, weight === HitWeight.Strong ? r * 1.5 : r, st[1], st[0]);
+    if (weight === HitWeight.Strong) this.add(x, y, 0, 0, 0.18, size * 0.9, st[1], SPARK.ring, false);
   }
 
   /** Some sparks flying out of (x, y) in every direction. */

@@ -6,6 +6,16 @@ import type { OwnedWeapon } from '../../src/core/weapons';
 import { bareWorld as quietWorld, quietWorld as armedWorld, still } from './helpers';
 
 describe('enemies', () => {
+  it('remember how hard the last hit was, and a plain hit is never a crit', () => {
+    const w = quietWorld();
+    const e = spawnEnemy(w, 'skeleton', 100, 0);
+    e.hp = e.maxHp = 1e6;
+    e.hitCrit = true;
+    damageEnemy(w, e, 77);
+    expect(e.hitAmount).toBe(77);
+    expect(e.hitCrit).toBe(false);
+  });
+
   it('walk straight towards the player', () => {
     const w = quietWorld();
     const e = spawnEnemy(w, 'skeleton', 100, 0);

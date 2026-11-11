@@ -35,7 +35,7 @@ import {
   drawFx,
   newMoments,
 } from '../render/fx';
-import { HIT_SPARK, SPARK, Sparks } from '../render/sparks';
+import { HIT_SPARK, HitWeight, SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
@@ -111,6 +111,9 @@ const NUMBER_SCREEN = 14;
 
 /** An enemy's sprite, with who it showed last frame and whether they were stunned (to catch a crush). */
 type EnemyImage = Phaser.GameObjects.Image & { uid?: number; stunned?: boolean };
+
+/** A hit at least this hard squashes harder and throws a bigger spark (NF-06; the same bar as the gold numbers). */
+const STRONG_HIT = config.effects.strongHit;
 
 /** Chance per frame that a bleeding or burning enemy lets a drop fall or an ember rise. */
 const DOT_SPARK = 0.06;
@@ -339,8 +342,10 @@ export class GameScene extends Phaser.Scene {
         // stay a white silhouette, like the hurt hero used to be red).
         const hit = (e.flash / HIT_FLASH) * (e.def.boss ? 0.3 : 1);
         // Chargers crouch while winding up and stretch as they burst into the dash.
-        let sx = 1 + a + 0.15 * hit;
-        let sy = 1 - a - 0.15 * hit;
+        // A strong hit squashes harder (NF-06).
+        const squash = e.hitAmount >= STRONG_HIT ? 0.25 : 0.15;
+        let sx = 1 + a + squash * hit;
+        let sy = 1 - a - squash * hit;
         if (e.def.move === 'charge') {
           if (e.act === BossAct.Windup) {
             sx += 0.15;
@@ -358,7 +363,13 @@ export class GameScene extends Phaser.Scene {
           .setRotation(e.act === BossAct.Windup && e.def.ability ? Math.sin(w.time * 18) * 0.18 : 0);
         if (this.stepDt > 0) {
           if (e.flash === HIT_FLASH) {
-            this.sparks.hit(e.x, e.y, e.hitBy, e.def.radius);
+            this.sparks.hit(
+              e.x,
+              e.y,
+              e.hitBy,
+              e.def.radius,
+              e.hitCrit ? HitWeight.Crit : e.hitAmount >= STRONG_HIT ? HitWeight.Strong : HitWeight.Plain,
+            );
             // Quebra-Junta crushing one that was already dizzy.
             if (img.uid === e.uid && img.stunned && e.hitBy && (WEAPONS[e.hitBy] as WeaponDef).crush)
               this.crushSpark(e);

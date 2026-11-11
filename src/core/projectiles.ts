@@ -197,6 +197,7 @@ export function updateProjectiles(world: World, dt: number): void {
       const crit = p.critChance > 0 && world.rng.next() < p.critChance;
       const amount = crit ? p.damage * p.critMult : p.damage;
       damageEnemy(world, e, amount, cos, sin, p.knockback, p.source);
+      e.hitCrit = crit;
       p.hits.push(e.uid);
       const def = p.source ? (WEAPONS[p.source.id] as WeaponDef) : null;
       // Leque de Facas: a crit opens a wound that bleeds.

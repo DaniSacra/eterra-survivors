@@ -23,6 +23,9 @@ export interface Enemy extends Poolable {
   flash: number;
   /** The weapon that hit it last (null: none, or not a weapon), so the render can draw that weapon's spark. */
   hitBy: WeaponId | null;
+  /** Damage of that last hit, and whether it was a critical one (NF-06: the spark says how hard it was). */
+  hitAmount: number;
+  hitCrit: boolean;
   /** Seconds left slowed by frost. */
   slow: number;
   /** Seconds left stunned (a slam): it can't move or bite. */
@@ -59,6 +62,8 @@ export const createEnemy = (): Enemy => ({
   kby: 0,
   flash: 0,
   hitBy: null,
+  hitAmount: 0,
+  hitCrit: false,
   slow: 0,
   stun: 0,
   dot: 0,
@@ -124,6 +129,8 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.kbx = e.kby = e.flash = e.slow = e.stun = e.dot = e.dotDps = e.dotTick = 0;
   e.dotBy = null;
   e.hitBy = null;
+  e.hitAmount = 0;
+  e.hitCrit = false;
   e.orbitReady.fill(0);
   e.act = 0;
   e.actT = def.ability ? def.ability.every / 2 : def.move ? 2 : 0;
@@ -177,6 +184,8 @@ export function damageEnemy(
   e.hp -= amount;
   e.flash = config.enemies.hitFlash;
   e.hitBy = source ? source.id : null;
+  e.hitAmount = amount;
+  e.hitCrit = false;
   const kb = knockback * (1 - e.def.knockbackResist);
   e.kbx += kx * kb;
   e.kby += ky * kb;

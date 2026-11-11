@@ -52,10 +52,13 @@ describe('Adagas de Andilla (thrown where she walks)', () => {
       const dealt = hp - e.hp;
       if (dealt > 0) {
         hits++;
+        expect(e.hitAmount).toBeCloseTo(dealt);
         if (dealt > s.damage * 1.5) {
           crits++;
           expect(dealt).toBeCloseTo(s.damage * crit.mult);
         }
+        // The hit remembers it was critical, for its spark (NF-06).
+        expect(e.hitCrit).toBe(dealt > s.damage * 1.5);
       }
     }
     expect(crits / hits).toBeGreaterThan(crit.chance - 0.08);
