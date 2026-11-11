@@ -13,7 +13,7 @@ import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
 import { ELEMENT_COLOR, UI } from './ui';
 import { star } from './sparks';
-import { arcLine, band, disc, ring } from './shapes';
+import { arcLine, band, disc, oval, ovalRing, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
 
 /** Identity color of each hero, for the light under their feet (so the eye finds them in a crowd). */
@@ -218,9 +218,12 @@ export function drawFx(
   const hero = HERO_COLOR[world.character];
   // The hero's light: a solid ring with a slow pulse around it, so the eye finds them in any crowd.
   const pulse = 1 + 0.12 * Math.sin(world.time * 4);
-  g.fillStyle(hero, 0.35).fillEllipse(p.x, p.y + 15, 44, 16);
-  g.lineStyle(3, hero, 1).strokeEllipse(p.x, p.y + 15, 44, 16);
-  g.lineStyle(2, 0xffffff, 0.35).strokeEllipse(p.x, p.y + 15, 52 * pulse, 20 * pulse);
+  g.fillStyle(hero, 0.35);
+  oval(g, p.x, p.y + 15, 44, 16);
+  g.lineStyle(3, hero, 1);
+  ovalRing(g, p.x, p.y + 15, 44, 16);
+  g.lineStyle(2, 0xffffff, 0.35);
+  ovalRing(g, p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
@@ -340,9 +343,8 @@ export function drawFx(
     const it = world.pickups.active[iIt] as (typeof world.pickups.active)[number];
     if (it.type !== 'chest') continue;
     const tw = Math.sin(world.time * 5 + it.x) * 0.5 + 0.5;
-    ground
-      .lineStyle(2, ITEM_GLINT, 0.35 + 0.3 * tw)
-      .strokeEllipse(it.x, it.y + 9, 34 + 4 * tw, 11 + 1.5 * tw);
+    ground.lineStyle(2, ITEM_GLINT, 0.35 + 0.3 * tw);
+    ovalRing(ground, it.x, it.y + 9, 34 + 4 * tw, 11 + 1.5 * tw);
     const k = Math.max(0, Math.sin(world.time * 3 + it.y)) ** 4; // mostly off, then a quick twinkle
     if (k > 0.05) star(g, it.x + 6, it.y - 9, 3 + 6 * k, 0xffffff, k);
   }
@@ -1400,12 +1402,13 @@ function drawSword(
 function drawShield(g: Phaser.GameObjects.Graphics, x: number, y: number, r: number, st: OrbitStyle): void {
   g.fillStyle(st.dark).lineStyle(2.5, INK);
   disc(g, x, y, r);
-  g.strokeCircle(x, y, r);
+  ring(g, x, y, r);
   g.fillStyle(st.color);
   disc(g, x, y, r * 0.78);
   g.fillStyle(0xf0f4ff, 0.85).fillRect(x - r * 0.78, y - r * 0.14, r * 1.56, r * 0.28);
   g.fillStyle(0xcbd8ec).lineStyle(1.5, INK);
   disc(g, x, y, r * 0.3);
-  g.strokeCircle(x, y, r * 0.3);
-  g.fillStyle(0xffffff, 0.4).fillEllipse(x - r * 0.35, y - r * 0.4, r * 0.5, r * 0.3);
+  ring(g, x, y, r * 0.3);
+  g.fillStyle(0xffffff, 0.4);
+  oval(g, x - r * 0.35, y - r * 0.4, r * 0.5, r * 0.3);
 }

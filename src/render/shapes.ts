@@ -45,6 +45,38 @@ export function ring(g: Phaser.GameObjects.Graphics, x: number, y: number, r: nu
   g.strokePath();
 }
 
+/** A filled ellipse of full width w and height h (current fill style), like Phaser's `fillEllipse`. */
+export function oval(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number): void {
+  const rx = w / 2;
+  const ry = h / 2;
+  if (rx <= 0 || ry <= 0) return;
+  const s = stepFor(Math.max(rx, ry));
+  for (let i = 0; i < N; i += s) {
+    const j = i + s;
+    g.fillTriangle(
+      x,
+      y,
+      x + (COS[i] as number) * rx,
+      y + (SIN[i] as number) * ry,
+      x + (COS[j] as number) * rx,
+      y + (SIN[j] as number) * ry,
+    );
+  }
+}
+
+/** An ellipse outline of full width w and height h (current line style), like Phaser's `strokeEllipse`. */
+export function ovalRing(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number): void {
+  const rx = w / 2;
+  const ry = h / 2;
+  if (rx <= 0 || ry <= 0) return;
+  const s = stepFor(Math.max(rx, ry));
+  g.beginPath();
+  g.moveTo(x + rx, y);
+  for (let i = s; i < N; i += s) g.lineTo(x + (COS[i] as number) * rx, y + (SIN[i] as number) * ry);
+  g.closePath();
+  g.strokePath();
+}
+
 /** Number of segments for an arc of radius r spanning `da` radians. */
 const segsFor = (r: number, da: number): number =>
   Math.max(2, Math.min(N, Math.ceil((Math.abs(da) * r) / 10)));

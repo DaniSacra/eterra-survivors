@@ -1747,7 +1747,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - O quê: queda do Fogo em 0,12 da vida.
 - Aceite: captura a 0,1x com a bola de fogo no alvo no quadro do flash.
 
-**NF-10 · Formas de 100 pontos que sobraram** · vfx · P · proposto
+**NF-10 · Formas de 100 pontos que sobraram** · vfx · P · ✅ (escudo, anel do herói e baú com `oval`/`ovalRing`/`ring`)
 
 - Por quê: 06-vfx #13. `drawShield` (`fx.ts:1401, 1407`: a Muralha monta 12 caminhos de 100 pontos por quadro), luz
   do herói (`:233-235`) e baú (`:340-342`) ainda usam os círculos do Phaser.
