@@ -155,6 +155,7 @@ export const t = {
     /** Desistir asks once more (for 2 s) before ending the run. */
     quitConfirm: 'Confirmar desistir',
     build: 'Sua build',
+    stats: 'Atributos',
     level: (n: number, max: number) => `Nv ${n}/${max}`,
     /** Each weapon's Elo recipe status. */
     formed: 'Elo formado',
@@ -304,6 +305,10 @@ export const t = {
     damageNumbers: 'Números de dano',
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
+    /** Short names, for the one-row toggles on the pause screen. */
+    soundShort: 'Som',
+    numbersShort: 'Números',
+    calmShort: 'Calma',
     /** The seal beside each option. */
     on: 'Ligado',
     off: 'Desligado',

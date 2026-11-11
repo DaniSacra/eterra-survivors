@@ -1788,7 +1788,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: captura da Maça de Ferro como arma nova em 420x820 e 360x640 com a receita; a mesma regra de nome na carta,
   na Pausa, no Livro e na tela final.
 
-**NU-03 · Pausa: build em qualquer celular, interruptores numa linha e atributos** · ui + impl · M · proposto
+**NU-03 · Pausa: build em qualquer celular, interruptores numa linha e atributos** · ui + impl · M · ✅ feito (2026-11-11: Som, Números e Calma numa linha com lâmpada; lista de uma linha por arma quando aperta; lista e botões na mesma largura; Atributos quando cabe)
 
 - Por quê: 05-ui #5 (e #6 do diagnóstico), 04-visual #15. Em 360x640 a Pausa esconde a build inteira
   (`PauseScene.ts:59-69`) e sobram ~200 px vazios (`s-07-pause.png`); os três interruptores ocupam três linhas; a lista
