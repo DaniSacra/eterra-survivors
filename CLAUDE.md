@@ -95,7 +95,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   The Loja buys in two steps (`ShopCart`: select, then `confirmPurchase`), in sections (`SHOP_SECTIONS`); items
   raise a stat, add level-up charges or, Segunda Chance, a revive (`RunBonuses.revives`, `config.revive`).
   Bot targets per stage x Loja profile (none / half / full wins): Valmor 0–15% (death at 6–8 min) / 40–60% / 85%+,
-  Cripta 0–10% / 55–65% / 90%+ (Daniel, 2026-11-11: with half the Loja you should win about 60%), Estrada 0% / 0–10% / 35–55%. Tune stage `mult` and waves first, then weapons.
+  Cripta 0–10% / 80–90% / 90%+ (Daniel, 2026-11-11: with half the Loja a person should win about 60%, and he could not pass 5:00 with everything bought while the bot won 94%, so the bot runs far ahead of people here; retest by hand), Estrada 0% / 0–10% / 35–55%. Tune stage `mult` and waves first, then weapons.
 - **Noite Sem Fim**: after a victory the end screen offers "Continuar a vigília" (`world.continueVigil()`); the
   spawner then grows the stage's last full wave (`config.vigil`: HP, contact damage, batch, an elite a minute).
   The victory is banked when the boss falls; `recordVigil` adds only what the vigil brought, and each hero keeps
