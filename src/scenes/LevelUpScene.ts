@@ -168,9 +168,13 @@ export class LevelUpScene extends Phaser.Scene {
           align: 'left',
           wrap: left + textW - rx,
         }).setOrigin(0, 1);
-        // Only when it fits under the description (short cards drop it).
-        if (ry - recipe.height < desc.y + desc.height + 3) recipe.destroy();
-        else if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
+        // The recipe always stays (it is what opens an Elo, NU-02): a long description gives up its last lines.
+        let lines = desc.getWrappedText();
+        while (ry - recipe.height < desc.y + desc.height + 3 && lines.length > 1) {
+          lines = lines.slice(0, -1);
+          desc.setText(`${lines.join('\n').replace(/[\s.,;:]+$/, '')}…`);
+        }
+        if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
       }
       return card;
     });

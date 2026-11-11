@@ -1766,7 +1766,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   calmo; seta assada em textura, varredura O(n) sem alocar. Base: `68ac386`.
 - Aceite: captura com baú e elite fora da tela; F4 igual; não cobre pausa nem joystick.
 
-**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · proposto (decisão 2 do Daniel)
+**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · receita ✅ feita (2026-11-11: a descrição longa cede as últimas linhas, com "…"); falta a regra única do nome do Elo (decisão 2 do Daniel)
 
 - Por quê: 05-ui #4. `LevelUpScene.ts:155` destrói a linha da receita quando a descrição tem 3 linhas (a Maça de Ferro
   em 420x820 perde a dica, `p-06-levelup.png`), justamente na carta que abre uma receita. E o nome do Elo é "???" no
