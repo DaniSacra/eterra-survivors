@@ -29,7 +29,6 @@ const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef
   Object.fromEntries(Object.entries(defs).map(([k, d]) => [k, { kind: 'art', art: d, res }]));
 
 /** PixelLab canvas sizes of the heroes (art px; files are at ART_RES). */
-const FRAME_48 = { w: 48, h: 64 };
 const FRAME_HIBIT = { w: 64, h: 80 };
 
 export const ASSETS: Record<string, AssetDef> = {
@@ -57,9 +56,9 @@ export const ASSETS: Record<string, AssetDef> = {
   'home.village': { kind: 'image', url: 'home/village.png' },
   'home.foreground': { kind: 'image', url: 'home/foreground.png' },
   ...pixelHero('aldo', FRAME_HIBIT, 8, 4),
-  ...pixelHero('lyra', FRAME_48, 8, 4),
-  ...pixelHero('teo', FRAME_48, 8, 4),
-  ...pixelHero('andilla', FRAME_48, 8, 4),
+  ...pixelHero('lyra', FRAME_HIBIT, 8, 4),
+  ...pixelHero('teo', FRAME_HIBIT, 8, 4),
+  ...pixelHero('andilla', FRAME_HIBIT, 8, 4),
 };
 
 /** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */

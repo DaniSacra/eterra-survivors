@@ -299,7 +299,8 @@ export class MenuScene extends Phaser.Scene {
     if (room < 60) return;
     const aldoK = Phaser.Math.Clamp(Math.floor(room / 74), 1, w < 600 ? 3 : 4);
     const otherK = Math.max(1, aldoK - (aldoK > 2 ? 1 : 0));
-    const feet = bottom - 4;
+    // A little further back, on the village snow rather than at the buttons' feet.
+    const feet = bottom - 4 - Math.min(40, room * 0.14);
     const gap = Math.min(w / 4.2, 64 * otherK * 0.95);
     PARTY.forEach((id, i) => {
       const big = id === 'aldo';
