@@ -2940,7 +2940,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C4 · Leitura da Cripta (dono: vfx-director)
 
-**CF-04 · Um vocabulário de aviso por consequência; covas e Badalada marcadas antes** · vfx + impl · P · proposto
+**CF-04 · Um vocabulário de aviso por consequência; covas e Badalada marcadas antes** · vfx + impl · P · ✅ feito no render, falta o core: covas do Coveiro (2026-11-11)
 
 - Por quê: 05-ui UI-04, 06-vfx #5 e #7. As covas do Coveiro (sem dano), a Badalada (sem dano) e o Dobre Fúnebre (20 de
   dano) usam o mesmo tracejado coral e são indistinguíveis lado a lado (`boss-ab0-420x820.png`): o jogador aprende a
@@ -2954,7 +2954,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: captura 420x820 com covas, Badalada e Dobre na mesma tela, em que cada um diz a consequência pela cor; as
   lápides aparecem no primeiro quadro da espera.
 
-**CF-01 · Pilha de ossos com queda, relógio e levante** · vfx · P · proposto
+**CF-01 · Pilha de ossos com queda, relógio e levante** · vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx #2, 05-ui UI-01. A pilha é a mecânica mais importante da fase e é invisível: troca de sprite e mais
   nada (`GameScene.ts:340`), coberta pelos outros esqueletos (`shots/pile-sheet.png`); nada diz "acerte antes que
@@ -2966,7 +2966,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   `stunned`); anéis só em pilhas visíveis, até 24; faíscas do pool.
 - Aceite: folha de captura com as quatro etapas; numa multidão de 200, a pilha é achada; F4 igual.
 
-**CF-06 · Acerto na cor da arma, não branco sobre osso** · vfx · P · proposto
+**CF-06 · Acerto na cor da arma, não branco sobre osso** · vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx #9 (conflito com o NF-01 resolvido em `07-direcao.md`). Na Cripta os inimigos principais são brancos;
   o flash branco de 0,05 s (`GameScene.ts:395`) vira uma mancha que apaga o sprite (`shots/s-wisps-soulProcession.png`,
@@ -2976,7 +2976,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: capturas de Procissão, Escudos e Adagas na Cripta sem silhueta branca sólida; o crítico continua o mais
   forte.
 
-**CF-03 · Dobre Fúnebre como sino, não como espada** · vfx · P · proposto
+**CF-03 · Dobre Fúnebre como sino, não como espada** · vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx #4. O aviso lê bem, mas (a) sobra uma linha radial tracejada (as bordas de um arco de 2π coincidem,
   `fx.ts:1664-1665`) e (b) o golpe é a varredura de espada do Cavaleiro (`drawSwing(... CLEAVE_STYLE)`, `fx.ts:1637`):
@@ -2986,7 +2986,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   (AR-01). Menos primitivas que a cunha.
 - Aceite: captura do aviso sem linha radial e do golpe como anel fechado.
 
-**CF-05 · Orbe do Espírito Gélido na cor dele** · vfx · P · proposto
+**CF-05 · Orbe do Espírito Gélido na cor dele** · vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx #6. O espírito é azul-gelo e o tiro sai branco-rosado com cauda coral (`drawEnemyShots`,
   `fx.ts:1201-1215`, cor única para todo atirador): parece o tiro do Goblin e não diz "frio". Não há aviso de disparo.
@@ -2995,7 +2995,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   (`SPARK.flake`).
 - Aceite: captura com Goblin e Espírito atirando, tiros distinguíveis; o aviso aparece antes de todo disparo.
 
-**CF-02 · Estouro da Ossada em Brasa que paga a jogada** · vfx · P · proposto
+**CF-02 · Estouro da Ossada em Brasa que paga a jogada** · vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx #3. O aviso é bom (`shots/eb-sheet.png`), o estouro é um anel fino de 0,25 s
   (`GameScene.ts:970-973`): o momento que recompensa "atrair a multidão para o estouro" passa num piscar, e o corpo
@@ -3005,7 +3005,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   ferido leva o brilho do `dotSpark`. Sem tremor.
 - Aceite: folha de captura do estouro com inimigos dentro; +10 faíscas no máximo por estouro.
 
-**CS-01 · Sons da Cripta: sino, pilha, estouro e pá** · impl · P · proposto
+**CS-01 · Sons da Cripta: sino, pilha, estouro e pá** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 06-vfx ("Sons"). `render/sounds.ts` não tem receita para a Badalada, o Dobre, a pilha (cair, levantar,
   quebrar), o estouro nem a pá. O sino é o centro da fase e do chefe ("o sino vai tocar por você", fala do Sineiro no

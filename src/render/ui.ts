@@ -53,6 +53,16 @@ export const UI = {
   okText: '#9ad88a',
 };
 
+/**
+ * The enemy warning vocabulary (CF-04): coral (`UI.dangerHex`, solid, dashes that speed up) hurts on touch; pale bone
+ * calls the dead (graves, the bell, eggs) and harms nothing by itself; slime green slows. No violet: the floor of the
+ * crypt is violet and purple is Lyra's.
+ */
+export const SUMMON_COLOR = 0xe6dcc0;
+export const SUMMON_SHADE = 0xa89c80;
+export const SUMMON_EDGE = 0xfff6dc;
+export const SLIME_WARN = 0x8fd04a;
+
 export function label(
   scene: Phaser.Scene,
   x: number,

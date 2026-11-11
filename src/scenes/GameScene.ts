@@ -24,7 +24,7 @@ import { WEAPONS, WEAPON_IDS, type WeaponDef, type WeaponId } from '../data/weap
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
-import { ELEMENT_COLOR, UI } from '../render/ui';
+import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, UI } from '../render/ui';
 import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../data/evolutions';
 import { Controls } from '../render/controls';
 import {
@@ -33,16 +33,19 @@ import {
   DAMAGE_TEXT,
   ELITE_PUFF,
   HERO_COLOR,
+  PILE_SHAKE,
+  SHOT_PLAIN,
   TINT,
   drawFx,
   newMoments,
+  shotStyle,
 } from '../render/fx';
 import { HIT_SPARK, HitWeight, SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
 import { Obstacles } from '../render/obstacles';
-import { Lighting } from '../render/lighting';
+import { Lighting, mixColor } from '../render/lighting';
 import { Mirror } from '../render/mirror';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
@@ -65,6 +68,20 @@ const AREA_HIT = Object.fromEntries(
     return [id, kind || blast || !!(d.split || d.chain || d.ricochet || d.ward || d.ground || d.wave)];
   }),
 ) as Record<WeaponId, boolean>;
+
+/**
+ * The colour an enemy flashes when a weapon hits it (CF-06): the weapon's own spark colour, lightened. Pale crypt
+ * enemies would turn into a white blotch under a white flash, so white is only for a critical hit.
+ */
+const HIT_PLAIN_TINT = 0xffe6b0;
+const HIT_TINT = Object.fromEntries(
+  WEAPON_IDS.map((id) => [id, mixColor(HIT_SPARK[id]?.[1] ?? HIT_PLAIN_TINT, 0xffffff, 0.3)]),
+) as Record<WeaponId, number>;
+
+/** Piles of bones tracked between frames (CF-01): where they lay, to tell a broken pile from any other death. */
+const PILES_TRACKED = 24;
+/** Seconds a risen skeleton takes to straighten (squash). */
+const RISE_SQUASH = 0.25;
 
 /** Dust and earth kicked up by bosses. */
 const DUST = 0xc8bca8;
@@ -112,7 +129,14 @@ const NUMBER_WORLD = 13;
 const NUMBER_SCREEN = 14;
 
 /** An enemy's sprite, with who it showed last frame and whether they were stunned (to catch a crush). */
-type EnemyImage = Phaser.GameObjects.Image & { uid?: number; stunned?: boolean };
+type EnemyImage = Phaser.GameObjects.Image & {
+  uid?: number;
+  stunned?: boolean;
+  /** Was a pile of bones last frame / was digging (for the transitions) and when it last stood up. */
+  piled?: boolean;
+  digging?: boolean;
+  rose?: number;
+};
 
 /** How long Estrela de Lyra's starlets fly before they burst (their hop spans it). */
 const STARLET_FALL = (WEAPONS.lyraStar as WeaponDef).split?.fall ?? 0.4;
@@ -196,6 +220,14 @@ export class GameScene extends Phaser.Scene {
   private lastHp = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
+  /** Where the piles lay last frame and this frame (x, y pairs), to catch a pile broken for good. */
+  private pilesPrev = new Float32Array(PILES_TRACKED * 2);
+  private pilesNow = new Float32Array(PILES_TRACKED * 2);
+  private nPrev = 0;
+  private nNow = 0;
+  /** The enemy shot nearest the hero at the start of the frame, and whether it is the cold kind (for the hit). */
+  private nearShot = 1e9;
+  private nearCold = false;
   private bossAb: BossAbility | undefined;
   private obstacles!: Obstacles;
   private lighting!: Lighting;
@@ -368,12 +400,19 @@ export class GameScene extends Phaser.Scene {
         const lp = e.def.leap;
         const lift =
           lp && e.act === BossAct.Active ? Math.sin(Math.PI * (1 - e.actT / lp.air)) * (lp.radius + 20) : 0;
+        // A pile about to stand up trembles; the one that just stood straightens up with a vertical stretch.
+        const shake = e.pile > 0 && e.pile < PILE_SHAKE ? Math.sin(w.time * 60 + e.uid) * 1.5 : 0;
+        const rise = img.uid === e.uid && img.rose !== undefined ? 1 - (w.time - img.rose) / RISE_SQUASH : 0;
+        if (rise > 0) {
+          sx -= 0.18 * rise;
+          sy += 0.3 * rise;
+        }
         img
-          .setPosition(e.x, e.y - lift)
+          .setPosition(e.x + shake, e.y - lift)
           .setScale(ART_SCALE * sx * (SPRITE_SCALE[key] ?? 1), ART_SCALE * sy * (SPRITE_SCALE[key] ?? 1))
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
-          .setRotation(e.act === BossAct.Windup && bossAbility(e) ? Math.sin(w.time * 18) * 0.18 : 0);
+          .setRotation(this.windupSway(e));
         if (this.stepDt > 0) {
           if (e.flash === HIT_FLASH) {
             this.sparks.hit(
@@ -389,10 +428,12 @@ export class GameScene extends Phaser.Scene {
           }
           if (e.dot > 0 && this.sparks.idle && this.sparks.rand() < DOT_SPARK) this.dotSpark(e);
         }
+        this.pileMoments(img, e);
         img.uid = e.uid;
         img.stunned = e.stun > 0;
         // A hit flashes white for a moment (not with the calm screen), then the status tint shows again.
-        if (hit > 1 - HIT_WHITE && !this.calm && !(e.hitBy && AREA_HIT[e.hitBy])) img.setTintFill(TINT.hit);
+        if (hit > 1 - HIT_WHITE && !this.calm && !(e.hitBy && AREA_HIT[e.hitBy]))
+          img.setTintFill(e.hitCrit || !e.hitBy ? TINT.hit : (HIT_TINT[e.hitBy] ?? TINT.hit));
         else if (w.freeze > 0 && (w.freeze > 1 || Math.sin(w.time * 20) > -0.3))
           // Covered in frost (light on top), blinking in the last second before they walk again.
           img.setTint(TINT.frost, TINT.frost, TINT.frozen, TINT.frozen);
@@ -475,6 +516,14 @@ export class GameScene extends Phaser.Scene {
         if (e.def.flee && !e.dead) l.add(e.x, e.y, 50 + Math.min(70, e.carry * 4), 0x8fe8ff, 0.7);
       }
     }
+    // A cold orb carries a faint blue light (CF-05); a few at most, effect lights are budgeted.
+    const shots = w.enemyShots.active;
+    for (let i = 0, lit = 0; i < shots.length && lit < 4; i++) {
+      const sh = shots[i] as (typeof shots)[number];
+      if (shotStyle(sh) === SHOT_PLAIN) continue;
+      lit++;
+      l.add(sh.x, sh.y, 60, FROST_LIGHT, 0.4);
+    }
     const zones = w.zones.active;
     for (let i = 0; i < zones.length; i++) {
       const z = zones[i] as (typeof zones)[number];
@@ -554,10 +603,15 @@ export class GameScene extends Phaser.Scene {
     this.hud.joystick.setEnabled(w.state === 'playing');
     // The Elo forge runs the world slower for a moment (real time; the sparks keep their own pace).
     const slow = this.time.now < this.slowUntil ? FORGE_SLOW : 1;
+    this.noteNearShot();
     w.step((delta / 1000) * slow, this.controls.read());
     this.stepDt = w.time - this.lastTime;
     this.lastTime = w.time;
     this.sparks.frame(this.calm);
+    // The piles seen last frame are the reference for this frame's deaths; the mirror refills the new list.
+    [this.pilesPrev, this.pilesNow] = [this.pilesNow, this.pilesPrev];
+    this.nPrev = this.nNow;
+    this.nNow = 0;
     if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) this.healSpark();
     this.lastHp = w.player.hp;
     this.deathSparks();
@@ -644,6 +698,7 @@ export class GameScene extends Phaser.Scene {
     for (let iF = 0; iF < this.world.puffs.active.length; iF++) {
       const f = this.world.puffs.active[iF] as (typeof this.world.puffs.active)[number];
       if (f.kind !== 'death' || f.ttl < fresh) continue;
+      if (this.brokenPile(f.x, f.y, f.r)) continue;
       if (f.r >= BOSS_PUFF) {
         sp.add(f.x, f.y, 0, 0, 0.7, f.r * 4, UI.goldHex, SPARK.ring, true);
         sp.add(f.x, f.y, 0, 0, 0.9, f.r * 6, 0xffffff, SPARK.ring, true);
@@ -745,8 +800,24 @@ export class GameScene extends Phaser.Scene {
     this.bossAb = b ? bossAbility(b) : undefined;
     if (!b || !ab || act === was) return;
     if (was === BossAct.Active && ab.kind === 'lunge') this.lungeDust(b);
+    if (act === BossAct.Windup && ab.kind === 'toll') sound.play('bellToll');
+    if (act === BossAct.Windup && ab.kind === 'cleave' && (ab.arc ?? 1) >= Math.PI * 2 - 0.01)
+      sound.play('bellDirge');
     if (was !== BossAct.Windup) return;
-    if (ab.kind === 'cleave' && act === BossAct.Active) {
+    if (ab.kind === 'cleave' && act === BossAct.Active && (ab.arc ?? 1) >= Math.PI * 2 - 0.01) {
+      // The Dobre Fúnebre rings out: dust along the whole edge of the ring, a flash on the ground, a deep beat.
+      this.shake(150, 0.008);
+      sound.play('dirgeBeat');
+      const n = 14;
+      for (let i = 0; i < n; i++) {
+        const a = (i * Math.PI * 2) / n + 0.2;
+        const x = b.x + Math.cos(a) * ab.range;
+        const y = b.y + Math.sin(a) * ab.range;
+        this.sparks.add(x, y, Math.cos(a) * 60, Math.sin(a) * 60 - 25, 0.5, 7, DUST, SPARK.star, true);
+      }
+      this.sparks.add(b.x, b.y, 0, 0, 0.3, ab.range, 0xffffff, SPARK.ring, true);
+      if (!this.calm) this.lighting.flash(b.x, b.y, ab.range * 2.4, 0xffe8e8, 0.3);
+    } else if (ab.kind === 'cleave' && act === BossAct.Active) {
       this.shake(150, 0.008);
       const aim = Math.atan2(b.aimY, b.aimX);
       const half = (ab.arc ?? 1) / 2;
@@ -769,6 +840,125 @@ export class GameScene extends Phaser.Scene {
         const y = b.y + Math.sin(a) * ab.range;
         this.sparks.add(x, y, 0, 0, 0.4, 20, DUST, SPARK.ring, true);
         this.sparks.burst(x, y, 2, 70, 5, 0xe8e2d0, SPARK.star, 0.4);
+      }
+    }
+  }
+
+  /**
+   * The bones of a pile (CF-01), once per transition: it falls (a fan of bones and a puff of dust), counts down (the
+   * ring is drawn by drawFx; in its last 0.6 s bones fly back to it) and stands up (a short ring and a squash).
+   * Also records where the pile lies for `brokenPile`.
+   */
+  private pileMoments(img: EnemyImage, e: Enemy): void {
+    const piled = e.pile > 0;
+    const sp = this.sparks;
+    if (piled && this.nNow < PILES_TRACKED) {
+      this.pilesNow[this.nNow * 2] = e.x;
+      this.pilesNow[this.nNow * 2 + 1] = e.y;
+      this.nNow++;
+    }
+    if (this.stepDt > 0 && img.uid === e.uid) {
+      const r = e.def.radius;
+      if (piled && !img.piled) {
+        sound.play('pileFall');
+        sp.add(e.x, e.y + r * 0.3, 0, 0, 0.35, r * 2.4, DUST, SPARK.ring);
+        for (let i = 0; i < 6; i++) {
+          const a = -Math.PI / 2 + (i - 2.5) * 0.55;
+          sp.add(e.x, e.y, Math.cos(a) * 110, Math.sin(a) * 110, 0.5, 4, SUMMON_COLOR, SPARK.star);
+        }
+      } else if (!piled && img.piled && e.rose) {
+        sound.play('pileRise');
+        img.rose = this.world.time;
+        sp.add(e.x, e.y, 0, 0, 0.3, r * 3, SUMMON_EDGE, SPARK.ring);
+        for (let i = 0; i < 3; i++)
+          sp.add(e.x + (i - 1) * 6, e.y + r * 0.4, (i - 1) * 40, -30, 0.35, 5, DUST, SPARK.star);
+      } else if (piled && e.pile < PILE_SHAKE && sp.idle && sp.rand() < 0.25) {
+        // Bones flying back to the pile.
+        const a = sp.rand() * Math.PI * 2;
+        sp.add(
+          e.x + Math.cos(a) * 22,
+          e.y + Math.sin(a) * 14,
+          -Math.cos(a) * 100,
+          -Math.sin(a) * 70,
+          0.28,
+          3.5,
+          SUMMON_COLOR,
+          SPARK.star,
+        );
+      }
+    }
+    if (img.uid !== e.uid) img.rose = undefined;
+    else if (img.rose !== undefined && this.world.time - img.rose > RISE_SQUASH) img.rose = undefined;
+    img.piled = piled;
+    // The Coveiro plants his shovel: a thud, and earth flies.
+    const digging = e.stir > 0 && !!e.def.dig;
+    if (this.stepDt > 0 && digging && !img.digging && img.uid === e.uid) {
+      sound.play('dig');
+      sp.burst(e.x, e.y + e.def.radius * 0.6, 4, 90, 5, DUST, SPARK.star, 0.4, false);
+    }
+    img.digging = digging;
+  }
+
+  /** A death on a pile of bones last frame is the pile broken for good: a double star and a crack (CF-01). */
+  private brokenPile(x: number, y: number, r: number): boolean {
+    for (let i = 0; i < this.nPrev; i++) {
+      if (
+        Math.abs((this.pilesPrev[i * 2] as number) - x) > 2 ||
+        Math.abs((this.pilesPrev[i * 2 + 1] as number) - y) > 2
+      )
+        continue;
+      const sp = this.sparks;
+      sound.play('pileBreak');
+      sp.add(x, y - 2, 40, -50, 0.32, 13, SUMMON_EDGE, SPARK.star, true);
+      sp.add(x, y - 4, -40, -60, 0.28, 9, 0xffffff, SPARK.star, true);
+      sp.add(x, y, 0, 0, 0.2, r * 2.2, SUMMON_EDGE, SPARK.ring, true);
+      if (sp.room) sp.burst(x, y, 5, 130, 4, SUMMON_COLOR, SPARK.star, 0.4, false);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * The Ossada em Brasa goes off (CF-02): a hot white flash running out to the exact blast radius, short rays, embers
+   * rising and pale smoke, with a scorch left on the ground by the mark. At most 10 sparks, a light, no shake.
+   */
+  private emberBurst(x: number, y: number, radius: number): void {
+    const sp = this.sparks;
+    sound.play('emberBurst');
+    sp.add(x, y, 0, 0, 0.18, radius, 0xfff0c0, SPARK.ring, true);
+    sp.add(x, y, 0, 0, 0.32, radius, 0xff8a3a, SPARK.ring, true);
+    sp.burst(x, y, 4, radius * 3.5, 5, 0xff8a3a, SPARK.ember, 0.6, true);
+    sp.burst(x, y, 4, radius * 1.4, 6, 0xffe8b0, SPARK.star, 0.3, true);
+    const m = this.moments;
+    const b = m.bursts[m.nextBurst] as (typeof m.bursts)[number];
+    m.nextBurst = (m.nextBurst + 1) % m.bursts.length;
+    b.t = this.world.time;
+    b.x = x;
+    b.y = y;
+    b.r = radius;
+    if (!this.calm) this.lighting.flash(x, y, radius * 3.2, 0xff9a40, 0.45);
+  }
+
+  /** The bell swings twice on a Badalada; any other boss winding up shakes. */
+  private windupSway(e: Enemy): number {
+    if (e.act !== BossAct.Windup) return 0;
+    const ab = bossAbility(e);
+    if (!ab) return 0;
+    if (ab.kind === 'toll') return Math.sin((1 - Math.max(0, e.actT) / ab.windup) * Math.PI * 4) * 0.22;
+    return Math.sin(this.world.time * 18) * 0.18;
+  }
+
+  /** Remembers the enemy shot nearest the hero before the step (a shot that lands is gone after it). */
+  private noteNearShot(): void {
+    const w = this.world;
+    const list = w.enemyShots.active;
+    this.nearShot = 1e9;
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i] as (typeof list)[number];
+      const d = Math.hypot(s.x - w.player.x, s.y - w.player.y);
+      if (d < this.nearShot) {
+        this.nearShot = d;
+        this.nearCold = shotStyle(s) !== SHOT_PLAIN;
       }
     }
   }
@@ -964,12 +1154,13 @@ export class GameScene extends Phaser.Scene {
           // The hurt shows on the outline (danger colour, then blinking white): the hero keeps their own colours,
           // with only a faint warm flash for a tenth of a second (NF-05).
           this.hurtAt = w.time;
+          if (this.nearCold && this.nearShot < 60)
+            this.sparks.burst(w.player.x, w.player.y, 6, 150, 7, 0x7ac8ff, SPARK.flake, 0.45, true);
           this.playerSprite.setTint(TINT.heroHurt);
           this.time.delayedCall(100, () => this.playerSprite.clearTint());
           break;
         case 'burst':
-          this.sparks.burst(e.x, e.y, 14, e.radius * 3, 5, 0xff8a3a, SPARK.ember, 0.45, true);
-          this.sparks.add(e.x, e.y, 0, 0, 0.25, e.radius, 0xff8a3a, SPARK.ring, true);
+          this.emberBurst(e.x, e.y, e.radius);
           break;
         case 'bossSpawned':
           sound.play('boss');

@@ -11,7 +11,9 @@ import type { Bolt, Slash } from '../core/effects';
 import type { Projectile } from '../core/projectiles';
 import type { Zone } from '../core/zones';
 import { INK } from './art/pen';
-import { ELEMENT_COLOR, UI } from './ui';
+import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, SUMMON_SHADE, UI } from './ui';
+import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
+import type { EnemyShot } from '../core/enemyShots';
 import { star } from './sparks';
 import { arcLine, band, disc, oval, ovalRing, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
@@ -186,8 +188,16 @@ export interface Moments {
   frost: number;
   /** The hero's life went up (Luz Sagrada's kills, a chest, food). */
   heal: number;
+  /** The last Ossada em Brasa blasts (CF-02), a ring of slots reused in turn. */
+  bursts: { t: number; x: number; y: number; r: number }[];
+  nextBurst: number;
 }
+const BURST_SLOTS = 6;
+/** How long a blast shows: the flash, rays and smoke are quick, the scorch on the ground stays for `BURST_SCORCH`. */
+const BURST_SCORCH = 2;
 export const newMoments = (): Moments => ({
+  bursts: Array.from({ length: BURST_SLOTS }, () => ({ t: -Infinity, x: 0, y: 0, r: 0 })),
+  nextBurst: 0,
   chest: -Infinity,
   elo: false,
   bomb: -Infinity,
@@ -225,6 +235,7 @@ export function drawFx(
   g.lineStyle(2, 0xffffff, 0.35);
   ovalRing(g, p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
+  drawBursts(g, top, world.time, m);
   drawCharges(g, world);
   drawLeaps(g, world);
   drawPushes(g, world);
@@ -1118,16 +1129,17 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
       const bk = 1 - m.ttl / m.total;
       g.fillStyle(WARN_COLOR, 0.1 + 0.15 * bk);
       disc(g, m.x, m.y, m.radius);
-      g.fillStyle(0xff8a3a, 0.2 + 0.3 * bk);
+      g.fillStyle(0xff8a3a, 0.2 + 0.3 * bk + 0.12 * Math.sin(world.time * (10 + 30 * bk)));
       disc(g, m.x, m.y, m.radius * bk);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * bk);
       dashedArc(g, m.x, m.y, m.radius, 0, Math.PI * 2, (world.time * (30 + 50 * bk)) % (DASH * 2));
       continue;
     }
     if (m.kind !== 'spawn') continue;
+    // Bone, not coral (CF-04): a rising grave calls the dead and hurts no one by itself.
     const k = 1 - m.ttl / m.total; // 0 -> 1
     const r = m.radius * (0.6 + 0.6 * k);
-    g.fillStyle(WARN_COLOR, 0.12 + 0.25 * k);
+    g.fillStyle(SUMMON_COLOR, 0.12 + 0.25 * k);
     oval(g, m.x, m.y + 2, r * 2.2, r * 1.1);
     g.lineStyle(2, INK, 0.7);
     for (let c = 0; c < 4; c++) {
@@ -1136,9 +1148,27 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
       const cy = Math.sin(a) * r * 0.5;
       g.lineBetween(m.x + cx * 0.2, m.y + 2 + cy * 0.2, m.x + cx, m.y + 2 + cy);
     }
-    g.lineStyle(1.5, WARN_COLOR, 0.5 + 0.5 * k);
+    g.lineStyle(1.5, SUMMON_EDGE, 0.5 + 0.5 * k);
     ovalRing(g, m.x, m.y + 2, r * 2.2, r * 1.1);
+    if ((ENEMIES[m.enemy] as EnemyDef).reassemble) tomb(g, m.x, m.y - 2, 12 + 6 * k, 0.7 + 0.3 * k);
   }
+}
+
+/** A small gravestone standing on its patch of earth, `h` px tall (the summon marker of CF-04). */
+function tomb(g: Phaser.GameObjects.Graphics, x: number, y: number, h: number, a: number): void {
+  const w = h * 0.62;
+  const top = y - h / 2 + w / 2;
+  g.fillStyle(SUMMON_SHADE, 0.5 * a);
+  oval(g, x, y + h / 2, w * 1.9, w * 0.7);
+  g.fillStyle(INK, a);
+  g.fillRect(x - w / 2 - 1.5, top, w + 3, y + h / 2 - top + 1);
+  disc(g, x, top, w / 2 + 1.5);
+  g.fillStyle(SUMMON_COLOR, a);
+  g.fillRect(x - w / 2, top, w, y + h / 2 - top);
+  disc(g, x, top, w / 2);
+  g.lineStyle(1.5, INK, 0.7 * a);
+  g.lineBetween(x, top - w * 0.2, x, top + w * 0.5);
+  g.lineBetween(x - w * 0.22, top + w * 0.1, x + w * 0.22, top + w * 0.1);
 }
 
 /** Rallied enemies shown with their ember, per frame. */
@@ -1153,6 +1183,7 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
   const list = world.enemies.active;
   const t = world.time;
   let rallied = 0;
+  let piles = 0;
   for (let i = 0; i < list.length; i++) {
     const e = list[i] as Enemy;
     if (e.dead) continue;
@@ -1162,12 +1193,14 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
       under.lineStyle(1.5, 0xc0402a, 0.3);
       ring(under, e.x, e.y, e.def.banner.radius);
     }
-    // The Coveiro planting the shovel: the ring where the graves open fills up (FT-16).
+    // The Coveiro planting the shovel: the ring where the graves open fills up, in bone (it calls, it doesn't hurt).
     if (e.def.dig && e.stir > 0) {
       const k = 1 - e.stir / e.def.dig.windup;
-      under.fillStyle(WARN_COLOR, 0.06 + 0.1 * k);
+      under.fillStyle(SUMMON_COLOR, 0.08 + 0.14 * k);
       disc(under, e.x, e.y, e.def.dig.radius + 14);
-      under.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
+      under.lineStyle(4, INK, 0.5);
+      ring(under, e.x, e.y, e.def.dig.radius);
+      under.lineStyle(2, SUMMON_EDGE, 0.5 + 0.4 * k);
       dashedArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
     }
     // The witch stirring: the reach of the brew lights up on the ground, filling until it goes off (FT-11).
@@ -1179,12 +1212,48 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
       dashedArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
     }
     if (e.def.move === 'shoot' && e.act === BossAct.Windup) {
-      const tipX = e.x + (world.player.x < e.x ? -6 : 6);
-      const tipY = e.y - e.def.radius - 6;
-      g.fillStyle(INK, 1);
-      disc(g, tipX, tipY, 5);
-      g.fillStyle(WARN_COLOR, 1);
-      disc(g, tipX, tipY, 3.5 + Math.sin(t * 30) * 0.8);
+      const sh = e.def.shoot as NonNullable<EnemyDef['shoot']>;
+      const st = shotStyleOf(sh.radius, sh.speed);
+      if (st !== SHOT_PLAIN) {
+        // The orb condenses in the hand while the flakes close in (CF-05): the shot is announced before it flies.
+        const k = 1 - Math.max(0, e.actT) / sh.windup;
+        const hx = e.x + (world.player.x < e.x ? -e.def.radius * 0.7 : e.def.radius * 0.7);
+        const hy = e.y - e.def.radius * 0.2;
+        const orb = 1.5 + (sh.radius + 1) * k;
+        g.fillStyle(st.halo, 0.3 + 0.2 * k);
+        disc(g, hx, hy, orb + 4);
+        g.fillStyle(INK, 1);
+        disc(g, hx, hy, orb + 1.5);
+        g.fillStyle(st.core, 1);
+        disc(g, hx, hy, orb);
+        for (let f = 0; f < 3; f++) {
+          const a = t * 5 + f * 2.1;
+          const d = 6 + 16 * (1 - k);
+          star(g, hx + Math.cos(a) * d, hy + Math.sin(a) * d * 0.7, 3.5, st.halo, 0.9);
+        }
+      } else {
+        const tipX = e.x + (world.player.x < e.x ? -6 : 6);
+        const tipY = e.y - e.def.radius - 6;
+        g.fillStyle(INK, 1);
+        disc(g, tipX, tipY, 5);
+        g.fillStyle(WARN_COLOR, 1);
+        disc(g, tipX, tipY, 3.5 + Math.sin(t * 30) * 0.8);
+      }
+    }
+    // The embers in an Ossada em Brasa's chest throb before it falls (CF-02).
+    if (e.def.burst) {
+      const beat = 0.5 + 0.5 * Math.sin(t * 6 + e.uid);
+      const cy = e.y - e.def.radius * 0.1;
+      g.fillStyle(0xff8a3a, 0.25 + 0.25 * beat);
+      disc(g, e.x, cy, 4 + 2.5 * beat);
+      g.fillStyle(0xfff0a0, 0.8);
+      disc(g, e.x, cy, 1.6 + beat);
+    }
+    // A pile of bones counts down to standing up again (CF-01): a thin ring of bone that closes into ember.
+
+    if (e.pile > 0 && piles < PILES_SHOWN) {
+      piles++;
+      drawPileClock(g, e, t);
     }
     if (e.rally > 0 && rallied < RALLY_SHOWN) {
       rallied++;
@@ -1197,23 +1266,145 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
   }
 }
 
-/** Enemy shots (FT-03): a pale core with a dark outline and a short trail behind, never a light. */
+/**
+ * The blast of an Ossada em Brasa (CF-02): a hot white disc running out to the exact radius in 0.08 s, short rays,
+ * pale smoke for 0.6 s, and a scorch on the ground that fades in `BURST_SCORCH` s. Still, no shake.
+ */
+function drawBursts(
+  ground: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  time: number,
+  m: Moments,
+): void {
+  for (let i = 0; i < m.bursts.length; i++) {
+    const b = m.bursts[i] as (typeof m.bursts)[number];
+    const age = time - b.t;
+    if (age < 0 || age > BURST_SCORCH) continue;
+    const fade = 1 - age / BURST_SCORCH;
+    ground.fillStyle(0x140c10, 0.38 * fade);
+    disc(ground, b.x, b.y, b.r * 0.9);
+    ground.fillStyle(0xff6a20, 0.25 * Math.max(0, 1 - age / 0.7));
+    disc(ground, b.x, b.y, b.r * 0.6);
+    if (age < 0.3) {
+      const k = age / 0.3;
+      const hot = Math.min(1, age / 0.08);
+      top.fillStyle(0xfff4d0, 0.8 * (1 - k) * (1 - k));
+      disc(top, b.x, b.y, b.r * hot);
+      top.lineStyle(3 * (1 - k) + 1, 0xffffff, 0.9 * (1 - k));
+      ring(top, b.x, b.y, b.r * hot);
+      top.lineStyle(3, 0xffb050, 0.9 * (1 - k));
+      for (let a = 0; a < 8; a++) {
+        const ang = a * (Math.PI / 4) + 0.3;
+        const r0 = b.r * (0.4 + 0.5 * k);
+        top.lineBetween(
+          b.x + Math.cos(ang) * r0,
+          b.y + Math.sin(ang) * r0,
+          b.x + Math.cos(ang) * (r0 + 9),
+          b.y + Math.sin(ang) * (r0 + 9),
+        );
+      }
+    }
+    if (age < 0.6) {
+      const k = age / 0.6;
+      top.fillStyle(0xd8d0e0, 0.26 * (1 - k));
+      for (let c = 0; c < 3; c++)
+        disc(top, b.x + (c - 1) * b.r * 0.4, b.y - b.r * (0.2 + 0.7 * k) - c * 3, b.r * (0.22 + 0.2 * k));
+    }
+  }
+}
+
+/** Piles of bones that show their clock per frame. */
+const PILES_SHOWN = 24;
+const PILE_EMBER = 0xffa040;
+
+/**
+ * The clock of a pile (CF-01): a thin bone ring around it closing in `reassemble.delay` s, turning to ember for the
+ * last second while its eyes light up. Never coral: standing up hurts no one.
+ */
+function drawPileClock(g: Phaser.GameObjects.Graphics, e: Enemy, t: number): void {
+  const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
+  const left = e.pile / re.delay; // 1 -> 0
+  const last = e.pile < 1;
+  const shake = e.pile < PILE_SHAKE ? Math.sin(t * 60 + e.uid) * 1.5 : 0;
+  const x = e.x + shake;
+  const r = e.def.radius + 15;
+  g.lineStyle(6, INK, 0.85);
+  ring(g, x, e.y, r);
+  g.lineStyle(3.5, last ? PILE_EMBER : SUMMON_EDGE, 1);
+  arcLine(g, x, e.y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left);
+  if (last) {
+    const glow = 0.5 + 0.5 * Math.sin(t * 24 + e.uid);
+    g.fillStyle(PILE_EMBER, 0.55 + 0.4 * glow);
+    disc(g, x - 3, e.y - 3, 1.8);
+    disc(g, x + 3, e.y - 3, 1.8);
+  }
+}
+/** The last seconds of a pile it trembles, and bones fly back to it (GameScene reads the same). */
+export const PILE_SHAKE = 0.6;
+
+/** How an enemy's shot is drawn (CF-05): the plain coral shot, or one in its shooter's own colour. */
+export interface ShotStyle {
+  core: number;
+  halo: number;
+  /** Frost flakes trailing behind, and a faint light. */
+  flakes: boolean;
+}
+export const SHOT_PLAIN: ShotStyle = { core: 0xffd8c8, halo: WARN_COLOR, flakes: false };
+const COLD_SHOT: ShotStyle = { core: 0xffffff, halo: 0x7ac8ff, flakes: true };
+/** Shooters with their own colour. A shot does not name its shooter, so it is matched by radius and speed. */
+const SHOT_STYLE: Partial<Record<EnemyId, ShotStyle>> = { coldSpirit: COLD_SHOT };
+const SHOT_KEYS: { radius: number; speed: number; style: ShotStyle }[] = [];
+for (const id of Object.keys(SHOT_STYLE) as EnemyId[]) {
+  const sh = (ENEMIES[id] as EnemyDef).shoot;
+  if (sh) SHOT_KEYS.push({ radius: sh.radius, speed: sh.speed, style: SHOT_STYLE[id] as ShotStyle });
+}
+export function shotStyleOf(radius: number, speed: number): ShotStyle {
+  for (let i = 0; i < SHOT_KEYS.length; i++) {
+    const k = SHOT_KEYS[i] as (typeof SHOT_KEYS)[number];
+    if (k.radius === radius && Math.abs(k.speed - speed) < 1) return k.style;
+  }
+  return SHOT_PLAIN;
+}
+export const shotStyle = (s: EnemyShot): ShotStyle => shotStyleOf(s.radius, Math.hypot(s.vx, s.vy));
+
+/** Enemy shots (FT-03): a pale core with a dark outline and a short trail behind, in its shooter's colour. */
 function drawEnemyShots(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemyShots.active;
   for (let i = 0; i < list.length; i++) {
     const s = list[i] as (typeof list)[number];
     const sp = Math.hypot(s.vx, s.vy) || 1;
     const tail = Math.min(22, s.age * sp);
-    g.lineStyle(s.radius * 1.4, WARN_COLOR, 0.45);
-    g.lineBetween(s.x, s.y, s.x - (s.vx / sp) * tail, s.y - (s.vy / sp) * tail);
+    const st = shotStyleOf(s.radius, sp);
+    const bx = s.x - (s.vx / sp) * tail;
+    const by = s.y - (s.vy / sp) * tail;
+    g.lineStyle(s.radius * 1.4, st.halo, 0.45);
+    g.lineBetween(s.x, s.y, bx, by);
+    if (st.flakes) {
+      // Flakes lagging behind, drifting sideways, and a soft halo.
+      for (let f = 1; f <= 3; f++) {
+        const d = f * 8 + Math.sin(world.time * 9 + f) * 2;
+        const side = Math.sin(world.time * 7 + f * 2 + s.x * 0.1) * 4;
+        star(
+          g,
+          s.x - (s.vx / sp) * d - (s.vy / sp) * side,
+          s.y - (s.vy / sp) * d + (s.vx / sp) * side,
+          6 - f * 1,
+          st.halo,
+          0.85,
+        );
+      }
+      g.fillStyle(st.halo, 0.4);
+      disc(g, s.x, s.y, s.radius + 8);
+      g.fillStyle(st.halo, 0.25);
+      disc(g, s.x, s.y, s.radius + 13);
+    }
     g.fillStyle(INK, 1);
     disc(g, s.x, s.y, s.radius + 2);
-    g.fillStyle(0xffd8c8, 1);
+    g.fillStyle(st.core, 1);
     disc(g, s.x, s.y, s.radius);
   }
 }
 
-/** Enemies shown sliding back from a push, per frame (NF-04). */
 const PUSH_SHOWN = 40;
 /** A push faster than this (px/s) leaves dust (a 600 push stays above it ~0.13 s): slower ones read as walking anyway. */
 const PUSH_DUST = 150;
@@ -1631,7 +1822,9 @@ function drawBossWarning(
         top.lineBetween(sx, sy, sx - e.aimX * l, sy - e.aimY * l);
       }
     }
-    if (ab.kind === 'cleave') {
+    if (ab.kind === 'cleave' && (ab.arc ?? 1) >= TAU_FX - 0.01) {
+      drawToll(g, top, e, ab.range, 1 - Math.max(0, e.actT) / CLEAVE_SHOW);
+    } else if (ab.kind === 'cleave') {
       const half = (ab.arc ?? 1) / 2;
       const t = 1 - Math.max(0, e.actT) / CLEAVE_SHOW;
       drawSwing(top, g, e.x, e.y, ab.range, aim - half, aim + half, t, CLEAVE_STYLE);
@@ -1645,6 +1838,30 @@ function drawBossWarning(
   const edgeA = 0.6 + 0.4 * k;
   switch (ab.kind) {
     case 'cleave': {
+      if ((ab.arc ?? 1) >= TAU_FX - 0.01) {
+        // The Dobre Fúnebre (CF-03): a full ring, so no radial lines. Rings close in on the bell like sound
+        // gathering, then three pulses in the last 0.6 s.
+        g.fillStyle(WARN_COLOR, fill);
+        disc(g, e.x, e.y, ab.range);
+        for (let i = 0; i < 3; i++) {
+          const q = (i / 3 + time * 1.2) % 1;
+          g.lineStyle(4, WARN_COLOR, 0.15 + 0.4 * q);
+          ring(g, e.x, e.y, ab.range * (1 - q) + e.def.radius * q);
+        }
+        g.fillStyle(WARN_COLOR, 0.3);
+        disc(g, e.x, e.y, ab.range * k);
+        const left = (1 - k) * ab.windup;
+        if (left < 0.6) {
+          const pulse = Math.max(0, Math.sin((left / 0.6) * Math.PI * 6)) ** 2;
+          g.lineStyle(5, 0xffffff, 0.85 * pulse);
+          ring(g, e.x, e.y, ab.range);
+          g.fillStyle(0xffffff, 0.18 * pulse);
+          disc(g, e.x, e.y, ab.range);
+        }
+        g.lineStyle(2.5, WARN_EDGE, edgeA);
+        dashedArc(g, e.x, e.y, ab.range, 0, TAU_FX, march);
+        break;
+      }
       const half = (ab.arc ?? 1) / 2;
       const a0 = aim - half;
       const a1 = aim + half;
@@ -1716,26 +1933,61 @@ function drawBossWarning(
     }
     case 'eggs':
     case 'toll': {
-      // Rings ripple out from the bell; small marks show where the dead will rise.
+      // Bone, not coral (CF-04): the bell and the eggs call, they do not hurt. Rings of sound leave the bell on each
+      // of its two beats, and the graves are there from the first frame, growing.
       const r = ab.range * (0.4 + 0.6 * k);
-      g.fillStyle(WARN_COLOR, fill * 0.6);
+      g.fillStyle(SUMMON_COLOR, fill * 0.8);
       disc(g, e.x, e.y, r);
-      g.lineStyle(2.5, WARN_EDGE, edgeA);
+      g.lineStyle(4.5, INK, 0.45);
+      ring(g, e.x, e.y, r);
+      g.lineStyle(2.5, SUMMON_EDGE, edgeA);
       dashedArc(g, e.x, e.y, r, 0, Math.PI * 2, march);
+      if (ab.kind === 'toll')
+        for (let b = 0; b < 2; b++) {
+          const q = (k - b * 0.45) / 0.45;
+          if (q <= 0 || q >= 1) continue;
+          g.lineStyle(5 * (1 - q) + 1, SUMMON_EDGE, 0.8 * (1 - q));
+          ring(g, e.x, e.y - e.def.radius * 0.4, e.def.radius + ab.range * 1.1 * q);
+        }
       const n = ab.count ?? 6;
       for (let i = 0; i < n; i++) {
         const a = (i * Math.PI * 2) / n;
         const mx = e.x + Math.cos(a) * ab.range;
         const my = e.y + Math.sin(a) * ab.range;
+        if (ab.kind === 'toll') {
+          tomb(g, mx, my, 12 + 4 * k, 0.5 + 0.5 * k);
+          continue;
+        }
         const mr = 6 + 6 * k;
-        g.fillStyle(WARN_COLOR, 0.25 + 0.3 * k);
+        g.fillStyle(SUMMON_COLOR, 0.25 + 0.3 * k);
         disc(g, mx, my, mr);
-        g.lineStyle(2, WARN_EDGE, edgeA);
+        g.lineStyle(2, SUMMON_EDGE, edgeA);
         ring(g, mx, my, mr);
       }
       break;
     }
   }
+}
+
+/**
+ * The Dobre Fúnebre landing (CF-03): a closed ring of shock running from the bell to the exact reach in
+ * CLEAVE_SHOW s, a thick white edge on a coral wash. It hurts the whole ring, so it leaves no safe wedge.
+ */
+function drawToll(
+  g: Phaser.GameObjects.Graphics,
+  top: Phaser.GameObjects.Graphics,
+  e: Enemy,
+  range: number,
+  t: number,
+): void {
+  const grow = 1 - (1 - t) ** 3;
+  const r = range * grow;
+  g.fillStyle(WARN_COLOR, 0.3 * (1 - t));
+  disc(g, e.x, e.y, r);
+  top.lineStyle(14 * (1 - t) + 3, WARN_COLOR, 0.55 * (1 - t));
+  ring(top, e.x, e.y, Math.max(0, r - 5));
+  top.lineStyle(7 * (1 - t) + 2, 0xffffff, 0.95 * (1 - t));
+  ring(top, e.x, e.y, r);
 }
 
 /** A dashed arc (current line style), its dashes shifted `offset` px along it. */
