@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { WeaponId } from '../data/weapons';
-import { disc, ring } from './shapes';
+import { ring } from './shapes';
 import { ELEMENT_COLOR } from './ui';
 
 /**
@@ -239,62 +239,59 @@ export class Sparks {
           star(g, s.x, s.y, s.size * (1 - 0.5 * k), s.color, a);
           break;
         case SPARK.cross: {
-          const r = s.size * (1 - 0.4 * k);
-          const w = r * 0.32;
-          g.fillStyle(s.color, a)
-            .fillRect(s.x - r, s.y - w, r * 2, w * 2)
-            .fillRect(s.x - w, s.y - r, w * 2, r * 2);
+          const arm = Math.max(1, Math.round((s.size * (1 - 0.4 * k)) / PX));
+          plus(g, s.x, s.y, arm, s.color, a);
           g.fillStyle(0xffffff, a);
-          disc(g, s.x, s.y, w * 1.2);
+          block(g, s.x, s.y, 1);
           break;
         }
         case SPARK.flake: {
-          const r = s.size * (1 - 0.3 * k);
-          const t = s.spin * s.age;
-          g.lineStyle(1.5, s.color, a);
-          for (let j = 0; j < 3; j++) {
-            const ang = t + (j * Math.PI) / 3;
-            const cx = Math.cos(ang) * r;
-            const cy = Math.sin(ang) * r;
-            g.lineBetween(s.x - cx, s.y - cy, s.x + cx, s.y + cy);
+          // A little plus that turns into an x half way through each spin: two frames, no rotation.
+          const arm = Math.max(1, Math.round((s.size * (1 - 0.3 * k)) / PX));
+          g.fillStyle(s.color, a);
+          if (Math.floor(s.spin * s.age * 2) % 2 === 0) plus(g, s.x, s.y, arm, s.color, a);
+          else {
+            block(g, s.x, s.y, 1);
+            for (let j = 1; j <= arm; j++) {
+              block(g, s.x - j * PX, s.y - j * PX, 1);
+              block(g, s.x + j * PX, s.y - j * PX, 1);
+              block(g, s.x - j * PX, s.y + j * PX, 1);
+              block(g, s.x + j * PX, s.y + j * PX, 1);
+            }
           }
           break;
         }
         case SPARK.ember: {
-          const r = s.size * 0.45 * (1 - 0.6 * k);
+          const n = Math.max(1, Math.round((s.size * 0.9 * (1 - 0.6 * k)) / PX));
           g.fillStyle(s.color, a);
-          disc(g, s.x, s.y, r);
-          g.fillStyle(0xfff0a0, a);
-          disc(g, s.x, s.y - r * 0.2, r * 0.5);
+          block(g, s.x, s.y, n);
+          if (n > 1) {
+            g.fillStyle(0xfff0a0, a);
+            block(g, s.x, s.y, n - 1);
+          }
           break;
         }
         case SPARK.confetti: {
-          const t = s.spin * s.age;
-          const ux = Math.cos(t) * s.size * 0.6;
-          const uy = Math.sin(t) * s.size * 0.6;
-          g.fillStyle(s.color, a).fillTriangle(
-            s.x - ux,
-            s.y - uy,
-            s.x + uy * 0.6,
-            s.y - ux * 0.6,
-            s.x + ux,
-            s.y + uy,
-          );
+          // A flat chip that flips: wide, then tall, then wide.
+          const long = Math.max(2, Math.round((s.size * 0.8) / PX));
+          g.fillStyle(s.color, a);
+          if (Math.floor(s.spin * s.age) % 2 === 0) g.fillRect(snap(s.x), snap(s.y), long * PX, PX);
+          else g.fillRect(snap(s.x), snap(s.y), PX, long * PX);
           break;
         }
         case SPARK.drop: {
-          // A round drop with a point on top, falling.
-          const r = s.size * 0.4;
+          // A drop: a block with a point on top, falling.
+          const n = Math.max(1, Math.round((s.size * 0.8) / PX));
           g.fillStyle(s.color, a);
-          disc(g, s.x, s.y, r);
-          g.fillTriangle(s.x - r * 0.9, s.y - r * 0.3, s.x + r * 0.9, s.y - r * 0.3, s.x, s.y - r * 2.4);
+          block(g, s.x, s.y, n);
+          block(g, s.x, s.y - n * PX, Math.max(1, n - 1));
           g.fillStyle(0xffffff, 0.7 * a);
-          disc(g, s.x - r * 0.35, s.y - r * 0.2, r * 0.3);
+          block(g, s.x - PX, s.y, 1);
           break;
         }
         case SPARK.ring: {
           const e = 1 - (1 - k) ** 3;
-          g.lineStyle(Math.max(1, 6 * (1 - k)), s.color, a);
+          g.lineStyle(Math.max(2, 2 * Math.round(3 * (1 - k))), s.color, a);
           ring(g, s.x, s.y, s.size * e);
           break;
         }
@@ -303,7 +300,36 @@ export class Sparks {
   }
 }
 
-/** A cartoon four-point star of radius `r` (a twinkle). */
+/** Art pixel of the effects, in world px: sparks are drawn as blocks snapped to this grid. */
+const PX = 2;
+const snap = (v: number): number => Math.round(v / PX) * PX;
+
+/** A square of `n` x `n` art pixels centred on (x, y), snapped to the grid (current fill style). */
+function block(g: Phaser.GameObjects.Graphics, x: number, y: number, n: number): void {
+  const side = n * PX;
+  g.fillRect(snap(x - side / 2), snap(y - side / 2), side, side);
+}
+
+/** A plus of blocks with arms of `arm` pixels. */
+function plus(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  arm: number,
+  color: number,
+  alpha: number,
+): void {
+  g.fillStyle(color, alpha);
+  block(g, x, y, 1);
+  for (let j = 1; j <= arm; j++) {
+    block(g, x - j * PX, y, 1);
+    block(g, x + j * PX, y, 1);
+    block(g, x, y - j * PX, 1);
+    block(g, x, y + j * PX, 1);
+  }
+}
+
+/** A four-point twinkle of radius `r`, made of pixel blocks. */
 export function star(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -312,8 +338,5 @@ export function star(
   color: number,
   alpha: number,
 ): void {
-  const w = r * 0.28;
-  g.fillStyle(color, alpha);
-  g.fillTriangle(x - w, y, x + w, y, x, y - r).fillTriangle(x - w, y, x + w, y, x, y + r);
-  g.fillTriangle(x, y - w, x, y + w, x - r, y).fillTriangle(x, y - w, x, y + w, x + r, y);
+  plus(g, x, y, Math.max(1, Math.round(r / PX)), color, alpha);
 }

@@ -5,11 +5,16 @@ import { ART_SCALE } from './art/pen';
 import type { Lighting } from './lighting';
 
 /** Where each obstacle sprite's foot is (a fraction of its texture height): that point sits on the hit circle. */
-const FOOT = [0.92, 0.8, 0.82];
+const FOOT = [0.92, 0.64, 0.64];
 const MAX = 60;
+/**
+ * Obstacles are drawn 1.5x the shared pixel scale: their art fills only part of its canvas, and at 1x a column's shaft
+ * is half as wide as the circle that blocks (the one exception to whole-number scaling, on purpose).
+ */
+const SCALE = ART_SCALE * 1.5;
 /** The column with a torch (public/sprites/obstacles/0t.png) and its flame's height over the foot (world px). */
 const TORCH = 'obstacle.0t';
-const TORCH_DY = 49;
+const TORCH_DY = 49 * 1.5;
 
 /**
  * The Cripta's obstacles on screen: like the decals, a fixed set of reused images laid out over the view's cells,
@@ -30,9 +35,7 @@ export class Obstacles {
     private readonly world: World,
   ) {
     for (let i = 0; i < MAX; i++)
-      this.images.push(
-        scene.add.image(0, 0, 'obstacle.0').setDepth(2.5).setScale(ART_SCALE).setVisible(false),
-      );
+      this.images.push(scene.add.image(0, 0, 'obstacle.0').setDepth(2.5).setScale(SCALE).setVisible(false));
   }
 
   /** Lays out the obstacles over the view rectangle (x, y, w, h) in world px. */

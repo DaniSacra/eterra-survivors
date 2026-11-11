@@ -196,6 +196,8 @@ export class GameScene extends Phaser.Scene {
   private ground!: Phaser.GameObjects.TileSprite;
   private decals!: Decals;
   private playerSprite!: Phaser.GameObjects.Sprite;
+  /** The hero's silhouette in moonlight, one pixel up and left behind the sprite: a pale rim around the dark outline. */
+  private heroRim!: Phaser.GameObjects.Image;
   /** The hero's walk and idle animations when they have pixel-art strips (else null: the code art bounces). */
   private heroAnims: { walk: string; idle: string } | null = null;
   /** Contact shadows on the ground (hero, flyers), redrawn each frame under the enemies. */
@@ -357,6 +359,7 @@ export class GameScene extends Phaser.Scene {
     this.shadows = this.add.graphics().setDepth(4.5);
     this.heroBar = this.add.graphics().setDepth(13.2);
     this.playerSprite = this.add.sprite(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
+    this.heroRim = this.add.image(0, 0, heroSprite).setDepth(13.05).setTintFill(0xb4d0ff);
     const walk = `${heroSprite}.walk`;
     this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
     this.projectileMirror = new Mirror(
@@ -774,6 +777,13 @@ export class GameScene extends Phaser.Scene {
     // Hurt (invulnerable): the hero blinks instead of fading into the crowd.
     this.playerSprite.setAlpha(w.player.iframes > 0 && Math.sin(w.time * 40) > 0 ? 0.55 : 1);
     if (w.player.facing.x !== 0) this.playerSprite.setFlipX(w.player.facing.x < 0);
+    const ps = this.playerSprite;
+    this.heroRim
+      .setTexture(ps.texture.key, ps.frame.name)
+      .setPosition(ps.x + (ps.flipX ? 1 : -1), ps.y - 1)
+      .setScale(ps.scaleX, ps.scaleY)
+      .setFlipX(ps.flipX)
+      .setAlpha(ps.alpha * 0.5);
     // A discreet contact shadow under the hero's feet.
     this.shadows.clear();
     this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET, 26, 8);
