@@ -8,7 +8,9 @@ export const SCENES = {
   pause: 'pause',
   end: 'end',
   shop: 'shop',
-  select: 'select',
+  heroes: 'heroes',
+  stages: 'stages',
+  story: 'story',
   options: 'options',
   collection: 'collection',
 } as const;

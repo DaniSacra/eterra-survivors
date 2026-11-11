@@ -565,6 +565,24 @@ export const t = {
   /** Segunda Chance used: the hero got up again. */
   revived: 'Segunda Chance! De pé outra vez.',
 
+  /** The hero screen (Começar opens it), then the stage screen and a stage's story. */
+  heroes: {
+    title: 'Heróis',
+    pick: 'Escolha quem vai defender Valmor',
+    advantage: 'Vantagem',
+    record: (wins: number, best: string) =>
+      wins > 0 ? `Vitórias: ${wins} · Melhor: ${best}` : `Sem vitórias · Melhor: ${best}`,
+    noRuns: 'Ainda não jogou',
+    keys: '↑↓ herói · Enter escolhe · Esc volta',
+  },
+  stageScreen: {
+    title: 'Fase',
+    go: 'Partir',
+    keys: '↑↓ fase · Enter abre · Esc volta',
+    /** The line on a closed stage's card: what opens it. */
+    unlockBy: (name: string) => `Vença ${name} para abrir`,
+    boss: (name: string) => `Chefe: ${name}`,
+  },
   select: {
     title: 'Preparação',
     hero: 'Herói',

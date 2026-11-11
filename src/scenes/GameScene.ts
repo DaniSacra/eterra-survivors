@@ -15,7 +15,7 @@ import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, recordRun, recordVigil } from '../render/save';
-import { lastChoice, type RunChoice } from './SelectScene';
+import { lastChoice, type RunChoice } from './choice';
 import { World } from '../core/world';
 import { bankOnEnd, newRunSummary, summarizeRun, type RunSummary } from '../core/records';
 import { liveAchievements } from '../core/achievements';

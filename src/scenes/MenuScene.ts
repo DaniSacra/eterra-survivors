@@ -125,7 +125,7 @@ export class MenuScene extends Phaser.Scene {
     if (loadSave().fresh.length > 0)
       newsDot(this, collection.x + collection.width / 2 - 8, collection.y - collection.height / 2 + 8);
     keyNav(this, [
-      button(this, rx, by, bw, 56, () => this.scene.start(SCENES.select), t.menu.start),
+      button(this, rx, by, bw, 56, () => this.scene.start(SCENES.heroes), t.menu.start),
       button(this, rx, by + 64, bw, 44, () => this.scene.start(SCENES.shop), t.menu.shop),
       // Two smaller ones side by side: the Coleção and the options.
       collection,

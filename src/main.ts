@@ -6,7 +6,9 @@ import { EndScene } from './scenes/EndScene';
 import { LevelUpScene } from './scenes/LevelUpScene';
 import { MenuScene } from './scenes/MenuScene';
 import { PauseScene } from './scenes/PauseScene';
-import { SelectScene } from './scenes/SelectScene';
+import { HeroesScene } from './scenes/HeroesScene';
+import { StageScene } from './scenes/StageScene';
+import { StoryScene } from './scenes/StoryScene';
 import { ShopScene } from './scenes/ShopScene';
 import { OptionsScene } from './scenes/OptionsScene';
 import { CollectionScene } from './scenes/CollectionScene';
@@ -34,7 +36,9 @@ const game = new Phaser.Game({
     PauseScene,
     EndScene,
     ShopScene,
-    SelectScene,
+    HeroesScene,
+    StageScene,
+    StoryScene,
     OptionsScene,
     CollectionScene,
   ],

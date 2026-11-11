@@ -15,7 +15,7 @@ import { UI, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } fr
 import { firstFit } from '../core/layout';
 import { ART_SCALE } from '../render/art/pen';
 import { PASSIVES } from '../data/upgrades';
-import { setChoice } from './SelectScene';
+import { setChoice } from './choice';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 
