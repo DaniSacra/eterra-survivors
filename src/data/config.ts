@@ -67,6 +67,11 @@ export const config = {
    * Ground marks (their own pool): an enemy about to rise inside the view shows `spawnTime` s first, never closer
    * than `spawnMinDist` px to the hero.
    */
+  /**
+   * The thief rat (FT-10) does not walk in from the edge: it appears `dist` px from the hero (past any blow's reach)
+   * on a mark `warn` s ahead, with a sound of coins, and runs from there.
+   */
+  thief: { dist: 200, warn: 1 },
   marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80, poolTick: 0.5 },
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */

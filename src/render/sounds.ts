@@ -26,6 +26,16 @@ export const SOUNDS = {
   gem: { kind: 'synth', wave: 'sine', from: 900, to: 1300, dur: 0.05, vol: 0.06, every: 0.035 },
   hurt: { kind: 'synth', wave: 'square', from: 240, to: 110, dur: 0.12, vol: 0.07, every: 0.2 },
   pickup: { kind: 'synth', wave: 'triangle', from: 600, to: 950, dur: 0.06, vol: 0.09, notes: [0, 5] },
+  /** A thief rat is about to appear: a quick jingle of coins. */
+  coins: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 1320,
+    to: 1320,
+    dur: 0.045,
+    vol: 0.09,
+    notes: [0, 0, 4, 7, 12],
+  },
   levelUp: {
     kind: 'synth',
     wave: 'triangle',

@@ -2,19 +2,22 @@ import type Phaser from 'phaser';
 import type { World } from '../core/world';
 import { ART_SCALE } from './art/pen';
 import { UI } from './ui';
+import { MAX_ARROWS as MAX, arrowTargets, createTargets, type ArrowKind } from './edgeTargets';
 
-/** At most this many arrows: chests first, then living elites. */
-const MAX = 3;
+/** The thief rat's arrow is yellow, the gold of the gems it carries. */
+const THIEF_COLOR = 0xffe14a;
+
 /** Distance of an arrow's tip from the screen's frame (px). */
 const INSET = 22;
 
 /**
- * Arrows on the screen's frame toward a chest on the ground or a living elite out of view (NU-01): an elite often
- * dies off screen and drops its chest there. Nothing allocates per frame; arrows vanish once the target shows.
+ * Arrows on the screen's frame toward a chest on the ground, the thief rat or a living elite out of view (NU-01): an
+ * elite often dies off screen and drops its chest there. Nothing allocates per frame; arrows vanish once the target shows.
  */
 export class EdgeArrows {
   private readonly g: Phaser.GameObjects.Graphics;
   private readonly icons: Phaser.GameObjects.Image[] = [];
+  private readonly targets = createTargets();
 
   constructor(scene: Phaser.Scene) {
     this.g = scene.add.graphics().setDepth(-5);
@@ -44,41 +47,20 @@ export class EdgeArrows {
     const view = cam.worldView;
     const cx = w / 2;
     const cy = (top + bottom) / 2;
-    let n = 0;
-    const items = world.pickups.active;
-    for (let i = 0; i < items.length && n < MAX; i++) {
-      const it = items[i] as (typeof items)[number];
-      if (it.type !== 'chest' || view.contains(it.x, it.y)) continue;
+    const n = arrowTargets(world, (x, y) => view.contains(x, y), this.targets);
+    for (let i = 0; i < n; i++) {
+      const t = this.targets[i] as (typeof this.targets)[number];
       this.arrow(
         g,
-        n++,
-        (it.x - view.x) * cam.zoom,
-        (it.y - view.y) * cam.zoom,
+        i,
+        (t.x - view.x) * cam.zoom,
+        (t.y - view.y) * cam.zoom,
         cx,
         cy,
         w,
         top,
         bottom,
-        true,
-        world.time,
-        calm,
-      );
-    }
-    const foes = world.enemies.active;
-    for (let i = 0; i < foes.length && n < MAX; i++) {
-      const e = foes[i] as (typeof foes)[number];
-      if (!(e.def.elite || e.def.flee) || e.dead || view.contains(e.x, e.y)) continue;
-      this.arrow(
-        g,
-        n++,
-        (e.x - view.x) * cam.zoom,
-        (e.y - view.y) * cam.zoom,
-        cx,
-        cy,
-        w,
-        top,
-        bottom,
-        false,
+        t.kind,
         world.time,
         calm,
       );
@@ -96,7 +78,7 @@ export class EdgeArrows {
     w: number,
     top: number,
     bottom: number,
-    chest: boolean,
+    kind: ArrowKind,
     time: number,
     calm: boolean,
   ): void {
@@ -111,7 +93,8 @@ export class EdgeArrows {
     const len = Math.hypot(dx, dy) || 1;
     const ux = dx / len;
     const uy = dy / len;
-    const color = chest ? UI.goldHex : UI.dangerHex;
+    const chest = kind === 'chest';
+    const color = chest ? UI.goldHex : kind === 'thief' ? THIEF_COLOR : UI.dangerHex;
     const pulse = calm ? 1 : 1 + 0.12 * Math.sin(time * 6 + i);
     const s = 9 * pulse;
     g.fillStyle(0x000000, 0.45).fillCircle(x - ux * 4, y - uy * 4, 13);
@@ -126,6 +109,6 @@ export class EdgeArrows {
     const icon = this.icons[i] as Phaser.GameObjects.Image;
     icon.setVisible(chest);
     if (chest) icon.setPosition(x - ux * 22, y - uy * 22);
-    else g.fillStyle(color, 1).fillCircle(x - ux * 18, y - uy * 18, 5);
+    else g.fillStyle(color, 1).fillCircle(x - ux * 18, y - uy * 18, kind === 'thief' ? 7 : 5);
   }
 }

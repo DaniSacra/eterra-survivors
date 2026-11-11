@@ -5,7 +5,7 @@ import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import { spawnOnRing, type Enemy } from './enemies';
 import { riseAt } from './marks';
 import { playtest } from './meta';
-import { spawnPoint } from './terrain';
+import { blockCircle, spawnPoint } from './terrain';
 import type { World } from './world';
 
 /** The segment active at time `t` (the last one that has started). */
@@ -105,8 +105,30 @@ export class Spawner {
 
   /** One enemy on the stage's spawn ring; a spot inside the view gets a spawn mark first (FT-02). */
   private send(world: World, id: EnemyId, hpMult: number, force = false): void {
+    if ((ENEMIES[id] as EnemyDef).flee) {
+      this.thiefPoint(world, id);
+      riseAt(world, id, this.at.x, this.at.y, hpMult, force, config.thief.warn);
+      return;
+    }
     spawnPoint(world, null, this.at);
     riseAt(world, id, this.at.x, this.at.y, hpMult, force);
+  }
+
+  /**
+   * Where a thief rat appears: `config.thief.dist` px from the hero in a random direction, out of the obstacles and the
+   * road's edges, and never closer than half of that (a first try that the ground pushed too near turns to the next).
+   */
+  private thiefPoint(world: World, id: EnemyId): void {
+    const p = world.player;
+    const r = (ENEMIES[id] as EnemyDef).radius;
+    const start = world.rng.next() * Math.PI * 2;
+    for (let i = 0; i < 8; i++) {
+      const a = start + (i * Math.PI) / 4;
+      this.at.x = p.x + Math.cos(a) * config.thief.dist;
+      this.at.y = p.y + Math.sin(a) * config.thief.dist;
+      blockCircle(world, this.at, r);
+      if (Math.hypot(this.at.x - p.x, this.at.y - p.y) >= config.thief.dist * 0.75) return;
+    }
   }
 
   /** `id`, or the segment's first (basic) enemy when `id` is already at its def's `max`. */

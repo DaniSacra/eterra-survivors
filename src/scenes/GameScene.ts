@@ -101,6 +101,10 @@ const HERO_BAR_W = 44;
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
 /** Each Elo's projectile sprite, tinted with its element's colour. */
 
+/** The thief rat's outline (gold) and the glow of the gems it carries. */
+const THIEF_RIM = 0xffe14a;
+const GEM_GLOW = 0x3ed4ff;
+
 /** Light colours (the light map multiplies the ground by them). */
 const PROJECTILE_LIGHT = 0xffe8b0;
 const BOSS_LIGHT = 0xd8b0ff;
@@ -148,6 +152,8 @@ type EnemyImage = Phaser.GameObjects.Image & {
   /** Pixel enemies: the pose shown and the world time it began (a strike plays from its start). */
   pose?: string;
   poseT0?: number;
+  /** The thief rat's yellow outline is on (a recycled image must lose it for the next enemy). */
+  rimmed?: boolean;
 };
 
 /** A dying pixel enemy playing its death strip where it fell, then fading (render only). */
@@ -496,6 +502,7 @@ export class GameScene extends Phaser.Scene {
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
           .setRotation(this.windupSway(e));
+        this.thiefLook(img, e);
         if (this.stepDt > 0) {
           if (e.flash === HIT_FLASH) {
             this.sparks.hit(
@@ -1135,6 +1142,26 @@ export class GameScene extends Phaser.Scene {
     if (!this.calm) this.lighting.flash(x, y, radius * 3.2, 0xff9a40, 0.45);
   }
 
+  /**
+   * The thief rat is easy to spot and to chase: a yellow outline, and the glow of the gems in its sack (the cyan of the
+   * gems, stronger than theirs) lighting the ground around it. Other enemies sharing the image lose the outline.
+   */
+  private thiefLook(img: EnemyImage, e: Enemy): void {
+    if (!e.def.flee) {
+      if (img.rimmed) {
+        img.preFX?.clear();
+        img.rimmed = false;
+      }
+      return;
+    }
+    if (!img.rimmed) {
+      img.preFX?.addGlow(THIEF_RIM, 3, 0, false, 0.1, 6);
+      img.rimmed = true;
+    }
+    const pulse = this.calm ? 1 : 1 + 0.15 * Math.sin(this.world.time * 8);
+    this.lighting.add(e.x, e.y - 4, 95 * pulse, GEM_GLOW, 0.9, 0.35);
+  }
+
   /** The bell swings twice on a Badalada; any other boss winding up shakes. */
   private windupSway(e: Enemy): number {
     if (e.act !== BossAct.Windup) return 0;
@@ -1401,6 +1428,9 @@ export class GameScene extends Phaser.Scene {
         case 'eliteSpawned':
           sound.play('elite');
           this.hud.announce(t.eliteWarning);
+          break;
+        case 'thiefMark':
+          sound.play('coins');
           break;
         case 'thiefSpawned':
           sound.play('elite');

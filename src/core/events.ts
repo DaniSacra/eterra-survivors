@@ -10,6 +10,8 @@ export type GameEvent =
   | { type: 'eliteSpawned' }
   /** A thief rat showed up with its eye on the gems, and when it got away with them (FT-10). */
   | { type: 'thiefSpawned' }
+  /** The mark of a thief about to appear was laid (its coins sound one second ahead). */
+  | { type: 'thiefMark'; x: number; y: number }
   | { type: 'thiefEscaped' }
   /** An Ossada em Brasa's mark went off (FT-14). */
   | { type: 'burst'; x: number; y: number; radius: number }

@@ -3194,10 +3194,10 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 1 · Conserto e leitura
 
-- **DD-01 · Carregar só as poses declaradas** · impl · P. Os 20 inimigos só com andar pedem `-windup`, `-strike` e
+- **DD-01 · Carregar só as poses declaradas** · impl · P · ✅ feito. Os 20 inimigos só com andar pedem `-windup`, `-strike` e
   `-death` que não existem (60 erros por carregamento). `enemySheets()` passa a carregar só as poses de
   `ENEMY_ANIMS[...].frames`. Aceite: teste que toda pose carregada tem arquivo em `public/`; zero 404 no carregamento.
-- **DD-02 · Rato Ladrão com aviso** · impl + ui · M. Nasce a cerca de 200 px do herói (nunca dentro do alcance de
+- **DD-02 · Rato Ladrão com aviso** · impl + ui · M · ✅ feito. Nasce a cerca de 200 px do herói (nunca dentro do alcance de
   golpe), com uma marca no chão e o som de moedas 1 s antes, e então corre. Seta na borda enquanto estiver fora de vista
   (`EdgeArrows`, prioridade acima de elite), contorno amarelo e o brilho das gemas no saco mais forte. Aceite: testes de
   distância de nascimento, marca antes do nascimento e seta só enquanto fora da tela.

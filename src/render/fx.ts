@@ -1237,7 +1237,9 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
     // Bone, not coral (CF-04): a rising grave calls the dead and hurts no one by itself.
     const k = 1 - m.ttl / m.total; // 0 -> 1
     const r = m.radius * (0.6 + 0.6 * k);
-    g.fillStyle(SUMMON_COLOR, 0.12 + 0.25 * k);
+    // A thief rat's mark is gold (the coins it is after), not bone.
+    const thief = (ENEMIES[m.enemy] as EnemyDef).flee !== undefined;
+    g.fillStyle(thief ? THIEF_MARK : SUMMON_COLOR, 0.12 + 0.25 * k);
     oval(g, m.x, m.y + 2, r * 2.2, r * 1.1);
     g.lineStyle(2, INK, 0.7);
     for (let c = 0; c < 4; c++) {
@@ -1246,11 +1248,13 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
       const cy = Math.sin(a) * r * 0.5;
       g.lineBetween(m.x + cx * 0.2, m.y + 2 + cy * 0.2, m.x + cx, m.y + 2 + cy);
     }
-    g.lineStyle(1.5, SUMMON_EDGE, 0.5 + 0.5 * k);
+    g.lineStyle(thief ? 2.5 : 1.5, thief ? THIEF_MARK : SUMMON_EDGE, 0.5 + 0.5 * k);
     ovalRing(g, m.x, m.y + 2, r * 2.2, r * 1.1);
     if ((ENEMIES[m.enemy] as EnemyDef).reassemble) tomb(g, m.x, m.y - 2, 12 + 6 * k, 0.7 + 0.3 * k);
   }
 }
+
+const THIEF_MARK = 0xffe14a;
 
 /** A small gravestone standing on its patch of earth, `h` px tall (the summon marker of CF-04). */
 function tomb(g: Phaser.GameObjects.Graphics, x: number, y: number, h: number, a: number): void {

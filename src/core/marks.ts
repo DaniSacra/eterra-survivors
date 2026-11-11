@@ -149,10 +149,18 @@ export function inView(world: World, x: number, y: number, margin = 0): boolean 
  * and never closer than config.marks.spawnMinDist px to the hero (the spot is pushed out). Returns whether it
  * rose (or will): false when the marks are full.
  */
-export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult = 1, force = false): boolean {
+export function riseAt(
+  world: World,
+  id: EnemyId,
+  x: number,
+  y: number,
+  hpMult = 1,
+  force = false,
+  warn?: number,
+): boolean {
   // The crowd's ceiling holds for everything but what the stage promises (an elite).
   if (!force && world.enemies.size >= config.enemies.maxActive) return false;
-  if (!inView(world, x, y, 20)) {
+  if (warn === undefined && !inView(world, x, y, 20)) {
     spawnEnemy(world, id, x, y, hpMult);
     return true;
   }
@@ -162,7 +170,7 @@ export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult =
   const dy = y - p.y;
   const d = Math.hypot(dx, dy);
   const min = config.marks.spawnMinDist;
-  if (d < min) {
+  if (d < min && warn === undefined) {
     // Pushed straight out from the hero (any way out if it sits right on them).
     const k = d > 1e-3 ? min / d : 0;
     x = d > 1e-3 ? p.x + dx * k : p.x + min;
@@ -176,7 +184,8 @@ export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult =
   m.hpMult = hpMult;
   m.force = force;
   m.radius = (ENEMIES[id] as EnemyDef).radius;
-  m.ttl = m.total = config.marks.spawnTime;
+  m.ttl = m.total = warn ?? config.marks.spawnTime;
+  if (warn !== undefined) world.events.push({ type: 'thiefMark', x, y });
   return true;
 }
 
