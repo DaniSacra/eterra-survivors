@@ -86,6 +86,85 @@ export const SOUNDS = {
     vol: 0.12,
     notes: [0, 4, 7, 12, 16, 19],
   },
+  /** The Sineiro's Badalada: two low tolls of the bell, a beat apart. */
+  bellToll: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 196,
+    to: 184,
+    dur: 0.5,
+    vol: 0.12,
+    notes: [0, 0],
+    every: 1,
+  },
+  /** The Dobre Fúnebre warning: one deeper, longer toll. */
+  bellDirge: { kind: 'synth', wave: 'sine', from: 110, to: 98, dur: 0.7, vol: 0.16, every: 1 },
+  /** ...and its blow: a thud under the ring of shock. */
+  dirgeBeat: {
+    kind: 'synth',
+    wave: 'sine',
+    from: 90,
+    to: 40,
+    dur: 0.22,
+    vol: 0.2,
+    notes: [0, 7],
+    every: 0.5,
+  },
+  /** A skeleton collapses into bones: a short clatter falling in pitch. */
+  pileFall: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 420,
+    to: 140,
+    dur: 0.05,
+    vol: 0.045,
+    notes: [0, -4, -9],
+    every: 0.09,
+  },
+  /** A pile stands up again: bones clicking back together, rising. */
+  pileRise: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 220,
+    to: 420,
+    dur: 0.05,
+    vol: 0.045,
+    notes: [0, 3, 7],
+    every: 0.12,
+  },
+  /** A pile broken for good: a dry, bright crack. */
+  pileBreak: {
+    kind: 'synth',
+    wave: 'square',
+    from: 1000,
+    to: 240,
+    dur: 0.03,
+    vol: 0.07,
+    notes: [0, 5, -3],
+    every: 0.05,
+  },
+  /** An Ossada em Brasa goes off: a low pop and a hiss. */
+  emberBurst: {
+    kind: 'synth',
+    wave: 'sawtooth',
+    from: 420,
+    to: 60,
+    dur: 0.14,
+    vol: 0.09,
+    notes: [0, -12],
+    every: 0.1,
+  },
+  /** The Coveiro plants his shovel: a dull thud of earth. */
+  dig: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 150,
+    to: 70,
+    dur: 0.09,
+    vol: 0.1,
+    notes: [0, -3],
+    every: 0.3,
+  },
   lost: { kind: 'synth', wave: 'triangle', from: 392, to: 380, dur: 0.2, vol: 0.11, notes: [7, 4, 0, -5] },
 } satisfies Record<string, SoundDef>;
 
