@@ -67,6 +67,11 @@ const SWING_AT = 0.7;
 /** Texture key of one pose's strip. */
 export const poseKey = (sprite: string, pose: EnemyPose): string => `${sprite}.${pose}`;
 
+/** The poses an enemy has strips for: its walk, plus the others only when it declares them. */
+export function declaredPoses(a: EnemyAnim): EnemyPose[] {
+  return (['walk', 'windup', 'strike', 'death'] as const).filter((p) => a.frames[p] !== undefined);
+}
+
 /**
  * What an enemy shows now. `k` is how far through the pose it is (0 to 1) when the core knows it (a windup counts
  * down its timer, a leap its air time), or -1 when the render keeps the time itself (a strike, the walk).

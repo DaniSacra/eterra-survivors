@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { ENEMY_ART } from './art/enemies';
-import { ENEMY_ANIMS, poseKey, type EnemyPose } from './enemyAnims';
+import { ENEMY_ANIMS, declaredPoses, poseKey } from './enemyAnims';
 import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
@@ -131,12 +131,11 @@ function pixelEnemies(ids: string[]): Record<string, AssetDef> {
   );
 }
 
-/** One strip per pose of every animated enemy (files `<id>-<pose>.png` next to the still, already at ART_RES). */
+/** One strip per declared pose of every animated enemy (files `<id>-<pose>.png` next to the still, already at ART_RES). */
 function enemySheets(): Record<string, AssetDef> {
-  const poses: EnemyPose[] = ['walk', 'windup', 'strike', 'death'];
   return Object.fromEntries(
     Object.entries(ENEMY_ANIMS).flatMap(([sprite, a]) =>
-      poses.map((pose) => [
+      declaredPoses(a).map((pose) => [
         poseKey(sprite, pose),
         {
           kind: 'sheet',
