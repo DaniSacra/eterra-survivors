@@ -8,6 +8,7 @@ import { EVOLUTIONS, type ElementId, type Evolution } from '../data/evolutions';
 import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from './art/pen';
 import { formatStatValue } from './describe';
+import { ovalRing } from './shapes';
 import { ELEMENT_COLOR, UI, label } from './ui';
 
 /** Icon badges are drawn 28 world px wide (render/art/icons.ts). */
@@ -315,6 +316,9 @@ export class BuildSlots {
   }
 }
 
+/** Below this length (px) a chain is drawn as two links instead of a braid. */
+const SHORT_CHAIN = 14;
+
 /**
  * A braided chain from (ax, ay) to (bx, by): two strands crossing each other every few px, over a dark outline so
  * it reads on any ground. `width` is the strand's (the glow layer draws it thicker).
@@ -330,6 +334,20 @@ export function chain(
 ): void {
   const len = Math.hypot(bx - ax, by - ay);
   if (len < 1) return;
+  if (len < SHORT_CHAIN) {
+    // Too short to braid (it read as an "8", NA-03): two links, one along the gap and one lying across it.
+    const mx = (ax + bx) / 2;
+    const my = (ay + by) / 2;
+    for (const [w, c] of [
+      [width + 1.6, UI.dim],
+      [width, color],
+    ] as const) {
+      g.lineStyle(w, c, 1);
+      ovalRing(g, mx, my, 5, len + 3);
+      ovalRing(g, mx, my, 11, 4.5);
+    }
+    return;
+  }
   const nx = -(by - ay) / len;
   const ny = (bx - ax) / len;
   const steps = Math.max(6, Math.round(len / 2));

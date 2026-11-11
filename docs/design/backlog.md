@@ -1876,7 +1876,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   mudar `width` (rejeitado: mexe no equilíbrio de uma fase no limite da meta).
 - Aceite: capturas em 420x820 da Estrada e de Valmor que se distinguem sem inimigos; miniaturas diferentes.
 
-**NA-03 · A corrente do Elo na faixa da build parece um "8"** · visual · P · proposto
+**NA-03 · A corrente do Elo na faixa da build parece um "8"** · visual · P · ✅ feito (2026-11-11: abaixo de 14 px, dois elos — um ao longo, um deitado — na cor do elemento)
 
 - Por quê: 04-visual #6 (`crop-strip.png`: um "8" vermelho sob a Fúria, ao lado dos números de nível). Lê como "nível
   8", não como corrente; é a marca permanente do Elo forjado.
