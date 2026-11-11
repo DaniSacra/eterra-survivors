@@ -23,10 +23,10 @@ const anim = (w: number, h: number, frames: [number, number, number, number]): E
 
 /** Enemies with state animations, by sprite key (bosses and elites first; the crowd follows). */
 export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
-  'enemy.blackKnight': anim(128, 160, [7, 5, 5, 7]),
-  'enemy.spiderMother': anim(160, 112, [7, 5, 5, 7]),
-  'enemy.oldWolf': anim(160, 128, [7, 5, 5, 7]),
-  'enemy.golem': anim(96, 112, [7, 5, 5, 7]),
+  'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7]),
+  'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9]),
+  'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7]),
+  'enemy.golem': anim(96, 112, [7, 9, 5, 9]),
   'enemy.witch': anim(96, 112, [7, 5, 5, 7]),
 };
 
