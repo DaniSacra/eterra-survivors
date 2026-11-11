@@ -59,26 +59,37 @@ export const TILE_ART: Record<string, ArtDef> = {
       }
     },
   },
-  /** Cripta: blue stone slabs, dark mortar, teal moss. */
+  /** Cripta: big rounded violet and teal-grey stone blocks with a lit top edge, dark joints, moss tufts. */
   'tile.crypt': {
     w: SIZE,
     h: SIZE,
     draw(p) {
       const r = rng(7);
-      // Low contrast: mortar close to the slabs, so bats, bones and the hero read on top.
-      p.fill(0x252438).fillRect(0, 0, SIZE, SIZE);
+      // Joints stay close to the blocks' value so bats, bones and the hero read on top; colour comes from the blocks.
+      p.fill(0x26243e).fillRect(0, 0, SIZE, SIZE);
       const rows = 4;
       const h = SIZE / rows;
+      const tones = [
+        [0x403c64, 0x363258],
+        [0x3c4a6c, 0x32405e],
+        [0x4a4268, 0x3e3858],
+        [0x38506a, 0x2e445a],
+      ] as const;
       for (let row = 0; row < rows; row++) {
         const off = row % 2 ? h : 0;
         for (let x = -off; x < SIZE; x += h * 2) {
-          const tone = [0x2c2b44, 0x302e4a, 0x2a2942][Math.floor(r() * 3)] as number;
-          p.fill(tone).fillRoundedRect(x + 1.5, row * h + 1.5, h * 2 - 3, h - 3, 4);
-          p.fill(0xffffff, 0.03).fillRect(x + 4, row * h + 4, h * 2 - 8, 3);
+          const [top, base] = tones[Math.floor(r() * tones.length)] as readonly [number, number];
+          p.fill(base).fillRoundedRect(x + 1.5, row * h + 1.5, h * 2 - 3, h - 3, 6);
+          p.fill(top).fillRoundedRect(x + 3, row * h + 2.5, h * 2 - 6, h * 0.55, 5);
+          p.fill(0xffffff, 0.04).fillRect(x + 8, row * h + 4, h * 2 - 16, 2);
+          p.fill(0x000000, 0.18).fillRect(x + 4, row * h + h - 6, h * 2 - 8, 3);
         }
       }
-      for (let i = 0; i < 3; i++)
-        p.fill(0x3a9a8a, 0.15).fillEllipse(r() * SIZE, r() * SIZE, 10 + r() * 14, 4 + r() * 4);
+      for (let i = 0; i < 5; i++) {
+        const [x, y] = [r() * SIZE, r() * SIZE];
+        p.fill(0x3ec8a0, 0.28).fillEllipse(x, y, 10 + r() * 14, 4 + r() * 4);
+        p.fill(0x7af0b8, 0.3).fillEllipse(x - 2, y - 1, 5, 2);
+      }
     },
   },
   /**

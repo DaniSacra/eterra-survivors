@@ -15,7 +15,7 @@ import type { StageId } from '../data/stages';
 /** Per stage: the ambient colour the night multiplies the ground by, and the tint of an enemy far from any light. */
 export const STAGE_DARK: Record<StageId, { ambient: number; enemy: number }> = {
   valmor: { ambient: 0x323e66, enemy: 0x9aa4c8 },
-  crypt: { ambient: 0x2e221e, enemy: 0xb09888 },
+  crypt: { ambient: 0x3c3260, enemy: 0xb4a8d0 },
   southRoad: { ambient: 0x38466e, enemy: 0x9eaacc },
 };
 

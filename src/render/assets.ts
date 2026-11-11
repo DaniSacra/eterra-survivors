@@ -67,6 +67,12 @@ export function heroFit(key: string): number {
   return walk?.kind === 'sheet' ? MENU_HERO_H / walk.h : 1;
 }
 
+/**
+ * Extra display scale for pixel sprites drawn at the same pixel density as the heroes but meant to loom (the Sineiro:
+ * PixelLab draws every figure about 100 px tall, so a boss gets its size here).
+ */
+export const SPRITE_SCALE: Record<string, number> = { 'enemy.bellRinger': 1.5 };
+
 /** Pixel-art enemies (PixelLab): still frames facing right, already upscaled to ART_RES, in public/sprites/enemies/. */
 function pixelEnemies(ids: string[]): Record<string, AssetDef> {
   return Object.fromEntries(

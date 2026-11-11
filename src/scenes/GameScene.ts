@@ -8,6 +8,7 @@ import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
+import { SPRITE_SCALE } from '../render/assets';
 import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
@@ -369,7 +370,7 @@ export class GameScene extends Phaser.Scene {
           lp && e.act === BossAct.Active ? Math.sin(Math.PI * (1 - e.actT / lp.air)) * (lp.radius + 20) : 0;
         img
           .setPosition(e.x, e.y - lift)
-          .setScale(ART_SCALE * sx, ART_SCALE * sy)
+          .setScale(ART_SCALE * sx * (SPRITE_SCALE[key] ?? 1), ART_SCALE * sy * (SPRITE_SCALE[key] ?? 1))
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
           .setRotation(e.act === BossAct.Windup && bossAbility(e) ? Math.sin(w.time * 18) * 0.18 : 0);
