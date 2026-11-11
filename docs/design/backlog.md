@@ -1695,7 +1695,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   existem, mais uma gotinha sobre a cabeça do que sangra, com o teto das estrelas de atordoado).
 - Aceite: capturas das três armas sobre multidão com esqueleto, morcego e elite reconhecíveis; F4 igual ou melhor.
 
-**NF-03 · Maça que aparece, pousa com o dano e anuncia a onda** · vfx · P · proposto
+**NF-03 · Maça que aparece, pousa com o dano e anuncia a onda** · vfx · P · ✅ feito (2026-11-11: cabeça cravada no quadro do dano, branca no golpe da onda; anel escuro no alcance; bolinhas âmbar da contagem; Quebra-Junta com borda âmbar; faíscas da Fúria e do Quebra-Junta na cor do elemento)
 
 - Por quê: 06-vfx #3 (alto) e #10, 04-visual #16, feedback do Daniel sobre a maça. A pancada é uma sombra e depois uma
   meia-lua bege: a maça nunca aparece e o dano chega ~70 ms antes do impacto desenhado; nada avisa qual golpe traz a

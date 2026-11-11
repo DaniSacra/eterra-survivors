@@ -36,6 +36,8 @@ export interface Slash extends Timed {
   weapon: WeaponId;
   /** Radius of the shock wave where it lands (0 = none). */
   shock: number;
+  /** A mace blow that brought its shock wave ("pá, pá, BUM": the render whitens the head). */
+  wave: boolean;
 }
 export const createSlash = (): Slash => ({
   poolIndex: -1,
@@ -49,6 +51,7 @@ export const createSlash = (): Slash => ({
   range: 0,
   weapon: 'blade',
   shock: 0,
+  wave: false,
 });
 
 /** Something falling from the sky (lightning, fire) and hitting the ground for a moment (purely visual). */

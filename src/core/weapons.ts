@@ -210,8 +210,9 @@ function fireSlam(world: World, s: SlamLevel, w: OwnedWeapon): boolean {
   // The wave goes first, so it (like the blow) only crushes what was stunned before this blow: the aftershock is
   // what crushes the enemies this blow stuns.
   const every = def.kind === 'slam' ? (def.waveEvery ?? 0) : 0;
-  if (every > 0 && ++w.swings % every === 0) shockWave(world, s, w, x, y, facing, 1);
-  smash(world, s, w, x, y, facing, r, dmg(world, s.damage), 'smash', s.knockback);
+  const wave = every > 0 && ++w.swings % every === 0;
+  if (wave) shockWave(world, s, w, x, y, facing, 1);
+  smash(world, s, w, x, y, facing, r, dmg(world, s.damage), 'smash', s.knockback, wave);
   return true;
 }
 
@@ -256,9 +257,11 @@ function smash(
   damage: number,
   form: 'smash' | 'shock',
   knockback: number,
+  wave = false,
 ): void {
   const slash = world.slashes.acquire();
   slash.form = form;
+  slash.wave = wave;
   slash.x = x;
   slash.y = y;
   slash.angle = angle;
@@ -315,6 +318,7 @@ function swingArc(world: World, s: ArcLevel, w: OwnedWeapon, angle: number, touc
   const list = world.enemies.active;
   const slash = world.slashes.acquire();
   slash.form = 'swing';
+  slash.wave = false;
   slash.angle = angle;
   slash.arc = s.arc;
   slash.range = range;
@@ -586,6 +590,7 @@ function yahWave(
   const list = world.enemies.active;
   const slash = world.slashes.acquire();
   slash.form = 'pulse';
+  slash.wave = false;
   slash.x = p.x;
   slash.y = p.y;
   slash.angle = 0;

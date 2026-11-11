@@ -128,8 +128,6 @@ const DUST_LIGHT = 0xe8dcc8;
 const DUST_DARK = 0x6a5a48;
 const DENT = 0x3a2a24;
 const SLAM_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
-/** Part of a mace blow's mark spent with the head coming down. */
-const DROP = 0.18;
 /** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
 const FIRE_SWORD: OrbitStyle = { color: 0xffd890, dark: 0xff6a20, blade: true };
 /** Part of a strike's life spent falling, before the burst on the ground (short: it lands with the damage, NF-09). */
@@ -245,8 +243,12 @@ export function drawFx(
   for (let iW = 0; iW < world.weapons.length; iW++) {
     const w = world.weapons[iW] as (typeof world.weapons)[number];
     const kind = WEAPONS[w.id].kind;
-    if ((WEAPONS[w.id] as WeaponDef).swell && w.stacks > 0 && w.stackTime > world.time)
+    const wdef = WEAPONS[w.id] as WeaponDef;
+    if (wdef.swell && w.stacks > 0 && w.stackTime > world.time)
       drawSouls(top, world, w.stacks, w.stackTime - world.time);
+    // The mace counts its blows to the wave: amber pips at the hero's feet light up one per blow (NF-03).
+    if (wdef.kind === 'slam' && (wdef.waveEvery ?? 0) > 1)
+      drawWaveCount(g, world, w.swings % (wdef.waveEvery ?? 1), (wdef.waveEvery ?? 1) - 1);
     if (kind === 'aura') {
       const st = weaponStats(w) as AuraLevel;
       const pulse = (WEAPONS[w.id] as WeaponDef).pulse;
@@ -701,14 +703,8 @@ function drawSmash(
 ): void {
   const r = s.shock;
   const glow = SLAM_GLOW[s.weapon];
-  if (t < DROP) {
-    // The head coming down: its shadow grows and darkens on the spot.
-    const k = t / DROP;
-    under.fillStyle(INK, 0.15 + 0.25 * k);
-    under.fillEllipse(s.x, s.y + 4, r * 0.5 * k + 6, r * 0.25 * k + 3);
-    return;
-  }
-  const k = (t - DROP) / (1 - DROP);
+  // The impact starts on the frame of the damage (NF-03): no drop before it.
+  const k = t;
   const open = 1 - (1 - k) * (1 - k) * (1 - k);
   const fade = 1 - k * k;
   const a0 = s.angle - Math.PI * 0.6;
@@ -717,14 +713,15 @@ function drawSmash(
   disc(under, s.x, s.y, r * open);
   under.fillStyle(DENT, 0.35 * fade);
   disc(under, s.x, s.y, r * 0.28);
-  if (glow) {
-    top.lineStyle(9 * fade + 2, glow, 0.45 * fade);
-    arcLine(top, s.x, s.y, r * open, a0, a1);
-  }
-  top.lineStyle(7 * fade + 2, DUST_LIGHT, 0.95 * fade);
+  // A dark ring on the ground at the exact reach of the blow.
+  under.lineStyle(3, INK, 0.45 * fade);
+  ring(under, s.x, s.y, r);
+  // Quebra-Junta's rim is its element's amber, with the dust only as a thread inside; the mace's is dust.
+  top.lineStyle(7 * fade + 2, glow ?? DUST_LIGHT, 0.95 * fade);
   arcLine(top, s.x, s.y, r * open, a0, a1);
-  top.lineStyle(2, 0xffffff, 0.9 * fade);
+  top.lineStyle(2, glow ? DUST_LIGHT : 0xffffff, 0.9 * fade);
   arcLine(top, s.x, s.y, r * open * 0.93, a0 + 0.15, a1 - 0.15);
+  if (k < HEAD_SHOWN) drawMaceHead(top, s, k / HEAD_SHOWN, glow);
   // Pebbles thrown out from the front half, falling back.
   top.fillStyle(DUST_LIGHT, 0.9 * fade);
   for (let i = 0; i < 5; i++) {
@@ -732,6 +729,40 @@ function drawSmash(
     const d = r * (0.6 + 0.5 * open);
     disc(top, s.x + Math.cos(a) * d, s.y + Math.sin(a) * d - Math.sin(k * Math.PI) * 14, 2.5);
   }
+}
+
+/** Part of a blow's life the mace head stays on the ground (~0.15 s). */
+const HEAD_SHOWN = 0.375;
+const IRON = 0x5c6270;
+const IRON_LIGHT = 0xaab2c0;
+
+/**
+ * The mace head driven into the ground where it struck, on the frame of the damage: it squashes and fades (`q` 0 -> 1).
+ * The blow that brings the shock wave has a white-hot head ("pá, pá, BUM").
+ */
+function drawMaceHead(g: Phaser.GameObjects.Graphics, s: Slash, q: number, glow: number | undefined): void {
+  const a = 1 - q * q;
+  const hx = s.x;
+  const hy = s.y - 6;
+  // The haft back toward the hero.
+  const bx = hx - Math.cos(s.angle) * 26;
+  const by = hy - Math.sin(s.angle) * 26 - 10;
+  g.lineStyle(4, 0x6a4a2a, a);
+  g.lineBetween(hx, hy, bx, by);
+  const w = 11 * (1 + 0.35 * q);
+  const h = 11 * (1 - 0.35 * q);
+  const body = s.wave ? 0xffffff : (glow ?? IRON);
+  for (let i = 0; i < 6; i++) {
+    const sa = (i * Math.PI) / 3;
+    g.fillStyle(s.wave ? 0xfff0c0 : IRON_LIGHT, a);
+    disc(g, hx + Math.cos(sa) * w, hy + Math.sin(sa) * h, 3);
+  }
+  g.fillStyle(INK, a);
+  oval(g, hx, hy, w * 2 + 3, h * 2 + 3);
+  g.fillStyle(body, a);
+  oval(g, hx, hy, w * 2, h * 2);
+  g.fillStyle(0xffffff, 0.5 * a);
+  oval(g, hx - w * 0.3, hy - h * 0.35, w * 0.7, h * 0.5);
 }
 
 /**
@@ -771,6 +802,19 @@ const AURA_CORE: readonly [number, number][] = [
   [0.6, 0.1],
   [0.35, 0.18],
 ];
+
+/** `lit` of `n` amber pips under the hero: the blows already struck towards the mace's next shock wave. */
+function drawWaveCount(g: Phaser.GameObjects.Graphics, world: World, lit: number, n: number): void {
+  const p = world.player;
+  for (let i = 0; i < n; i++) {
+    const x = p.x + (i - (n - 1) / 2) * 12;
+    const y = p.y + 38;
+    g.fillStyle(INK, 0.6);
+    disc(g, x, y, 4.5);
+    g.fillStyle(i < lit ? ELEMENT_COLOR.earth : 0x4a3a28, i < lit ? 1 : 0.8);
+    disc(g, x, y, 3);
+  }
+}
 
 /**
  * Procissão: the souls it has gathered (one per kill, up to its cap; each adds a wisp to the next volley) circle the

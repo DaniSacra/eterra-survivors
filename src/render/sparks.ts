@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import type { WeaponId } from '../data/weapons';
 import { disc, ring } from './shapes';
+import { ELEMENT_COLOR } from './ui';
 
 /**
  * A fixed pool of tiny cartoon sparks (hit sparks, death stars, confetti, rings), created once and never
@@ -57,7 +58,9 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   fireSword: [SPARK.ember, 0xff8a20],
   yahFlame: [SPARK.ember, 0xff9a30],
   forgeFury: [SPARK.ember, 0xffa040],
-  jointBreaker: [SPARK.star, 0xffc890],
+  // The Elos' sparks in their element's colour.
+  jointBreaker: [SPARK.star, ELEMENT_COLOR.earth],
+  fury: [SPARK.star, ELEMENT_COLOR.fury],
   staff: [SPARK.cross, 0xd8b0ff],
   lyraStar: [SPARK.cross, 0xfff0c0],
 };
@@ -142,7 +145,13 @@ export class Sparks {
   }
 
   /** A hit by `weapon` on something at (x, y): its spark, popping up and out. */
-  hit(x: number, y: number, weapon: WeaponId | null, size: number, weight: HitWeight = HitWeight.Plain): void {
+  hit(
+    x: number,
+    y: number,
+    weapon: WeaponId | null,
+    size: number,
+    weight: HitWeight = HitWeight.Plain,
+  ): void {
     if (!this.room) return;
     const st = (weapon && HIT_SPARK[weapon]) || HIT_PLAIN;
     const a = this.rand() * Math.PI * 2;
@@ -156,7 +165,16 @@ export class Sparks {
       this.add(x - ox * 0.5, y + oy - 4, -ox * 2, oy * 2 - 30, 0.26, r * 1.3, 0xffffff, SPARK.star);
       return;
     }
-    this.add(x + ox, y + oy, ox * 3, oy * 3 - 20, 0.22, weight === HitWeight.Strong ? r * 1.5 : r, st[1], st[0]);
+    this.add(
+      x + ox,
+      y + oy,
+      ox * 3,
+      oy * 3 - 20,
+      0.22,
+      weight === HitWeight.Strong ? r * 1.5 : r,
+      st[1],
+      st[0],
+    );
     if (weight === HitWeight.Strong) this.add(x, y, 0, 0, 0.18, size * 0.9, st[1], SPARK.ring, false);
   }
 
