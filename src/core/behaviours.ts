@@ -360,7 +360,7 @@ function dig(world: World, e: Enemy, dt: number, out: { x: number; y: number }):
     e.stir -= dt;
     if (e.stir > 0) return;
     e.brewT = d.every;
-    const start = world.rng.next() * TAU;
+    const start = e.aimX; // chosen when the windup began, so the render can mark the graves from the first frame
     const hpMult = segmentAt(world.time, world.stage.waves).hpMult;
     for (let i = 0; i < d.count; i++) {
       const a = start + (i / d.count) * TAU;
@@ -371,7 +371,10 @@ function dig(world: World, e: Enemy, dt: number, out: { x: number; y: number }):
   e.brewT -= dt;
   const p = world.player;
   const near = (p.x - e.x) ** 2 + (p.y - e.y) ** 2 <= d.range * d.range;
-  if (e.brewT <= 0 && e.stun <= 0 && near && world.enemies.size < config.enemies.maxActive) e.stir = d.windup;
+  if (e.brewT <= 0 && e.stun <= 0 && near && world.enemies.size < config.enemies.maxActive) {
+    e.stir = d.windup;
+    e.aimX = world.rng.next() * TAU;
+  }
 }
 
 /**

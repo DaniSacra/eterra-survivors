@@ -283,3 +283,25 @@ describe('marks and the crowd', () => {
     expect(w.kills).toBe(0);
   });
 });
+
+describe('Coveiro: the graves are fixed from the start of the windup (CF-04)', () => {
+  it('the ring angle is chosen when the shovel goes in and the Ossadas rise exactly there', () => {
+    const w = bareWorld();
+    w.player.x = 300;
+    const d = ENEMIES.gravedigger.dig;
+    const e = spawnEnemy(w, 'gravedigger', 0, 0);
+    e.brewT = 0;
+    run(w, 0.3);
+    expect(e.stir).toBeGreaterThan(0);
+    const start = e.aimX;
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(start).toBeLessThan(Math.PI * 2);
+    run(w, d.windup + 0.8);
+    const bones = w.enemies.active.filter((o) => o.type === 'bones');
+    const first = bones.find(
+      (o) => Math.abs(Math.atan2(o.y - e.y, o.x - e.x) - Math.atan2(Math.sin(start), Math.cos(start))) < 0.3,
+    );
+    expect(bones.length).toBe(d.count);
+    expect(first).toBeDefined();
+  });
+});
