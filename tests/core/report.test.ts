@@ -61,10 +61,10 @@ describe('end-of-run report', () => {
     expect(almostElo(w)).toBeNull();
     w.passives.might = PASSIVES.might.maxLevel;
     blade.level = maxLevel('blade') - 1;
-    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury' });
+    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury', missing: 'weapon', passive: 'might' });
     blade.level = maxLevel('blade');
     w.passives.might = PASSIVES.might.maxLevel - 1;
-    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury' });
+    expect(almostElo(w)).toEqual({ weapon: 'blade', elo: 'fury', missing: 'passive', passive: 'might' });
     w.passives.might = PASSIVES.might.maxLevel - 2;
     expect(almostElo(w)).toBeNull();
     forgeFury(w);

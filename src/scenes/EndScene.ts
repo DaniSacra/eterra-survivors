@@ -295,9 +295,10 @@ export class EndScene extends Phaser.Scene {
     const almost = almostElo(this.world);
     if (almost) {
       const weapon = t.weapons[almost.weapon].name;
+      const piece = almost.missing === 'weapon' ? weapon : t.passives[almost.passive];
       const text = save.elos.includes(almost.elo)
-        ? t.end.almostElo(t.weapons[almost.elo].name)
-        : t.end.almostEloUnknown(weapon);
+        ? t.end.almostElo(piece, t.weapons[almost.elo].name)
+        : t.end.almostEloUnknown(piece, weapon);
       line(text, 15, UI.gold, true);
     }
     const elos = this.newElos;

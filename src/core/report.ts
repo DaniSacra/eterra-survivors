@@ -48,12 +48,17 @@ export function passiveReport(world: World): { id: PassiveId; level: number }[] 
  * The Elo the run came closest to, for the end screen's "faltou pouco": a recipe one level short, of the weapon or
  * of its passive. Null otherwise.
  */
-export function almostElo(world: World): { weapon: WeaponId; elo: WeaponId } | null {
+export function almostElo(
+  world: World,
+): { weapon: WeaponId; elo: WeaponId; missing: 'weapon' | 'passive'; passive: PassiveId } | null {
   for (const o of world.weapons) {
     const st = eloStatus(world, o.id);
     if (st.kind !== 'missing') continue;
     const short = st.weaponMax - st.weapon + (st.passiveMax - st.passiveLevel);
-    if (short === 1) return { weapon: o.id, elo: (evolutionOf(o.id) as { id: WeaponId }).id };
+    if (short !== 1) continue;
+    const evo = evolutionOf(o.id) as { id: WeaponId; evo: { passive: PassiveId } };
+    const missing = st.weapon < st.weaponMax ? 'weapon' : 'passive';
+    return { weapon: o.id, elo: evo.id, missing, passive: evo.evo.passive };
   }
   return null;
 }

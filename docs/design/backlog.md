@@ -1798,7 +1798,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   (`levelUp.after`, `weaponStats.lifetime`).
 - Aceite: captura em 360x640 com o total; teste de `describe` cobrindo os 91 níveis sem mudança escondida.
 
-**NU-05 · "Faltou pouco" diz o que faltou** · ui + impl · P · proposto
+**NU-05 · "Faltou pouco" diz o que faltou** · ui + impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 05-ui #9. `almostElo` sabe se falta arma ou passiva (`report.ts:51-59`), mas a frase só diz "Faltou um nível
   para o Elo de Lâmina de Valmor!". Dizer a peça transforma o lamento em plano (pilar 4).

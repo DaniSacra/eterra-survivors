@@ -353,8 +353,10 @@ export const t = {
     next: 'Próxima fase',
     passives: 'Passivas',
     /** "Faltou pouco": the Elo closest to forming (an unknown Elo is named by its weapon, not revealed). */
-    almostElo: (elo: string) => `Faltou um nível para forjar ${elo}!`,
-    almostEloUnknown: (weapon: string) => `Faltou um nível para o Elo de ${weapon}!`,
+    /** "Faltou pouco" names the piece one level short (NU-05): the weapon or the recipe's passive. */
+    almostElo: (piece: string, elo: string) => `Faltou 1 nível de ${piece} para forjar ${elo}!`,
+    almostEloUnknown: (piece: string, weapon: string) =>
+      `Faltou 1 nível de ${piece} para o Elo de ${weapon}!`,
     /** An achievement this run unlocked, with its reward ("+50 ouro"). */
     achievement: (name: string, reward: string) => `Conquista: ${name} (${reward})`,
     moreAchievements: (n: number) => (n === 1 ? '+1 conquista' : `+${n} conquistas`),
