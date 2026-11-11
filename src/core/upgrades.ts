@@ -161,11 +161,6 @@ export function forgeElos(world: World): void {
   }
 }
 
-/** The owned base weapons whose Elo uses `passive` (a passive card lists them all). */
-export function weaponsCompletedBy(owned: readonly WeaponId[], passive: PassiveId): WeaponId[] {
-  return owned.filter((id) => evolutionOf(id)?.evo.passive === passive);
-}
-
 /** What a passive choice would do to its stat (the level-up stat sheet shows `from → to`); null otherwise. */
 export function statPreview(
   world: World,

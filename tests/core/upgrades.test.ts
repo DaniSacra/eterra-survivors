@@ -8,7 +8,6 @@ import {
   weaponLevelDiff,
   eloReady,
   statPreview,
-  weaponsCompletedBy,
 } from '../../src/core/upgrades';
 import { addXp, xpToNext } from '../../src/core/xp';
 import { config } from '../../src/data/config';
@@ -191,16 +190,6 @@ describe('passive limit', () => {
     for (const o of passives) expect(owned).toContain(o.id);
   });
 
-  it('lists every owned weapon whose Elo a passive completes', () => {
-    expect(weaponsCompletedBy(['mace', 'blade', 'paladinSwords'], 'armor')).toEqual([
-      'mace',
-      'paladinSwords',
-    ]);
-    expect(weaponsCompletedBy(['blade', 'fire'], 'might')).toEqual(['blade', 'fire']);
-    expect(weaponsCompletedBy(['frost'], 'might')).toEqual([]);
-    // An Elo already formed needs nothing more.
-    expect(weaponsCompletedBy(['fury'], 'might')).toEqual([]);
-  });
 
   it('bumps buildRev on every build change, not on a heal', () => {
     const w = quietWorld();

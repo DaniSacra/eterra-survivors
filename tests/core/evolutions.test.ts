@@ -13,10 +13,12 @@ import {
 import { maxLevel } from '../../src/core/weapons';
 import { weaponUsed, newSave, recordRun } from '../../src/core/meta';
 import { newRunSummary } from '../../src/core/records';
-import { ELEMENTS, EVOLUTIONS, EVOLVED_IDS, elementOf } from '../../src/data/evolutions';
+import { ELEMENTS, EVOLUTIONS, EVOLVED_IDS } from '../../src/data/evolutions';
+
+const elementOf = (id: WeaponId) => EVOLUTIONS[id]?.element ?? null;
 import { ELEMENT_COLOR } from '../../src/render/ui';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
-import { WEAPONS } from '../../src/data/weapons';
+import { WEAPONS, type WeaponId } from '../../src/data/weapons';
 import { CHEST } from '../../src/data/pickups';
 import { PASSIVES } from '../../src/data/upgrades';
 import { STAGES } from '../../src/data/stages';

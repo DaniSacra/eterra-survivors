@@ -34,7 +34,10 @@ export interface OwnedWeapon {
   damage: number;
   /** Match time when it was picked up. */
   since: number;
-  /** Attacks made so far (a Fúria wave comes every `every`). */
+  /**
+   * Attacks made so far, for the verbs that come every n-th attack: a Fúria wave, a mace's shock wave, Chama de Yah's
+   * pulse. Each weapon has at most one of them, so they never share the count.
+   */
   swings: number;
   /** Seconds until a shock wave's aftershock (Quebra-Junta; 0 = none pending), and where. */
   after: number;

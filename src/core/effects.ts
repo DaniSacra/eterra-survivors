@@ -78,7 +78,7 @@ export const createBolt = (): Bolt => ({
   fromY: 0,
 });
 
-export function addBolt(world: World, x: number, y: number, radius: number, weapon: WeaponId): void {
+export function addBolt(world: World, x: number, y: number, radius: number, weapon: WeaponId): Bolt {
   const b = world.bolts.acquire();
   b.x = x;
   b.y = y;
@@ -86,12 +86,12 @@ export function addBolt(world: World, x: number, y: number, radius: number, weap
   b.weapon = weapon;
   b.ttl = config.effects.boltTtl;
   b.link = false;
+  return b;
 }
 
 /** A bolt jumping from (fx, fy) to (x, y) (Tempestade's chain), purely visual. */
 export function addLink(world: World, fx: number, fy: number, x: number, y: number, weapon: WeaponId): void {
-  addBolt(world, x, y, 0, weapon);
-  const b = world.bolts.active[world.bolts.active.length - 1] as Bolt;
+  const b = addBolt(world, x, y, 0, weapon);
   b.link = true;
   b.fromX = fx;
   b.fromY = fy;

@@ -57,11 +57,6 @@ export function evolutionOf(base: WeaponId): { id: WeaponId; evo: Evolution } | 
   return null;
 }
 
-/** The element of an Elo (null for base weapons). */
-export function elementOf(id: WeaponId): ElementId | null {
-  return EVOLUTIONS[id]?.element ?? null;
-}
-
 /** A weapon's strength category; an Elo takes its base's. */
 export function weaponCategory(id: WeaponId): WeaponCategory {
   const def: WeaponDef = WEAPONS[id];

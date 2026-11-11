@@ -1578,7 +1578,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   os testes antigos para o que testam. Vai junto com o D-06.
 - Aceite: teste novo verde; com o D-06 aprovado, os dois `skipIf` da progressão passam a rodar.
 
-**NT-03 · Código morto, comentários soltos e um ponto frágil** · impl · P · 🟡 em parte
+**NT-03 · Código morto, comentários soltos e um ponto frágil** · impl · P · ✅ feito (2026-11-11: `weaponsCompletedBy` e `elementOf` fora, `addBolt` devolve o raio, `swings` documentado)
 
 - Feito em 2026-11-09: removidos `unlockedTitles` e as docs soltas; aspas do Livro no `pt-BR.ts`. Falta: `weaponsCompletedBy`/`elementOf` só usados em teste, `addLink`, contadores de `swings`.
 
