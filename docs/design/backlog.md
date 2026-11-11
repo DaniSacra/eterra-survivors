@@ -33,13 +33,14 @@ antigos deste backlog que pedem traço cartoon seguem a nova direção.
 
 ## Próximos 5
 
-Plano da noite de 2026-11-08 (aprovado): ver a seção "Revisão 2026-11-08" no fim das etapas.
+Sugestão do game-director de 2026-11-10 para a etapa "Fases temáticas e inimigos novos" (no fim do arquivo), à espera
+da aprovação do Daniel. A lista anterior (RB-01, RB-02, RU-02, RF-02, RE-01) está toda feita.
 
-1. **RB-01** Vitória e derrota no mesmo passo (a fase não é liberada)
-2. **RB-02** Fantasma esmaecido come projéteis e atrai a mira
-3. **RU-02** Faixa da build no HUD
-4. **RF-02** Acerto em flash branco; herói ferido com rosto visível
-5. **RE-01** Aldo em Valmor, a primeira partida, justa
+1. **FT-01** Base dos inimigos novos: pools, tetos, agenda, chefes com várias habilidades e a métrica de dano
+2. **FT-02 + FT-03** Marca no chão antes de surgir; atirador (Goblin Lanceiro)
+3. **FT-04 + FT-05 + FT-06** Salto (Corvo), matilha (Lobo da Geada) e estandarte
+4. **FT-07** Estrada do Sul estreita, com elenco novo e o Golem só nela
+5. **FT-08** Lobo Velho: Uivo da Geada e a arena de gelo (depende da pergunta 1)
 
 ---
 
@@ -1332,6 +1333,11 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 - Desafios e conquistas que liberam armas novas.
 - Novas fases do Capítulo 1 do original (Pasto do Vau, Vau do Corvo, caminho para Erukh), com lore do Daniel.
 - Tabela de recordes local por herói e fase (virou CC-08, 2026-11-09).
+- Ondas com etiquetas (2026-11-10, da etapa "Fases temáticas"): momentos marcados da curva que pedem uma coisa de cada
+  vez, como uma onda de loja (um mercador no chão por 20 s), uma de esquiva (só tiros e saltos) e uma de habilidade (um
+  objetivo curto). Fica para depois de a partida de 10 minutos com chefe às 10:00 estar firme com os inimigos novos.
+- Dificuldade dos inimigos novos por perigo (ND-01): mais atiradores, ninhos e estandartes por perigo, em vez de só
+  multiplicar vida e dano.
 
 Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Daniel):
 
@@ -1969,3 +1975,580 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   por herói no sim antes de ligar.
 - Aceite: teste por traço; sim de 16 sementes com cada herói a ±20 pontos da fase; pick rates por herói diferentes
   entre si (o traço muda a build).
+
+---
+
+## Fases temáticas e inimigos novos (2026-11-10)
+
+Origem: pedido do Daniel de 2026-11-10, proposta do game-director. **Todos os itens estão `· proposto`**: esperam a
+aprovação do Daniel. Bússola: o jogo **mais dinâmico, mais divertido, mais arriscado e mais recompensador**; a
+diversão vale mais que a fidelidade estrita ao cânone (fases, elencos e lugares podem se afastar do original quando o
+jogo fica melhor). Nome novo de lugar, criatura ou habilidade é **nome provisório** até o Daniel aprovar (perguntas no
+fim da seção).
+
+Prefixo: **FT** (fases temáticas).
+
+### Diagnóstico
+
+- As três fases se parecem: ratos e voadores nas três, as mesmas duas elites (`elites('golem', 'goblin')`,
+  `data/stages.ts`) nas três, e todo inimigo comum só persegue (`move`: `zigzag`, `charge`, `phase`). Nada obriga o
+  jogador a mudar de rota: o melhor caminho é sempre andar em círculo largo (pilar 2: autopiloto).
+- Risco não paga: a única fonte de recompensa extra é a elite, que vem na hora marcada e também só persegue. Não existe
+  "vou arriscar entrar ali porque vale".
+- A Estrada do Sul (520 de largura) é um campo aberto com bordas: o corredor não pesa, e é a fase mais pobre em
+  identidade.
+- Cada fase precisa pedir uma habilidade diferente: **Valmor** pede _prioridade de alvo_ (ninho, ladrão, ovos: o que
+  matar primeiro), a **Cripta** pede _limpeza_ (os que não descansam: terminar o serviço, pilhas e explosões), a
+  **Estrada** pede _esquiva lateral_ (investidas, mergulhos, lanças num corredor estreito).
+
+### Princípios (valem para todos os itens FT)
+
+- **Um verbo por inimigo**, data-driven: campo opcional em `EnemyDef`, um `case` em `core/behaviours.ts`, teste em
+  `tests/core/` **com o inimigo dentro de uma multidão** (não só sozinho), conferido no sim.
+- **Tudo telegrafado**: toda ameaça nova avisa antes, no chão, na linguagem de perigo que já existe nos chefes
+  (`WARN_COLOR` = `UI.dangerHex`, coral com listras e borda tracejada branca andando, `render/fx.ts`). Nada de dano sem
+  aviso, nada sob o herói sem aviso.
+- **Arte de perigo contra arte do herói** (vfx-director): os efeitos do herói são luz (aditivos, dourado, cores de
+  elemento); os do inimigo são **coisas** (núcleo coral claro, contorno escuro, sem blend aditivo) e são desenhados
+  **acima da camada de escuridão**, para nunca sumirem no escuro. Poças e gelo têm cor de material própria (fora do
+  ciano das gemas, do roxo da Lyra e do verde do Teo); a borda coral aparece só enquanto armam. Modo calmo: sem pulsar,
+  preenchimento estático.
+- **Risco paga, e se vê**: ninho, ladrão, estandarte e elites deixam recompensa visivelmente melhor (`loot`), com seta
+  na borda quando fora da tela (reaproveita o NU-01).
+- **Teto por tipo** (`max` no `EnemyDef`) para tudo que atira, gera ou fortalece, e pools próprios com teto para
+  projéteis e marcas do inimigo. Nada aloca por quadro.
+- Os comportamentos entram **junto da fase que os usa primeiro** (ver "Ordem"): explodir e remontar esperam a Cripta.
+
+### Dados comuns (referência para todos os itens)
+
+```ts
+// data/enemies.ts · EnemyDef, campos novos (todos opcionais)
+move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'flee' | 'pack' | 'still';
+/** Most of this type alive at once: the spawner picks the stage's basic instead, specials wait. */
+max?: number;
+/** charge: replaces CHARGE (core/behaviours.ts) for this enemy. */
+charge?: { trigger: number; windup: number; dash: number; speedMult: number; rest: number };
+/** shoot: walks until `range`, holds between `keep` and `range`, every `every` s winds up and fires. */
+shoot?: {
+  range: number; keep: number; every: number; windup: number;
+  /** Straight shot (px/s, px, s). Damage = contact damage x `damage` (default 1). */
+  speed: number; radius: number; life: number; damage?: number;
+  /** Lobbed: lands where the hero stood after `flight` s and leaves the next of `pools` there. */
+  lob?: { flight: number; pools: GroundPool[] };
+};
+/** leap: marks the hero's spot, crouches `windup`, flies `air` s (no contact), lands hurting within `radius`. */
+leap?: { trigger: number; windup: number; air: number; radius: number; rest: number };
+/** pack: heads for a point `flank` rad to its side (by uid parity) until within `close` px. */
+pack?: { flank: number; close: number };
+/** flee: keeps `keep` px from the hero, picks up gems it walks over (`steal`), runs off after `life` s. */
+flee?: { keep: number; life: number; steal: boolean };
+/** nest: stands still; while within `range` of the hero, every `every` s marks and spawns `count`, up to `total`. */
+nest?: { spawn: EnemyId; every: number; count: number; total: number; range: number };
+/** banner: every `tick` s, enemies within `radius` are rallied (config.rally) for a little more than a tick. */
+banner?: { radius: number; tick: number };
+/** brew: every `every` s stops `windup` s, then heals `heal` of max HP and rallies `rally` s the ones within `radius`. */
+brew?: { every: number; windup: number; radius: number; heal: number; rally: number };
+/** burst (Cripta): on death leaves a mark that bursts after `delay` s (hero: contact x `damage`; enemies: `foes` of its max HP). */
+burst?: { delay: number; radius: number; damage: number; foes: number };
+/** reassemble (Cripta): the first death leaves a pile that stands up after `delay` s unless hit. */
+reassemble?: { delay: number };
+/** trail (Cripta): every `every` s leaves `pool` where it stands. */
+trail?: { every: number; pool: GroundPool };
+/** Besides its gem: gold (before greed and stage mult), a random floor item, a chest, a pickup. */
+loot?: { gold?: number; item?: boolean; chest?: boolean; pickup?: PickupId };
+/** Bosses with more than one ability use them in this order, in a loop (`ability` stays as the one-ability form). */
+abilities?: BossAbility[];
+
+/** A patch an enemy leaves on the ground. `slow` multiplies the hero's speed inside; `hit` is contact x hit per tick. */
+export interface GroundPool {
+  kind: 'poison' | 'tar' | 'web' | 'ice' | 'slime';
+  radius: number;
+  ttl: number; // Infinity = until the boss falls
+  slow?: number;
+  hit?: number;
+}
+```
+
+```ts
+// data/config.ts · novos
+/** Banner and brew: what a rallied enemy gets. */
+rally: { speed: 1.3, damage: 1.25 },
+/** Enemy shots (own pool, no allocation). */
+enemyShots: { max: 60 },
+/** Ground marks: telegraphs, pools, ice, webs and the spawn mark (own pool). */
+marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80, poolTick: 0.5 },
+```
+
+```ts
+// data/stages.ts · StageDef, novo
+/** Scheduled one-offs besides elites: from `from` s, one every `every` s (each obeys its def's `max`). */
+specials?: { id: EnemyId; from: number; every: number }[];
+```
+
+```ts
+// data/waves.ts · Roles ganha o atirador (comum, entra no sorteio com peso; o teto `max` do def segura)
+shooter?: EnemyId;
+// CURVE: `shooter` 1 em 120, 180 e 240 s; 2 em 300, 390, 480 e 540 s; 0 na luta do chefe (600 s).
+// Fases sem `shooter` não mudam (o filtro de `buildWaves` já ignora papel vazio).
+```
+
+Ninho, ladrão e estandarte **não** entram no sorteio com peso: com lotes de até 10 a cada 0,5 s, qualquer peso enche o
+teto na hora e o ritmo vira sorte. Vão para `specials` (ritmo fixo, legível, ajustável), como as elites. A vigília
+continua os `specials` no mesmo ritmo.
+
+### Base
+
+**FT-01 · Base dos inimigos novos: pools, tetos, agenda, chefes com várias habilidades e a métrica de dano** · impl + bal · M · proposto
+
+- Por quê: todo item FT precisa de projéteis do inimigo, marcas no chão, teto por tipo e uma medida de quem causa o
+  dano. Feito uma vez, cada comportamento depois vira um `case` pequeno.
+- O quê:
+  - `core/enemyShots.ts`: `Pool<EnemyShot>` (x, y, vx, vy, radius, damage, ttl, `lob` com alvo e tempo de voo,
+    `ownerUid`), teto `config.enemyShots.max`; acerta só o herói (círculo contra círculo). Congelam no Sopro de Geada
+    (item do chão); a Badalada (bomba) apaga os tiros visíveis (dá mais valor ao item).
+  - `core/marks.ts`: `Pool<Mark>` (kind, x, y, radius, `arm` (aviso), `ttl`, `hit`, `slow`, `foes`, `spawn` +
+    `hpMult`), teto `config.marks.max`. `updateMarks` roda depois de `updateZones` e antes de `sweepDeadEnemies` (como
+    `updateShatters`): consulta o hash só ao armar. Escreve `player.groundSlow` (1 = nada), que `updatePlayer` usa no
+    passo seguinte.
+  - `world.alive: Record<EnemyId, number>` (sobe em `spawnEnemy`, desce no `sweep` e no despawn) e `max` respeitado no
+    `Spawner` (o atirador acima do teto vira o básico; `specials` esperam).
+  - `move: 'still'` e `'flee'` nunca são reciclados para a frente do herói: longe demais, somem sem drop.
+  - `StageDef.specials` no `Spawner` (fase e vigília).
+  - `abilities` nos chefes: `Enemy.abilityIndex`, `updateBoss` usa `abilities[i]` e avança ao fim de cada uma; `ability`
+    vira `[ability]`. Tipos novos de habilidade entram com seus itens (FT-08, FT-12).
+  - `loot` em `onEnemyKilled` (ouro, item, baú, pickup), substituindo o `if (e.def.elite)` (elite = `loot.chest`).
+  - `hurtHero` aceita atacante nulo (tiro, poça): a Muralha bloqueia mas não devolve dano quando o dono já morreu.
+  - Métrica: `world.hurtBy` por fonte (`contact`, `shot`, `leap`, `ground`, `burst`, `boss`) e por tipo de inimigo,
+    contadores preallocados (sem string por golpe). O sim imprime `DANO POR FONTE` por fase (substitui `taken.fast`).
+  - Bot do sim (`tests/lab/bot.ts`): marcas armando e tiros entram na repulsão como ameaça (peso de elite), para os
+    números não punirem um bot cego.
+- Custo: `data/enemies.ts`, `data/stages.ts`, `data/config.ts`, `core/world.ts`, `core/waves.ts`, `core/enemies.ts`,
+  `core/bosses.ts`, `core/player.ts`, dois arquivos novos no core; render: espelhos novos (`render/mirror.ts`) para tiros
+  e marcas, desenhados acima da escuridão.
+- Riscos: dois pools novos no passo; ambos O(n) pequenos (60 e 160). Nenhuma mudança de jogo ainda: o sim tem de dar os
+  mesmos números com a mesma semente.
+- Aceite: testes de pool (teto, reuso), de `max` no spawner, de `specials`, de `abilities` em ciclo e de `loot`;
+  `npm run sim` com `SIM_SHOP=all` idêntico ao anterior (só a linha nova de dano); F4 igual.
+
+**FT-02 · Marca no chão antes de surgir** · impl + vfx · P · proposto
+
+- Por quê: inimigo que nasce dentro da tela (lados da Estrada, ovos, ninhos, a badalada do Sineiro) acerta sem aviso.
+  Pilar 5.
+- O quê: quem surge **dentro da vista** passa antes por uma marca `spawn` de `config.marks.spawnTime` (0,5 s) e nunca a
+  menos de `spawnMinDist` (80 px) do herói (a marca é empurrada para fora). Quem surge no anel fora da tela continua
+  direto (a marca seria invisível e custaria pool). Vale para todas as fases.
+- Visual (vfx): o chão racha num círculo do raio do inimigo, com brilho coral fraco crescendo em 0,5 s e um sopro de
+  poeira (neve, pó de pedra) no surgimento. Mortos-vivos: fiapos de névoa saindo da racha (Cripta).
+- Custo: `core/marks.ts` (kind `spawn`), `core/terrain.ts` (`spawnPoint` diz se o ponto está na vista), `core/bosses.ts`
+  (badalada), render.
+- Aceite: teste: nada surge na vista sem 0,5 s de marca nem a menos de 80 px do herói; captura da Estrada com saídas
+  laterais marcadas.
+
+### Estrada do Sul: "os caçadores"
+
+Habilidade pedida: **esquiva lateral**. Corredor estreito, pressão das duas pontas, investidas e mergulhos que só se
+evitam saindo da linha.
+
+**FT-03 · Atirador: para longe e lança um projétil lento** · impl + vfx · P · proposto
+
+- Por quê: obriga a andar (Brotato: quem atira tira o jogador do círculo). Primeiro usuário: Goblin Lanceiro.
+- O quê: `move: 'shoot'`. Anda até `range`, fica entre `keep` e `range` (recua se o herói chega perto), a cada `every`
+  s para `windup` s e atira na posição do herói naquele instante (sem perseguir). Tonto ou congelado não atira.
+  Projétil sempre mais lento que o herói (150).
+- Dados (Goblin Lanceiro vira comum; deixa de ser elite em todas as fases):
+  ```ts
+  goblin: {
+    sprite: 'enemy.goblin', radius: 12, hp: 16, speed: 70, damage: 6, xp: 2, knockbackResist: 0.2,
+    move: 'shoot', max: 10,
+    shoot: { range: 260, keep: 190, every: 3.2, windup: 0.6, speed: 140, radius: 5, life: 2.2 },
+  },
+  ```
+- Visual: no aviso, o goblin recua o braço e a ponta da lança acende coral; a lança voa com núcleo claro, contorno
+  escuro e um rastro curto. Sem linha de mira (polui com 10 atiradores).
+- Aceite: teste com o atirador no meio de 200 inimigos: atira no ritmo, para de atirar tonto; teto de 10 e de 60 tiros;
+  no sim, `shot` abaixo de 30% do dano recebido na Estrada.
+
+**FT-04 · Salto: marca o chão, sobe e cai com dano em área** · impl + vfx · P · proposto
+
+- Por quê: ameaça que vem de cima, sem passar pela multidão: o círculo marcado pede um passo de lado.
+- O quê: `move: 'leap'`. Perto (`trigger`), marca o ponto do herói, agacha `windup`, voa `air` s (sem contato, sem
+  separação; pode ser atingido) e cai em linha reta no ponto marcado: dano de contato em `radius`. Aviso total =
+  windup + air. Usuários: Corvo (mergulho) e Golem de Pedra (FT-07).
+- Dados:
+  ```ts
+  crow: { sprite: 'enemy.crow', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0,
+    move: 'leap', leap: { trigger: 240, windup: 0.45, air: 0.6, radius: 24, rest: 3.5 } },
+  ```
+- Visual: círculo coral no chão enchendo do centro para a borda durante todo o aviso, e a sombra do corvo crescendo
+  nele; no impacto, anel de neve e penas escuras.
+- Aceite: teste do aviso (1,05 s) e do dano só dentro do raio; no sim, `leap` abaixo de 30% do dano.
+
+**FT-05 · Matilha: cerca pelos lados** · impl · P · proposto
+
+- Por quê: lobos que chegam em pinça mudam a rota de fuga; na estrada estreita, correm rente às árvores e cortam para
+  dentro.
+- O quê: `move: 'pack'`. Mira um ponto girado `flank` rad para o seu lado (paridade do `uid`) até `close` px do herói,
+  depois vem reto. Seno e cosseno do giro pré-calculados (sem trigonometria por quadro).
+- Dados: `frostWolf: { ..., move: 'pack', pack: { flank: 1.0, close: 150 } }` (resto igual).
+- Visual: nenhum aviso novo (é movimento); os olhos do lobo brilham frios, legíveis no escuro.
+- Aceite: teste: dois lobos de `uid` par e ímpar chegam por lados opostos, também dentro de uma multidão.
+
+**FT-06 · Estandarte: fortalece quem está perto até cair** · impl + vfx · P · proposto
+
+- Por quê: alvo de prioridade com recompensa. Derrubar o estandarte é uma decisão de rota (ir até ele no meio dos
+  fortalecidos), e paga.
+- O quê: `move: 'still'`, `banner`. A cada `tick` s, quem está no raio ganha `rally` (velocidade x1,3, contato x1,25,
+  `config.rally`) por um pouco mais que um tick. `Enemy.rally` (segundos) é o mesmo campo que a Bruxa usa (FT-11).
+  Consulta ao hash 4 vezes por segundo por estandarte, no máximo 2 vivos.
+- Dados (nome provisório; ver pergunta 6):
+  ```ts
+  warBanner: { sprite: 'enemy.warBanner', radius: 14, hp: 70, speed: 0, damage: 0, xp: 6, knockbackResist: 1,
+    move: 'still', max: 2, banner: { radius: 150, tick: 0.25 }, loot: { gold: 15, item: true } },
+  ```
+- Visual: mastro fincado com pano preto rasgado e um braseiro no topo, que é uma das luzes da fase (a luz é o que faz o
+  estandarte ser visto de longe); o raio lido por um brilho avermelhado fraco no chão. Fortalecido: brasinha sobre a
+  cabeça do inimigo (marca na textura, sem efeito por inimigo).
+- Aceite: teste: dentro do raio, mais rápido e mais forte; fora, normal; ao cair, todos voltam ao normal em menos de
+  0,5 s; ouro e item no chão.
+
+**FT-07 · Estrada do Sul: corredor estreito, elenco novo e o Golem só aqui** · impl + bal + visual · M · proposto
+
+- Por quê: a fase mais pobre hoje. Estreita, a estrada vira o que o nome promete: pressão das duas pontas e investidas
+  que só se evitam de lado. Substitui a restrição do NA-02 ("sem mudar `width`").
+- O quê:
+  - `layout: { kind: 'corridor', width: 320, sides: 0.05 }` (ponto de partida; calibrar entre 300 e 340). No celular a
+    vista tem pelo menos 480 px de mundo (`config.view.minWorldSide`), então a estrada inteira cabe na tela em pé, com
+    ~80 px de floresta de cada lado. As saídas laterais (5%) surgem na vista e usam a marca do FT-02.
+  - Elenco: `buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostBoar', extra: 'frostWolf', shooter: 'goblin' })`,
+    `specials: [{ id: 'warBanner', from: 120, every: 45 }]`, `elites: elites('golem')`.
+  - Fera nova de investida longa (nome provisório "Javali da Geada"):
+    ```ts
+    frostBoar: { sprite: 'enemy.frostBoar', radius: 18, hp: 55, speed: 48, damage: 10, xp: 4, knockbackResist: 0.7,
+      move: 'charge', charge: { trigger: 340, windup: 0.9, dash: 1.0, speedMult: 5.5, rest: 4 } },
+    ```
+    A investida percorre ~290 px a ~290 px/s. Esquiva: sair 30 px da linha (raio 18 + herói 12) leva 0,2 s, e o aviso
+    dá 0,9 s. Fugir para trás não adianta (é quase o dobro da velocidade do herói); para o lado, sempre dá.
+  - Golem de Pedra com verbo próprio, reaproveitando o salto do FT-04 (pesado):
+    `golem: { ..., move: 'leap', leap: { trigger: 300, windup: 0.8, air: 0.9, radius: 64, rest: 4 } }`. Na estrada de
+    320, o pouso fecha 128 px: anda-se para a frente ou para trás, não para o lado.
+  - `mult` (`data/stages.ts`): a mesma batelada numa estrada 38% mais estreita é ~1,6x mais densa. Ponto de partida
+    `spawn` 1,25 para **1,0**; depois `hp` e `damage`; armas por último.
+  - Charge por inimigo: `CHARGE` vira o padrão de `def.charge` (o Encapuzado continua igual).
+  - Textos (`pt-BR.ts`):
+    - `stages.southRoad.desc`: "Uma estrada estreita entre pinheiros: encapuzados, goblins e a matilha do Lobo Velho."
+    - `stages.southRoad.intro` (campo novo, aviso do HUD nos primeiros 3 s; a ui decide onde): "A estrada aperta entre os
+      pinheiros. Não há para onde correr, só para o lado."
+    - `enemies.frostBoar`: "Javali da Geada" (provisório); `enemies.warBanner`: "Estandarte da Aliança Negra"
+      (provisório).
+    - `bestiary.ways`: `shoot: 'Atira de longe'`, `leap: 'Salta e cai em área'`, `pack: 'Cerca pelos lados'`,
+      `banner: 'Fortalece quem está perto'`.
+    - `bestiary.flavor` (escritos para o Survivors, provisórios): `frostBoar`: "Abaixa a cabeça, raspa o gelo e vem. Na
+      estrada estreita, só resta o lado."; `warBanner`: "Enquanto o pano estiver de pé, eles não recuam." O Goblin mantém
+      a frase do cânone (Aliança Negra).
+  - Arte (linha por criatura; Pen provisório serve para todos):
+    - Javali da Geada (r 18, ~36 px): corpo baixo e largo, crina eriçada de gelo, presas claras, olhos frios pequenos;
+      pelagem cinza-azulada escura com geada nas costas; no aviso, bafo branco e cascos raspando.
+    - Estandarte (r 14, ~28 px de base, mastro alto): ver FT-06.
+    - Goblin comum (r 12): o desenho da elite menor e mais apagado, lança comprida na mão (a silhueta da lança diz
+      "atira").
+    - Golem (r 26): igual, com rachaduras que acendem laranja no agachar do salto.
+  - Bestiário e conquistas: `elites25` passa a contar `witch` e `golem` (e a elite da Cripta, quando houver); nome
+    "Pedra e Lança" muda (o Goblin não é mais elite), sugestão provisória "Pedra e Caldeirão".
+- Riscos: corredor estreito com 500 inimigos amontoa nas pontas (separação mais cara: medir F4); deitado no celular a
+  vista tem só 480 px de altura e as pontas ficam perto (ver tempo de chegada no sim e captura em 844x390).
+- Aceite: sim `SIM_SEEDS=16 SIM_SHOP=all SIM_STAGE=southRoad`: 0% / 0–10% / 35–55%; nenhuma fonte nova acima de 30% do
+  dano; capturas em 390x844 e 420x820 com a estrada inteira e a floresta visíveis; teste: herói parado no eixo de uma
+  investida a 300 px escapa andando de lado assim que o aviso começa; F4 com 500 inimigos a 60 FPS.
+
+**FT-08 · Lobo Velho: Uivo da Geada e a arena de gelo** · impl + vfx + bal · M · proposto
+
+- Por quê: o chefe da Estrada é hoje uma investida repetida. Com o gelo, a luta vira um lugar que o lobo desenha: o
+  espaço encolhe e cada investida precisa ser lida contra o gelo.
+- O quê:
+  - Ao chegar (`bossSpawned`), o lobo uiva e a estrada **congela fechada** 450 px à frente e atrás do herói:
+    `world.arena = { y0, y1 }`, e `blockCircle` limita o herói (só o herói; a escolta passa pulando o gelo). Abre
+    quando o chefe cai (a vigília segue livre).
+  - Habilidades em ciclo: `abilities: [mordidaFunda, mordidaFunda, uivo]`, com a Mordida Funda atual.
+  - Uivo da Geada (nome provisório; "Sopro de Geada" já é o item do chão que congela, pergunta 2): para, uiva
+    `windup` 1,2 s com as áreas marcadas, que viram gelo permanente até o fim da luta.
+    ```ts
+    { kind: 'frost', every: 5, windup: 1.2, trigger: 600, count: 2, radius: 64, cap: 6, near: 120, far: 220,
+      slow: 0.6, range: 0, damage: 0 },
+    ```
+    Regras: nunca a menos de `near` px do herói (nunca sob ele); as duas áreas em metades opostas da estrada e nunca
+    lado a lado na mesma faixa de `y` (sempre sobra passagem); no máximo `cap` (a mais velha derrete em 1 s); cobertura
+    máxima ~27% da arena (6 x 12.870 px² contra 320 x 900).
+  - **Lento ou escorregadio** (recomendação: **lento**):
+    - Lento (velocidade x0,6 sobre o gelo): pró: lê na hora, funciona igual no polegar e no teclado, o bot do sim entende
+      (é só `groundSlow`), custo P. Contra: menos novidade; lento demais vira frustração (por isso 0,6, não 0,4).
+    - Escorregadio (o herói mantém o embalo e demora a virar): pró: novo e divertido no teclado. Contra: no toque parece
+      controle quebrado ou atraso de entrada, faz errar a esquiva da Mordida Funda justamente quando ela importa, pede
+      estado de velocidade no herói e um bot novo. Custo M.
+    - Variação que dá risco e recompensa (opcional, P): se a Mordida Funda cruza o gelo, o lobo escorrega 50% mais longe
+      e fica tonto 1 s no fim (janela de dano). Atrair a investida para o gelo vira jogada.
+- Visual: aviso com as marcas de perigo enchendo durante o uivo e geada correndo do lobo até elas; o gelo pronto é
+  branco-lilás fosco com rachaduras e um brilho frio fraco, na família do gelo (A-05: nunca ciano); as paredes da arena
+  são cristais de gelo altos atravessando a estrada, com luz fria própria. O uivo treme a tela (é chefe; respeita o
+  modo calmo).
+- Textos: `bestiary.ways` por chefe passa a uma lista de habilidades
+  (`bestiary.bossAbilities.oldWolf: ['Mordida Funda', 'Uivo da Geada']`), porque a chave `lunge` hoje diz "Mordida
+  Funda" e a Mãe-Aranha também investe; HUD: `hud.arenaClosed: 'O Lobo Velho fecha a estrada!'`.
+- Aceite: testes: nenhuma área a menos de 120 px do herói, nunca duas na mesma faixa, teto 6, arena prende só o herói e
+  abre na morte do chefe; sim: luta do chefe com mediana de 45 a 90 s, `boss` abaixo de 30% do dano e a habilidade não
+  mata sozinha um herói de vida cheia (regra do E-07).
+
+### Fase 1 · Arredores de Valmor: "a praga"
+
+Habilidade pedida: **prioridade de alvo**. Nada de mortos comuns: bichos, ninhos e infestação. O lugar: os
+**Arredores de Valmor** continuam com esse nome (já é o nome da fase e não depende do cemitério), mas o cenário sai do
+cemitério para os **celeiros, cercas e campos** em volta da vila, na neve (os objetos que o visual-director já lista para
+Valmor: cercas, montes de feno, lampiões). Alternativas de nome para o Daniel: "Celeiros de Valmor", "Campos de
+Valmor" (provisórios).
+
+**FT-09 · Ninho: parado, gera inimigos até ser destruído** · impl + vfx · P · proposto
+
+- Por quê: o alvo que chama o jogador para fora do círculo. Ignorar custa aranhas; quebrar paga.
+- O quê: `move: 'still'`, `nest`. Enquanto o herói está a menos de `range` px, a cada `every` s marca (FT-02) e gera
+  `count` aranhas ao lado, até `total`; depois fica quieto. Sem contato. Longe demais, some (FT-01).
+- Dados (nome provisório):
+  ```ts
+  spiderNest: { sprite: 'enemy.spiderNest', radius: 18, hp: 60, speed: 0, damage: 0, xp: 8, knockbackResist: 1,
+    move: 'still', max: 3, nest: { spawn: 'spider', every: 4, count: 2, total: 10, range: 520 },
+    loot: { gold: 10, item: true } },
+  ```
+  Na fase: `specials: [{ id: 'spiderNest', from: 45, every: 30 }, ...]`.
+- Visual: um novelo de teia no chão preso numa cerca ou num monte de feno, com sacos pálidos que pulsam uma luz
+  doentia (amarelo-esverdeado ácido, longe do verde do Teo) antes de cada leva; a pulsação acelera no último segundo.
+- Aceite: teste: gera no ritmo só com o herói perto, para no `total`, solta ouro e item; teto de 3.
+
+**FT-10 · Ladrão: foge, leva as gemas e, se cair, deixa um baú** · impl + vfx · M · proposto
+
+- Por quê: o pico de risco e recompensa da fase: largar a posição para caçar um bicho que corre com a sua experiência.
+- O quê: `move: 'flee'`. Chega até `keep` px e passa a fugir (afasta-se do herói, de lado); mais lento que o herói (dá
+  para alcançar, mas custa rota). Passando sobre gemas, guarda o valor (`Enemy.carry`; varre as gemas só para os
+  ladrões vivos, no máximo 1). Depois de `life` s, corre para fora e some (evento `thiefEscaped`). Morto: devolve o que
+  levou numa gema só, mais o baú. Surge com aviso no HUD e seta na borda (NU-01).
+- Dados (nome provisório):
+  ```ts
+  thiefRat: { sprite: 'enemy.thiefRat', radius: 10, hp: 30, speed: 135, damage: 0, xp: 0, knockbackResist: 0.3,
+    move: 'flee', max: 1, flee: { keep: 200, life: 16, steal: true }, loot: { chest: true } },
+  ```
+  Na fase: `{ id: 'thiefRat', from: 150, every: 120 }` (2:30, 4:30, 6:30, 8:30). Eventos `thiefSpawned` e
+  `thiefEscaped`.
+- Textos: `hud.thief: 'Um ladrão está levando suas gemas!'`, `hud.thiefEscaped: 'O ladrão fugiu.'`,
+  `bestiary.ways.flee: 'Foge com suas gemas'`.
+- Visual: rato magro de lenço, com um saco nas costas que cresce e brilha cada vez mais (as gemas roubadas aparecem
+  como luz azul-clara vazando pela boca do saco: a única coisa ciano nele, porque é sua).
+- Riscos: são até 4 baús a mais por corrida (cada um um nível e ouro): adianta o 1º Elo e a Loja. Medir no sim; se
+  passar, o baú do ladrão vira só ouro e um nível, sem cura.
+- Aceite: teste: rouba gema, foge, some depois de `life` s sem drop, morto devolve tudo numa gema e deixa o baú; no sim,
+  1º Elo ainda entre 5 e 7 min e a Loja inteira em 40 a 60 corridas.
+
+**FT-11 · Bruxa do Caldeirão, a elite da fase 1** · impl + vfx + bal · M · proposto
+
+- Por quê: elite que não persegue: obriga a ir até ela entre poças, e paga com a melhor recompensa da fase.
+- O quê:
+  - `move: 'shoot'` com `lob`: fica longe e arremessa poções em arco que caem onde o herói estava; o ponto de queda é
+    marcado durante o voo. As poções alternam **veneno** (dano a cada 0,5 s dentro) e **piche** (lento), poças de 4 s.
+  - `brew`: a cada 8 s para e mexe o caldeirão; no fim, cura 30% e fortalece (`rally`, o do FT-06) os bichos no raio.
+  - Morta: o caldeirão tomba e deixa um **Elixir** (pickup novo) além do baú.
+  - Nas seis horas de elite (`ELITE_TIMES`), `elites: elites('witch')`.
+  ```ts
+  witch: { sprite: 'enemy.witch', radius: 20, hp: 450, speed: 55, damage: 10, xp: 20, knockbackResist: 0.85,
+    elite: true, move: 'shoot',
+    shoot: { range: 280, keep: 200, every: 3, windup: 0.7, speed: 0, radius: 8, life: 0, damage: 0.5,
+      lob: { flight: 0.9, pools: [
+        { kind: 'poison', radius: 52, ttl: 4, hit: 0.5 },
+        { kind: 'tar', radius: 60, ttl: 4, slow: 0.6 },
+      ] } },
+    brew: { every: 8, windup: 1, radius: 170, heal: 0.3, rally: 4 },
+    loot: { chest: true, pickup: 'elixir' } },
+  ```
+  ```ts
+  // data/pickups.ts (o nome vem dos itens do original)
+  /** Elixir: the witch's last potion. Heals half the max HP and speeds the weapons up for a while. */
+  elixir: { sprite: 'pickup.elixir', weight: 0 },
+  // data/config.ts pickups: elixirHeal: 0.5, elixirTime: 10, elixirCooldown: 0.7
+  ```
+- Textos: `enemies.witch: 'Bruxa do Caldeirão'` (provisório); `pickups.elixir: 'Elixir'`, descrição "Cura metade da
+  vida e acelera as armas por 10 s."; `bestiary.flavor.witch` (provisório): "Ri sozinha mexendo o caldeirão. Derrube a
+  velha e a última poção é sua."
+- Visual: velha gorda e corcunda, xale escuro, nariz e mãos sob a luz do caldeirão grande de ferro, que é uma fonte de
+  luz (amarelo-esverdeado ácido) e solta vapor; ao mexer, o vapor sobe alto e o raio do `brew` acende no chão. Poções
+  em voo com sombra crescendo no ponto marcado; veneno: poça ácida que borbulha; piche: âmbar escuro e brilhante,
+  pegajoso. Elixir no chão: frasco âmbar com brilho dourado (recompensa, não perigo).
+- Aceite: testes: poção cai no ponto marcado, poças alternam, `brew` cura e fortalece só no raio, Elixir no chão ao
+  morrer; sim: `ground` abaixo de 30% do dano em Valmor; 1º Elo entre 5 e 7 min.
+
+**FT-12 · Mãe-Aranha: Ferroada, Teia e Ovos** · impl + vfx + bal · M · proposto
+
+- Por quê: chefe novo da fase 1 (o Cavaleiro Negro sai). Três habilidades em ciclo, cada uma pedindo uma resposta:
+  sair da linha (Ferroada), sair da área (Teia), quebrar antes que choque (Ovos).
+- O quê (`abilities`, FT-01; tipos novos `eggs` e `web` em `core/bosses.ts`):
+  ```ts
+  spiderMother: {
+    sprite: 'enemy.spiderMother', radius: 32, hp: 18000, speed: 90, damage: 18, xp: 0, knockbackResist: 1, boss: true,
+    abilities: [
+      // Ferroada: short lunge (the Aranha Tumular's skill in the original).
+      { kind: 'lunge', every: 3.5, windup: 0.6, trigger: 220, range: 170, damage: 22, dash: 0.3 },
+      // Teia: three marked circles (one on the hero, with warning) that slow while they last.
+      { kind: 'web', every: 4, windup: 0.9, trigger: 500, range: 100, damage: 0, count: 3, radius: 60, ttl: 8, slow: 0.55, cap: 6 },
+      { kind: 'lunge', every: 3.5, windup: 0.6, trigger: 220, range: 170, damage: 22, dash: 0.3 },
+      // Ovos: egg sacs in a ring that hatch into spiders unless broken.
+      { kind: 'eggs', every: 4, windup: 1, trigger: 600, range: 110, damage: 0, summon: 'spiderEgg', count: 4 },
+    ],
+  },
+  spiderEgg: { sprite: 'enemy.spiderEgg', radius: 10, hp: 40, speed: 0, damage: 0, xp: 1, knockbackResist: 1,
+    move: 'still', nest: { spawn: 'spider', every: 3.5, count: 3, total: 3, range: 9999 } },
+  ```
+  O ovo nasce com `hpMult` 1 (40 de vida, quebra fácil); as aranhas que saem, com o `hpMult` da luta. O ovo é um ninho
+  de uma leva só (reaproveita o FT-09) e some ao chocar.
+- Visual: aranha enorme (r 32, ~70 px), corpo escuro com o abdômen marcado por um desenho pálido que acende antes de
+  cada habilidade, oito olhos com brilho próprio, luz de baixo; Ferroada com a linha de perigo no chão; Teia: círculos
+  coral que viram teia cinza-branca radial, levemente luzidia; Ovos: sacos pálidos que tremem e racham com luz por
+  dentro no último segundo.
+- Textos: `enemies.spiderMother: 'Mãe-Aranha'`, `enemies.spiderEgg: 'Ovo de Aranha'` (provisório);
+  `bestiary.bossAbilities.spiderMother: ['Ferroada', 'Teia', 'Ovos']`; `bestiary.flavor` (provisórios):
+  `spiderMother`: "Os ovos ficam nas cercas. A mãe fica onde é mais escuro."; `spiderEgg`: "Quebre antes que trinque.";
+  `spiderNest`: "Um novelo de teia que pulsa. Cada pulso é mais uma aranha."; `thiefRat`: "Leva tudo o que brilha no
+  chão. Pegue o rato e pegue o saco."
+- Aceite: testes de cada habilidade (aviso, área, teto de teias, ovo que choca e ovo quebrado); sim: luta de 45 a 90 s,
+  `boss` abaixo de 30% do dano, nenhuma habilidade mata sozinha de vida cheia.
+
+**FT-13 · Fase 1 montada: elenco, textos, Cavaleiro fora e Cripta provisória** · impl + bal + visual · M · proposto
+
+- Por quê: junta FT-09 a FT-12 numa fase e resolve o que a troca quebra (conquista, bestiário, Cripta).
+- O quê:
+  - Valmor: `buildWaves({ basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' })`, `specials` de ninho e
+    ladrão, `elites: elites('witch')`, `boss: { id: 'spiderMother', at: config.matchDuration }`.
+  - Ajustes de papel: Rato de Cova vira o básico (`hp` 6 para 9, `speed` 100 para 78); Rato Gigante vira o resistente e
+    mantém a investida (`radius` 15, `hp` 42, `speed` 55, `damage` 8, `xp` 3, `knockbackResist` 0.5); Aranha Tumular
+    igual (ziguezague).
+  - **Cripta provisória** até o FT-16 (a fase 1 leva rato e aranha):
+    `{ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'ghost' }`, Gosma Verde fora até virar perigo no FT-16; a
+    elite continua o Golem **só até** o Daniel decidir a da Cripta (exceção temporária ao "Golem só na Estrada").
+  - Cavaleiro Negro sai das fases; dados e arte ficam. O bestiário o mostra só para quem já o viu; `seenAll` passa a
+    contar `bestiaryOrder().length` (hoje `ENEMY_IDS.length`, ficaria impossível). Conquista `bossKnight`: mesmo id (o
+    save de quem já tem continua valendo), agora "Derrote a Mãe-Aranha." com nome provisório "Ninho Desfeito".
+  - Textos (`pt-BR.ts`, provisórios):
+    - `stages.valmor.desc`: "Celeiros, cercas e campos na neve, tomados por ratos e aranhas."
+    - `stages.valmor.intro`: "Ratos nos celeiros, teias nas cercas. Alguma coisa grande fez ninho perto da vila."
+    - `stages.valmor.won`: "A Mãe-Aranha caiu. Mas o sino da igreja velha continua tocando." (mantém o gancho do RL-02
+      para a Cripta)
+    - `bestiary.ways.nest: 'Gera aranhas até cair'`
+    - O `menu.intro` ("Os mortos se levantaram") pode ficar: os mortos continuam no jogo, na Cripta.
+  - Arte da fase: chão de neve pisada com palha, cercas, montes de feno e lampiões (decalques sem custo por quadro);
+    miniatura da Preparação nova.
+  - Arte dos bichos (Pen provisório serve): Rato de Cova (r 9) cinza, magro, olhos que pegam a luz; Rato Gigante (r 15,
+    ~30 px) marrom-escuro, costas arqueadas, cauda grossa, agacha antes da investida; Ninho (r 18) e Ladrão (r 10) nos
+    seus itens.
+- Aceite: sim `SIM_SEEDS=16 SIM_SHOP=all`: Valmor 0–15% (morte entre 6 e 8 min) / 40–60% / 85%+; Cripta provisória
+  0% / 15–35% / 70–85%; nenhuma fonte nova acima de 30% do dano; teste: save antigo com `bossKnight` e o Cavaleiro no
+  bestiário continua válido; F4 com 500 inimigos a 60 FPS.
+
+### Fase 2 · Cripta da Igreja Velha: "os que não descansam" (para a próxima conversa com o Daniel)
+
+Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depende das respostas 4 e 10.
+
+**FT-14 · Explode ao morrer** · impl + vfx · P · proposto (com a Cripta)
+
+- O quê: `burst`. Ao morrer, deixa uma marca que estoura em `delay` s: fere o herói no raio (contato x `damage`) e os
+  inimigos no raio (`foes` da vida máxima do próprio estourador, que já cresce com o `hpMult`). Atrair a multidão para o
+  estouro vira jogada. Sem reação em cadeia no mesmo passo (estouros novos esperam o seu `delay`).
+- Dados (nome provisório "Ossada em Brasa"): `{ ...bones, burst: { delay: 1, radius: 48, damage: 1.5, foes: 0.6 } }`.
+- Visual: a ossada desmonta e as brasas no peito crescem; círculo coral enchendo em 1 s; estouro de fagulhas, sem
+  tremor (não é bomba do herói).
+- Aceite: teste do aviso e dos dois danos; sim: `burst` abaixo de 30% do dano.
+
+**FT-15 · Remonta se a pilha não for quebrada** · impl + vfx · P · proposto (com a Cripta)
+
+- O quê: `reassemble`. A primeira morte não mata: vira pilha (sem contato, parada, sem gema, sem `onKill`), que levanta
+  em `delay` s com metade da vida; qualquer acerto na pilha a destrói de vez (aí sim gema e abate). Mira automática pode
+  escolher pilhas.
+- Dados: Ossada da Cripta com `reassemble: { delay: 3 }` (o básico da fase: "os que não descansam" no próprio nome).
+- Visual: pilha de ossos com os olhos ainda acesos, que tremem e se juntam no último segundo.
+- Aceite: teste: levanta sem acerto, acerto destrói, Nevasca e Procissão só contam a morte de verdade.
+
+**FT-16 · Cripta montada** · impl + bal + visual · M · proposto (depois das respostas do Daniel)
+
+- Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
+  Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do
+  Espectro no original; orbe lento, `shoot` com `speed` 90), Ossada em Brasa (`specials`), e a **Gosma Verde** como
+  perigo: `trail: { every: 1.2, pool: { kind: 'slime', radius: 26, ttl: 4, slow: 0.7 } }`, teto 6.
+- Ladrão da Cripta (ideia): um **ladrão de cova** encapuzado; o original já chama os encapuzados assim ("Ladrão de cova,
+  é o que eles são", Berta). Reaproveita o FT-10.
+- Chefe: O Sineiro, com a badalada; se faltar variedade, uma segunda habilidade com nome do original (`dreno` ou
+  `chama` existem nos dados dele em `src/data.js`), a decidir com o Daniel.
+- Elite: aberta (pergunta 4).
+
+### Equilíbrio de cada fase
+
+- Antes de cada fase mudar: `SIM_SEEDS=16 SIM_SHOP=all npm run sim` e `npm run lab` na linha de base; depois, a mesma
+  coisa. Tabela antes/depois em `docs/balance-baseline.md`.
+- Metas (as de `CLAUDE.md`, sem mudança): Valmor 0–15% (morte 6–8 min) / 40–60% / 85%+; Cripta 0% / 15–35% / 70–85%;
+  Estrada 0% / 0–10% / 35–55%.
+- Medir sempre: vitórias e mediana de morte por perfil; `DANO POR FONTE` (nenhuma fonte nova acima de **30%** do dano
+  recebido na fase; rápidos abaixo de 40%, regra do E-02); 1º Elo (5 a 7 min); baús por corrida (elites + ladrões);
+  ouro por corrida e a linha `LOJA` (40 a 60 corridas); luta do chefe (mediana 45 a 90 s); pico de inimigos ativos nos
+  snapshots (nunca acima de 600); `POOL`.
+- Ordem de ajuste: `mult` e `specials` da fase, depois números do inimigo novo, armas por último.
+- Desempenho: F4 (420x820, CPU 4x) com 500 inimigos da mistura da fase **e os tetos cheios** (10 atiradores, 60 tiros,
+  ~40 marcas) a 60 FPS, antes e depois de cada fase.
+
+### Arte: o que sai com Pen e o que pede sprite
+
+- Saem com Pen provisório, sem bloquear: Goblin comum, Corvo, Lobo da Geada, Javali da Geada, Estandarte, Rato de Cova,
+  Rato Gigante, Ninho, Ovo, Rato Ladrão, Golem (todos de silhueta simples e já com desenho parecido no jogo).
+- Pedem sprite antes de a fase ser dada como pronta (silhueta grande e animação que conta a mecânica): **Mãe-Aranha**
+  (botar ovos, investir, lançar teia), **Bruxa do Caldeirão** (mexer o caldeirão, arremessar) e, quando houver, a elite
+  da Cripta. Podem entrar no jogo com Pen para teste; a fonte dos sprites segue com o Daniel
+  (`.claude/agents/visual-director.md`).
+
+### Ordem (reavaliada)
+
+A sugestão era: 1 comportamentos e marca, 2 Estrada, 3 fase 1, 4 Cripta. Mudo uma coisa: **os comportamentos entram
+com a fase que os usa**, em vez de todos de uma vez. Assim cada parte é jogável ao terminar, e explodir e remontar não
+são feitos antes de o Daniel aprovar a Cripta.
+
+| Fase        | Passos (um commit cada, nesta ordem)          | Donos                     |
+| ----------- | --------------------------------------------- | ------------------------- |
+| **Base**    | FT-01 · FT-02                                 | impl + vfx                |
+| **Estrada** | FT-03 · FT-04 · FT-05 · FT-06 · FT-07 · FT-08 | impl + vfx + bal + visual |
+| **Fase 1**  | FT-09 · FT-10 · FT-11 · FT-12 · FT-13         | impl + vfx + bal + visual |
+| **Cripta**  | FT-14 · FT-15 · FT-16 (depois do Daniel)      | impl + vfx + bal + visual |
+
+A Estrada continua primeiro: é a fase mais pobre, usa os verbos mais simples (atirar, saltar, cercar, investir) e
+depende de menos nomes do Daniel (só o Uivo e o estandarte). A fase 1 depende de mais respostas (lugar, Bruxa, bichos)
+e mexe na primeira impressão de todo jogador novo, então merece as respostas antes.
+
+### Perguntas para o Daniel (Fases temáticas)
+
+1. **Gelo do Lobo Velho: lento ou escorregadio?** Recomendo lento (x0,6), com a variação do lobo que escorrega no gelo
+   e fica tonto (FT-08).
+2. **Nomes**: "Bruxa do Caldeirão"; "Sopro da Geada" (conflita com o item do chão **Sopro de Geada**, que congela os
+   inimigos; proponho "Uivo da Geada"); o lugar da fase 1 (manter "Arredores de Valmor" com celeiros e campos, ou
+   "Celeiros de Valmor" / "Campos de Valmor"); as criaturas novas: Ninho de Aranha, Ovo de Aranha, Rato Ladrão, Javali
+   da Geada (ou outra fera de investida: alce, urso), Estandarte da Aliança Negra, Ossada em Brasa, e o nome do Elixir
+   (vem dos itens do original).
+3. **O Vazio**: não existe no cânone. Procurei em `docs/mundo/` (cânone, histórias, pendências, revisões) e no código do
+   original: "vazio" só aparece como adjetivo (o túmulo de Morvath "arrombado e vazio", os quatro nichos vazios sob as
+   espadas dos paladinos, o ensinamento de Elun sobre "estar vazios" para a luz entrar). Se o Vazio é uma ideia nova
+   sua, preciso que você diga o que é antes de ele aparecer na Estrada; não proponho nada sobre ele sem isso.
+4. **Elite da Cripta: um paladino reerguido pode?** Toca o cânone: os paladinos são da Ordem de Erukh, e a fé nunca
+   aparece de forma negativa (sua decisão de 2026-11-06). Há um gancho no original: os quatro nichos vazios sob as
+   espadas dos paladinos, no túmulo de Morvath. Um paladino morto erguido contra a vontade (um guardião que não
+   descansa, não um vilão) cabe? Ou prefere outra elite (um clérigo caído como o Sineiro, um coveiro, uma criatura)?
+5. **Onde o Cavaleiro Negro volta?** Opções: chefe de uma fase futura (Pasto do Vau, a mina do Capítulo 1); aparição
+   especial na Noite Sem Fim (por exemplo, a cada 10 min de vigília, com baú grande); ou chefe do Perigo 3 (ND-01).
+   Recomendo a vigília: dá um motivo novo para continuar e não pede fase nova.
+6. **Aliança Negra na Estrada**: o cânone diz só que é o acordo dos Nekaren com os Goblins. O estandarte pode ser
+   dela? Ela tem cor ou símbolo (para a arte do pano)? A ligação com os encapuzados ("trabalham por ouro para os de
+   capuz") está no `arco-de-revelacoes.md`, que é proposta: vale como cânone?
+7. **A praga da fase 1 tem causa?** O texto proposto não explica de onde vêm os ratos e a Mãe-Aranha ("alguma coisa
+   grande fez ninho perto da vila"). Quer ligar a praga à Irmandade, ao Selo de Morvath, ou deixar sem causa?
+8. **Goblin comum**: hoje ele é elite com 400 de vida; vira um atirador de 16. Tudo bem perder a elite goblin (a
+   conquista "Pedra e Lança" muda de nome)?
+9. **Ladrão rouba gemas**: a ideia de ele carregar a sua experiência (e devolver ao morrer) agrada, ou prefere um ladrão
+   que só foge com o baú?
+10. **Gosma Verde**: na Cripta ela vira perigo (deixa limo que deixa lento) e sai por um tempo do jogo entre a fase 1
+    nova e a Cripta nova. Pode?
