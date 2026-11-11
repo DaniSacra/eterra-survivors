@@ -575,6 +575,15 @@ export const t = {
     noRuns: 'Ainda não jogou',
     keys: '↑↓ herói · Enter escolhe · Esc volta',
   },
+  /** The story shown before a stage (approved by Daniel, 2026-11-11; from the canon: prólogo and capítulo 1). */
+  stageStory: {
+    valmor:
+      'Valmor fica no sul gelado de Imladrin. De noite, as covas do cemitério aparecem abertas, e os mortos não ficam deitados. Aldo voltou em busca de trabalho, e de Clara. Trabalho é o que não falta. Proteja a vila até o amanhecer.',
+    crypt:
+      'A igreja velha rachou há cinquenta anos, e o povo passou a rezar na capela nova. Desde então ninguém mais desce à cripta. Agora alguém cavou por baixo dela, e o sino volta a tocar sem ninguém lá dentro. Desça, e não deixe o sino chamar o resto dos mortos.',
+    southRoad:
+      'A estrada de neve corre entre os pinheiros, e a luz do lampião alcança pouco. A matilha saiu da floresta, e os cavalos fugiram para o pasto. Para chegar a Erukh, é preciso passar por ela.',
+  } satisfies Record<StageId, string>,
   stageScreen: {
     title: 'Fase',
     go: 'Partir',

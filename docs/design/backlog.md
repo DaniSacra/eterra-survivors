@@ -3207,7 +3207,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 - ✅ **DD-03 · Tela Heróis** · ui + visual · G. Começar abre a tela Heróis: os quatro um embaixo do outro; cada linha com
   o sprite grande em escala inteira, nome, classe, vantagem, arma inicial, recorde e, se bloqueado, o preço. Escolher
   leva à tela Fase. Voltar em cada tela volta uma etapa.
-- ✅ **DD-04 (história: texto provisório até o Daniel aprovar) · Tela Fase e história da fase** · ui + visual · G. Um cartão por fase com ilustração (recorte do chão e do
+- ✅ **DD-04 · Tela Fase e história da fase** · ui + visual · G. Um cartão por fase com ilustração (recorte do chão e do
   chefe), nome e a linha atual. Tocar no cartão abre a história: ilustração maior, texto curto, o chefe do fim, Partir e
   Voltar. Fase bloqueada mostra como desbloquear. **Depende do Daniel (lore):** as três histórias saem do cânone
   (prólogo e capítulo 1) e são mostradas antes de entrar no jogo.

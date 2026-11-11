@@ -49,9 +49,7 @@ export class StoryScene extends Phaser.Scene {
     const tx = side ? px + picW / 2 + 16 : cx - wrapW / 2;
     const tw = side ? wrapW - picW - 16 : wrapW;
     const ty = side ? top + 6 : top + picH + 14;
-    const body = open
-      ? s.desc /* placeholder until Daniel approves the stage stories */
-      : t.stageScreen.unlockBy(t.stages[STAGES_BEFORE(id)].name);
+    const body = open ? t.stageStory[id] : t.stageScreen.unlockBy(t.stages[STAGES_BEFORE(id)].name);
     const text = label(this, tx, ty, body, 14, {
       align: 'left',
       wrap: tw,
