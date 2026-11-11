@@ -282,7 +282,7 @@ export class GameScene extends Phaser.Scene {
         // Hammers spin end over end as they fly.
         img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
         // Fúria da Forja drops embers behind it.
-        this.lighting.add(p.x, p.y, 70, PROJECTILE_TINT[p.sprite] ?? PROJECTILE_LIGHT, 0.55);
+        this.lighting.add(p.x, p.y, 70, PROJECTILE_TINT[p.sprite] ?? PROJECTILE_LIGHT, 0.55, 0.15);
         if (p.sprite === FORGE && this.stepDt > 0 && this.sparks.rand() < 0.3)
           this.sparks.add(p.x, p.y, 0, 20, 0.4, 5, 0xffa040, SPARK.ember);
       },
@@ -399,6 +399,9 @@ export class GameScene extends Phaser.Scene {
     const l = this.lighting;
     l.begin();
     l.hero(w.player.x, w.player.y, HERO_COLOR[w.character]);
+    // The stage's own flames: candles, lanterns, fires and torches.
+    this.decals.lights(l, w.time, this.calm);
+    this.obstacles.lights(l, w.time, this.calm);
     // Bosses carry their own light, so they are never a shape in the dark.
     if (w.boss) l.add(w.boss.x, w.boss.y, w.boss.def.radius * 5, BOSS_LIGHT, 0.7);
     const zones = w.zones.active;

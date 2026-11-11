@@ -1999,12 +1999,16 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   forja (não no modo calmo). Inimigos ficam acima do escuro e só escurecem com a distância da luz do herói
   (`enemyTint`). Com 505 inimigos no Chromium por software, ligar a luz não mudou o FPS; falta conferir num celular.
 
-**AR-02 · Chão e cenário por fase** · visual · M · proposto
+**AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11)
 
 - O quê: várias variantes do tile por fase escolhidas por hash da célula, detalhes (rachaduras, musgo, ossos, neve),
   objetos de cenário (cercas e lanternas em Valmor; lápides, colunas e velas na Cripta; pinheiros, pedras e placa na
   Estrada), os que carregam luz alimentam o AR-01; borda do mapa irregular caindo no preto.
 - Aceite: nenhum tile repetido visível na captura; objetos que bloqueiam batem com `core/terrain.ts`.
+- Feito: chamas que iluminam de verdade (velas na Cripta, lanternas em Valmor, fogueiras na Estrada, tocha em metade
+  das colunas), tremulando fora do modo calmo; camada de brilho aditivo (`Lighting.glow`) para chamas, clarões e
+  projéteis, porque o MULTIPLY sozinho não clareia um chão escuro; lajes e musgo variando o piso da Cripta; vinheta
+  no HUD. Falta: tiles novos de verdade (PixelLab ou Pen) e a borda irregular do mapa.
 
 **AR-03 · Avisos de ataque como formas no chão** · vfx · P · proposto
 

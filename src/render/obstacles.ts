@@ -2,10 +2,14 @@ import type Phaser from 'phaser';
 import { obstacleAt, type Obstacle } from '../core/terrain';
 import type { World } from '../core/world';
 import { ART_SCALE } from './art/pen';
+import type { Lighting } from './lighting';
 
 /** Where each obstacle sprite's foot is (a fraction of its texture height): that point sits on the hit circle. */
 const FOOT = [0.71, 0.53, 0.61];
 const MAX = 60;
+/** The column with a torch (render/art/tiles.ts) and its flame's height over the foot (world px). */
+const TORCH = 'obstacle.0t';
+const TORCH_DY = 39;
 
 /**
  * The Cripta's obstacles on screen: like the decals, a fixed set of reused images laid out over the view's cells,
@@ -18,6 +22,7 @@ export class Obstacles {
   private lastCx = NaN;
   private lastCy = NaN;
   private lastCols = 0;
+  private shown = 0;
   private lastRows = 0;
 
   constructor(
@@ -50,13 +55,24 @@ export class Obstacles {
       for (let i = 0; i < cols; i++) {
         if (n >= MAX || !obstacleAt(this.world.seed, layout, cx + i, cy + j, this.ob)) continue;
         const k = this.ob.kind;
+        // Every other column carries a torch.
+        const torch = k === 0 && ((cx + i) * 7 + (cy + j) * 3) % 2 === 0;
         (this.images[n++] as Phaser.GameObjects.Image)
-          .setTexture(`obstacle.${k}`)
+          .setTexture(torch ? TORCH : `obstacle.${k}`)
           .setOrigin(0.5, FOOT[k] ?? 0.5)
           .setPosition(this.ob.x, this.ob.y)
           .setFlipX(((cx + i + cy + j) & 1) === 1)
           .setVisible(true);
       }
     for (let k = n; k < MAX; k++) (this.images[k] as Phaser.GameObjects.Image).setVisible(false);
+    this.shown = n;
+  }
+
+  /** Adds the torches' lights (the flame sits TORCH_DY world px over the column's foot). */
+  lights(l: Lighting, time: number, calm: boolean): void {
+    for (let i = 0; i < this.shown; i++) {
+      const img = this.images[i] as Phaser.GameObjects.Image;
+      if (img.texture.key === TORCH) l.flame(img.x, img.y - TORCH_DY, 200, 0xffa050, time, calm);
+    }
   }
 }

@@ -14,6 +14,7 @@ import { describeAchievement } from '../render/describe';
 import { sound } from '../render/sound';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
+import { vignetteTexture } from '../render/lighting';
 import { EVOLUTIONS, type Evolution } from '../data/evolutions';
 import type { WeaponId } from '../data/weapons';
 
@@ -90,7 +91,11 @@ export class HudScene extends Phaser.Scene {
     this.toastNow = null;
   }
 
+  private vignette!: Phaser.GameObjects.Image;
+
   create(): void {
+    // Under everything on the HUD: the light vignette that frames the game view.
+    this.vignette = this.add.image(0, 0, vignetteTexture(this)).setOrigin(0).setDepth(-10);
     this.bars = this.add.graphics();
     this.timer = label(this, 0, 0, '', 24, { bold: true, stroke: true });
     // The level sits at the tip of the XP bar; gold and kills share one line, each after its icon.
@@ -149,6 +154,7 @@ export class HudScene extends Phaser.Scene {
 
   private layout(): void {
     const { width, height } = this.scale;
+    this.vignette.setDisplaySize(width, height);
     const s = (this.inset = safeArea());
     const top = s.top + XP_H;
     const left = s.left + PAD;

@@ -173,6 +173,21 @@ export const OBSTACLE_ART: Record<string, ArtDef> = {
       p.shine(10, 8, 4, 36, 0.25);
     },
   },
+  /** A column with a torch in a sconce (render-side variant of kind 0; the flame lights the dark, AR-02). */
+  'obstacle.0t': {
+    w: 44,
+    h: 70,
+    draw(p) {
+      (OBSTACLE_ART['obstacle.0'] as ArtDef).draw(p);
+      p.outline = 1.5;
+      p.rrect(19, 22, 6, 9, 2, 0x3a2a1c); // sconce
+      p.rrect(18.5, 18, 7, 5, 2, 0x5a4028);
+      p.ink();
+      p.fill(0xff8a30).fillEllipse(22, 13, 7, 11);
+      p.fill(0xffd870).fillEllipse(22, 15, 4, 7);
+      p.fill(0xffffff, 0.9).fillEllipse(22, 16.5, 1.6, 3);
+    },
+  },
   'obstacle.1': {
     w: 54,
     h: 50,
@@ -267,6 +282,25 @@ export const DECAL_ART: Record<string, ArtDef> = {
       p.fill(0xffffff).fillEllipse(6, 6.5, 1.4, 2.5);
     },
   },
+  /** A slab of another stone tone, so the floor never repeats (AR-02). */
+  'decal.slab': {
+    w: 36,
+    h: 18,
+    draw(p) {
+      p.fill(0x34324e, 0.9).fillRoundedRect(1, 1, 34, 16, 3);
+      p.fill(0x1c1b2c, 0.8).fillRect(1, 15, 34, 2);
+      p.fill(0xffffff, 0.04).fillRect(3, 3, 30, 2);
+      p.fill(0x1c1b2c, 0.6).fillRect(14, 4, 1.5, 9);
+    },
+  },
+  'decal.moss': {
+    w: 28,
+    h: 12,
+    draw(p) {
+      p.fill(0x2a6a5a, 0.35).fillEllipse(14, 6, 26, 9);
+      p.fill(0x3a9a8a, 0.35).fillEllipse(10, 5, 10, 5).fillEllipse(19, 7, 8, 4);
+    },
+  },
   'decal.bonePile': {
     w: 24,
     h: 12,
@@ -321,6 +355,36 @@ export const DECAL_ART: Record<string, ArtDef> = {
       p.circle(8, 12, 6, 0x3a6a54).circle(16, 10, 7, 0x3a6a54).circle(20, 14, 5, 0x3a6a54);
       p.ink();
       p.fill(0xe8eff8, 0.85).fillEllipse(15, 5, 10, 3.5).fillEllipse(7, 7.5, 6, 2.5);
+    },
+  },
+  /** Valmor: a lantern on a short post, a warm light in the snow (AR-02). */
+  'decal.lantern': {
+    w: 16,
+    h: 34,
+    draw(p) {
+      p.shadow(8, 32, 12, 4);
+      p.outline = 1.5;
+      p.rrect(6.5, 12, 3, 20, 1, 0x3a2a1c); // post
+      p.rrect(3, 3, 10, 11, 2, 0x2e2a30); // cage
+      p.ink();
+      p.fill(0xffc860).fillRect(5, 5.5, 6, 6.5);
+      p.fill(0xfff0c0).fillRect(6.5, 7, 3, 3.5);
+      p.fill(0x2e2a30).fillRect(7.5, 5, 1, 7);
+    },
+  },
+  /** Estrada do Sul: the embers of a travellers' fire (AR-02). */
+  'decal.campfire': {
+    w: 30,
+    h: 22,
+    draw(p) {
+      p.fill(0x1a1610, 0.5).fillEllipse(15, 17, 28, 9);
+      p.outline = 1.5;
+      p.rrect(4, 14, 22, 4, 2, 0x5a4028);
+      p.rrect(8, 12, 14, 4, 2, 0x4a3420);
+      p.ink();
+      p.fill(0xff7a28).fillEllipse(15, 10, 10, 12);
+      p.fill(0xffc850).fillEllipse(15, 12, 6, 7);
+      p.fill(0xfff0c0, 0.9).fillEllipse(15, 13, 2.5, 3);
     },
   },
   'decal.fence': {
