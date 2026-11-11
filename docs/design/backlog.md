@@ -2017,12 +2017,17 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
 - Aceite: capturas lado a lado antes/depois; bestiário e Livro de Elos coerentes com o jogo.
 
-**AR-05 · Prova de sprites** · visual + impl · M · proposto (depende do Daniel)
+**AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04
 
 - O quê: Aldo + 2–3 inimigos em pixel art (24–32 px, escala inteira, sem suavização), carregados por `assets.ts`,
   com idle, andar, dano e morte; fixa a densidade de pixel e a paleta para o resto.
 - Pergunta ao Daniel: de onde vêm os sprites (arte sua, encomenda, pacote licenciado, IA retocada)? Toda arte externa
   entra com licença em `docs/art/credits.md`.
+- Feito (2026-11-11): fonte escolhida, **PixelLab** (MCP `pixellab`, conta do Daniel). Os quatro heróis saem do
+  sprite original de corpo inteiro do Crônicas (`dungeon-rpg/src/herobody.js`) como referência (v3, 1 geração cada),
+  com andar (6 quadros) e respirar (4) para o leste; o jogo espelha para o oeste. Faixas em `public/sprites/`,
+  `pixelHero` em `assets.ts`, menus encaixados por `heroFit`. Ajustes pendentes: a Lyra e o Teo perderam o cajado e
+  a maça na vista lateral; no andar, o Teo perdeu as faixas verdes do hábito (cinto vermelho).
 
 ---
 

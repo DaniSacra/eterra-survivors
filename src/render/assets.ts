@@ -40,6 +40,9 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(OBSTACLE_ART, ART_RES),
   ...art(ICON_ART, ART_RES),
   ...pixelHero('aldo', 8, 4),
+  ...pixelHero('lyra', 8, 4),
+  ...pixelHero('teo', 8, 4),
+  ...pixelHero('andilla', 8, 4),
 };
 
 /** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
