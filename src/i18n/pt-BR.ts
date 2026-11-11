@@ -284,7 +284,6 @@ export const t = {
     element: (name: string) => `Elemento: ${name}`,
     effect: 'O que faz',
     open: 'Toque num Elo descoberto para ver a página dele.',
-    back: 'Voltar ao Livro',
     elements: {
       fury: 'Fúria',
       fire: 'Fogo',

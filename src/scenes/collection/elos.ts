@@ -110,7 +110,12 @@ function drawPage(a: TabArea, id: WeaponId): TabContent {
   const evo = EVOLUTIONS[id] as Evolution;
   const color = ELEMENT_COLOR[evo.element];
   const cx = a.x + a.w / 2;
-  const w = Math.min(520, a.w);
+  const w = Math.min(520, a.w - 32);
+  // A panel the size of the page, edged in the element's colour (sized once the page is drawn).
+  const panel = scene.add
+    .rectangle(cx, a.y, w + 32, 10, UI.panel, 0.92)
+    .setOrigin(0.5, 0)
+    .setStrokeStyle(2, color);
   let y = a.y + (short ? 12 : 22);
   label(scene, cx, y, t.weapons[id].name, short ? 22 : 26, { bold: true, color: css(color) });
   y += short ? 22 : 28;
@@ -147,11 +152,10 @@ function drawPage(a: TabArea, id: WeaponId): TabContent {
     lore.setOrigin(0.5, 0);
     y += lore.height + (short ? 12 : 22);
   }
-  const bw = Math.min(240, a.w);
-  const by = Math.min(a.y + a.h - 22, y + 22);
+  panel.setSize(w + 32, Math.min(a.h, y - a.y - (short ? 6 : 10)));
+  // One Back only: the Coleção's own goes back to the Livro while a page is open (NU-08).
   const index = EVOLVED_IDS.filter((e) => a.save.elos.includes(e)).indexOf(id);
-  const back = button(scene, cx, by, bw, 40, () => a.reopen(undefined, index), t.elos.back);
-  return { buttons: [back], start: 0 };
+  return { buttons: [], start: -1, back: () => a.reopen(undefined, index) };
 }
 
 function icon(

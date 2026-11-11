@@ -31,4 +31,6 @@ export interface TabContent {
   onFocus?: (i: number, prev: number) => void;
   /** Called once keyNav exists, so a tap can move the keyboard focus too. */
   bindFocus?: (focus: (i: number) => void) => void;
+  /** What Back (and Esc) do while this content is open, instead of leaving the Coleção (an Elo's page). */
+  back?: () => void;
 }

@@ -1832,7 +1832,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   (não "Sozinha", que lê como sem companhia; não "Área", que é nome de atributo); também na página do Livro de Elos.
 - Aceite: captura das três categorias na carta.
 
-**NU-08 · Página do Elo com painel, um Voltar só e Esc que volta ao Livro** · ui + visual · P · 🟡 em parte
+**NU-08 · Página do Elo com painel, um Voltar só e Esc que volta ao Livro** · ui + visual · P · ✅ feito (2026-11-11: painel com borda do elemento; o Voltar da Coleção volta ao Livro na página)
 
 - Feito em 2026-11-09: Esc na página volta ao Livro. Falta: painel e um Voltar só.
 

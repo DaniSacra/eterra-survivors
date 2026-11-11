@@ -58,7 +58,9 @@ export class CollectionScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
 
     // Phone lying down: Back in the corner and the tabs beside it, no title. Else the title over the tabs.
-    const back = backButton(this, t.shop.back, () => this.back());
+    // Back leaves the Coleção, unless the open content takes it (an Elo's page goes back to the Livro).
+    const backTo: { content?: () => void } = {};
+    const back = backButton(this, t.shop.back, () => (backTo.content ? backTo.content() : this.back()));
     let tabsX: number;
     let tabsW: number;
     let tabsY: number;
@@ -92,6 +94,7 @@ export class CollectionScene extends Phaser.Scene {
       reopen: (page, focus) => this.scene.restart({ tab: this.tab, page, focus }),
     };
     const content = DRAW[this.tab](area);
+    backTo.content = content.back;
 
     const all = [...tabs, ...content.buttons, back];
     const n = tabs.length;
@@ -107,9 +110,7 @@ export class CollectionScene extends Phaser.Scene {
     content.bindFocus?.((i) => nav.focus(n + i));
     bindKeys(this, (kb) => {
       // Esc on an Elo's page goes back to the Livro; elsewhere, out of the Coleção.
-      kb.once('keydown-ESC', () =>
-        this.tab === 'elos' && this.page ? this.scene.restart({ tab: this.tab }) : this.back(),
-      );
+      kb.once('keydown-ESC', () => (content.back ? content.back() : this.back()));
       // Q and E (and Page Up / Page Down) switch tabs from anywhere.
       const shift = (d: number) => this.open(TABS[(current + d + TABS.length) % TABS.length] as TabId);
       kb.on('keydown-Q', () => shift(-1));
