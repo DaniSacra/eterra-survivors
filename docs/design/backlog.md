@@ -33,14 +33,14 @@ antigos deste backlog que pedem traço cartoon seguem a nova direção.
 
 ## Próximos 5
 
-Sugestão do game-director de 2026-11-10 para a etapa "Fases temáticas e inimigos novos" (no fim do arquivo), à espera
-da aprovação do Daniel. A lista anterior (RB-01, RB-02, RU-02, RF-02, RE-01) está toda feita.
+Aprovado pelo Daniel em 2026-11-10: a **Etapa AR (arte nova)** vem antes das fases temáticas, para que inimigos e
+fases novos já nasçam no estilo novo. A lista anterior (FT-01 a FT-08) volta depois da AR.
 
-1. **FT-01** Base dos inimigos novos: pools, tetos, agenda, chefes com várias habilidades e a métrica de dano
-2. **FT-02 + FT-03** Marca no chão antes de surgir; atirador (Goblin Lanceiro)
-3. **FT-04 + FT-05 + FT-06** Salto (Corvo), matilha (Lobo da Geada) e estandarte
-4. **FT-07** Estrada do Sul estreita, com elenco novo e o Golem só nela
-5. **FT-08** Lobo Velho: Uivo da Geada e a arena de gelo (depende da pergunta 1)
+1. **AR-01** Escuridão e luz (camada escura, luz do herói, luzes de cenário, efeitos que iluminam)
+2. **AR-02** Chão com variação e cenário por fase, borda do mapa caindo no preto
+3. **AR-03** Avisos de ataque como formas no chão (FT-17)
+4. **AR-04** `Pen` repintado no estilo novo (heróis, inimigos, chefes, itens)
+5. **AR-05** Prova de sprites (Aldo + 2–3 inimigos), depende da fonte dos sprites (pergunta ao Daniel)
 
 ---
 
@@ -1978,6 +1978,50 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 
 ---
 
+## Etapa AR · Arte nova (2026-11-10)
+
+Origem: a direção de arte mudou para fantasia escura e iluminada (pixel art top-down com luz, "hi-bit"; referências
+em `docs/design/art-references/`, padrão em `.claude/agents/visual-director.md`). Até aqui só os documentos mudaram.
+Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 a AR-05, um commit por passo.
+
+**AR-01 · Escuridão e luz** · visual + vfx + impl · M · proposto
+
+- Por quê: é o que mais muda a cara do jogo e não depende de sprite.
+- O quê: uma camada de escuridão por fase (azul-noite em Valmor e na Estrada, quase preto quente na Cripta),
+  redesenhada a cada quadro a partir de uma lista pré-alocada de luzes e apagada com uma textura radial comum; luz do
+  herói na cor dele, sempre acesa; luzes de cenário fixas (tochas, velas, lanternas) por fase; chefes com luz
+  própria; projéteis, Elos e explosões em modo aditivo e com clarão curto. Inimigos, gemas e avisos continuam legíveis
+  fora da luz (nada de ameaça sumindo no escuro). Vinheta leve. Modo calmo: sem tremulação nem clarões.
+- Aceite: capturas 420x820 e 1280x720 das três fases; 60 FPS com 500 inimigos (F4) no desktop e sem queda
+  perceptível com 4x de CPU; nenhum alocamento por quadro.
+
+**AR-02 · Chão e cenário por fase** · visual · M · proposto
+
+- O quê: várias variantes do tile por fase escolhidas por hash da célula, detalhes (rachaduras, musgo, ossos, neve),
+  objetos de cenário (cercas e lanternas em Valmor; lápides, colunas e velas na Cripta; pinheiros, pedras e placa na
+  Estrada), os que carregam luz alimentam o AR-01; borda do mapa irregular caindo no preto.
+- Aceite: nenhum tile repetido visível na captura; objetos que bloqueiam batem com `core/terrain.ts`.
+
+**AR-03 · Avisos de ataque como formas no chão** · vfx · P · proposto
+
+- É o FT-17 (ver lá), puxado para cá: faixa listrada para investidas, cone para leques, círculo com anéis para saltos
+  e quedas. Os avisos ficam acima da escuridão.
+
+**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto
+
+- O quê: corpos mais escuros e de cores apagadas, uma cor principal por criatura, contorno escuro, olhos menores,
+  mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
+- Aceite: capturas lado a lado antes/depois; bestiário e Livro de Elos coerentes com o jogo.
+
+**AR-05 · Prova de sprites** · visual + impl · M · proposto (depende do Daniel)
+
+- O quê: Aldo + 2–3 inimigos em pixel art (24–32 px, escala inteira, sem suavização), carregados por `assets.ts`,
+  com idle, andar, dano e morte; fixa a densidade de pixel e a paleta para o resto.
+- Pergunta ao Daniel: de onde vêm os sprites (arte sua, encomenda, pacote licenciado, IA retocada)? Toda arte externa
+  entra com licença em `docs/art/credits.md`.
+
+---
+
 ## Fases temáticas e inimigos novos (2026-11-10)
 
 Origem: pedido do Daniel de 2026-11-10, proposta do game-director. **Todos os itens estão `· proposto`**: esperam a
@@ -2481,7 +2525,7 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   `chama` existem nos dados dele em `src/data.js`), a decidir com o Daniel.
 - Elite: aberta (pergunta 4).
 
-**FT-17 · Avisos de ataque como formas no chão, não setas** · vfx · P · proposto
+**FT-17 · Avisos de ataque como formas no chão, não setas** · vfx · P · proposto (vira o AR-03)
 
 - Por quê: o Daniel achou as referências em `docs/design/art-references/` (`swamp-lane-telegraphs.png`,
   `cone-telegraph.png`, `swamp-frog-boss-leap.png`) muito mais claras que as setas de hoje (`Windup` dos inimigos e a
