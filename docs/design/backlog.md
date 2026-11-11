@@ -2568,8 +2568,13 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   a partir de 70 s); **Coveiro** (`gravedigger`, `dig`: finca a pá, 1.1 s de aviso e 4 Ossadas saem das covas num anel
   de 110 px) como elite da Cripta, escolha do Daniel (2026-11-11); o Golem fica só na Estrada. Sim `SIM_SEEDS=16`:
   Cripta 2% / 27% / 84%.
-- Falta: atirador espiritual (Toque Gélido), Sineiro com 2ª habilidade, Morcego Vampiro no lugar do cinzento, arte final
-  (Ossada em Brasa, Coveiro, pilha, limo).
+- Feito também (2026-11-11): Morcego Vampiro (`vampireBat`, zigue-zague) no lugar do cinzento; Espírito Gélido
+  (`coldSpirit`, atirador do Toque Gélido, orbe de 90 px/s, máx. 5, papel `shooter`); Sineiro com 2ª habilidade, o
+  **Dobre Fúnebre** (`dreno` do original; anel completo de 130 px em volta dele, 20 de dano, 1,2 s de aviso). `mult` da
+  Cripta: hp 1.4, damage 1.65. Sim `SIM_SEEDS=16`: Cripta 0% / 13% / 80%, tiros 14% do dano (a Loja pela metade fica
+  um pouco abaixo dos 15%).
+- Falta: arte final (Ossada em Brasa, Coveiro, pilha, limo, Espírito Gélido, Morcego Vampiro) e conferir a Cripta
+  jogando.
 
 - Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
   Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do

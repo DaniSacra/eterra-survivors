@@ -57,6 +57,18 @@ const STING: BossAbility = {
   dash: 0.3,
 };
 
+/** A badalada: the Sineiro's bell swings and the dead of the crypt rise around him. */
+const BADALADA: BossAbility = {
+  kind: 'toll',
+  every: 8,
+  windup: 1.1,
+  trigger: 600,
+  range: 80,
+  damage: 0,
+  summon: 'bones',
+  count: 8,
+};
+
 /** Enemy roster, from the original Crônicas de Eterra cast. Names live in i18n under `enemies`. */
 export interface EnemyDef {
   /** Asset key in render/assets.ts. */
@@ -180,6 +192,33 @@ export const ENEMIES = {
     xp: 1,
     knockbackResist: 0,
     reassemble: { delay: 3, hp: 0.3, sprite: 'enemy.bonePile' },
+  },
+  /** Morcego Vampiro: the crypt's bats (Crônicas de Eterra), redder and sturdier than the grey ones, weaving as they come. */
+  vampireBat: {
+    sprite: 'enemy.vampireBat',
+    radius: 9,
+    hp: 8,
+    speed: 126,
+    damage: 5,
+    xp: 1,
+    knockbackResist: 0,
+    move: 'zigzag',
+  },
+  /**
+   * Espírito Gélido (provisional name): keeps its distance and sends the Toque Gélido, a slow orb of cold (the
+   * Espectro's skill in the original).
+   */
+  coldSpirit: {
+    sprite: 'enemy.coldSpirit',
+    radius: 13,
+    hp: 22,
+    speed: 62,
+    damage: 4,
+    xp: 2,
+    knockbackResist: 0.4,
+    move: 'shoot',
+    max: 5,
+    shoot: { range: 300, keep: 220, every: 4.5, windup: 0.7, speed: 90, radius: 6, life: 4 },
   },
   /** Ossada em Brasa (provisional name): the embers in its chest go off a second after it falls (FT-14). */
   emberBones: {
@@ -436,17 +475,13 @@ export const ENEMIES = {
     xp: 0,
     knockbackResist: 1,
     boss: true,
-    // A badalada: the bell swings, and the dead of the crypt rise around him.
-    ability: {
-      kind: 'toll',
-      every: 8,
-      windup: 1.1,
-      trigger: 600,
-      range: 80,
-      damage: 0,
-      summon: 'bones',
-      count: 8,
-    },
+    // A badalada: the bell swings, and the dead of the crypt rise around him. Then the Dobre Fúnebre (his `dreno` in
+    // the original): the bell tolls once for the hero, a full ring of sound around him.
+    ability: BADALADA,
+    abilities: [
+      BADALADA,
+      { kind: 'cleave', every: 5, windup: 1.2, trigger: 240, range: 130, damage: 20, arc: Math.PI * 2 },
+    ],
   },
   oldWolf: {
     sprite: 'enemy.oldWolf',

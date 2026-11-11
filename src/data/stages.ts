@@ -66,8 +66,14 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 1.25, damage: 1.85, speed: 1.05, spawn: 1.15, gold: 1.5 },
-    waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'ghost' }),
+    mult: { hp: 1.4, damage: 1.65, speed: 1.05, spawn: 1.15, gold: 1.5 },
+    waves: buildWaves({
+      basic: 'bones',
+      fast: 'vampireBat',
+      tank: 'skeleton',
+      extra: 'ghost',
+      shooter: 'coldSpirit',
+    }),
     elites: elites('gravedigger'),
     specials: [
       { id: 'emberBones', from: 40, every: 12 },

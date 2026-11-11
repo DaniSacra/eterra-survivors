@@ -179,6 +179,26 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
   'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
+  'enemy.vampireBat': winged(0x7a3a4e, 0x52283a, 'bat'),
+  /** Espírito Gélido (provisional): a small pale-blue spirit, a ball of cold in its hands (FT-16). */
+  'enemy.coldSpirit': {
+    w: 26,
+    h: 30,
+    draw(p) {
+      p.shadow(13, 27, 12, 3.5);
+      p.poly(
+        [4, 24, 4, 12, 8, 5, 13, 2, 18, 5, 22, 12, 22, 24, 19, 22, 16, 26, 13, 22, 10, 26, 7, 22],
+        0xb8d8ee,
+      );
+      p.inkColor = 0x2a4058;
+      p.ink();
+      p.inkColor = INK;
+      p.fill(0x2a4058).fillEllipse(10.5, 11, 4, 5.5).fillEllipse(16.5, 11, 4, 5.5);
+      p.glow(11, 11.5, 1, 0xe8f8ff).glow(16.5, 11.5, 1, 0xe8f8ff);
+      p.glow(13, 19, 2.4, 0x9ad8f8); // the orb of cold
+      p.shine(9, 6, 4, 2.5, 0.5);
+    },
+  },
   'enemy.ghost': {
     w: 30,
     h: 34,

@@ -249,6 +249,7 @@ export const t = {
     bossAbilities: {
       oldWolf: ['Mordida Funda', 'Uivo da Geada'],
       spiderMother: ['Ferroada', 'Teia', 'Ovos'],
+      bellRinger: ['Badalada', 'Dobre Fúnebre'],
     } as Partial<Record<EnemyId, string[]>>,
     /** A line about each enemy: from the original where it has one, else written for the Survivors (docs/design/conquistas.md). */
     quote: (line: string) => `"${line}"`,
@@ -281,6 +282,9 @@ export const t = {
       witch: 'Ri sozinha mexendo o caldeirão. Derrube a velha e a última poção é sua.',
       // written for the Survivors (provisional, FT-14)
       emberBones: 'As brasas no peito não apagam com a queda. Longe dela, quando estourar.',
+      // written for the Survivors (provisional, FT-16); the Morcego Vampiro and the Toque Gélido are from the original
+      vampireBat: 'Desce da abóbada da cripta e morde de passagem.',
+      coldSpirit: 'Um frio que se solta das mãos e vem devagar. Dê a volta.',
       // written for the Survivors (provisional, FT-16)
       gravedigger: 'Cuida das covas da cripta. Quando finca a pá, as covas se abrem.',
       // written for the Survivors (provisional, FT-10)
@@ -727,6 +731,8 @@ export const t = {
     thiefRat: 'Rato Ladrão',
     emberBones: 'Ossada em Brasa',
     gravedigger: 'Coveiro',
+    vampireBat: 'Morcego Vampiro',
+    coldSpirit: 'Espírito Gélido',
     witch: 'Bruxa do Caldeirão',
     spiderEgg: 'Ovo de Aranha',
     spiderMother: 'Mãe-Aranha',

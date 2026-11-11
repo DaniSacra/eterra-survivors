@@ -107,3 +107,22 @@ describe('boss abilities', () => {
     expect(boss.actT).toBe(left);
   });
 });
+
+describe('Sineiro', () => {
+  it('Dobre Fúnebre: a full ring around him hurts the hero from any side, and stepping out avoids it', () => {
+    const ring = ENEMIES.bellRinger.abilities?.find((a) => a.kind === 'cleave') as BossAbility;
+    expect(ring.arc).toBeCloseTo(Math.PI * 2);
+    const near = withBoss('bellRinger', -ring.range * 0.5);
+    near.boss.abilityIdx = 1;
+    near.boss.actT = 0;
+    const hp = near.w.player.hp;
+    for (let t = 0; t < ring.windup + 0.1; t += STEP) near.w.step(STEP, still);
+    expect(near.w.player.hp).toBeLessThan(hp);
+    const far = withBoss('bellRinger', ring.range * 3);
+    far.boss.abilityIdx = 1;
+    far.boss.actT = 0;
+    far.w.player.hp = far.w.player.stats.maxHp;
+    for (let t = 0; t < ring.windup + 0.1; t += STEP) far.w.step(STEP, still);
+    expect(far.w.player.hp).toBe(far.w.player.stats.maxHp);
+  });
+});
