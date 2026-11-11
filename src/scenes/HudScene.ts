@@ -15,6 +15,8 @@ import { sound } from '../render/sound';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 import { vignetteTexture } from '../render/lighting';
+import { EdgeArrows } from '../render/edgeArrows';
+import { settings } from '../render/settings';
 import { EVOLUTIONS, type Evolution } from '../data/evolutions';
 import type { WeaponId } from '../data/weapons';
 
@@ -95,10 +97,13 @@ export class HudScene extends Phaser.Scene {
   }
 
   private vignette!: Phaser.GameObjects.Image;
+  /** Arrows on the frame toward chests and elites out of view (NU-01). */
+  private arrows!: EdgeArrows;
 
   create(): void {
     // Under everything on the HUD: the light vignette that frames the game view.
     this.vignette = this.add.image(0, 0, vignetteTexture(this)).setOrigin(0).setDepth(-10);
+    this.arrows = new EdgeArrows(this);
     this.bars = this.add.graphics();
     this.timer = label(this, 0, 0, '', 24, { bold: true, stroke: true });
     // The level sits at the tip of the XP bar; gold and kills share one line, each after its icon.
@@ -313,6 +318,8 @@ export class HudScene extends Phaser.Scene {
     const w = this.world;
     const p = w.player;
     const { width } = this.scale;
+    const cam = this.scene.get(SCENES.game).cameras.main;
+    this.arrows.update(w, cam, width, this.bottom, this.scale.height - this.inset.bottom, settings().calm);
     const g = this.bars.clear();
 
     const s = this.inset;

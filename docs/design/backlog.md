@@ -1756,7 +1756,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 
 ### N5 · Interface (dono: ui-designer)
 
-**NU-01 · Setas na borda para o baú no chão e a elite fora da tela** · ui + impl · P · proposto
+**NU-01 · Setas na borda para o baú no chão e a elite fora da tela** · ui + impl · P · ✅ feito (2026-11-11, `render/edgeArrows.ts`)
 
 - Por quê: 05-ui #3 (regressão: `eliteArrows` saiu em `fb215a6`). A elite solta o baú onde morre (`world.ts:271`) e
   com armas automáticas ela morre fora da tela; o jogador não sabe que há um baú (ouro, cura e às vezes o nível que
