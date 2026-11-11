@@ -73,7 +73,9 @@ function winged(body: number, wing: number, kind: 'bat' | 'crow', glow: number |
         if (glow === null) p.eye(12, 10, 2).eye(16.5, 10, 2);
         else p.glow(12, 10, 1.3, glow).glow(16.5, 10, 1.3, glow); // vampire: small angry glowing eyes
         const fang = glow === null ? 1.6 : 2.8;
-        p.fill(0xffffff).fillTriangle(12.5, 13, 13.7, 13, 13, 13 + fang).fillTriangle(15, 13, 16.2, 13, 15.6, 13 + fang);
+        p.fill(0xffffff)
+          .fillTriangle(12.5, 13, 13.7, 13, 13, 13 + fang)
+          .fillTriangle(15, 13, 16.2, 13, 15.6, 13 + fang);
       } else {
         p.eye(16, 9.5, 1.8);
       }
