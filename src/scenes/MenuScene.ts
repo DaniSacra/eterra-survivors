@@ -299,16 +299,20 @@ export class MenuScene extends Phaser.Scene {
     if (room < 60) return;
     const aldoK = Phaser.Math.Clamp(Math.floor(room / 74), 1, w < 600 ? 3 : 4);
     const otherK = Math.max(1, aldoK - (aldoK > 2 ? 1 : 0));
+    // Aldo stands out by his place in front, not by size: the same scale as the others.
     // A little further back, on the village snow rather than at the buttons' feet.
     const feet = bottom - 4 - Math.min(40, room * 0.14);
     const gap = Math.min(w / 4.2, 64 * otherK * 0.95);
     PARTY.forEach((id, i) => {
       const big = id === 'aldo';
-      const k = big ? aldoK : otherK;
-      const x = cx + (i - 1.5) * gap + (big ? 0 : (i < 2 ? -1 : 1) * 8);
+      const k = otherK;
+      const x = cx + (i - 1.5) * gap + (big ? 0 : (i < 2 ? -1 : 1) * 18);
       // Still, standing on the snow: Aldo a step in front, the others on a shallow arc behind him.
       const y = feet - (big ? 0 : 6 + (i === 1 || i === 3 ? 0 : 4) * k * 0.5);
       const colour = HERO_COLOR[id];
+      // Lyra and Andilla stand just behind the foreground pines (depth -3), Teo and Aldo in front of them.
+      const behind = id === 'lyra' || id === 'andilla';
+      const d = behind ? -3.5 : big ? 1 : 0;
       const key = `${CHARACTERS[id].sprite}.front`;
       const pad = this.bottomPad(key);
       this.add
@@ -317,13 +321,13 @@ export class MenuScene extends Phaser.Scene {
         .setTint(colour)
         .setAlpha(0.35)
         .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(big ? 1 : 0);
-      this.add.ellipse(x, y, 30 * k, 8 * k, 0x05040f, 0.5).setDepth(big ? 1 : 0);
+        .setDepth(d);
+      this.add.ellipse(x, y, 30 * k, 8 * k, 0x05040f, 0.5).setDepth(d);
       const hero = this.add
         .image(x, y + pad * k, key)
         .setOrigin(0.5, 1)
         .setScale(k)
-        .setDepth(big ? 1.2 : 1)
+        .setDepth(behind ? -3.4 : d + 0.2)
         .setTint(0xdcd8f4);
       hero.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     });
