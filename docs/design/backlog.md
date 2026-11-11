@@ -1984,7 +1984,7 @@ Origem: a direção de arte mudou para fantasia escura e iluminada (pixel art to
 em `docs/design/art-references/`, padrão em `.claude/agents/visual-director.md`). Até aqui só os documentos mudaram.
 Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 a AR-05, um commit por passo.
 
-**AR-01 · Escuridão e luz** · visual + vfx + impl · M · proposto
+**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02)
 
 - Por quê: é o que mais muda a cara do jogo e não depende de sprite.
 - O quê: uma camada de escuridão por fase (azul-noite em Valmor e na Estrada, quase preto quente na Cripta),
@@ -1994,6 +1994,10 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   fora da luz (nada de ameaça sumindo no escuro). Vinheta leve. Modo calmo: sem tremulação nem clarões.
 - Aceite: capturas 420x820 e 1280x720 das três fases; 60 FPS com 500 inimigos (F4) no desktop e sem queda
   perceptível com 4x de CPU; nenhum alocamento por quadro.
+- Feito: `render/lighting.ts` (mapa de luz a 1/4 da resolução em MULTIPLY sobre o terreno, carimbos radiais
+  aditivos em lote, listas pré-alocadas). Luz do herói, do chefe, de projéteis, zonas e itens; clarão na bomba e na
+  forja (não no modo calmo). Inimigos ficam acima do escuro e só escurecem com a distância da luz do herói
+  (`enemyTint`). Com 505 inimigos no Chromium por software, ligar a luz não mudou o FPS; falta conferir num celular.
 
 **AR-02 · Chão e cenário por fase** · visual · M · proposto
 

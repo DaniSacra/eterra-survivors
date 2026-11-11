@@ -26,7 +26,7 @@ export class Obstacles {
   ) {
     for (let i = 0; i < MAX; i++)
       this.images.push(
-        scene.add.image(0, 0, 'obstacle.0').setDepth(4.5).setScale(ART_SCALE).setVisible(false),
+        scene.add.image(0, 0, 'obstacle.0').setDepth(2.5).setScale(ART_SCALE).setVisible(false),
       );
   }
 

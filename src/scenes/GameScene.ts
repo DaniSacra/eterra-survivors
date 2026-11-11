@@ -40,6 +40,7 @@ import { settings } from '../render/settings';
 import { sound } from '../render/sound';
 import { Decals } from '../render/decals';
 import { Obstacles } from '../render/obstacles';
+import { Lighting } from '../render/lighting';
 import { Mirror } from '../render/mirror';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
@@ -69,6 +70,13 @@ const DUST = 0xc8bca8;
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
 /** Each Elo's projectile sprite, tinted with its element's colour. */
+/** Light colours (the light map multiplies the ground by them). */
+const PROJECTILE_LIGHT = 0xffe8b0;
+const BOSS_LIGHT = 0xd8b0ff;
+const BURN_LIGHT = 0xff9040;
+const FROST_LIGHT = 0x90c8ff;
+const ZONE_LIGHT = 0xd8ffc0;
+
 const PROJECTILE_TINT: Record<string, number> = Object.fromEntries(
   EVOLVED_IDS.map((id) => [`proj.${id}`, ELEMENT_COLOR[(EVOLUTIONS[id] as Evolution).element]]),
 );
@@ -173,6 +181,9 @@ export class GameScene extends Phaser.Scene {
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
   private obstacles!: Obstacles;
+  private lighting!: Lighting;
+  /** The view rectangle the ground covers this frame (world px), for the light map. */
+  private view = { x: 0, y: 0, w: 1, h: 1 };
   private forest: Phaser.GameObjects.TileSprite[] = [];
   /** Ground drawn past each side of the view (world px), so a camera shake never shows the world's empty edge. */
   private viewMargin = 24;
@@ -204,6 +215,7 @@ export class GameScene extends Phaser.Scene {
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.decals = new Decals(this, this.world.stageId);
     this.obstacles = new Obstacles(this, this.world);
+    this.lighting = new Lighting(this, this.world.stageId);
     // The road's frozen forest: one strip of pines on each side, over the ground, scrolled like it.
     const layout = this.world.stage.layout;
     this.forest =
@@ -212,7 +224,7 @@ export class GameScene extends Phaser.Scene {
             this.add
               .tileSprite(0, 0, 1, 1, 'tile.forest')
               .setOrigin(i === 0 ? 1 : 0, 0)
-              .setDepth(4.6),
+              .setDepth(2.6),
           )
         : [];
     this.gemMirror = new Mirror(
@@ -266,6 +278,7 @@ export class GameScene extends Phaser.Scene {
         // Hammers spin end over end as they fly.
         img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
         // Fúria da Forja drops embers behind it.
+        this.lighting.add(p.x, p.y, 70, PROJECTILE_TINT[p.sprite] ?? PROJECTILE_LIGHT, 0.55);
         if (p.sprite === FORGE && this.stepDt > 0 && this.sparks.rand() < 0.3)
           this.sparks.add(p.x, p.y, 0, 20, 0.4, 5, 0xffa040, SPARK.ember);
       },
@@ -345,7 +358,8 @@ export class GameScene extends Phaser.Scene {
           img.setTint(TINT.frost, TINT.frost, TINT.frozen, TINT.frozen);
         else if (e.slow > 0) img.setTint(TINT.slowed);
         else if (e.dot > 0) img.setTint(e.dotKind === 'bleed' ? TINT.bleed : TINT.burn);
-        else img.clearTint();
+        // Out of the hero's light, the night shades them (never so dark that they hide).
+        else img.setTint(this.lighting.enemyTint(e.x, e.y));
         img.setAlpha(isFaded(e) ? 0.3 : 1); // a fading ghost: harmless and untouchable for a moment
       },
     );
@@ -373,6 +387,28 @@ export class GameScene extends Phaser.Scene {
     });
     this.fitCamera();
     this.cameras.main.fadeIn(150);
+  }
+
+  /** This frame's lights (projectiles add theirs as they are mirrored). */
+  private addLights(): void {
+    const w = this.world;
+    const l = this.lighting;
+    l.begin();
+    l.hero(w.player.x, w.player.y, HERO_COLOR[w.character]);
+    // Bosses carry their own light, so they are never a shape in the dark.
+    if (w.boss) l.add(w.boss.x, w.boss.y, w.boss.def.radius * 5, BOSS_LIGHT, 0.7);
+    const zones = w.zones.active;
+    for (let i = 0; i < zones.length; i++) {
+      const z = zones[i] as (typeof zones)[number];
+      const color = z.burnDps > 0 ? BURN_LIGHT : z.slows ? FROST_LIGHT : ZONE_LIGHT;
+      l.add(z.x, z.y, z.radius * 2.2, color, 0.6);
+    }
+    // Chests glow where they lie.
+    const items = w.pickups.active;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i] as (typeof items)[number];
+      l.add(it.x, it.y, 90, it.type === 'chest' ? 0xffd070 : 0xc8d8ff, 0.5);
+    }
   }
 
   /** Camera shake, skipped with the calm-screen option. */
@@ -416,6 +452,10 @@ export class GameScene extends Phaser.Scene {
     const fh = vh + this.viewMargin * 2;
     this.ground.setPosition(vx, vy).setSize(fw, fh);
     this.ground.setTilePosition(vx, vy);
+    this.view.x = vx;
+    this.view.y = vy;
+    this.view.w = fw;
+    this.view.h = fh;
     this.decals.update(vx, vy, fw, fh);
     this.obstacles.update(vx, vy, fw, fh);
     if (layout.kind === 'corridor')
@@ -463,6 +503,7 @@ export class GameScene extends Phaser.Scene {
       this.playerSprite.setFlipX(w.player.facing.x < 0);
       this.playerOutline.setFlipX(w.player.facing.x < 0);
     }
+    this.addLights();
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
     this.enemyMirror.sync(w.enemies.active);
@@ -472,6 +513,8 @@ export class GameScene extends Phaser.Scene {
     // Sparks keep flying after the boss falls (the world stops), but hold still behind the level-up choice.
     if (w.state !== 'levelup') this.sparks.update(delta / 1000);
     this.sparks.draw(this.fxTop);
+    const v = this.view;
+    this.lighting.render(v.x, v.y, v.w, v.h, delta / 1000);
     this.showReward();
     this.handleEvents();
     this.frameSounds();
@@ -708,6 +751,7 @@ export class GameScene extends Phaser.Scene {
     this.moments.chest = w.time;
     this.moments.elo = true;
     this.rewardIcon.setTexture(`icon.${elo}`);
+    if (!this.calm) this.lighting.flash(p.x, p.y, 520, color, 0.9);
     const sp = this.sparks;
     sp.add(p.x, p.y, 0, 0, 0.6, 70, color, SPARK.ring, true);
     sp.add(p.x, p.y, 0, 0, 0.8, 110, 0xffffff, SPARK.ring, true);
@@ -859,6 +903,7 @@ export class GameScene extends Phaser.Scene {
           this.hud.announce(t.pickups[e.id], true);
           if (e.id === 'bomb') {
             this.moments.bomb = w.time;
+            if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 900, 0xfff0d0, 0.7);
             this.shake(300, 0.012);
           } else if (e.id === 'freeze') this.moments.frost = w.time;
           break;
