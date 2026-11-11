@@ -35,6 +35,8 @@ export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7]),
   'enemy.golem': anim(96, 112, [7, 9, 5, 9]),
   'enemy.witch': anim(96, 112, [7, 5, 5, 7]),
+  'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7]),
+  'enemy.bellRinger': anim(95, 102, [7, 7, 5, 7]),
   // The crowd: a walk only (the still is its first frame). Sizes are the final display size, scale 1.
   'enemy.bat': anim(32, 32, [5], 12),
   'enemy.rat': anim(40, 32, [5]),
