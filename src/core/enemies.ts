@@ -3,6 +3,7 @@ import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/
 import { updateBoss } from './bosses';
 import { behaviourStep, isAirborne, isFaded, rallyDamage } from './behaviours';
 import { hurtHero, onKill } from './elos';
+import { addPatch } from './marks';
 import { BLOCKED, blockCircle, spawnPoint } from './terrain';
 import type { Poolable } from './pool';
 import type { OwnedWeapon } from './weapons';
@@ -55,6 +56,8 @@ export interface Enemy extends Poolable {
   actT: number;
   aimX: number;
   aimY: number;
+  /** trail: seconds to the next patch it leaves. */
+  trailT: number;
   /** reassemble: seconds left as a pile (0: standing), and whether it has already stood up once. */
   pile: number;
   rose: boolean;
@@ -97,6 +100,7 @@ export const createEnemy = (): Enemy => ({
   abilityIdx: 0,
   vanished: false,
   aimY: 0,
+  trailT: 0,
   pile: 0,
   rose: false,
   dead: false,
@@ -161,12 +165,13 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.aimY = 0;
   e.rally = 0;
   e.spawned = 0;
-  e.brewT = def.brew?.every ?? 0;
+  e.brewT = def.brew?.every ?? def.dig?.every ?? 0;
   e.stir = 0;
   e.carry = 0;
   e.abilityIdx = 0;
   e.pile = 0;
   e.rose = false;
+  e.trailT = def.trail?.every ?? 0;
   e.dead = e.vanished = false;
   world.seen[type] = true;
   world.alive[type] = (world.alive[type] ?? 0) + 1;
@@ -299,6 +304,7 @@ export function updateEnemies(world: World, dt: number): void {
       speed = 0;
     }
     if (e.dot > 0) tickDot(world, e, dt);
+    if (e.def.trail && !frozen) leaveTrail(world, e, dt);
     if (e.slow > 0) {
       e.slow -= dt;
       speed *= config.zones.slowFactor;
@@ -392,6 +398,19 @@ export function updateEnemies(world: World, dt: number): void {
       break;
     }
   }
+}
+
+/** A trail (FT-16): every `every` s a patch under it, unless its `cap` of patches is already on the ground. */
+function leaveTrail(world: World, e: Enemy, dt: number): void {
+  const tr = e.def.trail as NonNullable<EnemyDef['trail']>;
+  e.trailT -= dt;
+  if (e.trailT > 0) return;
+  e.trailT = tr.every;
+  let n = 0;
+  const marks = world.marks.active;
+  for (let i = 0; i < marks.length; i++) if (marks[i]?.kind === tr.pool.kind) n++;
+  if (n >= tr.cap) return;
+  addPatch(world, tr.pool.kind, e.x, e.y, tr.pool.radius, 0.01, tr.pool.ttl, tr.pool.slow ?? 1, 0);
 }
 
 /** Removes dead enemies (backwards, so swap-remove is safe) and reports each death to the world. */

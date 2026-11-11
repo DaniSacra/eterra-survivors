@@ -107,6 +107,9 @@ export function behaviourStep(
       out.y = (ux * s + uy * c) * step;
       return;
     }
+    case 'dig':
+      dig(world, e, dt, out);
+      return;
     case 'flee':
       return flee(world, e, dt, ux, uy, dist, step, out);
     case 'still':
@@ -337,6 +340,29 @@ function lobPotion(world: World, e: Enemy, lob: NonNullable<NonNullable<EnemyDef
     e.x,
     e.y,
   );
+}
+
+/**
+ * Dig (FT-16): every `every` s the Coveiro stops `windup` s with the shovel planted; at the end `count` of `spawn`
+ * rise in a ring of `radius` px around him, each out of a spawn mark if it is in view.
+ */
+function dig(world: World, e: Enemy, dt: number, out: { x: number; y: number }): void {
+  const d = e.def.dig;
+  if (!d) return;
+  if (e.stir > 0) {
+    e.stir -= dt;
+    out.x = out.y = 0;
+    if (e.stir > 0) return;
+    e.brewT = d.every;
+    const start = world.rng.next() * TAU;
+    for (let i = 0; i < d.count; i++) {
+      const a = start + (i / d.count) * TAU;
+      riseAt(world, d.spawn as EnemyId, e.x + Math.cos(a) * d.radius, e.y + Math.sin(a) * d.radius);
+    }
+    return;
+  }
+  e.brewT -= dt;
+  if (e.brewT <= 0 && e.stun <= 0) e.stir = d.windup;
 }
 
 /**

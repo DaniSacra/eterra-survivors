@@ -99,3 +99,34 @@ describe('burst (FT-14)', () => {
     expect(far.hp).toBe(farHp);
   });
 });
+
+describe('Coveiro dig and slime trail (FT-16)', () => {
+  it('the Coveiro stands still for the windup, then raises a ring of Ossadas', () => {
+    const w = bareWorld();
+    const d = ENEMIES.gravedigger.dig;
+    w.player.x = 400;
+    w.player.y = 0;
+    const e = spawnEnemy(w, 'gravedigger', 0, 0);
+    e.brewT = 0;
+    run(w, STEP * 2);
+    expect(e.stir).toBeGreaterThan(0);
+    const x = e.x;
+    run(w, d.windup * 0.5);
+    expect(e.x).toBe(x);
+    run(w, d.windup * 0.5 + 0.7);
+    expect(w.enemies.active.filter((o) => o.type === 'bones').length).toBe(d.count);
+  });
+
+  it('a Gosma Verde leaves slime that slows the hero, never more than its cap', () => {
+    const w = bareWorld();
+    const tr = ENEMIES.slime.trail;
+    w.player.x = 400;
+    const e = spawnEnemy(w, 'slime', 0, 0);
+    e.stun = 999;
+    run(w, tr.every * (tr.cap + 4));
+    const slime = w.marks.active.filter((m) => m.kind === 'slime');
+    expect(slime.length).toBeGreaterThan(1);
+    expect(slime.length).toBeLessThanOrEqual(tr.cap);
+    expect(slime[0]?.slow).toBe(tr.pool.slow);
+  });
+});

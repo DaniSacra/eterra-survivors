@@ -24,6 +24,7 @@ export type EnemyWay =
   | 'nest'
   | 'flee'
   | 'reassemble'
+  | 'dig'
   | 'burst'
   | 'elite'
   | 'cleave'
@@ -55,10 +56,12 @@ export function enemyTraits(def: EnemyDef, heroSpeed = config.player.stats.moveS
         ? 'banner'
         : def.nest
           ? 'nest'
-          : def.burst
-            ? 'burst'
-            : def.reassemble
-              ? 'reassemble'
-              : (def.move ?? null));
+          : def.dig
+            ? 'dig'
+            : def.burst
+              ? 'burst'
+              : def.reassemble
+                ? 'reassemble'
+                : (def.move ?? null));
   return { hp: def.hp, speed, damage: def.damage, push, way };
 }

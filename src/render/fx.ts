@@ -1162,6 +1162,14 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
       under.lineStyle(1.5, 0xc0402a, 0.3);
       ring(under, e.x, e.y, e.def.banner.radius);
     }
+    // The Coveiro planting the shovel: the ring where the graves open fills up (FT-16).
+    if (e.def.dig && e.stir > 0) {
+      const k = 1 - e.stir / e.def.dig.windup;
+      under.fillStyle(WARN_COLOR, 0.06 + 0.1 * k);
+      disc(under, e.x, e.y, e.def.dig.radius + 14);
+      under.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
+      dashedArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
+    }
     // The witch stirring: the reach of the brew lights up on the ground, filling until it goes off (FT-11).
     if (e.def.brew && e.stir > 0) {
       const k = 1 - e.stir / e.def.brew.windup;
@@ -1489,6 +1497,7 @@ function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
 const POISON = 0xa8c030;
 const TAR = 0x6a4a1a;
 const WEB = 0xe4e4ec;
+const SLIME = 0x3ab070;
 
 /**
  * Patches an enemy leaves on the ground (poison, tar). In flight a potion arcs from the thrower to the marked spot
@@ -1498,9 +1507,10 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
   for (let i = 0; i < list.length; i++) {
     const m = list[i] as (typeof list)[number];
-    if (m.kind !== 'poison' && m.kind !== 'tar' && m.kind !== 'web') continue;
+    if (m.kind !== 'poison' && m.kind !== 'tar' && m.kind !== 'web' && m.kind !== 'slime') continue;
     const r = m.radius;
-    const color = m.kind === 'poison' ? POISON : m.kind === 'web' ? WEB : TAR;
+    const color = m.kind === 'poison' ? POISON : m.kind === 'web' ? WEB : m.kind === 'slime' ? SLIME : TAR;
+    if (m.ttl > 0 && m.kind === 'slime') continue;
     if (m.ttl > 0) {
       const k = 1 - m.ttl / m.total; // 0 -> 1
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);

@@ -2564,10 +2564,12 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
 **FT-16 · Cripta montada** · impl + bal + visual · M · parcial (2026-11-11)
 
 - Feito: Ossada que remonta (básico), Ossada em Brasa como especial (`from` 40 s, a cada 12 s, máx. 8), `mult.hp` 1.35
-  para 1.25. Sim `SIM_SEEDS=16`: Cripta 0% / 17% / 83%. Decisões para o Daniel mudar: elite continua o Golem (pergunta 4),
-  Morcego Vampiro e Espectro atirador (Toque Gélido) ainda não entraram, o rastro de limo da Gosma Verde (pergunta 10)
-  e a segunda habilidade do Sineiro também não; o morcego cinzento segue na fase.
-- Falta: rastro (`trail`) da Gosma Verde, atirador espiritual, Sineiro com 2ª habilidade, arte final da Ossada em Brasa.
+  para 1.25; **Gosma Verde** de volta como perigo (`trail`: limo de 26 px que deixa lento a 0.7, máx. 6 vivas, especial
+  a partir de 70 s); **Coveiro** (`gravedigger`, `dig`: finca a pá, 1.1 s de aviso e 4 Ossadas saem das covas num anel
+  de 110 px) como elite da Cripta, escolha do Daniel (2026-11-11); o Golem fica só na Estrada. Sim `SIM_SEEDS=16`:
+  Cripta 2% / 27% / 84%.
+- Falta: atirador espiritual (Toque Gélido), Sineiro com 2ª habilidade, Morcego Vampiro no lugar do cinzento, arte final
+  (Ossada em Brasa, Coveiro, pilha, limo).
 
 - Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
   Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do

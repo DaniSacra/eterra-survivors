@@ -68,8 +68,11 @@ export const STAGES = {
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
     mult: { hp: 1.25, damage: 1.85, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'ghost' }),
-    elites: elites('golem'),
-    specials: [{ id: 'emberBones', from: 40, every: 12 }],
+    elites: elites('gravedigger'),
+    specials: [
+      { id: 'emberBones', from: 40, every: 12 },
+      { id: 'slime', from: 70, every: 15 },
+    ],
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
   /** Estrada do Sul: the frozen road, the hooded ones and the wolf pack. */

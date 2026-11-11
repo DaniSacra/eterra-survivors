@@ -353,6 +353,24 @@ export const ENEMY_ART: Record<string, ArtDef> = {
    * Bruxa do Caldeirão (provisional): a stout hunched old woman in a dark shawl, long nose and hands lit from below
    * by the iron cauldron's sick acid glow (FT-11).
    */
+  /** Coveiro (provisional): a hunched man in a long dark coat and a brim hat, a shovel over the shoulder (FT-16). */
+  'enemy.gravedigger': {
+    w: 40,
+    h: 46,
+    draw(p) {
+      p.shadow(20, 42, 28, 6);
+      p.rrect(26, 8, 3, 32, 1.5, 0x6a4a2a); // shovel handle
+      p.poly([23, 4, 33, 4, 31, 12, 25, 12], 0x8a8a94); // blade
+      p.poly([10, 18, 28, 18, 31, 41, 7, 41], 0x3a3438); // long coat
+      p.rrect(11, 38, 7, 5, 2, 0x2a2428).rrect(21, 38, 7, 5, 2, 0x2a2428); // boots
+      p.circle(19, 13, 6.5, 0xb89a80); // head
+      p.rrect(8, 8, 22, 3.5, 1.5, 0x2a2428).rrect(12, 3, 14, 7, 3, 0x2a2428); // hat
+      p.ink();
+      p.fill(0x4a4448).fillRect(17, 22, 3, 18);
+      p.eye(16.5, 14, 1.6).eye(21.5, 14, 1.6);
+      p.shine(14, 6, 6, 2, 0.3);
+    },
+  },
   'enemy.witch': {
     w: 46,
     h: 46,

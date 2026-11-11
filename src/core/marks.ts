@@ -10,7 +10,7 @@ import type { World } from './world';
  * (FT-02: nothing appears inside the view without warning). `ice`: a patch of the Lobo Velho's ice, forming while
  * `ttl` runs out, then slowing the hero to `slow` until the fight ends (core/arena.ts, FT-08).
  */
-export type MarkKind = 'spawn' | 'ice' | 'poison' | 'tar' | 'web' | 'burst';
+export type MarkKind = 'spawn' | 'ice' | 'poison' | 'tar' | 'web' | 'slime' | 'burst';
 /** The marks that are patches of ground the hero can stand in. */
 export const isPatch = (k: MarkKind): boolean => k !== 'spawn' && k !== 'burst';
 
@@ -65,7 +65,7 @@ export const createMark = (): Mark => ({
 /** A patch of ground (poison, tar, web) warning for `arm` s, then lasting `life` s (see Mark). */
 export function addPatch(
   world: World,
-  kind: 'poison' | 'tar' | 'web',
+  kind: 'poison' | 'tar' | 'web' | 'slime',
   x: number,
   y: number,
   radius: number,

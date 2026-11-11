@@ -84,7 +84,7 @@ export interface EnemyDef {
    * shoot keeps its distance and throws slow shots; leap marks the hero's spot and lands there; pack comes in from
    * the side; still stands where it is.
    */
-  move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still' | 'flee';
+  move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still' | 'flee' | 'dig';
   /** Most of this type alive at once: the spawner sends the stage's basic instead, specials wait. */
   max?: number;
   /** charge: its own numbers instead of the default (core/behaviours.ts CHARGE). */
@@ -125,6 +125,15 @@ export interface EnemyDef {
    */
   flee?: { keep: number; life: number; steal: boolean };
   /**
+   * trail (FT-16): every `every` s it leaves `pool` under itself (a slowing patch), at most `cap` of its trail alive.
+   */
+  trail?: { every: number; cap: number; pool: GroundPool };
+  /**
+   * dig (FT-16, the Coveiro): every `every` s it stops `windup` s, then `count` of `spawn` rise in a ring of
+   * `radius` px around it (each out of a spawn mark).
+   */
+  dig?: { every: number; windup: number; count: number; radius: number; spawn: string };
+  /**
    * reassemble (FT-15): the first death is not one. It falls in a pile (harmless, still, no gem) that stands up again
    * after `delay` s with `hp` of its max life; any hit on the pile breaks it for good.
    */
@@ -143,7 +152,7 @@ export interface EnemyDef {
 
 /** A patch an enemy leaves on the ground (core/marks.ts). `hit` is contact damage x hit, every tick, inside it. */
 export interface GroundPool {
-  kind: 'poison' | 'tar' | 'web';
+  kind: 'poison' | 'tar' | 'web' | 'slime';
   radius: number;
   ttl: number;
   slow?: number;
@@ -218,7 +227,18 @@ export const ENEMIES = {
     knockbackResist: 0,
     move: 'zigzag',
   },
-  slime: { sprite: 'enemy.slime', radius: 17, hp: 45, speed: 42, damage: 8, xp: 3, knockbackResist: 0.6 },
+  /** Gosma Verde: in the crypt it is a hazard, leaving green slime that slows whoever walks in it (FT-16). */
+  slime: {
+    sprite: 'enemy.slime',
+    radius: 17,
+    hp: 45,
+    speed: 42,
+    damage: 8,
+    xp: 3,
+    knockbackResist: 0.6,
+    max: 6,
+    trail: { every: 1.2, cap: 5, pool: { kind: 'slime', radius: 26, ttl: 4, slow: 0.7 } },
+  },
   ghost: {
     sprite: 'enemy.ghost',
     radius: 15,
@@ -389,6 +409,22 @@ export const ENEMIES = {
     },
     brew: { every: 8, windup: 1, radius: 170, heal: 0.3, rally: 4 },
     loot: { pickup: 'elixir' },
+  },
+  /**
+   * Coveiro (provisional name): a gravedigger who keeps the crypt's graves; now and then plants the shovel and a ring
+   * of Ossadas climbs out of the ground around him (FT-16).
+   */
+  gravedigger: {
+    sprite: 'enemy.gravedigger',
+    radius: 20,
+    hp: 480,
+    speed: 48,
+    damage: 12,
+    xp: 20,
+    knockbackResist: 0.85,
+    elite: true,
+    move: 'dig',
+    dig: { every: 7, windup: 1.1, count: 4, radius: 110, spawn: 'bones' },
   },
   // Bosses (stage `boss`): killing one wins the stage.
   bellRinger: {

@@ -241,6 +241,7 @@ export const t = {
       frost: 'Uivo da Geada',
       web: 'Teia',
       eggs: 'Ovos',
+      dig: 'Abre covas ao redor',
       reassemble: 'Levanta se a pilha não for quebrada',
       burst: 'Estoura ao cair',
     },
@@ -280,6 +281,8 @@ export const t = {
       witch: 'Ri sozinha mexendo o caldeirão. Derrube a velha e a última poção é sua.',
       // written for the Survivors (provisional, FT-14)
       emberBones: 'As brasas no peito não apagam com a queda. Longe dela, quando estourar.',
+      // written for the Survivors (provisional, FT-16)
+      gravedigger: 'Cuida das covas da cripta. Quando finca a pá, as covas se abrem.',
       // written for the Survivors (provisional, FT-10)
       thiefRat: 'Leva tudo o que brilha no chão. Pegue o rato e pegue o saco.',
       spiderNest: 'Um novelo de teia que pulsa. Cada pulso é mais uma aranha.',
@@ -294,7 +297,8 @@ export const t = {
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
       spider: 'Faz ninho entre as lápides e nunca anda em linha reta.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
-      slime: 'Escorre do limo da cripta. Bater nela é como bater em mingau.',
+      slime:
+        'Escorre do limo da cripta e deixa um rastro que prende os pés. Bater nela é como bater em mingau.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
       ghost: 'Um frio que atravessa as paredes. Às vezes some, e o golpe passa junto.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
@@ -722,6 +726,7 @@ export const t = {
     spiderNest: 'Ninho de Aranha',
     thiefRat: 'Rato Ladrão',
     emberBones: 'Ossada em Brasa',
+    gravedigger: 'Coveiro',
     witch: 'Bruxa do Caldeirão',
     spiderEgg: 'Ovo de Aranha',
     spiderMother: 'Mãe-Aranha',
