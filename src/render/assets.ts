@@ -64,6 +64,9 @@ export const ASSETS: Record<string, AssetDef> = {
   'proj.daggers': { kind: 'image', url: 'sprites/fx/dagger.png' },
   'proj.staff': { kind: 'image', url: 'sprites/fx/staffOrb.png' },
   'proj.holyLight': { kind: 'image', url: 'sprites/fx/holyOrb.png' },
+  'proj.elunLight': { kind: 'image', url: 'sprites/fx/elunOrb.png' },
+  'proj.starlet': { kind: 'image', url: 'sprites/fx/starlet.png' },
+  'proj.lyraStar': { kind: 'image', url: 'sprites/fx/lyraStar.png' },
   'fx.shield': { kind: 'image', url: 'sprites/fx/shield.png' },
   'fx.maceHead': { kind: 'image', url: 'sprites/fx/maceHead.png' },
   // Ground decals and the Cripta's obstacles: PixelLab pixel art (files already at ART_RES), see decals.ts / obstacles.ts.

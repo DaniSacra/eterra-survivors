@@ -12,7 +12,16 @@ describe('effects keep the pixel look', () => {
   });
 
   it('every effect sprite is a PixelLab image drawn through the asset map', () => {
-    for (const key of ['proj.hammer', 'proj.daggers', 'proj.staff', 'fx.shield', 'fx.maceHead'])
+    for (const key of [
+      'proj.hammer',
+      'proj.daggers',
+      'proj.staff',
+      'proj.elunLight',
+      'proj.starlet',
+      'proj.lyraStar',
+      'fx.shield',
+      'fx.maceHead',
+    ])
       expect(assetsSource).toContain(`'${key}': { kind: 'image'`);
   });
 });
