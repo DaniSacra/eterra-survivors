@@ -3,7 +3,7 @@ import type { DamageNumber } from '../core/effects';
 import { BossAct, bossAbility } from '../core/bosses';
 import type { BossAbility } from '../data/enemies';
 import { CHARGE, isFaded } from '../core/behaviours';
-import type { Enemy } from '../core/enemies';
+import { spriteOf, type Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
@@ -419,14 +419,15 @@ export class GameScene extends Phaser.Scene {
       (img, e) => {
         const w = this.world;
         // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
-        const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[e.def.sprite];
+        const spr = spriteOf(e);
+        const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[spr];
         const posed = anim ? enemyPose(e, anim) : null;
         const key =
           anim && posed
-            ? poseKey(e.def.sprite, posed.pose)
+            ? poseKey(spr, posed.pose)
             : e.pile > 0
               ? (e.def.reassemble as { sprite: string }).sprite
-              : e.def.sprite;
+              : spr;
         if (img.texture.key !== key) {
           img.setTexture(key);
           // Bosses over their escort and elites over the crowd, so they always show whole.
@@ -483,7 +484,7 @@ export class GameScene extends Phaser.Scene {
         // A flyer hovers above the ground with a small shadow below, bobbing and beating its wings.
         let hover = 0;
         // Scale and flying go by the enemy's own sprite, not by the pose strip it shows now.
-        const sprite = e.pile > 0 ? key : e.def.sprite;
+        const sprite = e.pile > 0 ? key : spr;
         if (FLYERS[sprite]) {
           const t = w.freeze > 0 ? 0 : w.time;
           hover = HOVER + Math.sin(t * 5 + e.uid) * 2.5;

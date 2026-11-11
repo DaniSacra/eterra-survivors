@@ -17,7 +17,7 @@ import {
   type Puff,
   type Slash,
 } from './effects';
-import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
+import { createEnemy, spriteOf, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import { createEnemyShot, updateEnemyShots, type EnemyShot, type HurtSource } from './enemyShots';
 import { addBurst, createMark, updateMarks, type Mark } from './marks';
 import { updateShatters } from './elos';
@@ -307,7 +307,7 @@ export class World {
     this.kills++;
     this.killsBy[e.type] = (this.killsBy[e.type] ?? 0) + 1;
     this.tally.kills++;
-    addPuff(this, e.x, e.y, e.def.radius, 'death', e.def.sprite, this.player.x < e.x);
+    addPuff(this, e.x, e.y, e.def.radius, 'death', spriteOf(e), this.player.x < e.x);
     const burst = e.def.burst;
     if (burst) {
       const hero = e.def.damage * burst.damage * this.enemyDamage * this.stage.mult.damage;

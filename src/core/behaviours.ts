@@ -28,8 +28,9 @@ export const isFaded = (e: Enemy): boolean => e.def.move === 'phase' && e.act ==
 /** True while a leaping enemy is in the air (no contact, no shoving; it can still be hit). */
 export const isAirborne = (e: Enemy): boolean => e.def.move === 'leap' && e.act === Act.Active;
 
-/** Contact damage multiplier of `e` right now: rallied by a banner (FT-06) or not. */
-export const rallyDamage = (e: Enemy): number => (e.rally > 0 ? config.rally.damage : 1);
+/** Damage multiplier of `e` right now: rallied by a banner (FT-06) and/or in a ghost's dark form. */
+export const rallyDamage = (e: Enemy): number =>
+  (e.rally > 0 ? config.rally.damage : 1) * (e.dark ? config.darkGhost.damage : 1);
 
 /**
  * Adjusts the step (mx, my) toward the hero (ux, uy unit, `step` px this frame) for the enemy's behaviour.
@@ -59,6 +60,11 @@ export function behaviourStep(
       if (e.actT <= 0) {
         const fading = e.act !== Act.Active;
         e.act = fading ? Act.Active : Act.Idle;
+        if (fading && !e.dark) {
+          // The first vanish: it comes back as its dark self, with a snap of shadow where it faded.
+          e.dark = true;
+          addPuff(world, e.x, e.y, e.def.radius * 2.2, 'shade');
+        }
         e.actT = fading ? PHASE.faded : PHASE.solid + world.rng.next() * 2;
       }
       if (e.act === Act.Active) {

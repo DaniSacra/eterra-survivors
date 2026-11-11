@@ -97,6 +97,8 @@ export interface EnemyDef {
    * the side; still stands where it is.
    */
   move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still' | 'flee' | 'dig';
+  /** phase: the sprite shown once it has vanished (its dark form, see Enemy.dark). */
+  darkSprite?: string;
   /** Most of this type alive at once: the spawner sends the stage's basic instead, specials wait. */
   max?: number;
   /** charge: its own numbers instead of the default (core/behaviours.ts CHARGE). */
@@ -287,6 +289,7 @@ export const ENEMIES = {
     xp: 3,
     knockbackResist: 0.7,
     move: 'phase',
+    darkSprite: 'enemy.ghostDark',
   },
   // Estrada do Sul
   hooded: {

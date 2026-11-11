@@ -394,6 +394,12 @@ export function drawFx(
         g.fillStyle(PUFF_COLOR, 0.9 * k);
         disc(g, cx, cy, cr);
       }
+    } else if (f.kind === 'shade') {
+      // A shadow snapping shut: a dark disc pulled in to a point, with a thin red ring at its edge.
+      g.fillStyle(0x120818, 0.8 * k);
+      disc(g, f.x, f.y, f.r * (0.3 + k * 0.7));
+      g.lineStyle(2, 0xff3a3a, k);
+      ring(g, f.x, f.y, f.r * (0.4 + k * 0.6));
     } else {
       const r = f.r * (1.6 - k * 0.8);
       const c = f.kind === 'gem' ? GEM_GLINT : ITEM_GLINT;

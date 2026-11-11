@@ -55,7 +55,7 @@ const SIEGE: readonly {
   { key: 'enemy.vampireBat', dx: -140, dy: -330, size: 0.9, depth: -2.5, left: false, fly: true },
   { key: 'enemy.vampireBat', dx: -125, dy: -255, size: 0.9, depth: -2.5, left: true, fly: true },
   { key: 'enemy.vampireBat', dx: -35, dy: -280, size: 0.9, depth: -2.5, left: true, fly: true },
-  { key: 'enemy.ghost', dx: 390, dy: -290, size: 0.6, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.ghost', dx: 390, dy: -290, size: 0.85, depth: -2.5, left: true, fly: true },
   { key: 'enemy.blackKnight', dx: 240, dy: -250, size: 0.5, depth: -2.6, left: true, fly: true },
   { key: 'enemy.oldWolf', dx: 500, dy: -250, size: 0.5, depth: -4.6, left: true, fly: true, alpha: 0.55 },
   {

@@ -147,7 +147,7 @@ export interface Puff extends Timed {
   y: number;
   /** Size, world px. */
   r: number;
-  kind: 'death' | 'gem' | 'item';
+  kind: 'death' | 'gem' | 'item' | 'shade';
   /** A death: the dying enemy's sprite key and whether it faced left, for the render's death animation. */
   sprite: string;
   flip: boolean;

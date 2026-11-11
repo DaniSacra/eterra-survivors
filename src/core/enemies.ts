@@ -61,6 +61,8 @@ export interface Enemy extends Poolable {
   /** reassemble: seconds left as a pile (0: standing), and whether it has already stood up once. */
   pile: number;
   rose: boolean;
+  /** A phasing ghost that has vanished once: it stays in its dark form until it dies. */
+  dark: boolean;
   dead: boolean;
   /** Swept without a kill: no XP, no drop, not counted (the crowd leaving when the boss arrives). */
   vanished: boolean;
@@ -103,8 +105,12 @@ export const createEnemy = (): Enemy => ({
   trailT: 0,
   pile: 0,
   rose: false,
+  dark: false,
   dead: false,
 });
+
+/** The sprite key `e` shows: its dark form's once it has turned dark. */
+export const spriteOf = (e: Enemy): string => (e.dark && e.def.darkSprite ? e.def.darkSprite : e.def.sprite);
 
 export type DotKind = 'bleed' | 'burn';
 
@@ -171,6 +177,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.abilityIdx = 0;
   e.pile = 0;
   e.rose = false;
+  e.dark = false;
   e.trailT = def.trail?.every ?? 0;
   e.dead = e.vanished = false;
   world.seen[type] = true;
@@ -310,7 +317,7 @@ export function updateEnemies(world: World, dt: number): void {
     const dist = Math.sqrt(distSq) || 1;
     // A boss using its ability moves on its own (or stands still) instead of walking to the hero.
     const acting = e.def.boss && updateBoss(world, e, dt);
-    let speed = frozen || acting ? 0 : e.def.speed * speedMult * dt;
+    let speed = frozen || acting ? 0 : e.def.speed * speedMult * (e.dark ? config.darkGhost.speed : 1) * dt;
     if (e.stun > 0) {
       e.stun -= dt;
       speed = 0;

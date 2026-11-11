@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BossAct } from '../../src/core/bosses';
-import { isFaded } from '../../src/core/behaviours';
+import { isFaded, rallyDamage } from '../../src/core/behaviours';
+import { config } from '../../src/data/config';
 import { damageEnemy, spawnEnemy } from '../../src/core/enemies';
 import { STAGES } from '../../src/data/stages';
 import { bareWorld, still } from './helpers';
@@ -81,5 +82,28 @@ describe('determinism', () => {
       return w.enemies.active.map((e) => `${e.uid}:${e.x.toFixed(3)},${e.y.toFixed(3)}`).join(' ');
     };
     expect(run()).toBe(run());
+  });
+});
+
+describe('ghost dark form', () => {
+  it('turns dark on its first vanish, hits harder and stays dark until it dies', () => {
+    const w = bareWorld();
+    const e = spawnEnemy(w, 'ghost', 600, 0);
+    expect(e.dark).toBe(false);
+    let t = 0;
+    while (!isFaded(e) && t < 10) {
+      w.step(STEP, still);
+      t += STEP;
+    }
+    expect(e.dark).toBe(true);
+    expect(w.puffs.active.some((f) => f.kind === 'shade')).toBe(true);
+    while (isFaded(e) && t < 20) {
+      w.step(STEP, still);
+      t += STEP;
+    }
+    // Solid again, and still dark (a second vanish does not undo it).
+    expect(isFaded(e)).toBe(false);
+    expect(e.dark).toBe(true);
+    expect(rallyDamage(e)).toBeCloseTo(config.darkGhost.damage);
   });
 });

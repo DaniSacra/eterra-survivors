@@ -72,6 +72,8 @@ export const config = {
    * on a mark `warn` s ahead, with a sound of coins, and runs from there.
    */
   thief: { dist: 200, warn: 1 },
+  /** A ghost's dark form (after its first vanish, until it dies): faster and harder-hitting. */
+  darkGhost: { speed: 1.45, damage: 1.8 },
   marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80, poolTick: 0.5 },
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */

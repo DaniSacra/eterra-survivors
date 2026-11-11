@@ -3216,9 +3216,9 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 3 · Inimigos
 
-- **DD-06 · Coveiro refeito** · visual · M. PixelLab, estilo cabeçudo do Aldo, mas ameaçador: rosto escondido pela aba
+- ✅ **DD-06 · Coveiro refeito** · visual · M. PixelLab, estilo cabeçudo do Aldo, mas ameaçador: rosto escondido pela aba
   do chapéu, olhos acesos, pá grande e suja, postura curvada. Mantém andar, preparar, cavar e morrer.
-- **DD-07 · Fantasma em duas formas** · impl + visual + bal · G. Menor (cerca de 40 px na tela). Simpático; ao sumir
+- ✅ **DD-07 · Fantasma em duas formas** · impl + visual + bal · G. Menor (cerca de 40 px na tela). Simpático; ao sumir
   (move `phase`) e reaparecer vira um fantasma negro de olhos vermelhos, mais rápido e com mais dano de contato, com um
   estalo de sombra na troca. Duas artes PixelLab do mesmo personagem; regra no core com teste (a forma escura só depois
   do primeiro sumiço e vale até morrer). Troca também o fantasma da tela inicial. **Depende do Daniel:** o nome da forma
