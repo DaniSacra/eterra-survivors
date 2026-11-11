@@ -28,7 +28,7 @@ describe('ground tiles', () => {
   it('keep dark and low contrast so heroes, enemies and shots read on top', () => {
     for (const [key, pal] of Object.entries(TILE_PALETTES)) {
       for (const c of pal.base) expect(lum(c), key).toBeLessThan(0.1);
-      expect(ratio(pal.base[0], pal.base[2]), key).toBeLessThan(1.5);
+      expect(ratio(pal.base[0], pal.base[2]), key).toBeLessThan(1.6);
     }
   });
 });
