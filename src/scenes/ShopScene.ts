@@ -36,6 +36,19 @@ import { SCENES } from './keys';
 const BADGE = 28;
 const GAP = 8;
 const HEAD = 24;
+/** A shop item's level under its name on short cards (NU-09): one pip per level, or a bar past 5 levels. */
+function levelPips(scene: Phaser.Scene, x: number, y: number, level: number, max: number): void {
+  const g = scene.add.graphics();
+  if (max > 5) {
+    const w = 44;
+    g.fillStyle(UI.border, 1).fillRect(x, y - 2, w, 4);
+    g.fillStyle(UI.goldHex, 1).fillRect(x, y - 2, (w * level) / max, 4);
+    return;
+  }
+  for (let i = 0; i < max; i++)
+    g.fillStyle(i < level ? UI.goldHex : UI.border, 1).fillCircle(x + 3 + i * 9, y, 3);
+}
+
 /** Smallest item card: wide enough for icon, name and price, tall enough to touch. */
 const CARD_MIN_W = 150;
 const CARD_MIN_H = 40;
@@ -280,12 +293,13 @@ export class ShopScene extends Phaser.Scene {
     const cost = shopCost(save, id);
     const level = t.shop.level(shopLevel(save, id), SHOP[id].maxLevel);
     const rx = x + w / 2 - 8;
-    // Short cards (phone lying down): one line, name and price only (the level shows in the detail).
+    // Short cards: the name and, under it, the level as pips (a bar past 5 levels) instead of the "Nv 2/5" line.
     const compact = h < 44;
-    label(this, tx, compact ? y : y - h / 2 + 5, t.shop.items[id], compact ? 12 : 13, {
+    label(this, tx, compact ? y - 6 : y - h / 2 + 5, t.shop.items[id], compact ? 12 : 13, {
       bold: true,
       align: 'left',
     }).setOrigin(0, compact ? 0.5 : 0);
+    if (compact) levelPips(this, tx, y + 9, shopLevel(save, id), SHOP[id].maxLevel);
     if (!compact && !DEV_MODE) label(this, tx, y + h / 2 - 20, level, 12, { color: UI.muted, align: 'left' });
     const py = compact ? y : y + h / 2 - 12;
     if (DEV_MODE)

@@ -1832,7 +1832,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   página estiver aberta; Esc idem.
 - Aceite: captura em 420x820 e 820x420; Esc na página volta ao Livro.
 
-**NU-09 · Loja: nível nos cartões** · ui + visual · P · proposto
+**NU-09 · Loja: nível nos cartões** · ui + visual · P · ✅ feito (2026-11-11)
 
 - Por quê: 05-ui #11, 04-visual #16. No jogo real em 420x820 os cartões compactos mostram nome e preço; o nível só no
   detalhe. Promove os pips da ideia "Loja com ícones, grupos e pips".
