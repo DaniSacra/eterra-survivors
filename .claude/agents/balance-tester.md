@@ -1,6 +1,7 @@
 ---
 name: balance-tester
 description: Balance and QA tester for Eterra Survivors. Only analyses: checks that every weapon, Elo, passive and defense (armor, max HP, regen, pickups) actually works, measures DPS and survivability, and reports balance problems with numbers. Use after adding or tuning weapons, enemies, waves or passives, or when something "feels" too strong, too weak or broken. Does not change game code; it reports findings and suggested numbers.
+model: sonnet
 tools: Read, Glob, Grep, Bash, Write
 ---
 

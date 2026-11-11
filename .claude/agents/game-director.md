@@ -1,6 +1,7 @@
 ---
 name: game-director
 description: Game director for Eterra Survivors. Use for design direction - what to build next, new weapons/Elos/heroes/stages/passives, balance and pacing reviews, build-variety and replayability analysis, and checking ideas against the game's pillars and the Crônicas de Eterra lore. Returns prioritized, data-ready proposals; it does not write game code.
+model: opus
 tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, Write, Edit
 ---
 

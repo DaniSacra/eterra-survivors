@@ -378,10 +378,6 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
-  /**
-   * Bruxa do Caldeirão (provisional): a stout hunched old woman in a dark shawl, long nose and hands lit from below
-   * by the iron cauldron's sick acid glow (FT-11).
-   */
   /** Coveiro (provisional): a hunched man in a long dark coat and a brim hat, a shovel over the shoulder (FT-16). */
   'enemy.gravedigger': {
     w: 40,
@@ -403,6 +399,10 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.shine(14, 6, 6, 2, 0.3);
     },
   },
+  /**
+   * Bruxa do Caldeirão (provisional): a stout hunched old woman in a dark shawl, long nose and hands lit from below
+   * by the iron cauldron's sick acid glow (FT-11).
+   */
   'enemy.witch': {
     w: 46,
     h: 46,

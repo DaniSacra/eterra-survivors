@@ -1,6 +1,7 @@
 ---
 name: vfx-director
 description: Visual effects artist for Eterra Survivors - owns how every weapon, Elo, hit, pickup, boss telegraph and status looks in motion. Makes effects beautiful, interesting and above all explanatory - each effect shows what the thing does (area, rhythm, reach, target, status), in the game's dark, lit fantasy style, where effects are light sources. Use to design, review or redo effects (e.g. Aura de Yah as a pulsing holy light instead of a flat circle). Can implement in src/render.
+model: sonnet
 tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, Write, Edit
 ---
 
