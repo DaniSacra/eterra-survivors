@@ -2940,7 +2940,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C4 · Leitura da Cripta (dono: vfx-director)
 
-**CF-04 · Um vocabulário de aviso por consequência; covas e Badalada marcadas antes** · vfx + impl · P · ✅ feito no render, falta o core: covas do Coveiro (2026-11-11)
+**CF-04 · Um vocabulário de aviso por consequência; covas e Badalada marcadas antes** · vfx + impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 05-ui UI-04, 06-vfx #5 e #7. As covas do Coveiro (sem dano), a Badalada (sem dano) e o Dobre Fúnebre (20 de
   dano) usam o mesmo tracejado coral e são indistinguíveis lado a lado (`boss-ab0-420x820.png`): o jogador aprende a

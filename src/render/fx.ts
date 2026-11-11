@@ -1202,6 +1202,17 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
       ring(under, e.x, e.y, e.def.dig.radius);
       under.lineStyle(2, SUMMON_EDGE, 0.5 + 0.4 * k);
       dashedArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
+      // The graves, where the core will raise them (aimX is the ring's start angle), growing from the first frame.
+      for (let c = 0; c < e.def.dig.count; c++) {
+        const a = e.aimX + (c * Math.PI * 2) / e.def.dig.count;
+        tomb(
+          under,
+          e.x + Math.cos(a) * e.def.dig.radius,
+          e.y + Math.sin(a) * e.def.dig.radius,
+          12 + 4 * k,
+          0.55 + 0.45 * k,
+        );
+      }
     }
     // The witch stirring: the reach of the brew lights up on the ground, filling until it goes off (FT-11).
     if (e.def.brew && e.stir > 0) {
