@@ -30,7 +30,7 @@ const PARTY: readonly CharacterId[] = ['lyra', 'teo', 'aldo', 'andilla'];
 /** The home: a painted dusk over Valmor in layers (mountains, village, snow), the party in front and the buttons. */
 export class MenuScene extends Phaser.Scene {
   /** Layers that slide a little with the pointer, with how far (0 to 1 of the slack). */
-  private layers: { img: Phaser.GameObjects.Image; slack: number; depth: number }[] = [];
+  private layers: { img: Phaser.GameObjects.Image; slack: number; ox: number }[] = [];
 
   constructor() {
     super(SCENES.menu);
@@ -203,15 +203,26 @@ export class MenuScene extends Phaser.Scene {
       .setScale(scale)
       .setDepth(depth)
       .setTint(tint);
-    this.layers.push({ img, slack, depth });
+    this.layers.push({ img, slack, ox: 0 });
+    // Narrower than the screen: mirrored copies on both sides (the edges match), so the scene always fills it.
+    const w = img.displayWidth;
+    for (let n = 1; (n - 0.5) * w < width / 2; n++)
+      for (const sign of [-1, 1]) {
+        const copy = this.add
+          .image(width / 2 + sign * n * w, bottom, key)
+          .setOrigin(0.5, 1)
+          .setScale(scale)
+          .setFlipX(n % 2 === 1)
+          .setDepth(depth)
+          .setTint(tint);
+        this.layers.push({ img: copy, slack, ox: sign * n * w });
+      }
     return img;
   }
 
   private parallax(p: number): void {
     for (const l of this.layers) {
-      const spare = Math.max(0, l.img.displayWidth - this.scale.width);
-      const room = Math.min(spare / 2, 24) * l.slack;
-      l.img.x = this.scale.width / 2 - p * 2 * room;
+      l.img.x = this.scale.width / 2 + l.ox - p * 2 * 24 * l.slack;
     }
   }
 
@@ -294,32 +305,35 @@ export class MenuScene extends Phaser.Scene {
       const big = id === 'aldo';
       const k = big ? aldoK : otherK;
       const x = cx + (i - 1.5) * gap + (big ? 0 : (i < 2 ? -1 : 1) * 8);
+      // Still, standing on the snow: Aldo a step in front, the others on a shallow arc behind him.
+      const y = feet - (big ? 0 : 6 + (i === 1 || i === 3 ? 0 : 4) * k * 0.5);
       const colour = HERO_COLOR[id];
+      const key = `${CHARACTERS[id].sprite}.front`;
+      const pad = this.bottomPad(key);
       this.add
-        .image(x, feet, GLOW)
+        .image(x, y, GLOW)
         .setDisplaySize(130 * k * 0.8, 36 * k * 0.8)
         .setTint(colour)
-        .setAlpha(0.7)
+        .setAlpha(0.35)
         .setBlendMode(Phaser.BlendModes.ADD)
         .setDepth(big ? 1 : 0);
-      this.add.ellipse(x, feet, 30 * k, 8 * k, 0x000000, 0.35).setDepth(big ? 1 : 0);
-      const sprite = CHARACTERS[id].sprite;
+      this.add.ellipse(x, y, 30 * k, 8 * k, 0x05040f, 0.5).setDepth(big ? 1 : 0);
       const hero = this.add
-        .image(x, feet + 2, `${sprite}.front`)
+        .image(x, y + pad * k, key)
         .setOrigin(0.5, 1)
         .setScale(k)
-        .setDepth(big ? 1.2 : 1);
+        .setDepth(big ? 1.2 : 1)
+        .setTint(0xdcd8f4);
       hero.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-      if (!settings().calm)
-        this.tweens.add({
-          targets: hero,
-          y: feet - k,
-          duration: 700 + i * 90,
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut',
-          delay: i * 160,
-        });
     });
+  }
+
+  /** Transparent rows under a sprite's feet (px), so its shadow and feet line up. */
+  private bottomPad(key: string): number {
+    const frame = this.textures.getFrame(key);
+    for (let row = frame.height - 1; row >= 0; row--)
+      for (let col = 0; col < frame.width; col++)
+        if (this.textures.getPixelAlpha(col, row, key) > 20) return frame.height - 1 - row;
+    return 0;
   }
 }
