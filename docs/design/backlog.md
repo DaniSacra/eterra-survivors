@@ -1723,7 +1723,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   (estrela dupla na cor da arma).
 - Aceite: teste dos campos; captura de Adagas/Leque com os números desligados onde o crítico se vê.
 
-**NF-07 · Projéteis no tamanho do acerto** · vfx · P · proposto
+**NF-07 · Projéteis no tamanho do acerto** · vfx · P · ✅ (cresce até o raio do acerto, nunca encolhe)
 
 - Por quê: 06-vfx #5. A onda da Fúria acerta ~68 px de largura e o sprite tem 36; nenhum projétil cresce com Área
   (`GameScene.ts:258`, escala fixa).

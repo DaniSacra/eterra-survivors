@@ -121,6 +121,9 @@ const NONE: readonly DamageNumber[] = [];
 /** A damage number's text object, with the rounded value it shows (so it only converts when that changes). */
 type NumberText = Phaser.GameObjects.Text & { shown?: number };
 
+/** A projectile image and the hit radius its sprite was drawn for (half its longest side, world px). */
+type ProjImage = Phaser.GameObjects.Image & { baseR?: number };
+
 /** Asset key of a gem worth `value` (tiers are highest first). No closure: it runs per gem per frame. */
 function gemSprite(value: number): string {
   const tiers = config.gems.tiers;
@@ -143,7 +146,7 @@ export class GameScene extends Phaser.Scene {
   /** A light silhouette behind the hero: a permanent outline that reads over any crowd. */
   private playerOutline!: Phaser.GameObjects.Sprite;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
-  private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
+  private projectileMirror!: Mirror<Projectile, ProjImage>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
@@ -276,10 +279,11 @@ export class GameScene extends Phaser.Scene {
     const walk = `${heroSprite}.walk`;
     this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
     this.projectileMirror = new Mirror(
-      () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
+      (): ProjImage => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
         if (img.texture.key !== p.sprite) {
           img.setTexture(p.sprite);
+          img.baseR = (Math.max(img.width, img.height) * ART_SCALE) / 2;
           // An Elo's projectiles take its element's colour.
           const tint = PROJECTILE_TINT[p.sprite];
           if (tint === undefined) img.clearTint();
@@ -287,6 +291,8 @@ export class GameScene extends Phaser.Scene {
         }
         // Hammers spin end over end as they fly.
         img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
+        // A shot that hits wider than its sprite (Fúria's wave, Área) grows to its hit size (NF-07); never shrinks.
+        img.setScale(ART_SCALE * Math.max(1, p.radius / (img.baseR ?? p.radius)));
         // Fúria da Forja drops embers behind it.
         this.lighting.add(p.x, p.y, 70, PROJECTILE_TINT[p.sprite] ?? PROJECTILE_LIGHT, 0.55, 0.15);
         if (p.sprite === FORGE && this.stepDt > 0 && this.sparks.rand() < 0.3)
