@@ -93,8 +93,6 @@ export const SPRITE_SCALE: Record<string, number> = {
   'enemy.slime': 0.8, // 46 x 38
   'enemy.bonePile': 0.42, // about half the width of the skeleton that fell
   'enemy.vampireBat': 0.52, // 29 x 31
-  'enemy.bat': 0.85, // 26 x 23
-  'enemy.hooded': 1.5, // 48
   'enemy.bellRinger': 1.5, // 153
 };
 

@@ -409,7 +409,7 @@ export class GameScene extends Phaser.Scene {
         const w = this.world;
         // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
         const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[e.def.sprite];
-        const posed = anim ? enemyPose(e) : null;
+        const posed = anim ? enemyPose(e, anim) : null;
         const key =
           anim && posed
             ? poseKey(e.def.sprite, posed.pose)
@@ -438,7 +438,8 @@ export class GameScene extends Phaser.Scene {
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
         // Slowed enemies take heavy, slow steps.
-        const a = w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06;
+        const a =
+          (w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) * (anim ? 0.5 : 1);
         // 1 -> 0 after a hit. Bosses are hit all the time: a small squash only, and no white flash (they would
         // stay a white silhouette, like the hurt hero used to be red).
         const hit = (e.flash / HIT_FLASH) * (e.def.boss ? 0.3 : 1);
@@ -469,7 +470,9 @@ export class GameScene extends Phaser.Scene {
         }
         // A flyer hovers above the ground with a small shadow below, bobbing and beating its wings.
         let hover = 0;
-        if (FLYERS[key]) {
+        // Scale and flying go by the enemy's own sprite, not by the pose strip it shows now.
+        const sprite = e.pile > 0 ? key : e.def.sprite;
+        if (FLYERS[sprite]) {
           const t = w.freeze > 0 ? 0 : w.time;
           hover = HOVER + Math.sin(t * 5 + e.uid) * 2.5;
           const flap = Math.sin(t * 24 + e.uid * 1.3);
@@ -480,7 +483,10 @@ export class GameScene extends Phaser.Scene {
         }
         img
           .setPosition(e.x + shake, e.y - lift - hover)
-          .setScale(ART_SCALE * sx * (SPRITE_SCALE[key] ?? 1), ART_SCALE * sy * (SPRITE_SCALE[key] ?? 1))
+          .setScale(
+            ART_SCALE * sx * (SPRITE_SCALE[sprite] ?? 1),
+            ART_SCALE * sy * (SPRITE_SCALE[sprite] ?? 1),
+          )
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
           .setRotation(this.windupSway(e));
@@ -863,7 +869,7 @@ export class GameScene extends Phaser.Scene {
       for (let i = 0; i < this.world.puffs.active.length; i++) {
         const f = this.world.puffs.active[i] as (typeof this.world.puffs.active)[number];
         const anim = ENEMY_ANIMS[f.sprite];
-        if (f.kind !== 'death' || f.ttl < fresh || !anim) continue;
+        if (f.kind !== 'death' || f.ttl < fresh || !anim?.frames.death) continue;
         let c = this.corpsePool.find((o) => !o.img.visible);
         if (!c && this.corpsePool.length < MAX_CORPSES) {
           c = { img: this.add.image(0, 0, f.sprite).setDepth(4).setScale(ART_SCALE), sprite: '', t0: 0 };
@@ -886,7 +892,7 @@ export class GameScene extends Phaser.Scene {
       const a = ENEMY_ANIMS[c.sprite] as (typeof ENEMY_ANIMS)[string];
       const t = (now - c.t0) / 1000;
       c.img.setFrame(poseFrame(a, 'death', -1, t));
-      const over = now - c.t0 - (a.frames.death / a.fps.death) * 1000 - CORPSE_HOLD;
+      const over = now - c.t0 - ((a.frames.death ?? 1) / a.fps.death) * 1000 - CORPSE_HOLD;
       if (over > 0) c.img.setAlpha(Math.max(0, 1 - over / CORPSE_FADE));
       if (over > CORPSE_FADE) c.img.setVisible(false);
     }
