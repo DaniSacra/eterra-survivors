@@ -148,10 +148,30 @@ export interface Puff extends Timed {
   /** Size, world px. */
   r: number;
   kind: 'death' | 'gem' | 'item';
+  /** A death: the dying enemy's sprite key and whether it faced left, for the render's death animation. */
+  sprite: string;
+  flip: boolean;
 }
-export const createPuff = (): Puff => ({ poolIndex: -1, ttl: 0, x: 0, y: 0, r: 0, kind: 'death' });
+export const createPuff = (): Puff => ({
+  poolIndex: -1,
+  ttl: 0,
+  x: 0,
+  y: 0,
+  r: 0,
+  kind: 'death',
+  sprite: '',
+  flip: false,
+});
 
-export function addPuff(world: World, x: number, y: number, r: number, kind: Puff['kind']): void {
+export function addPuff(
+  world: World,
+  x: number,
+  y: number,
+  r: number,
+  kind: Puff['kind'],
+  sprite = '',
+  flip = false,
+): void {
   // Deaths leave room for pickup glints, so those still show in a big wave.
   const { maxPuffs, pickupPuffs } = config.effects;
   if (world.puffs.size >= (kind === 'death' ? maxPuffs - pickupPuffs : maxPuffs)) return;
@@ -160,6 +180,8 @@ export function addPuff(world: World, x: number, y: number, r: number, kind: Puf
   p.y = y;
   p.r = r;
   p.kind = kind;
+  p.sprite = sprite;
+  p.flip = flip;
   p.ttl = config.effects.puffTtl;
 }
 

@@ -307,7 +307,7 @@ export class World {
     this.kills++;
     this.killsBy[e.type] = (this.killsBy[e.type] ?? 0) + 1;
     this.tally.kills++;
-    addPuff(this, e.x, e.y, e.def.radius, 'death');
+    addPuff(this, e.x, e.y, e.def.radius, 'death', e.def.sprite, this.player.x < e.x);
     const burst = e.def.burst;
     if (burst) {
       const hero = e.def.damage * burst.damage * this.enemyDamage * this.stage.mult.damage;

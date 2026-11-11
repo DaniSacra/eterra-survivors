@@ -9,6 +9,7 @@ import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
 import { FLYERS, SPRITE_SCALE } from '../render/assets';
+import { ENEMY_ANIMS, enemyPose, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
@@ -143,7 +144,21 @@ type EnemyImage = Phaser.GameObjects.Image & {
   piled?: boolean;
   digging?: boolean;
   rose?: number;
+  /** Pixel enemies: the pose shown and the world time it began (a strike plays from its start). */
+  pose?: string;
+  poseT0?: number;
 };
+
+/** A dying pixel enemy playing its death strip where it fell, then fading (render only). */
+interface Corpse {
+  img: Phaser.GameObjects.Image;
+  sprite: string;
+  t0: number;
+}
+/** Corpses at once, and how long the last frame stays before the fade (ms). */
+const MAX_CORPSES = 8;
+const CORPSE_HOLD = 700;
+const CORPSE_FADE = 500;
 
 /** How long Estrela de Lyra's starlets fly before they burst (their hop spans it). */
 const STARLET_FALL = (WEAPONS.lyraStar as WeaponDef).split?.fall ?? 0.4;
@@ -187,6 +202,7 @@ export class GameScene extends Phaser.Scene {
   /** The hero's life bar, under their feet and over the crowd. */
   private heroBar!: Phaser.GameObjects.Graphics;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
+  private corpsePool: Corpse[] = [];
   private projectileMirror!: Mirror<Projectile, ProjImage>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
   private gemMirror!: Mirror<Gem, Phaser.GameObjects.Image>;
@@ -275,6 +291,7 @@ export class GameScene extends Phaser.Scene {
     this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
     this.banked = false;
     this.vigilBanked = false;
+    this.corpsePool = [];
     this.heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
     this.ground = this.add.tileSprite(0, 0, 1, 1, this.world.stage.tile).setOrigin(0);
     this.decals = new Decals(this, this.world.stageId);
@@ -390,11 +407,33 @@ export class GameScene extends Phaser.Scene {
       (): EnemyImage => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
       (img, e) => {
         const w = this.world;
-        const key = e.pile > 0 ? (e.def.reassemble as { sprite: string }).sprite : e.def.sprite;
+        // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
+        const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[e.def.sprite];
+        const posed = anim ? enemyPose(e) : null;
+        const key =
+          anim && posed
+            ? poseKey(e.def.sprite, posed.pose)
+            : e.pile > 0
+              ? (e.def.reassemble as { sprite: string }).sprite
+              : e.def.sprite;
         if (img.texture.key !== key) {
           img.setTexture(key);
           // Bosses over their escort and elites over the crowd, so they always show whole.
           img.setDepth(e.def.boss ? 7 : e.def.elite ? 6 : 5);
+        }
+        if (anim && posed) {
+          if (img.pose !== posed.pose) {
+            img.pose = posed.pose;
+            img.poseT0 = w.time;
+          }
+          img.setFrame(
+            poseFrame(
+              anim,
+              posed.pose,
+              posed.k,
+              w.freeze > 0 ? 0 : w.time - (img.poseT0 ?? w.time) + e.uid * 0.13,
+            ),
+          );
         }
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
@@ -710,6 +749,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.lastHp = w.player.hp;
     this.deathSparks();
+    this.corpses();
     this.swingSparks();
     this.boltSparks();
     this.bossMoments();
@@ -812,6 +852,43 @@ export class GameScene extends Phaser.Scene {
         sp.burst(f.x, f.y - f.r * 0.5, 3, 170, 7, 0xffffff, SPARK.star, 0.5);
       } else if (sp.room)
         sp.burst(f.x, f.y - f.r * 0.3, 2 + (f.poolIndex & 1), 110, 5, 0xffffff, SPARK.star, 0.35, false);
+    }
+  }
+
+  /** Dying pixel enemies: each new death puff of one with a death strip starts a corpse, and every corpse plays on. */
+  private corpses(): void {
+    const now = this.time.now;
+    if (this.stepDt > 0) {
+      const fresh = config.effects.puffTtl - this.stepDt - 1e-6;
+      for (let i = 0; i < this.world.puffs.active.length; i++) {
+        const f = this.world.puffs.active[i] as (typeof this.world.puffs.active)[number];
+        const anim = ENEMY_ANIMS[f.sprite];
+        if (f.kind !== 'death' || f.ttl < fresh || !anim) continue;
+        let c = this.corpsePool.find((o) => !o.img.visible);
+        if (!c && this.corpsePool.length < MAX_CORPSES) {
+          c = { img: this.add.image(0, 0, f.sprite).setDepth(4).setScale(ART_SCALE), sprite: '', t0: 0 };
+          this.corpsePool.push(c);
+        }
+        if (!c) continue;
+        c.sprite = f.sprite;
+        c.t0 = now;
+        c.img
+          .setTexture(poseKey(f.sprite, 'death'), 0)
+          .setPosition(f.x, f.y)
+          .setFlipX(f.flip)
+          .setAlpha(1)
+          .setVisible(true);
+        c.img.setTint(this.lighting.enemyTint(f.x, f.y));
+      }
+    }
+    for (const c of this.corpsePool) {
+      if (!c.img.visible) continue;
+      const a = ENEMY_ANIMS[c.sprite] as (typeof ENEMY_ANIMS)[string];
+      const t = (now - c.t0) / 1000;
+      c.img.setFrame(poseFrame(a, 'death', -1, t));
+      const over = now - c.t0 - (a.frames.death / a.fps.death) * 1000 - CORPSE_HOLD;
+      if (over > 0) c.img.setAlpha(Math.max(0, 1 - over / CORPSE_FADE));
+      if (over > CORPSE_FADE) c.img.setVisible(false);
     }
   }
 

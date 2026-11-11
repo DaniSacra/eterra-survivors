@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { ENEMY_ART } from './art/enemies';
+import { ENEMY_ANIMS, poseKey, type EnemyPose } from './enemyAnims';
 import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
@@ -51,6 +52,9 @@ export const ASSETS: Record<string, AssetDef> = {
     'gravedigger',
     'bellRinger',
   ]),
+  // Bosses and elites with state animations: a still (walk frame 0) and one strip per pose, see enemyAnims.ts.
+  ...pixelEnemies(Object.keys(ENEMY_ANIMS).map((k) => k.replace('enemy.', ''))),
+  ...enemySheets(),
   // The home's painted layers (PixelLab, 512 px wide, transparent sky), see scenes/MenuScene.ts.
   'home.mountains': { kind: 'image', url: 'home/mountains.png' },
   'home.village': { kind: 'image', url: 'home/village.png' },
@@ -91,12 +95,7 @@ export const SPRITE_SCALE: Record<string, number> = {
   'enemy.vampireBat': 0.52, // 29 x 31
   'enemy.bat': 0.85, // 26 x 23
   'enemy.hooded': 1.5, // 48
-  'enemy.golem': 1.55, // 91
-  'enemy.witch': 1.8, // 85
   'enemy.bellRinger': 1.5, // 153
-  'enemy.oldWolf': 1.6, // 138 x 110
-  'enemy.spiderMother': 1.6, // 133 x 96
-  'enemy.blackKnight': 1.45, // 101 x 135
 };
 
 /** Enemies that fly: they hover over the ground with a shadow under them (GameScene). */
@@ -106,6 +105,25 @@ export const FLYERS: Record<string, boolean> = { 'enemy.bat': true, 'enemy.vampi
 function pixelEnemies(ids: string[]): Record<string, AssetDef> {
   return Object.fromEntries(
     ids.map((id) => [`enemy.${id}`, { kind: 'image', url: `sprites/enemies/${id}.png` } as AssetDef]),
+  );
+}
+
+/** One strip per pose of every animated enemy (files `<id>-<pose>.png` next to the still, already at ART_RES). */
+function enemySheets(): Record<string, AssetDef> {
+  const poses: EnemyPose[] = ['walk', 'windup', 'strike', 'death'];
+  return Object.fromEntries(
+    Object.entries(ENEMY_ANIMS).flatMap(([sprite, a]) =>
+      poses.map((pose) => [
+        poseKey(sprite, pose),
+        {
+          kind: 'sheet',
+          url: `sprites/enemies/${sprite.replace('enemy.', '')}-${pose}.png`,
+          w: a.w,
+          h: a.h,
+          fps: a.fps[pose],
+        } as AssetDef,
+      ]),
+    ),
   );
 }
 
