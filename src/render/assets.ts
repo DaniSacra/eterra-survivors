@@ -113,20 +113,10 @@ export function heroFit(key: string): number {
 }
 
 /**
- * Extra display scale for pixel sprites drawn at the same pixel density as the heroes but meant to loom (the Sineiro:
- * PixelLab draws every figure about 100 px tall, so a boss gets its size here).
+ * Extra display scale for pixel sprites, whole numbers only (empty today: every sprite is generated at its final size,
+ * see tests/render/density.test.ts).
  */
-export const SPRITE_SCALE: Record<string, number> = {
-  // Target on-screen heights (px), Aldo being 62: crowd about his size, the resistant a head taller, small flyers
-  // about half, elites about 1.5x, bosses 2.2x or more. The collision radius stays in data/enemies.ts.
-  'enemy.skeleton': 1.25, // 78: the sturdy warrior stands out of the crowd
-  'enemy.emberBones': 1.05, // 66
-  'enemy.ghost': 0.9, // 55
-  'enemy.coldSpirit': 0.92, // 54
-  'enemy.slime': 0.8, // 46 x 38
-  'enemy.bonePile': 0.42, // about half the width of the skeleton that fell
-  'enemy.vampireBat': 0.52, // 29 x 31
-};
+export const SPRITE_SCALE: Record<string, number> = {};
 
 /** Enemies that fly: they hover over the ground with a shadow under them (GameScene). */
 export const FLYERS: Record<string, boolean> = { 'enemy.bat': true, 'enemy.vampireBat': true };

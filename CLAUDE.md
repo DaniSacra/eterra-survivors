@@ -112,8 +112,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   **Pixel density (2026-11-11 art round):** the whole game is one hi-bit pixel style (Sea of Stars–like: big heads, tinted
   dark outline, one strong colour, one highlight dot). 1 art px = `ART_RES` (2) texture px, shown at display scale 1;
   sprites are generated at their final size (PixelLab, one frame per art px) and packed at 2x with no smoothing, so
-  `SPRITE_SCALE` must stay integer (`tests/render/density.test.ts`; the seven legacy Cripta crowd sprites are
-  whitelisted and the list may only shrink). Target sizes in art px: heroes 64x80 frames; crowd 32–72 wide
+  `SPRITE_SCALE` must stay integer (`tests/render/density.test.ts`; it is empty today). Target sizes in art px: heroes 64x80 frames; crowd 32–72 wide
   (`ENEMY_ANIMS` in `render/enemyAnims.ts` holds each one); elites 96–112 tall; bosses 112–160 tall; decals 16–56;
   Cripta obstacles 44x72, 56x52, 36x44; projectiles 16–28. Enemies animate by state (walk, windup, strike, death
   corpse via the `death` puff's `sprite`/`flip`); crowd enemies only walk. Palettes by stage: Valmor cold blues, snow
@@ -123,6 +122,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   PixelLab images (`public/sprites/{decals,obstacles,fx}`), effect pieces placed from `drawFx` go through the
   `fxSprites` pool, and no ground zone fills past `ZONE_FILL_MAX` (0.35). Every generation is logged in
   `docs/art/credits.md`.
+
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Collection, Options, Game, Hud (overlay), LevelUp,
   Pause, End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
   Conquistas, Heróis): each tab draws in a `TabArea` and returns its focusable buttons; the scene owns the tab row,
