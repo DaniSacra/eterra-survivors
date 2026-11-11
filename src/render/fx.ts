@@ -991,28 +991,51 @@ function drawStuns(g: Phaser.GameObjects.Graphics, world: World): void {
 /** Common chargers (Encapuzado, Rato, Goblin) winding up: a coral arrow on the ground shows where they will run. */
 function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemies.active;
+  // How far a dash runs (world px per second of base speed): the lane on the ground is exactly where it passes.
+  const reach = CHARGE.speedMult * CHARGE.dash * world.stage.mult.speed;
+  const time = world.time;
   for (let i = 0; i < list.length; i++) {
     const e = list[i] as Enemy;
     if (e.act !== BossAct.Windup || e.def.move !== 'charge') continue;
     const k = 1 - Math.max(0, e.actT) / CHARGE.windup; // 0 -> 1 as the dash comes
     const ux = e.aimX;
     const uy = e.aimY;
-    const r = e.def.radius;
-    const x0 = e.x + ux * (r + 4);
-    const y0 = e.y + uy * (r + 4);
-    const len = 14 + 16 * k;
-    const x1 = x0 + ux * len;
-    const y1 = y0 + uy * len;
-    g.lineStyle(4, WARN_COLOR, 0.5 + 0.4 * k).lineBetween(x0, y0, x1, y1);
-    g.fillStyle(WARN_COLOR, 0.6 + 0.4 * k).fillTriangle(
-      x1 + ux * 9,
-      y1 + uy * 9,
-      x1 - uy * 6,
-      y1 + ux * 6,
-      x1 + uy * 6,
-      y1 - ux * 6,
-    );
+    const w = e.def.radius * 2;
+    const len = e.def.speed * reach + e.def.radius;
+    // A lane as wide as the body and as long as the dash: translucent, filling up toward its end as the dash
+    // comes, with a light dashed edge (FT-17 / AR-03).
+    const vx = (-uy * w) / 2;
+    const vy = (ux * w) / 2;
+    const ex = e.x + ux * len;
+    const ey = e.y + uy * len;
+    g.fillStyle(WARN_COLOR, 0.1 + 0.1 * k);
+    quad(g, e.x + vx, e.y + vy, ex + vx, ey + vy, ex - vx, ey - vy, e.x - vx, e.y - vy);
+    const fx = e.x + ux * len * k;
+    const fy = e.y + uy * len * k;
+    g.fillStyle(WARN_COLOR, 0.28);
+    quad(g, e.x + vx, e.y + vy, fx + vx, fy + vy, fx - vx, fy - vy, e.x - vx, e.y - vy);
+    g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
+    const march = (time * (30 + 50 * k)) % (DASH * 2);
+    dashedLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, march);
+    dashedLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, march);
+    dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
   }
+}
+
+/** A filled four-sided shape (no allocation). */
+function quad(
+  g: Phaser.GameObjects.Graphics,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  x3: number,
+  y3: number,
+): void {
+  g.fillTriangle(x0, y0, x1, y1, x2, y2);
+  g.fillTriangle(x0, y0, x2, y2, x3, y3);
 }
 
 /** Chest, Badalada and Sopro de Geada: shapes that say what happened, instead of a full-screen flash. */

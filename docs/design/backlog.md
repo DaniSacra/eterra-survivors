@@ -2010,10 +2010,13 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   projéteis, porque o MULTIPLY sozinho não clareia um chão escuro; lajes e musgo variando o piso da Cripta; vinheta
   no HUD. Falta: tiles novos de verdade (PixelLab ou Pen) e a borda irregular do mapa.
 
-**AR-03 · Avisos de ataque como formas no chão** · vfx · P · proposto
+**AR-03 · Avisos de ataque como formas no chão** · vfx · P · ✅ feito (2026-11-11)
 
 - É o FT-17 (ver lá), puxado para cá: faixa listrada para investidas, cone para leques, círculo com anéis para saltos
   e quedas. Os avisos ficam acima da escuridão.
+- Feito: a investida comum (rato, encapuzado) deixou a seta e virou uma faixa no chão da largura do corpo e do
+  comprimento real da investida (`CHARGE` × velocidade da fase), enchendo até o impacto, com borda tracejada. Os
+  chefes já usavam formas (cone do Corte Brutal, faixa da Mordida Funda, anéis da Badalada).
 
 **AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto
 
@@ -2538,7 +2541,7 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   `chama` existem nos dados dele em `src/data.js`), a decidir com o Daniel.
 - Elite: aberta (pergunta 4).
 
-**FT-17 · Avisos de ataque como formas no chão, não setas** · vfx · P · proposto (vira o AR-03)
+**FT-17 · Avisos de ataque como formas no chão, não setas** · vfx · P · ✅ feito no AR-03
 
 - Por quê: o Daniel achou as referências em `docs/design/art-references/` (`swamp-lane-telegraphs.png`,
   `cone-telegraph.png`, `swamp-frog-boss-leap.png`) muito mais claras que as setas de hoje (`Windup` dos inimigos e a
