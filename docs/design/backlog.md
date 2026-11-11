@@ -241,7 +241,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: `UI.gold`, `UI.danger` (e o que faltar) em `render/ui.ts`, trocando todos os hexadecimais soltos.
 - Aceite: `grep` não encontra cor hexadecimal de UI fora dos tokens nas cenas.
 
-**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito
+**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto
 
 - Por quê: plano do Daniel (o herói some na multidão do chefe) e visual-director (Lyra some na Cripta: roxo igual a
   morcegos e aranhas; chão da cripta com contraste alto, `tiles.ts`).
@@ -250,6 +250,13 @@ depois e registra em `docs/balance-baseline.md`.
   do chão da cripta.
 - Aceite: captura com 500 inimigos e chefe em 390x844: o herói é achado em menos de 1 s, nas três fases, com os
   quatro heróis.
+- ↩ Reaberto na Revisão 2026-11-11 · proposto (04-visual #3): o item foi feito antes dos sprites PixelLab. Hoje o
+  Aldo (64x80 art px) é menor que o Esqueleto (108x124) e o Coveiro (192x192) na mesma escala, o monte tapa os pés, e
+  só sobram a luz do herói e o contorno que pisca ao apanhar (`m-c2-2.png`, `m-c2-boss.png`, `d-c2-3.png`). Novo O
+  quê: contorno fino âmbar sempre ligado (cor de identidade `0xe8b840`, ou a cor de cada herói), sombra elíptica sob
+  o herói, profundidade acima de todos os inimigos (já 13,1). **Sem** aumentar o herói (decisão da Revisão 2026-11-11:
+  mexe na leitura do hitbox). A barra de vida sob os pés é do CU-02. Dono: visual. Tamanho P. Aceite: o mesmo de
+  cima, refeito na Cripta com os sprites novos e o Sineiro.
 
 **A-03 · HUD legível no celular** · visual + impl · P · ✅ feito
 
@@ -1236,7 +1243,7 @@ implementação abaixo; cada item é um commit.
   título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
   abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
-**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
+**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto · ampliado na Revisão 2026-11-11
 
 - O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
   (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
@@ -1250,6 +1257,16 @@ implementação abaixo; cada item é um commit.
   para inimigos não vistos, `setTintFill(UI.borderOff)` com alfa 0,9 (a forma fica, cor e olhos não); o Livro de Elos
   continua com `setTint` (RA-05). Dono: visual. Tamanho: P. Aceite: captura com os 16 inimigos onde nenhum não visto
   mostra cor ou olho.
+- Revisão 2026-11-11 · ampliado · proposto (05-ui UI-06, `bestiary-420.png`, `bestiary-1000.png`): a silhueta acima
+  continua sem fazer, e com 26 entradas a grade plana já não se lê (os 8 vistos da Cripta espalhados entre "???" de
+  outras fases; miniaturas de 22 px; a ficha cai abaixo da dobra em 420). Escopo novo, além da silhueta: (1) grupos
+  por fase com cabeçalho e contagem ("Cripta da Igreja Velha 5 de 9"), a fase atual aberta e as outras recolhidas
+  (toque abre; decisão minha, sem rolagem por arrasto); (2) miniatura mínima de 40 px em 420; (3) selo de elite
+  (coroa prata) e de chefe (sino ou estrela dourada) desenhados em `Graphics`; (4) linha **"Como lidar"** na ficha, com
+  o mesmo texto da dica do CU-01 (uma fonte só, `t.bestiary.tips[id]`); (5) chefe com 0 abates mostra "De pé", não
+  "x0". Textos: `bestiary.stageHeader: (fase, vistos, total) => \`${fase} ${vistos} de ${total}\``,
+`bestiary.standing: 'De pé'`, `bestiary.how: 'Como lidar'`. Donos: ui + impl. Tamanho M. Aceite: capturas 420x820 e
+  1000x680 com os grupos, nenhum não visto com cor, a ficha visível sem rolar, "Como lidar" nos inimigos da Cripta.
 
 **CC-07 · Aba Conquistas** · impl + ui · M · ✅ feito
 
@@ -1329,7 +1346,8 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 - Itens equipáveis guardados entre partidas, ou uma loja dentro da partida.
 - Habilidade ativa por herói (um botão), pensando no controle de um polegar. Na Revisão 2026-11-09 o game-director
   propôs antes um traço passivo por herói (ND-02), que não pede botão.
-- Objetivos na fase (proteger a fonte da cripta, escoltar algo na Estrada), quebrando o loop de 10 minutos.
+- Objetivos na fase (proteger a fonte da cripta, escoltar algo na Estrada), quebrando o loop de 10 minutos. A fonte
+  da cripta virou proposta pequena na Revisão 2026-11-11 (CD-01, Fonte de Luz: cura, não escolta).
 - Desafios e conquistas que liberam armas novas.
 - Novas fases do Capítulo 1 do original (Pasto do Vau, Vau do Corvo, caminho para Erukh), com lore do Daniel.
 - Tabela de recordes local por herói e fase (virou CC-08, 2026-11-09).
@@ -1504,7 +1522,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: teste com multidão dentro e um alvo fora: as espadas avançam; no sim, investida em pelo menos 30% dos passos
   com inimigos nessa faixa; Vigília ainda na faixa do lab.
 
-**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito
+**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto
 
 - Por quê: 03-qa #9, 05-ui #2. O toast de conquista já iniciado e o aviso grande (`announce`: "Um inimigo poderoso se
   aproxima!", "Ganhou: X") continuam animando sobre o título, a 1ª carta, a linha da receita e o Trocar
@@ -1514,6 +1532,14 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   da fila; chamado no `create` da `LevelUpScene` e da `PauseScene`. Sem alocação por quadro.
 - Aceite: capturas de level-up e Pausa logo depois de forjar um Elo e de abrir um baú, sem nada do HUD sobre o título
   ou as cartas; o toast aparece depois de fechar.
+- ↩ Reaberto na Revisão 2026-11-11 · proposto (05-ui UI-02, reproduzido em `lvl-420x820.png`, `lvl-360x640.png`,
+  `pause-420x820.png`): as setas de borda do NU-01 (`EdgeArrows.update`, `HudScene.ts:322`) entraram depois do `quiet()`
+  e são desenhadas por cima das cartas, do ícone do Vigor e do painel de atributos; e o toast de conquista entra no meio
+  da luta do chefe, junto com o aviso do Dobre Fúnebre (`boss-ab0-420x820.png`; `nextToast` só olha `state` e banner,
+  `HudScene.ts:372-380`). Novo O quê: (a) `quiet()` também esconde as setas, e o `update` delas não roda com LevelUp,
+  Pausa ou Fim ativos; (b) `nextToast` espera enquanto `world.boss` vive ou a vida está abaixo de 30% (a fila guarda).
+  Tamanho P. Aceite: as mesmas capturas sem triângulo sobre carta ou painel; nenhuma conquista aparece durante a luta
+  do chefe e todas aparecem depois.
 
 **NB-09 · Liberar herói com um toque, e o toque duplo já começa a partida** · impl · P · ✅ feito
 
@@ -1994,7 +2020,7 @@ Origem: a direção de arte mudou para fantasia escura e iluminada (pixel art to
 em `docs/design/art-references/`, padrão em `.claude/agents/visual-director.md`). Até aqui só os documentos mudaram.
 Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 a AR-05, um commit por passo.
 
-**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02)
+**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02) · ↩ reaberto na Revisão 2026-11-11 (luz nos efeitos) · proposto
 
 - Por quê: é o que mais muda a cara do jogo e não depende de sprite.
 - O quê: uma camada de escuridão por fase (azul-noite em Valmor e na Estrada, quase preto quente na Cripta),
@@ -2008,8 +2034,20 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   aditivos em lote, listas pré-alocadas). Luz do herói, do chefe, de projéteis, zonas e itens; clarão na bomba e na
   forja (não no modo calmo). Inimigos ficam acima do escuro e só escurecem com a distância da luz do herói
   (`enemyTint`). Com 505 inimigos no Chromium por software, ligar a luz não mudou o FPS; falta conferir num celular.
+- ↩ Reaberto na Revisão 2026-11-11 · proposto (06-vfx #1): o "Elos e explosões em modo aditivo e com clarão" não
+  aconteceu. Nenhum `BlendModes.ADD` em `render/fx.ts` e `render/sparks.ts`; `Lighting.add`/`flash` só têm três usos
+  (projétil, pulso de nível, Segunda Chance; `GameScene.ts:308, 843, 1012`). Aura, Chama, Fúria, Maça, raios, Fogo,
+  Espada de Fogo, estouro da Ossada em Brasa e Dobre Fúnebre são adesivos planos sobre a noite, na fase mais escura.
+  Novo O quê: cada evento forte acende o chão na cor do dono ou do elemento (`lighting.add`/`flash` no ponto onde o
+  desenho já está: Aura e Chama pulsando no tique, raio e Tempestade com flash frio de 0,12 s, Fogo e Espada de Fogo
+  com luz na queda e brasa fraca na zona, Geada azul fraco, estouro e Dobre com flash curto no raio) e um Graphics
+  aditivo `fxGlow` (depth 11,5) para os núcleos, **substituindo** o disco normal nos efeitos fortes. Teto de 8 luzes de
+  efeito por quadro; modo calmo corta o alfa à metade. **Depende do AR-02 (chão da Cripta mais escuro) vir antes**:
+  luz sobre chão claro não aparece. Donos: vfx + impl. Tamanho M. Aceite: capturas 420x820 da Cripta com Aura, Tempestade
+  e Espada de Fogo acendendo o chão; F4 (420x820, CPU 4x, 500 inimigos) igual antes e depois; nenhuma alocação por
+  quadro.
 
-**AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11)
+**AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11) · resto ampliado na Revisão 2026-11-11 · proposto
 
 - O quê: várias variantes do tile por fase escolhidas por hash da célula, detalhes (rachaduras, musgo, ossos, neve),
   objetos de cenário (cercas e lanternas em Valmor; lápides, colunas e velas na Cripta; pinheiros, pedras e placa na
@@ -2019,6 +2057,20 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   das colunas), tremulando fora do modo calmo; camada de brilho aditivo (`Lighting.glow`) para chamas, clarões e
   projéteis, porque o MULTIPLY sozinho não clareia um chão escuro; lajes e musgo variando o piso da Cripta; vinheta
   no HUD. Falta: tiles novos de verdade (PixelLab ou Pen) e a borda irregular do mapa.
+- Revisão 2026-11-11 · ampliado · proposto (04-visual #1, #2, #5, #10, #12; 06-vfx #1): na Cripta o "Falta" pesa mais.
+  (1) **O chão é um tile único de 128 px repetido** em `tileSprite` (`GameScene.ts:235`, `tiles.ts:62-92`, seed fixa):
+  a grade de tijolos e as manchas verdes se repetem nos mesmos lugares (`m-c2-0.png`, `m-c2-2.png`). (2) **É o chão
+  mais claro e mais ruidoso das três fases**: blocos rosa, azul e teal com musgo ciano no mesmo valor dos morcegos
+  magenta, fantasmas lilás e do Aldo, que somem no fundo (`m-c2-2.png`). (3) Props em `Pen` com contorno cartoon de
+  2 px ao lado de sprites PixelLab de contorno tingido; 3 obstáculos e 7 decalques. (4) Poças de luz de vela e tocha
+  fracas demais para contar. Novo O quê, em dois passos: **(a) código, zero gerações**: 4 a 6 variantes de 128 px por
+  hash de célula (sem `tileSprite`), juntas e topos dos blocos a 60-70% do valor atual, saturação reservada para
+  props e luzes, poças de luz das tochas e velas maiores e mais contrastadas; **(b) PixelLab**: coluna, sarcófago e
+  lápide em `create_1_direction_object` (~10 gerações cada), depois decalques (ossos, teias, tocha de parede, arco) em
+  três escalas; borda irregular caindo no preto por último (baixa prioridade numa fase de obstáculos). O passo (a) vem
+  **antes** do AR-01 reaberto. Donos: visual (+ impl no a). Tamanho: a P, b M. Aceite: captura 420x820 da Cripta sem
+  repetição visível de tile; herói, morcego e fantasma com valor acima do chão (teste de cinza na captura); props no
+  mesmo traço dos sprites.
 
 **AR-03 · Avisos de ataque como formas no chão** · vfx · P · ✅ feito (2026-11-11)
 
@@ -2034,7 +2086,7 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
 - Aceite: capturas lado a lado antes/depois; bestiário e Livro de Elos coerentes com o jogo.
 
-**AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04
+**AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04 · andar dos inimigos ampliado na Revisão 2026-11-11 · proposto
 
 - O quê: Aldo + 2–3 inimigos em pixel art (24–32 px, escala inteira, sem suavização), carregados por `assets.ts`,
   com idle, andar, dano e morte; fixa a densidade de pixel e a paleta para o resto.
@@ -2045,6 +2097,14 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   com andar (6 quadros) e respirar (4) para o leste; o jogo espelha para o oeste. Faixas em `public/sprites/`,
   `pixelHero` em `assets.ts`, menus encaixados por `heroFit`. Ajustes pendentes: a Lyra e o Teo perderam o cajado e
   a maça na vista lateral; no andar, o Teo perdeu as faixas verdes do hábito (cinto vermelho).
+- Revisão 2026-11-11 · ampliado · proposto (04-visual #4, #13): os inimigos PixelLab da Cripta são quadros parados
+  com squash por seno (`GameScene.ts:346-357`); em multidão o squash lê como vibração e eles deslizam ao lado de um Aldo
+  que anda em 6 quadros. Novo O quê: andar para o leste (o jogo espelha) para **Morcego Vampiro** (asas batendo é o que
+  mais vende "vivo") e **Ossada**, depois Esqueleto e Espectro (`animate_character`, 3 a 6 gerações no total; conferir
+  antes se os sprites feitos como objeto aceitam esqueleto). Os ajustes pendentes da Lyra e do Teo (cajado, maça,
+  faixas) saem no mesmo estilo do Aldo novo (referência `aldo.png`). Ordem das gerações: decisão 6 do Daniel em
+  `docs/reviews/2026-11-11/07-direcao.md`. Dono: visual. Tamanho M. Aceite: captura em movimento (gif ou 4 quadros) de
+  uma multidão da Cripta sem deslizar; F4 igual.
 
 ---
 
@@ -2202,7 +2262,7 @@ continua os `specials` no mesmo ritmo.
 
 - Feito (FT-01, 2026-11-11): `core/enemyShots.ts` e `core/marks.ts` (pools com teto), `world.alive` e `max` no
   spawner, `StageDef.specials`, `loot`, `hurtHero` com atacante nulo e fonte, `world.hurtBy` e a linha `DANO POR
-  FONTE` no sim. Ficaram para quando um item precisar: `abilities` (FT-08), `flee`/`still` fora do reciclar, bot
+FONTE` no sim. Ficaram para quando um item precisar: `abilities` (FT-08), `flee`/`still` fora do reciclar, bot
   vendo tiros e marcas. Sim igual em Valmor e na Cripta.
 
 **FT-02 · Marca no chão antes de surgir** · impl + vfx · P · ✅ feito (2026-11-11, enxuto)
@@ -2575,6 +2635,10 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   um pouco abaixo dos 15%).
 - Falta: arte final (Ossada em Brasa, Coveiro, pilha, limo, Espírito Gélido, Morcego Vampiro) e conferir a Cripta
   jogando.
+- Revisão 2026-11-11: a arte final saiu (sprites PixelLab, `fb44e4b`) e a Cripta foi conferida jogando (03-qa: todas
+  as mecânicas funcionam como descrito). O que falta para fechar o FT-16 está na seção "Revisão 2026-11-11": as peças
+  que não mordem (CB-01, CB-02, CE-01), a faixa da meia Loja (CE-02, 13% contra 15 a 35%) e a leitura (CF-01 a CF-05,
+  CU-01).
 
 - Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
   Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do
@@ -2694,3 +2758,429 @@ e mexe na primeira impressão de todo jogador novo, então merece as respostas a
     fora, já que a fé nunca aparece de forma negativa? E a Gosma Verde passa da Cripta para o Pântano?
 12. **Ordem das fases**: o Pântano entra depois da Cripta (4ª fase, com a Estrada por último) ou em outro lugar? Quem
     é o chefe e a elite dele (originais, não um sapo gigante)?
+
+---
+
+## Revisão 2026-11-11
+
+Origem: revisão de `7e51776` com foco na **Cripta** (`docs/reviews/2026-11-11/00` a `06`). Triagem, conflitos, leitura
+de design e as decisões que só o Daniel pode tomar em `docs/reviews/2026-11-11/07-direcao.md`. **Todos os itens
+abaixo estão `· proposto`**: esperam a aprovação do Daniel. Achados repetidos em vários relatórios viraram um item só.
+
+Prefixos novos (C de Cripta, o foco da rodada): **CB** bug, **CT** técnico (código, sem efeito de jogo), **CE**
+equilíbrio, **CF** efeitos visuais, **CS** som, **CU** interface, **CA** arte, **CD** direção (sistema novo). Itens
+antigos reabertos ou ampliados mantêm o ID e têm o escopo novo no próprio lugar, mais acima: **NB-08**, **A-02**,
+**CC-06**, **AR-01**, **AR-02**, **AR-05** e uma nota no **FT-16**.
+
+Regras (as mesmas das revisões anteriores): cada passo com `npm test`, `npm run lint`, `npm run build` verdes, jogo
+rodando, um commit e push; lógica nova no core com teste em `tests/core/` **dentro de uma multidão**; equilíbrio com
+`SIM_STAGE=crypt SIM_SEEDS=16 SIM_SHOP=all npm run sim` antes e depois (32 sementes para a faixa, ruído de ±5 pontos);
+render medido no F4 (420x820, CPU 4x) antes e depois, sem alocação por quadro, modo calmo respeitado. **Regra de cor de
+aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca, verde-limo atrasa.
+
+### Próximos 5 (sugestão do game-director, não substitui a lista do topo até o Daniel aprovar)
+
+1. **NB-08 (reaberto) + CB-03 + CB-04 + CB-05**: setas e avisos por cima das escolhas, `elites25`, texto de derrota,
+   `markWeb`.
+2. **CB-01 + CB-02 + CE-01, depois CE-02**: as peças da Cripta mordem, e só então a meia Loja volta à faixa.
+3. **CF-01 + CF-04 + CU-01**: pilha com relógio, um vocabulário de aviso, dica na primeira vez.
+4. **CU-02 + CF-06 + A-02 (reaberto)**: vida baixa, lentidão e "Caiu por"; acerto na cor da arma; herói achável.
+5. **CD-01 Fonte de Luz** (se aprovada); se não, **AR-02 (chão, passo a) e depois AR-01 (luz)**.
+
+### Ordem sugerida
+
+| Fase                     | Passos (um commit cada, nesta ordem)                                                                   | Donos                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| **C1 Bugs**              | NB-08 · CB-03 · CB-04 · CB-05 · CB-01 · CB-02                                                          | impl (ui confere NB-08) |
+| **C2 Técnico**           | CT-01 · CT-04 · CT-05 · CT-02 · CT-03                                                                  | impl + bal              |
+| **C3 Equilíbrio**        | CE-01 · (CD-01, se aprovado) · CE-02 · tabela em `balance-baseline.md`                                 | impl + bal              |
+| **C4 Leitura da Cripta** | CF-04 · CF-01 · CF-06 · CF-03 · CF-05 · CF-02 · CS-01 · CF-07                                          | vfx + impl              |
+| **C5 Interface**         | CU-02 · CU-01 · CU-03 · CU-04 · CU-05 · CU-06 · CU-08 · CC-06 · CU-07                                  | ui + impl               |
+| **C6 Arte e luz**        | A-02 · CA-01 · AR-02 (a) · AR-01 · CA-03 (tinta) · AR-05 · CA-02 · AR-02 (b) · CA-03 (regerar) · CF-08 | visual + vfx + impl     |
+
+### Decisões do Daniel (detalhe em `07-direcao.md`)
+
+1. Fonte de Luz (CD-01): aprovar? E a luz dela impede as Ossadas de remontar dentro (lore)?
+2. Texto de derrota por fase (CB-04): frases provisórias.
+3. Textos provisórios dos inimigos novos (02-code B7) e das dicas do CU-01.
+4. Decidi, pode mudar: dicas e vinheta ligadas com opção; Bestiário recolhido por fase; Desistir mostra a tela final;
+   Maça interrompe a cova do Coveiro; arte em código morta removida.
+5. Fantasma: manter o rosto e escurecer o corpo (CA-03).
+6. Ordem das gerações PixelLab: andar (Morcego, Ossada) e Sineiro antes dos props e dos recolors.
+
+### C1 · Bugs
+
+**CB-03 · `elites25` só conta o Golem** · impl · P · proposto
+
+- Por quê: 02-code M1. `data/achievements.ts:77` tem `enemies: ['golem']`, e o Golem só existe na Estrada; a Bruxa
+  (Valmor) e o Coveiro (Cripta) não contam, embora o texto diga "Derrote 25 elites" (`pt-BR.ts:437`). O FT-07 já
+  pedia isso; ficou para trás.
+- O quê: `enemies: ['witch', 'gravedigger', 'golem']`. O teste passa a derivar a lista das elites reais
+  (`STAGES[*].elites`), para não divergir de novo.
+- Aceite: teste que falha se uma elite de fase não contar; save antigo com abates de Golem continua contando.
+
+**CB-04 · "Tombou na neve" na Cripta** · impl · P · proposto (texto com o Daniel)
+
+- Por quê: 03-qa B1, 05-ui UI-03. `t.end.lostText` (`pt-BR.ts:373`) diz "<herói> tombou na neve. Valmor ainda espera
+  por um herói." em todas as fases (`r420-death-end.png`): é a primeira frase depois da morte, dentro de uma cripta.
+- O quê: `end.lostByStage: Record<StageId, (hero: string) => string>`. Provisórios, sem fato novo de lore:
+  - `valmor`: "${hero} tombou na neve. Valmor ainda espera por um herói." (igual)
+  - `crypt`: "${hero} caiu na cripta. O sino ainda toca."
+  - `southRoad`: "${hero} caiu na Estrada do Sul. A matilha ainda uiva."
+- Aceite: captura do fim de jogo nas três fases com a frase da fase; nenhum texto fora do `pt-BR.ts`.
+
+**CB-05 · `markWeb` mexe na marca errada com o pool cheio** · impl · P · proposto
+
+- Por quê: 02-code B1. `arena.ts:111-113` ignora o `false` de `addPatch` quando há 160 marcas e sobrescreve o `born`
+  da última marca qualquer, bagunçando "a mais antiga derrete".
+- O quê: `if (addPatch(...)) { ... }`.
+- Aceite: teste com o pool de marcas cheio: nenhuma marca existente muda.
+
+**CB-01 · A pilha de ossos quebra no segundo acerto do mesmo ataque** · impl + bal · P · proposto
+
+- Por quê: 02-code M2, 06-vfx #2, 01-balance (remontagem dentro do ruído: 8 contra 11 vitórias). Em
+  `core/enemies.ts:216-249` o golpe que zera a vida vira pilha e qualquer `damageEnemy` seguinte, mesmo no mesmo passo,
+  mata de vez. Aura, órbita, zona, projétil perfurante e arco com vários golpes quase nunca deixam a Ossada remontar; a
+  mira única deixa sempre. A regra pune uma categoria e ignora as outras por acidente (pilar 3), e é o verbo da fase
+  ("os que não descansam"). E a quebra pula `source.damage`, `bestHit` e `onEnemyDamaged`: a tela final subconta.
+- O quê: a pilha ignora dano nos primeiros `config.enemies.pileGuard` = 0.15 s (compara `e.pile` com
+  `def.reassemble.delay`); depois, qualquer acerto quebra, como hoje. A quebra conta o dano na fonte, no `bestHit` e
+  no gancho. O sim imprime, por categoria de arma, quantas pilhas remontaram e quantas foram quebradas.
+- Aceite: teste dentro de uma multidão: Aura e um projétil no mesmo passo não quebram a pilha; um acerto 0,2 s depois
+  quebra; dano da quebra aparece no relatório. Sim: nenhuma categoria com taxa de remontagem abaixo da metade da outra.
+
+**CB-02 · Coveiro: Ossadas sem a vida da onda, cova longe do herói, Maça que não interrompe** · impl + bal · P · proposto
+
+- Por quê: 01-balance B1, 02-code M3 (parte) e M4, 02-code B4. `behaviours.ts:360` chama `riseAt` sem `hpMult`: as 4
+  Ossadas do Coveiro têm 14 de vida aos 9:00 (a comum tem 168) e morrem de um golpe mordendo como as outras (40). O
+  `dig` não olha distância (o `nest` tem `range`), então cava fora da tela; não confere `maxActive`; e a tontura não
+  cancela a cova já começada (o `shoot` cancela).
+- O quê: `riseAt(..., segmentAt(world.time, world.stage.waves).hpMult)` como a Badalada; `dig.range` novo (dado:
+  `dig: { every: 7, windup: 1.1, count: 4, radius: 110, spawn: 'bones', range: 420 }`); só cava com
+  `world.enemies.size < config.enemies.maxActive`; `e.stun > 0` durante a espera cancela a cova (decisão: a Maça de
+  Ferro vira resposta ao Coveiro, coerente com o atirador).
+- Aceite: testes: Ossadas do Coveiro com a vida das comuns da mesma hora; nenhuma cova com o herói a mais de 420 px;
+  tontura na espera cancela; teto respeitado. Sim da Cripta antes e depois (vai endurecer; a faixa é o CE-02).
+
+### C2 · Técnico
+
+**CT-01 · Teto de inimigos em todo surgimento e marcas reaproveitadas limpas** · impl · P · proposto
+
+- Por quê: 02-code M3, B2, B9. `riseAt` fora da vista chama `spawnEnemy` direto e o `send` dos `specials` também não
+  confere `maxActive` (`Pool.acquire` nunca recusa); `addBurst`, `riseAt` e `markIce` não resetam `slow`, `life`,
+  `damage`, `tick`, `foe`, `fromX/Y`; `dig.spawn`/`nest.spawn`/`summon` são `string` com `as EnemyId`.
+- O quê: a checagem de `maxActive` mora dentro de `riseAt` e do `send`; um `resetMark(m)` único (DRY com
+  `createMark`) chamado por todo `add*`; os campos `spawn`/`summon` tipados como `EnemyId`.
+- Aceite: teste com 700 inimigos: nada novo surge por `riseAt` nem por `specials`; teste de marca reaproveitada sem
+  campo velho; typecheck pega um id errado.
+
+**CT-04 · `?dev`: o chefe das 5:00 chega com a escolta da última faixa** · impl · P · proposto
+
+- Por quê: 03-qa B2. Com `config.devBossAt` a curva continua lendo o tempo da partida: o Sineiro chega com a multidão
+  das 5:00 (4 → 222 inimigos em 26 s) e não com o fio de escoltas da faixa final (NE-05). O Daniel testa uma luta que o
+  jogador não vê.
+- O quê: quando `playtest.bossAt` traz o chefe, o spawner passa a usar o segmento da luta do chefe (o último de
+  `stage.waves`) dali em diante.
+- Aceite: teste em `waves.test.ts`: com `bossAt` 300, o lote depois do chefe é o do segmento final; contagem de
+  inimigos no `?dev` parecida com a de `world.time = 598`.
+
+**CT-05 · Bot do sim enfrenta o chefe** · bal · P · proposto
+
+- Por quê: 01-balance. 3 de 192 corridas "perdem" aos 15:00 com o herói intacto: o bot foge do chefe (peso 5 em
+  `tests/lab/bot.ts` `steer`) e o chefe (89 px/s) nunca o alcança. A vitória da Loja inteira na Cripta fica um pouco
+  subestimada.
+- O quê: com o chefe vivo e o herói acima de 50% da vida, o peso de fuga do chefe cai e o bot orbita a ~180 px dele.
+- Aceite: nenhuma corrida chega aos 15:00 sem morrer nem vencer; sim da Cripta antes e depois na tabela.
+
+**CT-02 · Testes que faltam na Cripta** · impl · P · proposto
+
+- Por quê: 02-code "Testes que faltam".
+- O quê: `coldSpirit`/`shoot` como comportamento; pilha sob `world.freeze` e sob `clearCrowd`; `burst` com a Muralha
+  de Valmor pronta (bloqueia sem contra-ataque) e `explode` poupando o chefe; `groundSlow` com `slime` e `web`; o
+  ciclo estrito Badalada/Dobre; `bestiaryOrder(seen)` e `bossSummons`.
+- Aceite: os testes existem e passam; nenhum muda comportamento.
+
+**CT-03 · Arte em código morta dos inimigos com PNG** · impl · P · proposto (decidi remover; o Daniel pode vetar)
+
+- Por quê: 02-code B5. `render/art/enemies.ts` ainda desenha Ossada, Esqueleto, Ossada em Brasa, pilha, Espectro,
+  Espírito Gélido, Gosma, Morcego Vampiro, Coveiro e Sineiro para texturas que `assets.ts:43-54` sobrescreve; o
+  comentário de `assets.ts:11-13` diz que tudo é desenhado em código.
+- O quê: remover os desenhos sobrescritos (o git guarda) e atualizar o comentário.
+- Aceite: build menor; nenhuma textura faltando (captura do Bestiário e da Cripta iguais).
+
+### C3 · Equilíbrio
+
+**CE-01 · O limo da Gosma Verde prende de verdade** · impl + bal · P · proposto
+
+- Por quê: 01-balance B2, 02-code B3, 06-vfx #8. Com o bot, o herói passa **0,19%** do tempo no limo, com 1,15 gosmas
+  vivas e 1,9 manchas no chão. O teto `trail.cap` (5) conta as manchas de todas as gosmas juntas
+  (`core/enemies.ts:403-416`), o rastro sai a cada 1,2 s, e a lentidão é de só 30%. É a peça que deveria tirar o
+  jogador do círculo largo (pilar 2) e hoje é cosmética.
+- O quê: a mancha guarda o dono (`ownerUid`, como os tiros) e o teto passa a ser por gosma; dados de partida, a validar
+  no sim:
+  ```ts
+  trail: { every: 0.6, cap: 10, pool: { kind: 'slime', radius: 34, ttl: 6, slow: 0.6 } },
+  // stages.ts crypt specials
+  { id: 'slime', from: 70, every: 10 },
+  ```
+- Aceite: teste com duas gosmas: cada uma mantém o próprio teto. Sim (meia Loja, 64 corridas): herói no limo pelo
+  menos 10x o de hoje (bot que foge; um humano pisa mais); `ground` abaixo de 30% do dano; tirar o limo muda o
+  resultado para fora do ruído.
+
+**CE-02 · Cripta com a meia Loja de volta na faixa** · bal + impl · P · proposto (depois de CB-01, CB-02, CE-01 e, se aprovado, CD-01)
+
+- Por quê: 01-balance D1, D2, D4. Meia Loja em 12,5% (128 corridas) contra 15 a 35%; 25 de 37 mortes antes do chefe
+  caem entre 4:00 e 5:30, o vale antes do 1º Elo. A alavanca de dano funciona (`mult.damage` 1.5: 18% / 88%); a de
+  vida é forte demais (`mult.hp` 1.25: 94% com a Loja inteira). As peças vão endurecer com os consertos, então o
+  `mult` é o último passo, não o primeiro.
+- O quê: depois dos itens acima, 32 sementes; mover só `mult.damage` (1.65 → entre 1.45 e 1.6) até a meia Loja ficar
+  em 20 a 30% (meio da faixa, para o ruído); armas não mudam.
+- Aceite: Cripta 0% / 20 a 30% / 75 a 85% em 32 sementes; nenhum herói a mais de 20 pontos; Loja inteira não passa de
+  85%; tabela em `docs/balance-baseline.md`.
+
+### C4 · Leitura da Cripta (dono: vfx-director)
+
+**CF-04 · Um vocabulário de aviso por consequência; covas e Badalada marcadas antes** · vfx + impl · P · proposto
+
+- Por quê: 05-ui UI-04, 06-vfx #5 e #7. As covas do Coveiro (sem dano), a Badalada (sem dano) e o Dobre Fúnebre (20 de
+  dano) usam o mesmo tracejado coral e são indistinguíveis lado a lado (`boss-ab0-420x820.png`): o jogador aprende a
+  fugir do inofensivo e a ignorar o que fere. As covas só aparecem no fim da espera, com ~12 px (`dig-after.png`).
+- O quê: três cores e nenhuma mais. **Coral sólido com tracejado que acelera = fere ao tocar.** **Marfim (osso
+  pálido) com contorno de tinta e lápides pequenas = invoca** (covas, Badalada, ovos). **Verde-limo = atrasa.** Sem
+  violeta: o chão da Cripta é violeta e o roxo é da Lyra (decisão da revisão). Os pontos de saída (4 do Coveiro, 8 da
+  Badalada) aparecem desde o começo da espera, como lápides de 12 a 16 px crescendo, nas mesmas posições que o core
+  vai usar (laço por `count`, sem alocar); na Badalada o sino balança duas vezes e solta dois anéis de som. Constantes
+  `SUMMON_*` em `render/ui.ts` ao lado de `WARN_*`.
+- Aceite: captura 420x820 com covas, Badalada e Dobre na mesma tela, em que cada um diz a consequência pela cor; as
+  lápides aparecem no primeiro quadro da espera.
+
+**CF-01 · Pilha de ossos com queda, relógio e levante** · vfx · P · proposto
+
+- Por quê: 06-vfx #2, 05-ui UI-01. A pilha é a mecânica mais importante da fase e é invisível: troca de sprite e mais
+  nada (`GameScene.ts:340`), coberta pelos outros esqueletos (`shots/pile-sheet.png`); nada diz "acerte antes que
+  levante".
+- O quê: **queda**: leque de 6 ossinhos e poeira, uma vez; **relógio**: anel fino cor de osso e brasa que fecha em
+  `reassemble.delay` (arco de `pile / delay`), olhos acendendo no último segundo, tremor de ±1,5 px e ossinhos voltando
+  no último 0,6 s (nunca coral: o levante não fere); **levante**: anel curto e squash vertical; **quebra**: estrela
+  dupla do crítico e estalo de ossos. O espelho guarda o `pile` do quadro anterior para disparar nas transições (como
+  `stunned`); anéis só em pilhas visíveis, até 24; faíscas do pool.
+- Aceite: folha de captura com as quatro etapas; numa multidão de 200, a pilha é achada; F4 igual.
+
+**CF-06 · Acerto na cor da arma, não branco sobre osso** · vfx · P · proposto
+
+- Por quê: 06-vfx #9 (conflito com o NF-01 resolvido em `07-direcao.md`). Na Cripta os inimigos principais são brancos;
+  o flash branco de 0,05 s (`GameScene.ts:395`) vira uma mancha que apaga o sprite (`shots/s-wisps-soulProcession.png`,
+  `shots/s-shields-valmorWall.png`).
+- O quê: em todas as fases, `setTintFill` com a cor de `HIT_SPARK[arma]` clareada; branco só no crítico. Mesma regra do
+  NF-01 (só alvo único, nunca em área).
+- Aceite: capturas de Procissão, Escudos e Adagas na Cripta sem silhueta branca sólida; o crítico continua o mais
+  forte.
+
+**CF-03 · Dobre Fúnebre como sino, não como espada** · vfx · P · proposto
+
+- Por quê: 06-vfx #4. O aviso lê bem, mas (a) sobra uma linha radial tracejada (as bordas de um arco de 2π coincidem,
+  `fx.ts:1664-1665`) e (b) o golpe é a varredura de espada do Cavaleiro (`drawSwing(... CLEAVE_STYLE)`, `fx.ts:1637`):
+  uma cunha de ~270° que deixa um "lado seguro" que não existe.
+- O quê: com arco ≥ 2π, sem linhas radiais; aviso com anéis contraindo para o sino e 3 pulsos no último 0,6 s; golpe
+  como anel de choque completo do sino até 130 px em 0,25 s, borda branca grossa, poeira na borda, flash no mapa de luz
+  (AR-01). Menos primitivas que a cunha.
+- Aceite: captura do aviso sem linha radial e do golpe como anel fechado.
+
+**CF-05 · Orbe do Espírito Gélido na cor dele** · vfx · P · proposto
+
+- Por quê: 06-vfx #6. O espírito é azul-gelo e o tiro sai branco-rosado com cauda coral (`drawEnemyShots`,
+  `fx.ts:1201-1215`, cor única para todo atirador): parece o tiro do Goblin e não diz "frio". Não há aviso de disparo.
+- O quê: cor por atirador (tabela no `fx.ts`, como `TRAIL`): núcleo branco, halo azul-gelo, 3 flocos atrás, contorno
+  escuro fino, luz fraca azul; aviso de 0,7 s com a orbe condensando na mão; acerto no herói com estilhaço azul
+  (`SPARK.flake`).
+- Aceite: captura com Goblin e Espírito atirando, tiros distinguíveis; o aviso aparece antes de todo disparo.
+
+**CF-02 · Estouro da Ossada em Brasa que paga a jogada** · vfx · P · proposto
+
+- Por quê: 06-vfx #3. O aviso é bom (`shots/eb-sheet.png`), o estouro é um anel fino de 0,25 s
+  (`GameScene.ts:970-973`): o momento que recompensa "atrair a multidão para o estouro" passa num piscar, e o corpo
+  some antes de o aviso aparecer.
+- O quê: brasa no peito pulsando antes da morte; no estouro, flash branco-quente de 0,08 s que corre até o raio exato,
+  8 raios curtos, brasas subindo, fumaça de 0,6 s, mancha chamuscada de 2 s (marca curta), luz laranja (AR-01); quem é
+  ferido leva o brilho do `dotSpark`. Sem tremor.
+- Aceite: folha de captura do estouro com inimigos dentro; +10 faíscas no máximo por estouro.
+
+**CS-01 · Sons da Cripta: sino, pilha, estouro e pá** · impl · P · proposto
+
+- Por quê: 06-vfx ("Sons"). `render/sounds.ts` não tem receita para a Badalada, o Dobre, a pilha (cair, levantar,
+  quebrar), o estouro nem a pá. O sino é o centro da fase e do chefe ("o sino vai tocar por você", fala do Sineiro no
+  original) e hoje não soa.
+- O quê: receitas Web Audio no mapa único: `bellToll` (grave, longo), `bellDirge` (mais grave, com batida no golpe),
+  `pileFall`, `pileRise`, `pileBreak` (estalo seco, o mais satisfatório), `emberBurst`, `dig`. Pilha com teto de vozes.
+- Aceite: cada evento soa uma vez; com 20 pilhas o teto de vozes segura; mudo respeitado.
+
+**CF-07 · Limo que espalha e seca** · vfx · P · proposto (depois do CE-01)
+
+- Por quê: 06-vfx #8. A mancha nasce pronta (`fx.ts:1513`) e some só por alfa; o herói lento não tem desenho de
+  "grudar".
+- O quê: espalha de 40 a 100% do raio em 0,2 s com respingo; encolhe com bolhas ao secar; fio de gosma no pé do herói
+  enquanto `groundSlow < 1` (o ícone do HUD é do CU-02).
+- Aceite: folha de captura do ciclo da mancha; F4 igual com 6 gosmas.
+
+### C5 · Interface (dono: ui-designer)
+
+**CU-02 · Vida baixa, lentidão e "Caiu por"** · ui + impl · M · proposto
+
+- Por quê: 05-ui UI-03. Com 18/160 só o número muda (`lowhp-420.png`); no celular o polegar cobre o canto e o olho
+  está no herói. A lentidão do limo não tem sinal. A tela final não usa o `world.hurtBy` que o mundo já conta: na
+  Cripta, com tiros, estouros e covas, "o que me matou" é a lição que muda a próxima partida (pilar 4).
+- O quê: (1) vinheta coral nas bordas abaixo de 35% (pulso lento) e 15% (pulso rápido), fixa no modo calmo
+  (reaproveita a textura da vinheta do HUD); barra de 3 px sob os pés só quando a vida não está cheia. (2) Ícone de
+  lentidão (`icon.slow`, 16 px) na linha dos contadores enquanto `groundSlow < 1`, contorno do herói em verde-limo.
+  (3) Fim: "Caiu por: contato 62% · tiros 25% · marcas no chão 13%" (`core/report.ts` ganha `hurtShare`, puro, com
+  teste). Textos: `end.hurtBy: (partes: string) => \`Caiu por: ${partes}\``, `end.hurt: { contact: 'contato', shot:
+  'tiros', leap: 'saltos', ground: 'marcas no chão', boss: 'o chefe' }`.
+- Aceite: capturas 420x820 e 360x640 com vida a 30% e 10%, herói no limo e tela final com a linha; teste do
+  `hurtShare`; F4 igual.
+
+**CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · proposto
+
+- Por quê: 05-ui UI-01. FT-14, 15 e 16 empilharam cinco verbos numa fase; o jogador só os descobre apanhando, e o
+  aviso de elite é sempre "Um inimigo poderoso se aproxima!" (`GameScene.ts:983-985`).
+- O quê: na primeira vez **por save** que surge um inimigo com verbo (`reassemble`, `burst`, `dig`, `trail`, `shoot`,
+  `leap`, `nest`, `flee`, `banner`, `brew`), uma dica sob o banner por 4 s, com o sprite em 28 px, sem pausar; no
+  máximo uma a cada 20 s, nunca com chefe vivo, fila de uma. O aviso de elite nomeia: "O Coveiro chegou! Cuidado com
+  as covas." "Dicas" nas Opções, ligada por padrão (decisão da revisão). O texto é o mesmo do "Como lidar" do CC-06.
+  Textos da Cripta (`bestiary.tips`):
+  - `bones`: "Levanta de novo em 3 s. Acerte a pilha para acabar com ela."
+  - `emberBones`: "Quando cai, estoura em brasa. Afaste-se do círculo."
+  - `gravedigger`: "Finca a pá e abre covas. Quatro Ossadas saem do anel."
+  - `slime`: "Deixa limo que atrasa quem pisa."
+  - `coldSpirit`: "Atira uma orbe lenta. Desvie andando."
+  - `eliteArrived: (nome: string, aviso: string) => \`${nome} chegou! ${aviso}\``; `eliteHint.gravedigger: 'Cuidado
+    com as covas.'`
+    As dicas de Valmor e da Estrada saem do mesmo jeito, uma frase de ação por inimigo, na implementação.
+- Aceite: save novo: cada dica aparece uma vez e nunca mais; nenhuma durante a luta do chefe; save antigo migra sem
+  perder nada (`sanitizeSave`); captura 420x820.
+
+**CU-03 · Chefe com barra própria e o nome do ataque** · ui + impl · P · proposto
+
+- Por quê: 05-ui UI-07. A barra do chefe usa o vermelho da vida do herói e nenhum rótulo diz o que vem ("Badalada" e
+  "Dobre Fúnebre" só existem no Bestiário).
+- O quê: barra roxo-escura com borda dourada fina (`UI.bossBar`, estilo dos painéis do Sea of Stars); no começo de cada
+  espera, o nome da habilidade sob a barra por 1,2 s (`hud.ability: (nome: string) => \`${nome}!\``; o core expõe o id
+  da habilidade corrente). Texto só muda quando a habilidade muda.
+- Aceite: captura com "Dobre Fúnebre!" sob a barra durante o aviso; barra do chefe e vida do herói de cores
+  diferentes.
+
+**CU-04 · Pausa com dano por arma** · ui + impl · P · proposto
+
+- Por quê: 05-ui UI-05. A pausa é a ficha da build (NU-03) e não responde "o que está funcionando?"; a tela final já
+  calcula o DPS.
+- O quê: barra fina de dano e DPS em cada linha de arma (a conta sai do `EndScene` para `core/report.ts`, sem
+  duplicar); em 360x640 só a barra.
+- Aceite: capturas 420x820 e 360x640; a mesma conta na Pausa e no fim.
+
+**CU-05 · Carta de arma nova com números** · ui + impl · P · proposto
+
+- Por quê: 05-ui UI-08. Arma nova só tem texto de sabor (`lvl-420x820.png`), a melhoria já mostra o delta: o jogador
+  compra no escuro (pilar 2).
+- O quê: linha "Dano 6 · Recarga 1,8 s · Alcance 90" do nível 1 (`describe.ts`), substituindo o sabor em 360x640,
+  nunca a receita (`levelUp.newStats`).
+- Aceite: captura de arma nova em 420x820 e 360x640 com números e receita.
+
+**CU-06 · Celular: nível, pips, joystick e cargas** · ui + impl · P · proposto
+
+- Por quê: 05-ui UI-10, 03-qa B4. "Nv" de 14 px sobre a barra de XP (`HudScene.ts:94`); pips da faixa de 3 px;
+  joystick com alfa 0,08/0,25 some no chão violeta (`joystick.ts:21`); R, X e B com 0 cargas não dão nenhum sinal.
+- O quê: "Nv N" a 16 px com contorno, fora da barra; pips de 4 px (ou número pequeno); joystick com alfa 0,14/0,4;
+  tecla sem carga dá um tremor curto no botão e um som surdo.
+- Aceite: capturas 420x820 e 360x640 na Cripta; R sem carga mostra o tremor.
+
+**CU-08 · Desistir mostra a tela final** · ui + impl · P · proposto (decidi; o Daniel pode vetar)
+
+- Por quê: 03-qa B5. Desistir (em duas etapas) vai direto ao menu; o Elo forjado é gravado, mas o jogador não vê o que
+  a partida rendeu. Pilar 4: toda partida mostra o que avançou.
+- O quê: Desistir abre o Fim com o título "Partida abandonada", ouro guardado, conquistas e Elos; "Menu" a um toque.
+- Aceite: captura; o ouro mostrado é o gravado no save.
+
+**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · proposto
+
+- Por quê: 05-ui UI-09. O cartão da Preparação tem nome e frase ("Pedra azul..." num chão que agora é violeta), sem
+  vitórias, melhor tempo nem perigos; as barras do HUD são retângulos planos, longe dos painéis finos dourados das
+  referências.
+- O quê: dois ou três ícones de perigo da fase (os verbos mais fortes), as três marcas de vitória (as do NU-10) e o
+  melhor tempo; frase da Cripta revista depois do AR-02 (o chão pode mudar de novo). Barras com traço dourado fino,
+  canto arredondado e coração no início, assadas em textura (sem `Graphics` por quadro).
+- Aceite: capturas 420x820 e 1000x680 da Preparação; F4 igual com as barras novas.
+
+### C6 · Arte e luz (dono: visual-director)
+
+**CA-01 · Sombra de contato nos inimigos** · visual + impl · P · proposto
+
+- Por quê: 04-visual #9. Os heróis têm sombra, os inimigos PixelLab não: flutuam e o monte vira uma massa.
+- O quê: uma elipse escura pré-alocada por imagem do espelho (uma textura `shadow`, profundidade abaixo dos
+  inimigos), escala pelo `radius`.
+- Aceite: captura de multidão com os sprites "no chão"; F4 com 500 inimigos igual.
+
+**CA-03 · Cripta com uma cor por criatura** · visual · M · proposto
+
+- Por quê: 04-visual #7 e #8. Ossada, Esqueleto e Ossada em Brasa são branco-osso e leem como uma massa
+  (`m-c2-2.png`); o Espectro lilás-claro tem o maior valor da tela e chama mais atenção que o perigo real.
+- O quê: primeiro por tinta (zero gerações): Espectro 15 a 20% mais escuro com olhos e boca acesos (o rosto fica,
+  decisão 5); depois, se ainda faltar, regerar o Esqueleto com armadura azul-aço escura e capa vermelha maior, e a
+  Ossada com crânio amarelado e olho âmbar (`create_character_state`, ~10 gerações cada).
+- Aceite: captura de multidão da Cripta em que Ossada, Esqueleto, Ossada em Brasa e Espectro se separam em cinza.
+
+**CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto
+
+- Por quê: 04-visual #6, 02-code B6, 06-vfx ("ponto fraco"). O Sineiro a 1,5x (`SPRITE_SCALE`) tem pixels de 3x3 entre
+  sprites de 2x2, é só um pouco maior que os Coveiros e mantém `radius: 30` com ~150 px de altura; o Bestiário não
+  aplica o fator. Três Coveiros (mesma silhueta marrom) e o chefe se confundem.
+- O quê: gerar o Sineiro em tamanho nativo (128 a 192 px, 4 a 6 gerações) com o sino como o acento que brilha (luz
+  própria, mais forte no aviso); `SPRITE_SCALE` sai; `radius` acompanha o corpo visível e a luta é medida no sim (hoje
+  22 a 39 s de mediana com a Loja inteira; se passar de 45 s, a mordida cai um pouco). Coveiro com capuz e cor
+  próprios.
+- Aceite: captura do chefe com escolta e dois Coveiros, todos distinguíveis; luta de 25 a 40 s no sim.
+
+**CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · proposto
+
+- Por quê: 06-vfx (tabela de armas). Aura de Yah: anel fino que some na multidão; Adagas e Leque de Facas: o Elo quase
+  igual à base; Maça de Ferro: impacto discreto no meio do monte. (Fogos-Fátuos pequenos já estão no NA-05 e em
+  "Efeitos menores".)
+- O quê: Aura com borda grossa (alfa alto na borda, baixo no miolo) e onda no tique; Leque com faísca de rebote e
+  gota de sangramento maior; Maça com luz âmbar no pouso (AR-01).
+- Aceite: folha de captura das três no nível máximo com 26 inimigos em volta.
+
+### C7 · Direção (sistema novo)
+
+**CD-01 · Fonte de Luz na Cripta: uma decisão de rota que cura** · impl + bal + vfx + ui · M · proposto (aprovação e pergunta de lore com o Daniel)
+
+- Por quê: pilares 2 e 6. 01-balance D2: 25 de 37 mortes da meia Loja caem entre 4:00 e 5:30, o vale antes do 1º Elo;
+  e nenhuma peça da Cripta tira o jogador do círculo largo. O cânone já tem o objeto: as fontes de luz "curam e
+  guardam a memória de quem passa" (`prologo.md`, "As fontes de luz") e a cripta do original tem uma ("A fonte de luz
+  cura e salva", `capitulo1-aldo-sozinho.md`). Gênero: pontos de cura ou de objetivo no mapa que puxam o jogador para
+  fora da rota (os santuários e objetivos de bioma dos survivors-likes), aqui sem botão e sem tela nova.
+- O quê: às 3:30, 6:00 e 8:30 uma fonte acende num ponto aberto do terreno entre 320 e 520 px do herói (seta na borda
+  pelo NU-01, aviso do HUD). Dentro do círculo, o herói cura 6% da vida máxima por segundo, até a fonte gastar 50% da
+  vida máxima ou apagar em 30 s. A horda continua vindo: curar é ficar parado num círculo de 64 px. Mecânica: uma marca
+  nova `fountain` no pool de marcas (`core/marks.ts`), que cura em vez de ferir; agenda como os `specials`.
+  ```ts
+  // data/stages.ts · StageDef, novo (opcional)
+  /** Light fountains: from `from` s, one every `every` s, lit `ttl` s, `near`-`far` px from the hero on open ground. */
+  fountains?: { from: number; every: number; ttl: number; near: number; far: number };
+  // crypt
+  fountains: { from: 210, every: 150, ttl: 30, near: 320, far: 520 },
+  // data/config.ts
+  /** Light fountain: radius, heal per second (of max HP) while inside, total it can give (of max HP). */
+  fountain: { radius: 64, heal: 0.06, charge: 0.5 },
+  ```
+  Textos: `hud.fountain: 'Uma fonte de luz brilha na cripta.'`; nome no Bestiário ou na dica: "Fonte de Luz" (termo do
+  original). Visual: poça de luz azul-clara (a cor da fonte no original, "uma luz azul que ninguém chega perto"; manter
+  longe do ciano das gemas, regra do A-05) que encolhe conforme gasta; a cura com as cruzes da Luz Sagrada. A vigília
+  continua as fontes no mesmo ritmo.
+  **Variante que depende do Daniel (lore):** pilhas de ossos dentro da luz não remontam. Liga a fonte ao verbo da fase
+  ("lutar perto da fonte"), mas é extrapolação; só entra com o sim dele.
+- Custo: `data/stages.ts`, `data/config.ts`, `core/marks.ts` (kind novo), `core/waves.ts` (agenda), render (luz, desenho,
+  seta), `pt-BR.ts`; bot do sim vai à fonte com vida abaixo de 60%. Sem alocação: a marca vem do pool.
+- Riscos: equilíbrio (a meia Loja pode subir demais; o CE-02 vem depois e absorve); a fonte não pode nascer dentro de
+  obstáculo (usar o mesmo teste de célula livre do `terrain.ts`); leitura com a horda em volta (a borda da poça fica
+  acima da escuridão).
+- Aceite: testes: a fonte nasce em chão livre na distância pedida, cura só dentro, para no `charge` e no `ttl`; sim
+  (meia Loja): a parte das mortes entre 4:00 e 5:30 cai de 2/3 para menos de 1/2, a Loja inteira não passa de 85%;
+  medida de tempo dentro da fonte e cura por fonte; F4 igual.
