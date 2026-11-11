@@ -117,8 +117,9 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   Cripta obstacles 44x72, 56x52, 36x44; projectiles 16–28. Enemies animate by state (walk, windup, strike, death
   corpse via the `death` puff's `sprite`/`flip`); crowd enemies only walk. Palettes by stage: Valmor cold blues, snow
   and warm lanterns; Cripta purples, stone and amber candles; Estrada pine greens, earth and torches. Ground tiles are
-  drawn in code as one seamless 128x128 art-pixel grid each (`render/art/pixelTiles.ts`, palettes in
-  `TILE_PALETTES`, kept dark and low-contrast by `tests/render/tiles.test.ts`); decals, obstacles and projectiles are
+  PixelLab images in `public/sprites/tiles/` (a generated ground, made to repeat by a dithered blend with its half-offset
+  copy, ~100 art px wide, shown at 2 px per art px; their contrast is pulled toward the mean so heroes read on top, see
+  `docs/art/credits.md`); decals, obstacles and projectiles are
   PixelLab images (`public/sprites/{decals,obstacles,fx}`), effect pieces placed from `drawFx` go through the
   `fxSprites` pool, and no ground zone fills past `ZONE_FILL_MAX` (0.35). Every generation is logged in
   `docs/art/credits.md`.

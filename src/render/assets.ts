@@ -5,7 +5,6 @@ import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { ITEM_ART } from './art/items';
 import { ART_RES, Pen } from './art/pen';
-import { TILE_ART } from './art/tiles';
 import type { ArtDef } from './art/types';
 
 /**
@@ -54,7 +53,11 @@ const DECALS = [
 const OBSTACLES = ['0', '0t', '1', '2'];
 
 export const ASSETS: Record<string, AssetDef> = {
-  ...art(TILE_ART, 1),
+  // Ground tiles: PixelLab ground (2x2 mirrored so it repeats without a seam, at ART_RES), see docs/art/credits.md.
+  tile: { kind: 'image', url: 'sprites/tiles/valmor.png' },
+  'tile.crypt': { kind: 'image', url: 'sprites/tiles/crypt.png' },
+  'tile.road': { kind: 'image', url: 'sprites/tiles/road.png' },
+  'tile.forest': { kind: 'image', url: 'sprites/tiles/forest.png' },
   ...art(HERO_ART, ART_RES),
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
@@ -197,7 +200,7 @@ export function generateAssets(scene: Phaser.Scene): void {
     }
     if (scene.textures.exists(key)) continue;
     // Sprites get a margin so outlines, hats and ears never get cut; images stay centred on their box.
-    const pad = def.art === TILE_ART[key] ? 0 : PAD;
+    const pad = PAD;
     g.clear();
     g.save();
     g.scaleCanvas(def.res, def.res);

@@ -3234,7 +3234,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 5 · Cenário
 
-- **DD-10 · Tiles refeitos no PixelLab** · visual · G. Cripta: lajes de piso com desgaste, rachaduras e limo, nunca
+- ✅ **DD-10 · Tiles refeitos no PixelLab** · visual · G. Cripta: lajes de piso com desgaste, rachaduras e limo, nunca
   padrão de parede. Valmor e Estrada: neve, terra e pedra com variação e bordas. Testes de contraste do chão mantidos.
 - **DD-11 · Obstáculos que formam o cenário** · visual + impl · G. Maiores e em pixel: Cripta (colunas, sarcófagos,
   estátuas de paladinos, montes de ossos), Valmor (cercas, carroças, fardos, poço), Estrada (troncos, rochas, carroça
