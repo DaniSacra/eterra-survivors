@@ -226,6 +226,7 @@ export function drawFx(
   ovalRing(g, p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
+  drawPushes(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
   // Many patches stacked (Espada de Fogo, Nevasca) must not wash the screen: the fills share a budget (NF-02).
   let frosts = 0;
@@ -1015,6 +1016,41 @@ function drawStuns(g: Phaser.GameObjects.Graphics, world: World): void {
         0xfff0a0,
         front ? 1 : 0.7,
       );
+    }
+  }
+}
+
+/** Enemies shown sliding back from a push, per frame (NF-04). */
+const PUSH_SHOWN = 40;
+/** A push faster than this (px/s) leaves dust (a 600 push stays above it ~0.13 s): slower ones read as walking anyway. */
+const PUSH_DUST = 150;
+const DUST = 0xcbbba0;
+
+/**
+ * A pushed enemy slides back on its heels: two short dust streaks on the ground behind it, along the push, longer and
+ * brighter the harder it was thrown (NF-04), so a push reads even on a still frame.
+ */
+function drawPushes(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemies.active;
+  let n = 0;
+  for (let i = 0; i < list.length && n < PUSH_SHOWN; i++) {
+    const e = list[i] as Enemy;
+    const kb = Math.hypot(e.kbx, e.kby);
+    if (kb < PUSH_DUST || e.def.boss) continue;
+    n++;
+    const ux = e.kbx / kb;
+    const uy = e.kby / kb;
+    const r = e.def.radius;
+    const k = Math.min(1, kb / 700);
+    const len = 10 + 26 * k;
+    // The heels: the side of the enemy the push came from, at its feet.
+    const hx = e.x - ux * r * 0.5;
+    const hy = e.y + r * 0.55 - uy * r * 0.3;
+    for (let side = -1; side <= 1; side += 2) {
+      const ox = -uy * r * 0.35 * side;
+      const oy = ux * r * 0.35 * side;
+      g.lineStyle(3 + 2 * k, DUST, 0.25 + 0.35 * k);
+      g.lineBetween(hx + ox, hy + oy, hx + ox - ux * len, hy + oy - uy * len);
     }
   }
 }

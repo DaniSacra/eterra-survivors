@@ -1707,7 +1707,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   Quebra-Junta, borda principal âmbar e bege só como fio interno; faíscas na cor do elemento. Sem rachaduras no chão.
 - Aceite: captura a 0,1x mostrando a maça no quadro do dano; o Daniel reconhece o golpe da onda antes dele.
 
-**NF-04 · Empurrão com forma** · vfx · P · proposto
+**NF-04 · Empurrão com forma** · vfx · P · ✅ feito (2026-11-11: dois riscos de poeira atrás do empurrado acima de 150 px/s, até 40 por quadro; sem o puff)
 
 - Por quê: 06-vfx #2 (alto). O empurrão acontece (escudos limpam um anel, o Quebra-Junta esvazia a tela), mas o golpe
   que empurra tem a cara de qualquer acerto; parado, o inimigo empurrado parece só ter andado.
