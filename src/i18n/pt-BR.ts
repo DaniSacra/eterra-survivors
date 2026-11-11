@@ -304,7 +304,8 @@ export const t = {
       slime:
         'Escorre do limo da cripta e deixa um rastro que prende os pés. Bater nela é como bater em mingau.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
-      ghost: 'Um frio que atravessa as paredes. Às vezes some, e o golpe passa junto.',
+      ghost:
+        'Um frio que atravessa as paredes. Às vezes some, e o golpe passa junto. Quem some uma vez volta Assombro: mais rápido e mais cruel.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
       golem: 'Pedra que anda. Devagar, mas não para.',
       // written for the Survivors (2026-11-09), not from the original; Daniel may rewrite
