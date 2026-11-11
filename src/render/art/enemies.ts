@@ -57,7 +57,7 @@ function rat(fur: number, s: number): ArtDef {
   };
 }
 
-function winged(body: number, wing: number, kind: 'bat' | 'crow'): ArtDef {
+function winged(body: number, wing: number, kind: 'bat' | 'crow', glow: number | null = null): ArtDef {
   return {
     w: 28,
     h: 22,
@@ -70,8 +70,10 @@ function winged(body: number, wing: number, kind: 'bat' | 'crow'): ArtDef {
       else p.poly([19, 9, 25, 11, 19, 13], 0xf0c850);
       p.ink();
       if (kind === 'bat') {
-        p.eye(12, 10, 2).eye(16.5, 10, 2);
-        p.fill(0xffffff).fillTriangle(12.5, 13, 13.5, 13, 13, 14.6).fillTriangle(15, 13, 16, 13, 15.5, 14.6);
+        if (glow === null) p.eye(12, 10, 2).eye(16.5, 10, 2);
+        else p.glow(12, 10, 1.3, glow).glow(16.5, 10, 1.3, glow); // vampire: small angry glowing eyes
+        const fang = glow === null ? 1.6 : 2.8;
+        p.fill(0xffffff).fillTriangle(12.5, 13, 13.7, 13, 13, 13 + fang).fillTriangle(15, 13, 16.2, 13, 15.6, 13 + fang);
       } else {
         p.eye(16, 9.5, 1.8);
       }
@@ -159,10 +161,12 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     w: 26,
     h: 30,
     draw(p) {
-      const sk = skeleton(0x8a7a78, 0xff9a2a);
+      const sk = skeleton(0x6a5a58, 0xff9a2a);
       sk.draw(p);
-      p.glow(13.5, 16, 3.2, 0xff7a2a);
-      p.glow(13.5, 16, 1.6, 0xffd060);
+      p.glow(13.5, 16, 4.2, 0xc83a10); // ember halo in the ribs, readable in the dark
+      p.glow(13.5, 16, 3, 0xff7a2a);
+      p.glow(13.5, 16, 1.5, 0xffd060);
+      p.glow(8.5, 14.5, 0.8, 0xff7a2a).glow(18.5, 14.5, 0.8, 0xff7a2a); // sparks at the shoulders
     },
   },
   /** A pile of bones: what an Ossada leaves for three seconds, eyes still lit (FT-15). */
@@ -174,12 +178,14 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.rrect(3, 8, 20, 4, 2, 0xb8b4cc).rrect(6, 5, 14, 4, 2, 0xa8a4bc);
       p.rrect(2, 4, 8, 2.5, 1.2, 0xb8b4cc).rrect(16, 3, 8, 2.5, 1.2, 0xb8b4cc);
       p.circle(15, 6, 4.2, 0xc8c4dc); // the skull on top
+      p.rrect(4, 10, 9, 2, 1, 0x8a869c).rrect(12, 11, 10, 2, 1, 0x8a869c); // crossed long bones
       p.ink();
+      p.fill(0x6a6680).fillRect(8, 7.5, 7, 0.8).fillRect(9, 9, 9, 0.8); // rib lines
       p.glow(14, 6, 0.8, 0xff5a6a).glow(16.5, 6, 0.8, 0xff5a6a);
     },
   },
   'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
-  'enemy.vampireBat': winged(0x7a3a4e, 0x52283a, 'bat'),
+  'enemy.vampireBat': winged(0x8a2a46, 0x5a1a30, 'bat', 0xff6a5a), // wine red, hot eyes, long fangs
   /** Espírito Gélido (provisional): a small pale-blue spirit, a ball of cold in its hands (FT-16). */
   'enemy.coldSpirit': {
     w: 26,
@@ -195,7 +201,10 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.inkColor = INK;
       p.fill(0x2a4058).fillEllipse(10.5, 11, 4, 5.5).fillEllipse(16.5, 11, 4, 5.5);
       p.glow(11, 11.5, 1, 0xe8f8ff).glow(16.5, 11.5, 1, 0xe8f8ff);
-      p.glow(13, 19, 2.4, 0x9ad8f8); // the orb of cold
+      p.rrect(6, 17, 6, 3, 1.5, 0xb8d8ee).rrect(14, 17, 6, 3, 1.5, 0xb8d8ee); // hands cupped around the orb
+      p.glow(13, 19, 3.6, 0x4a90d0); // the orb of cold: a halo, then a bright core
+      p.glow(13, 19, 2.4, 0x9ad8f8);
+      p.glow(13, 19, 1.1, 0xffffff);
       p.shine(9, 6, 4, 2.5, 0.5);
     },
   },
@@ -387,7 +396,10 @@ export const ENEMY_ART: Record<string, ArtDef> = {
       p.rrect(8, 8, 22, 3.5, 1.5, 0x2a2428).rrect(12, 3, 14, 7, 3, 0x2a2428); // hat
       p.ink();
       p.fill(0x4a4448).fillRect(17, 22, 3, 18);
-      p.eye(16.5, 14, 1.6).eye(21.5, 14, 1.6);
+      p.fill(0x1a1418, 0.7).fillRect(13, 11.5, 12, 2.5); // shadow under the brim
+      p.glow(17, 14.4, 0.8, 0xf0d860).glow(21.5, 14.4, 0.8, 0xf0d860); // eyes catch a little light
+      p.fill(0x5a5458).fillRect(10, 24, 18, 1); // coat seam and belt
+      p.fill(0xc8c8d4).fillRect(24, 5, 6, 1.2); // blade edge
       p.shine(14, 6, 6, 2, 0.3);
     },
   },

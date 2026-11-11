@@ -1547,6 +1547,19 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
     if (m.kind === 'tar') {
       g.fillStyle(0xb07020, 0.3 * fade);
       disc(g, m.x - r * 0.3, m.y - r * 0.3, r * 0.35);
+    } else if (m.kind === 'slime') {
+      // Thick green ooze: a darker core, glossy blobs and a pale sheen; it clings, so no rising bubbles.
+      g.fillStyle(0x1e6a46, 0.35 * fade);
+      disc(g, m.x + r * 0.1, m.y + r * 0.1, r * 0.6);
+      for (let b = 0; b < 5; b++) {
+        const bx = m.x + Math.cos(b * 1.9 + m.y) * r * 0.55;
+        const by = m.y + Math.sin(b * 2.7 + m.x) * r * 0.45;
+        const pulse = 1 + 0.15 * Math.sin(world.time * 2 + b);
+        g.fillStyle(0x7ae8a8, 0.35 * fade);
+        disc(g, bx, by, (3 + (b % 3)) * pulse);
+        g.fillStyle(0xe0fff0, 0.55 * fade);
+        disc(g, bx - 1, by - 1, 1.2);
+      }
     } else {
       // Bubbles that rise and burst, fixed to the patch.
       for (let b = 0; b < 4; b++) {
