@@ -1600,13 +1600,18 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 
 ### N3 · Equilíbrio
 
-**NE-02 · Tempestade medida de novo depois das rajadas** · bal + impl · P · proposto
+**NE-02 · Tempestade medida de novo depois das rajadas** · bal + impl · P · ⏸ medido, falta calibrar o lab (2026-11-11)
 
 - Por quê: 01-balance: Tempestade com ELO X **1,2x** no sim (Raio L7 813, Tempestade 854), a única Elo abaixo de
   2,5x; com a varredura de reserva (mock) a Tempestade vai de 716 para 1199 e a Espada de Fogo de 615 para 1361.
 - O quê: depois do NB-04, sim de 16 sementes; se a Tempestade ficar abaixo de 2x, `storm` `chain.count` 2 → 3; se a
   faixa `auto` passar do teto no sim, reajustar no lab.
 - Aceite: todas as Elos ≥ 2,5x no sim; bandas verdes; metas de fase dentro.
+- Medido (2026-11-11): sim 16 sementes, Tempestade 1,3x o Raio; `chain.count` 3 não muda o sim (1,2x) e põe a
+  Tempestade a 66% no lab (fora da faixa): revertido. Causa: o lab (grade de 64 px) é esparso. Com a grade de 32 px o
+  Raio vai de 277 para 1891 (6,8x) e a Tempestade de 1153 para 3375 (2,9x), porque o salto acerta um só e os raios
+  dela são fracos (25 contra 99). No sim, multidão densa, o Raio rende 1339 (lab 277). Próximo passo: lab com coluna
+  densa (junto com o NE-06) e bandas por ela; aí subir o dano por raio da Tempestade.
 
 **NE-01 · Maça de Ferro: mais alcance, menos dano** · impl + bal · P · ✅ feito (2026-11-11: lab 91%, Teo Valmor meia Loja 54%; `docs/balance-baseline.md`)
 
