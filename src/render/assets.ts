@@ -58,6 +58,14 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(HERO_ART, ART_RES),
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
+  // Pixel projectiles and pieces of effects (PixelLab, files at ART_RES); they replace the code-drawn ones of the same key.
+  'proj.hammer': { kind: 'image', url: 'sprites/fx/hammer.png' },
+  'proj.forgeFury': { kind: 'image', url: 'sprites/fx/forgeHammer.png' },
+  'proj.daggers': { kind: 'image', url: 'sprites/fx/dagger.png' },
+  'proj.staff': { kind: 'image', url: 'sprites/fx/staffOrb.png' },
+  'proj.holyLight': { kind: 'image', url: 'sprites/fx/holyOrb.png' },
+  'fx.shield': { kind: 'image', url: 'sprites/fx/shield.png' },
+  'fx.maceHead': { kind: 'image', url: 'sprites/fx/maceHead.png' },
   // Ground decals and the Cripta's obstacles: PixelLab pixel art (files already at ART_RES), see decals.ts / obstacles.ts.
   ...props('decals', DECALS),
   ...props('obstacles', OBSTACLES),

@@ -14,6 +14,7 @@ import { INK } from './art/pen';
 import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, SUMMON_SHADE, UI } from './ui';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import type { EnemyShot } from '../core/enemyShots';
+import { fxSprites } from './fxSprites';
 import { star } from './sparks';
 import { arcLine, band, disc, oval, ovalRing, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
@@ -205,6 +206,10 @@ export const newMoments = (): Moments => ({
   heal: -Infinity,
 });
 /** Regeneration is green, never the life bar's red (a red rise reads as losing life). */
+/** No ground zone is filled more opaque than this: the ring says where it ends, the fill only tints. */
+export const ZONE_FILL_MAX = 0.35;
+/** Texture width of the shield sprite (art px). */
+const SHIELD_ART = 24;
 export const HEAL_COLOR = 0x7ae890;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
 export const CHEST_SHOW = 1.3;
@@ -341,7 +346,7 @@ export function drawFx(
             ring(top, x, y, r);
           }
           drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
-        } else drawShield(top, x, y, r, style);
+        } else drawShield(x, y, r);
       }
     }
   }
@@ -713,7 +718,7 @@ function drawSmash(
   const fade = 1 - k * k;
   const a0 = s.angle - Math.PI * 0.6;
   const a1 = s.angle + Math.PI * 0.6;
-  under.fillStyle(DUST_LIGHT, 0.45 * fade);
+  under.fillStyle(DUST_LIGHT, ZONE_FILL_MAX * fade);
   disc(under, s.x, s.y, r * open);
   under.fillStyle(DENT, 0.35 * fade);
   disc(under, s.x, s.y, r * 0.28);
@@ -725,7 +730,7 @@ function drawSmash(
   arcLine(top, s.x, s.y, r * open, a0, a1);
   top.lineStyle(2, glow ? DUST_LIGHT : 0xffffff, 0.9 * fade);
   arcLine(top, s.x, s.y, r * open * 0.93, a0 + 0.15, a1 - 0.15);
-  if (k < HEAD_SHOWN) drawMaceHead(top, s, k / HEAD_SHOWN, glow);
+  if (k < HEAD_SHOWN) drawMaceHead(s, k / HEAD_SHOWN);
   // Pebbles thrown out from the front half, falling back.
   top.fillStyle(DUST_LIGHT, 0.9 * fade);
   for (let i = 0; i < 5; i++) {
@@ -737,36 +742,14 @@ function drawSmash(
 
 /** Part of a blow's life the mace head stays on the ground (~0.15 s). */
 const HEAD_SHOWN = 0.375;
-const IRON = 0x5c6270;
-const IRON_LIGHT = 0xaab2c0;
 
 /**
  * The mace head driven into the ground where it struck, on the frame of the damage: it squashes and fades (`q` 0 -> 1).
  * The blow that brings the shock wave has a white-hot head ("pá, pá, BUM").
  */
-function drawMaceHead(g: Phaser.GameObjects.Graphics, s: Slash, q: number, glow: number | undefined): void {
-  const a = 1 - q * q;
-  const hx = s.x;
-  const hy = s.y - 6;
-  // The haft back toward the hero.
-  const bx = hx - Math.cos(s.angle) * 26;
-  const by = hy - Math.sin(s.angle) * 26 - 10;
-  g.lineStyle(4, 0x6a4a2a, a);
-  g.lineBetween(hx, hy, bx, by);
-  const w = 11 * (1 + 0.35 * q);
-  const h = 11 * (1 - 0.35 * q);
-  const body = s.wave ? 0xffffff : (glow ?? IRON);
-  for (let i = 0; i < 6; i++) {
-    const sa = (i * Math.PI) / 3;
-    g.fillStyle(s.wave ? 0xfff0c0 : IRON_LIGHT, a);
-    disc(g, hx + Math.cos(sa) * w, hy + Math.sin(sa) * h, 3);
-  }
-  g.fillStyle(INK, a);
-  oval(g, hx, hy, w * 2 + 3, h * 2 + 3);
-  g.fillStyle(body, a);
-  oval(g, hx, hy, w * 2, h * 2);
-  g.fillStyle(0xffffff, 0.5 * a);
-  oval(g, hx - w * 0.3, hy - h * 0.35, w * 0.7, h * 0.5);
+function drawMaceHead(s: Slash, q: number): void {
+  // The pixel head with its haft, turned the way the blow goes; it swells a little as it lands, then fades.
+  fxSprites.put('fx.maceHead', s.x, s.y - 6, s.angle, 1 + 0.25 * q, 1 - q * q);
 }
 
 /**
@@ -1407,7 +1390,7 @@ function drawBursts(
     const age = time - b.t;
     if (age < 0 || age > BURST_SCORCH) continue;
     const fade = 1 - age / BURST_SCORCH;
-    ground.fillStyle(0x140c10, 0.38 * fade);
+    ground.fillStyle(0x140c10, ZONE_FILL_MAX * fade);
     disc(ground, b.x, b.y, b.r * 0.9);
     ground.fillStyle(0xff6a20, 0.25 * Math.max(0, 1 - age / 0.7));
     disc(ground, b.x, b.y, b.r * 0.6);
@@ -2293,17 +2276,7 @@ function drawSword(
   g.strokePath();
 }
 
-/** A round shield of hit radius `r`: a wooden rim, a painted face with a band across and a steel boss. */
-function drawShield(g: Phaser.GameObjects.Graphics, x: number, y: number, r: number, st: OrbitStyle): void {
-  g.fillStyle(st.dark).lineStyle(2.5, INK);
-  disc(g, x, y, r);
-  ring(g, x, y, r);
-  g.fillStyle(st.color);
-  disc(g, x, y, r * 0.78);
-  g.fillStyle(0xf0f4ff, 0.85).fillRect(x - r * 0.78, y - r * 0.14, r * 1.56, r * 0.28);
-  g.fillStyle(0xcbd8ec).lineStyle(1.5, INK);
-  disc(g, x, y, r * 0.3);
-  ring(g, x, y, r * 0.3);
-  g.fillStyle(0xffffff, 0.4);
-  oval(g, x - r * 0.35, y - r * 0.4, r * 0.5, r * 0.3);
+/** A round shield of hit radius `r`: the pixel shield, grown to the size of the hit. */
+function drawShield(x: number, y: number, r: number): void {
+  fxSprites.put('fx.shield', x, y, 0, (r * 2) / SHIELD_ART);
 }

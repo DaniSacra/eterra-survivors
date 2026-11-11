@@ -44,6 +44,7 @@ import {
   newMoments,
   shotStyle,
 } from '../render/fx';
+import { fxSprites } from '../render/fxSprites';
 import { HIT_SPARK, HitWeight, SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
@@ -339,6 +340,7 @@ export class GameScene extends Phaser.Scene {
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
+    fxSprites.init(this);
     this.fxGlow = this.add.graphics().setDepth(11.5).setBlendMode(Phaser.BlendModes.ADD);
     this.healText = this.add
       .text(0, 0, '', {
@@ -439,7 +441,8 @@ export class GameScene extends Phaser.Scene {
         // squash when hit. Frozen enemies stand still.
         // Slowed enemies take heavy, slow steps.
         const a =
-          (w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) * (anim ? 0.5 : 1);
+          (w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) *
+          (anim ? 0.5 : 1);
         // 1 -> 0 after a hit. Bosses are hit all the time: a small squash only, and no white flash (they would
         // stay a white silhouette, like the hurt hero used to be red).
         const hit = (e.flash / HIT_FLASH) * (e.def.boss ? 0.3 : 1);
@@ -789,7 +792,9 @@ export class GameScene extends Phaser.Scene {
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
+    fxSprites.begin();
     drawFx(this.fx, this.fxTop, w, this.moments, this.fxGlow, this.calm);
+    fxSprites.end();
     // Sparks keep flying after the boss falls (the world stops), but hold still behind the level-up choice.
     if (w.state !== 'levelup') this.sparks.update(delta / 1000);
     this.sparks.draw(this.fxGlow);
