@@ -281,7 +281,8 @@ export const t = {
     equals: '=',
     mystery: '?',
     /** A formed Elo's page: its element, what it does, its line, and the way back to the grid. */
-    element: (name: string) => `Elemento: ${name}`,
+    /** The page's element and weapon category: "Elemento: Fúria · Mira". */
+    elementAndCategory: (name: string, category: string) => `Elemento: ${name} · ${category}`,
     effect: 'O que faz',
     open: 'Toque num Elo descoberto para ver a página dele.',
     elements: {

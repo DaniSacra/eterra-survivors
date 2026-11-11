@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { weaponUsed } from '../../core/meta';
-import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../../data/evolutions';
+import { EVOLUTIONS, EVOLVED_IDS, weaponCategory, type Evolution } from '../../data/evolutions';
 import type { WeaponId } from '../../data/weapons';
 import { t } from '../../i18n/pt-BR';
 import { ART_SCALE } from '../../render/art/pen';
@@ -119,7 +119,14 @@ function drawPage(a: TabArea, id: WeaponId): TabContent {
   let y = a.y + (short ? 12 : 22);
   label(scene, cx, y, t.weapons[id].name, short ? 22 : 26, { bold: true, color: css(color) });
   y += short ? 22 : 28;
-  label(scene, cx, y, t.elos.element(t.elos.elements[evo.element]), 13, { color: UI.muted });
+  label(
+    scene,
+    cx,
+    y,
+    t.elos.elementAndCategory(t.elos.elements[evo.element], t.levelUp.category[weaponCategory(id)]),
+    13,
+    { color: UI.muted },
+  );
   y += short ? 30 : 46;
 
   // weapon + passive ═══ Elo, the chain braided in the element's colour.
