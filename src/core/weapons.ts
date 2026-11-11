@@ -121,7 +121,7 @@ export function updateWeapons(world: World, dt: number): void {
         shockWave(world, weaponStats(w) as SlamLevel, w, w.afterX, w.afterY, 0, scale);
       }
     }
-    w.timer -= dt;
+    w.timer -= world.haste > 0 ? dt / config.pickups.elixirCooldown : dt;
     if (w.timer > 0) continue;
     const s = weaponStats(w);
     const fire = FIRE[kind] as Fire<WeaponKind>;

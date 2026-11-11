@@ -19,6 +19,8 @@ export const PICKUPS = {
   bomb: { sprite: 'pickup.bomb', weight: 1 },
   /** Sopro de Geada: freezes every enemy for a while. */
   freeze: { sprite: 'pickup.freeze', weight: 1 },
+  /** Elixir: the witch's last potion. Heals half the max HP and speeds the weapons up for a while (provisional name). */
+  elixir: { sprite: 'pickup.elixir', weight: 0 },
 } satisfies Record<string, PickupDef>;
 
 /** What an elite's chest gives, all at once. */

@@ -82,6 +82,11 @@ const COLLECT: Record<PickupId, (world: World) => void> = {
         damageEnemy(world, e, config.pickups.bombDamage);
     }
   },
+  elixir(world) {
+    const p = world.player;
+    heal(p, p.stats.maxHp * config.pickups.elixirHeal);
+    world.haste = config.pickups.elixirTime;
+  },
   freeze(world) {
     world.freeze = config.pickups.freezeTime;
     // Frozen ghosts can't phase back in by themselves (behaviours don't run), so they turn solid now.

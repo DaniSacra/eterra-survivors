@@ -41,8 +41,11 @@ export interface Enemy extends Poolable {
   orbitReady: number[];
   /** Seconds left rallied by a banner (FT-06): faster and harder-hitting (config.rally). */
   rally: number;
-  /** Nests: how many it has raised so far. */
+  /** Nests: how many it has raised so far; a witch: potions thrown. */
   spawned: number;
+  /** A brewing witch: seconds to the next stir, and seconds of stirring left. */
+  brewT: number;
+  stir: number;
   /** Thieves: XP worth of gems carried (given back, in one gem, when it falls). */
   carry: number;
   /** Bosses: which of `abilities` comes next (round and round). */
@@ -85,6 +88,8 @@ export const createEnemy = (): Enemy => ({
   aimX: 1,
   rally: 0,
   spawned: 0,
+  brewT: 0,
+  stir: 0,
   carry: 0,
   abilityIdx: 0,
   vanished: false,
@@ -151,6 +156,8 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.aimY = 0;
   e.rally = 0;
   e.spawned = 0;
+  e.brewT = def.brew?.every ?? 0;
+  e.stir = 0;
   e.carry = 0;
   e.abilityIdx = 0;
   e.dead = e.vanished = false;

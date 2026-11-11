@@ -217,7 +217,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
-    hurtBy: { contact: 0, shot: 0, leap: 0, boss: 0 },
+    hurtBy: { contact: 0, shot: 0, leap: 0, ground: 0, boss: 0 },
   };
   const side = seed % 2 ? 1 : -1;
   let bossAt = -1;

@@ -84,7 +84,14 @@ export interface EnemyDef {
     radius: number;
     life: number;
     damage?: number;
+    /** Lobbed instead of thrown straight: lands where the hero stood after `flight` s and leaves the next of `pools`. */
+    lob?: { flight: number; pools: GroundPool[] };
   };
+  /**
+   * brew (FT-11): every `every` s it stops `windup` s stirring, then heals the others within `radius` by `heal` of
+   * their max HP and rallies them for `rally` s.
+   */
+  brew?: { every: number; windup: number; radius: number; heal: number; rally: number };
   /** leap: marks the hero's spot, crouches `windup`, flies `air` s (no contact), lands hurting within `radius`. */
   leap?: { trigger: number; windup: number; air: number; radius: number; rest: number };
   /** pack: heads for a point `flank` rad to its side (by uid parity) until within `close` px, then straight in. */
@@ -106,6 +113,15 @@ export interface EnemyDef {
    * one) and a given pickup.
    */
   loot?: { gold?: number; item?: boolean; chest?: boolean; pickup?: PickupId };
+}
+
+/** A patch an enemy leaves on the ground (core/marks.ts). `hit` is contact damage x hit, every tick, inside it. */
+export interface GroundPool {
+  kind: 'poison' | 'tar' | 'web';
+  radius: number;
+  ttl: number;
+  slow?: number;
+  hit?: number;
 }
 
 /** A charge's numbers: within `trigger` px it crouches `windup` s, dashes `dash` s at x`speedMult`, rests `rest` s. */
@@ -280,6 +296,39 @@ export const ENEMIES = {
     elite: true,
     move: 'leap',
     leap: { trigger: 300, windup: 0.8, air: 0.9, radius: 64, rest: 4 },
+  },
+  /**
+   * Bruxa do Caldeirão (provisional name): keeps away and lobs potions where the hero stands (poison, then tar); now
+   * and then stirs the cauldron, healing and rallying the crowd around it. Falls with a chest and an Elixir (FT-11).
+   */
+  witch: {
+    sprite: 'enemy.witch',
+    radius: 20,
+    hp: 450,
+    speed: 55,
+    damage: 10,
+    xp: 20,
+    knockbackResist: 0.85,
+    elite: true,
+    move: 'shoot',
+    shoot: {
+      range: 280,
+      keep: 200,
+      every: 3,
+      windup: 0.7,
+      speed: 0,
+      radius: 8,
+      life: 0,
+      lob: {
+        flight: 0.9,
+        pools: [
+          { kind: 'poison', radius: 52, ttl: 4, hit: 0.5 },
+          { kind: 'tar', radius: 60, ttl: 4, slow: 0.6 },
+        ],
+      },
+    },
+    brew: { every: 8, windup: 1, radius: 170, heal: 0.3, rally: 4 },
+    loot: { pickup: 'elixir' },
   },
   // Bosses (stage `boss`): killing one wins the stage.
   bellRinger: {

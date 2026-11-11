@@ -215,6 +215,7 @@ export function drawFx(
   const p = world.player;
   const hero = HERO_COLOR[world.character];
   drawIce(g, world);
+  drawPatches(g, world);
   // The hero's light: a solid ring with a slow pulse around it, so the eye finds them in any crowd.
   const pulse = 1 + 0.12 * Math.sin(world.time * 4);
   g.fillStyle(hero, 0.35);
@@ -1150,6 +1151,14 @@ function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Grap
       under.lineStyle(1.5, 0xc0402a, 0.3);
       ring(under, e.x, e.y, e.def.banner.radius);
     }
+    // The witch stirring: the reach of the brew lights up on the ground, filling until it goes off (FT-11).
+    if (e.def.brew && e.stir > 0) {
+      const k = 1 - e.stir / e.def.brew.windup;
+      under.fillStyle(0xa8c030, 0.08 + 0.12 * k);
+      disc(under, e.x, e.y, e.def.brew.radius * (0.4 + 0.6 * k));
+      under.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
+      dashedArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
+    }
     if (e.def.move === 'shoot' && e.act === BossAct.Windup) {
       const tipX = e.x + (world.player.x < e.x ? -6 : 6);
       const tipY = e.y - e.def.radius - 6;
@@ -1462,6 +1471,57 @@ function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
     const glow = 0.45 + 0.15 * Math.sin(world.time * 2 + m.x);
     g.lineStyle(2, ICE, glow);
     ring(g, m.x, m.y, r);
+  }
+}
+
+/** Patch colours (FT-11): poison is a sick acid green-yellow, tar is dark amber; neither is Teo's green nor a gem's cyan. */
+const POISON = 0xa8c030;
+const TAR = 0x6a4a1a;
+
+/**
+ * Patches an enemy leaves on the ground (poison, tar). In flight a potion arcs from the thrower to the marked spot
+ * (the danger colour filling, the edge marching); landed, poison bubbles and tar shines, the exact size of the effect.
+ */
+function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.marks.active;
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i] as (typeof list)[number];
+    if (m.kind !== 'poison' && m.kind !== 'tar') continue;
+    const r = m.radius;
+    const color = m.kind === 'poison' ? POISON : TAR;
+    if (m.ttl > 0) {
+      const k = 1 - m.ttl / m.total; // 0 -> 1
+      g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
+      disc(g, m.x, m.y, r);
+      g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
+      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (world.time * (30 + 50 * k)) % (DASH * 2));
+      // The flask in its arc.
+      const fx = m.fromX + (m.x - m.fromX) * k;
+      const fy = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
+      g.fillStyle(INK, 1);
+      disc(g, fx, fy, 6.5);
+      g.fillStyle(color === TAR ? 0xb07020 : POISON, 1);
+      disc(g, fx, fy, 4.5);
+      continue;
+    }
+    const fade = Math.min(1, m.life / 0.6);
+    g.fillStyle(color, (m.kind === 'tar' ? 0.7 : 0.5) * fade);
+    disc(g, m.x, m.y, r);
+    g.lineStyle(2, INK, 0.6 * fade);
+    ring(g, m.x, m.y, r);
+    if (m.kind === 'tar') {
+      g.fillStyle(0xb07020, 0.3 * fade);
+      disc(g, m.x - r * 0.3, m.y - r * 0.3, r * 0.35);
+    } else {
+      // Bubbles that rise and burst, fixed to the patch.
+      for (let b = 0; b < 4; b++) {
+        const ph = (world.time * 0.9 + b * 0.27 + m.x * 0.01) % 1;
+        const bx = m.x + Math.cos(b * 2.3 + m.y) * r * 0.55;
+        const by = m.y + Math.sin(b * 1.7 + m.x) * r * 0.4 - ph * 8;
+        g.fillStyle(0xe8f0a0, (1 - ph) * 0.8 * fade);
+        disc(g, bx, by, 2 + ph * 2);
+      }
+    }
   }
 }
 

@@ -276,6 +276,32 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
+  /**
+   * Bruxa do Caldeirão (provisional): a stout hunched old woman in a dark shawl, long nose and hands lit from below
+   * by the iron cauldron's sick acid glow (FT-11).
+   */
+  'enemy.witch': {
+    w: 46,
+    h: 46,
+    draw(p) {
+      p.shadow(23, 42, 38, 7);
+      p.ellipse(14, 31, 16, 14, 0x2a2a30); // cauldron
+      p.rrect(7, 22, 14, 4, 2, 0x44444c); // rim
+      p.ellipse(14, 24, 11, 4, 0xa8d030); // brew
+      p.poly([20, 40, 18, 22, 28, 12, 40, 24, 42, 40], 0x3a2a4a); // shawl
+      p.circle(32, 14, 8, 0xc8b898); // head
+      p.poly([36, 14, 45, 17, 37, 19], 0xc8b898); // long nose
+      p.poly([24, 9, 30, 1, 38, 6, 40, 10, 28, 12], 0x2a1e38); // hood
+      p.rrect(22, 24, 8, 5, 2.5, 0xc8b898); // hand stirring
+      p.ink();
+      p.glow(34, 12.5, 1.1, 0xc8e040);
+      p.fill(0x1e1424).fillRect(33, 17.5, 5, 1.2);
+      p.line(14, 24, 24, 26, 2, 0x6a4a2a); // spoon
+      p.glow(14, 24, 2.6, 0xc8e040);
+      p.shine(30, 10, 5, 3, 0.25);
+    },
+  },
+
   // ---- Elites ----
   /** Goblin Lanceiro: since FT-03 a common thrower (no elite ring); the long spear says it throws. */
   'enemy.goblin': {

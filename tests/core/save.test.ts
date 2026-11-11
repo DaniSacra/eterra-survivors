@@ -32,9 +32,10 @@ describe('save v2 migration', () => {
       lastStage: 'crypt',
       records: {},
     });
-    // Valmor's cast first seen in Valmor; the Crypt's own cast in the Crypt; elites (in both) stay in Valmor.
+    // Valmor's cast first seen in Valmor; the Crypt's own cast in the Crypt; Valmor's own elite is the witch since FT-11, so the golem is first met in the Crypt.
     expect(s.bestiary.bones).toEqual({ kills: 0, stage: 'valmor' });
-    expect(s.bestiary.golem).toEqual({ kills: 0, stage: 'valmor' });
+    expect(s.bestiary.witch).toEqual({ kills: 0, stage: 'valmor' });
+    expect(s.bestiary.golem).toEqual({ kills: 0, stage: 'crypt' });
     expect(s.bestiary.rat).toEqual({ kills: 0, stage: 'crypt' });
     expect(s.bestiary.blackKnight).toEqual({ kills: 1, stage: 'valmor' });
     expect(s.bestiary.bellRinger).toEqual({ kills: 1, stage: 'crypt' });

@@ -52,7 +52,7 @@ export const STAGES = {
     layout: { kind: 'open' },
     mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
-    elites: elites('golem'),
+    elites: elites('witch'),
     specials: [
       { id: 'spiderNest', from: 45, every: 30 },
       { id: 'thiefRat', from: 150, every: 120 },

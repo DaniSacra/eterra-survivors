@@ -64,7 +64,7 @@ export const config = {
    * Ground marks (their own pool): an enemy about to rise inside the view shows `spawnTime` s first, never closer
    * than `spawnMinDist` px to the hero.
    */
-  marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80 },
+  marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80, poolTick: 0.5 },
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */
     base: 5,
@@ -98,6 +98,10 @@ export const config = {
     foodHeal: 30,
     bombDamage: 600,
     freezeTime: 6,
+    /** Elixir (the witch's last potion): heals this share of max HP, and the weapons cool down faster for a while. */
+    elixirHeal: 0.5,
+    elixirTime: 10,
+    elixirCooldown: 0.7,
   },
   gold: {
     /** Chance that a normal enemy drops a coin, and what it is worth (times greed). */

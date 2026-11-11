@@ -4,8 +4,8 @@ import type { Poolable } from './pool';
 import type { World } from './world';
 
 /** Where the hero's damage came from (the sim's "DANO POR FONTE"). */
-export type HurtSource = 'contact' | 'shot' | 'leap' | 'boss';
-export const HURT_SOURCES: readonly HurtSource[] = ['contact', 'shot', 'leap', 'boss'];
+export type HurtSource = 'contact' | 'shot' | 'leap' | 'ground' | 'boss';
+export const HURT_SOURCES: readonly HurtSource[] = ['contact', 'shot', 'leap', 'ground', 'boss'];
 
 /** A slow shot thrown by an enemy (FT-03): it flies straight and hurts only the hero. */
 export interface EnemyShot extends Poolable {

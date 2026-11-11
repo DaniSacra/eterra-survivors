@@ -2436,7 +2436,7 @@ Valmor" (provisórios).
 - Aceite: teste: rouba gema, foge, some depois de `life` s sem drop, morto devolve tudo numa gema e deixa o baú; no sim,
   1º Elo ainda entre 5 e 7 min e a Loja inteira em 40 a 60 corridas.
 
-**FT-11 · Bruxa do Caldeirão, a elite da fase 1** · impl + vfx + bal · M · proposto
+**FT-11 · Bruxa do Caldeirão, a elite da fase 1** · impl + vfx + bal · M · ✅ feito (2026-11-11)
 
 - Por quê: elite que não persegue: obriga a ir até ela entre poças, e paga com a melhor recompensa da fase.
 - O quê:

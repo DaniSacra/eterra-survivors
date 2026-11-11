@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { closeArena, iceSlow, markIce } from '../../src/core/arena';
+import { closeArena, groundSlow, markIce } from '../../src/core/arena';
 import { BossAct, bossAbility } from '../../src/core/bosses';
 import { spawnEnemy } from '../../src/core/enemies';
 import type { Mark } from '../../src/core/marks';
@@ -66,11 +66,11 @@ describe('the Lobo Velho arena (FT-08)', () => {
     const m = ice(w)[0] as Mark;
     w.player.x = m.x;
     w.player.y = m.y;
-    expect(iceSlow(w)).toBe(1); // still forming
+    expect(groundSlow(w)).toBe(1); // still forming
     m.ttl = 0;
-    expect(iceSlow(w)).toBe(FROST.slow);
+    expect(groundSlow(w)).toBe(FROST.slow);
     w.player.x = m.x + m.radius + 5;
-    expect(iceSlow(w)).toBe(1);
+    expect(groundSlow(w)).toBe(1);
   });
 
   it('a howl in the fight: the patches form at the end of the windup', () => {

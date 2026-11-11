@@ -231,6 +231,21 @@ export const ITEM_ART: Record<string, ArtDef> = {
       p.fill(0xfff6c0).fillRect(10.8, 1.5, 2.4, 3);
     },
   },
+  /** Elixir (provisional name): an amber flask with a golden glow, a reward and not a danger (FT-11). */
+  'pickup.elixir': {
+    w: 24,
+    h: 26,
+    draw(p) {
+      p.fill(0xffd070, 0.3).fillCircle(12, 15, 11);
+      p.rrect(9.5, 2, 5, 6, 1.5, 0xb09070); // neck
+      p.rrect(8.5, 1, 7, 3, 1.5, 0x7a5a3a); // cork
+      p.ellipse(12, 16, 17, 15, 0xe8a030); // flask
+      p.ink();
+      p.fill(0xffe090).fillEllipse(12, 18, 12, 7);
+      p.shine(8, 12, 6, 3, 0.7);
+      p.glow(14, 15, 1.2, 0xfff4c0);
+    },
+  },
   'pickup.freeze': {
     w: 24,
     h: 24,

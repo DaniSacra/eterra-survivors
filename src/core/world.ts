@@ -39,7 +39,7 @@ import {
   type UpgradeOption,
 } from './upgrades';
 import { blockCircle } from './terrain';
-import { holdInArena, iceSlow, openArena } from './arena';
+import { holdInArena, groundSlow, openArena } from './arena';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
 import { createZone, updateZones, type Zone } from './zones';
@@ -123,9 +123,11 @@ export class World {
   /** How many of each enemy type are alive (the spawner keeps each under its def's `max`). */
   readonly alive: Partial<Record<EnemyId, number>> = {};
   /** Damage the hero took this run, by where it came from (the sim's "DANO POR FONTE"). */
-  readonly hurtBy: Record<HurtSource, number> = { contact: 0, shot: 0, leap: 0, boss: 0 };
+  readonly hurtBy: Record<HurtSource, number> = { contact: 0, shot: 0, leap: 0, ground: 0, boss: 0 };
   /** Seconds left of Sopro de Geada (enemies frozen). */
   freeze = 0;
+  /** Seconds left of the Elixir (weapons cool down faster, config.pickups.elixirCooldown). */
+  haste = 0;
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
   readonly weapons: OwnedWeapon[] = [];
   readonly spawner = new Spawner();
@@ -206,7 +208,7 @@ export class World {
     dt = Math.min(dt, config.maxDt);
     this.time += dt;
     // On the Lobo Velho's ice the hero is slower (FT-08).
-    const ice = this.marks.size > 0 ? iceSlow(this) : 1;
+    const ice = this.marks.size > 0 ? groundSlow(this) : 1;
     if (ice < 1) {
       ICE_INPUT.x = input.x * ice;
       ICE_INPUT.y = input.y * ice;
@@ -216,6 +218,7 @@ export class World {
     blockCircle(this, this.player, config.player.radius);
     holdInArena(this, config.player.radius);
     if (this.freeze > 0) this.freeze = Math.max(0, this.freeze - dt);
+    if (this.haste > 0) this.haste = Math.max(0, this.haste - dt);
     this.spawner.update(this, dt);
     updateMarks(this, dt);
     updateEnemies(this, dt);

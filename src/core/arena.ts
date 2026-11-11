@@ -32,14 +32,14 @@ export function holdInArena(world: World, r: number): void {
   else if (p.y > a.y1 - r) p.y = a.y1 - r;
 }
 
-/** The hero's speed factor on the ground they stand on: the slowest formed ice under them, or 1. */
-export function iceSlow(world: World): number {
+/** The hero's speed factor on the ground they stand on: the slowest formed patch (ice, tar, web) under them, or 1. */
+export function groundSlow(world: World): number {
   const p = world.player;
   const list = world.marks.active;
   let k = 1;
   for (let i = 0; i < list.length; i++) {
     const m = list[i] as Mark;
-    if (m.kind !== 'ice' || m.ttl > 0) continue;
+    if (m.kind === 'spawn' || m.ttl > 0) continue;
     if ((p.x - m.x) ** 2 + (p.y - m.y) ** 2 < m.radius * m.radius && m.slow < k) k = m.slow;
   }
   return k;

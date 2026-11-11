@@ -2,11 +2,12 @@ import { config } from '../data/config';
 import { MAX_ENEMY_RADIUS, type EnemyId } from '../data/enemies';
 import type { Enemy } from './enemies';
 import { addPuff } from './effects';
+import type { EnemyDef } from '../data/enemies';
 import { fireEnemyShot } from './enemyShots';
 import { hurtHero } from './elos';
 import type { World } from './world';
 import { BossAct as Act } from './bosses';
-import { inView, riseAt } from './marks';
+import { addPatch, inView, riseAt } from './marks';
 import { TAU } from './math';
 import { segmentAt } from './waves';
 
@@ -91,6 +92,7 @@ export function behaviourStep(
       return;
     }
     case 'shoot':
+      if (e.def.brew && brew(world, e, dt, out)) return;
       return shoot(world, e, dt, ux, uy, dist, step, out);
     case 'leap':
       return leap(world, e, dt, dist, out);
@@ -143,7 +145,8 @@ function shoot(
     const p = world.player;
     const damage =
       e.def.damage * (sh.damage ?? 1) * world.enemyDamage * world.stage.mult.damage * rallyDamage(e);
-    fireEnemyShot(world, e.x, e.y, p.x, p.y, sh.speed, sh.radius, sh.life, damage);
+    if (sh.lob) lobPotion(world, e, sh.lob);
+    else fireEnemyShot(world, e.x, e.y, p.x, p.y, sh.speed, sh.radius, sh.life, damage);
     e.act = Act.Idle;
     e.actT = sh.every * (0.85 + 0.3 * world.rng.next());
     return;
@@ -310,4 +313,57 @@ function flee(
   const len = Math.hypot(dx, dy) || 1;
   out.x = (dx / len) * step;
   out.y = (dy / len) * step;
+}
+
+/**
+ * A potion in the air (FT-11): it lands where the hero stands now, `flight` s later (the spot is marked all the way),
+ * and leaves the next of the thrower's `pools`, round and round. A poison tick takes the thrower's contact damage times the pool's `hit`.
+ */
+function lobPotion(world: World, e: Enemy, lob: NonNullable<NonNullable<EnemyDef['shoot']>['lob']>): void {
+  const pool = lob.pools[e.spawned++ % lob.pools.length];
+  if (!pool) return;
+  const p = world.player;
+  const base = e.def.damage * world.enemyDamage * world.stage.mult.damage * rallyDamage(e);
+  addPatch(
+    world,
+    pool.kind,
+    p.x,
+    p.y,
+    pool.radius,
+    lob.flight,
+    pool.ttl,
+    pool.slow ?? 1,
+    base * (pool.hit ?? 0),
+    e.x,
+    e.y,
+  );
+}
+
+/**
+ * Brew (FT-11): every `every` s the witch stops `windup` s to stir; at the end the others within `radius` heal
+ * `heal` of their max HP and are rallied `rally` s. Returns true while stirring (she stands still).
+ */
+function brew(world: World, e: Enemy, dt: number, out: { x: number; y: number }): boolean {
+  const b = e.def.brew;
+  if (!b) return false;
+  if (e.stir > 0) {
+    e.stir -= dt;
+    out.x = out.y = 0;
+    if (e.stir > 0) return true;
+    e.brewT = b.every;
+    const list = world.enemies.active;
+    const ids = world.enemyHash.query(e.x, e.y, b.radius + MAX_ENEMY_RADIUS, world.scratch);
+    for (let n = 0; n < ids.length; n++) {
+      const o = list[ids[n] as number] as Enemy;
+      if (o === e || o.dead || o.def.boss) continue;
+      if ((o.x - e.x) ** 2 + (o.y - e.y) ** 2 > b.radius * b.radius) continue;
+      o.hp = Math.min(o.maxHp, o.hp + o.maxHp * b.heal);
+      o.rally = Math.max(o.rally, b.rally);
+    }
+    return true;
+  }
+  e.brewT -= dt;
+  if (e.brewT > 0 || e.stun > 0) return false;
+  e.stir = b.windup;
+  return false;
 }

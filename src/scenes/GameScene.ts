@@ -457,6 +457,14 @@ export class GameScene extends Phaser.Scene {
         l.add(e.x, e.y, 90, 0xc8e040, pulse);
       }
     }
+    // The witch's cauldron is a source of sick acid light, and flares while she stirs (FT-11).
+    if (w.alive.witch) {
+      const foes = w.enemies.active;
+      for (let i = 0; i < foes.length; i++) {
+        const e = foes[i] as (typeof foes)[number];
+        if (e.def.brew && !e.dead) l.flame(e.x - 8, e.y, e.stir > 0 ? 220 : 130, 0xc8e040, w.time, this.calm);
+      }
+    }
     // A thief's sack leaks the light of the gems it carries (FT-10).
     if (w.alive.thiefRat) {
       const foes = w.enemies.active;
