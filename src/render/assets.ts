@@ -112,11 +112,6 @@ export function heroFit(key: string): number {
   return walk?.kind === 'sheet' ? MENU_HERO_H / walk.h : 1;
 }
 
-/** `heroFit` for the front-facing pose, which is stored at native size (half of ART_RES). */
-export function frontFit(key: string): number {
-  return heroFit(key) * ART_RES;
-}
-
 /**
  * Extra display scale for pixel sprites drawn at the same pixel density as the heroes but meant to loom (the Sineiro:
  * PixelLab draws every figure about 100 px tall, so a boss gets its size here).

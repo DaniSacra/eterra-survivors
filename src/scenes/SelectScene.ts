@@ -1,4 +1,3 @@
-import { frontFit } from '../render/assets';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { heroUnlocked, lastRun, newHeroRecord, stageUnlocked, unlockHero, type MetaSave } from '../core/meta';
@@ -41,6 +40,9 @@ export function setChoice(registry: Phaser.Data.DataManager, choice: RunChoice):
 /** Pick a hero and a stage. Locked heroes are bought here; locked stages open by winning the previous one. */
 /** After buying a hero, the main button waits this long (ms) before it can start the run (as the Loja's). */
 const BUY_READY_MS = 250;
+
+/** Height of the front-facing hero sprite (art px, shown 1:1). */
+const FRONT_H = 72;
 
 export class SelectScene extends Phaser.Scene {
   /** The locked hero whose price was tapped once: the next tap buys (two steps, as in the Loja). */
@@ -177,12 +179,12 @@ export class SelectScene extends Phaser.Scene {
     const top = y - h / 2;
     // The hero standing in the card's corner, feet on its line, big enough to tell who it is.
     this.add
-      .image(x - w / 2 + 23, top + Math.min(58, h - 2), `${CHARACTERS[id].sprite}.front`)
+      .image(x - w / 2 + 28, top + h - 4, `${CHARACTERS[id].sprite}.front`)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * 1.2 * frontFit(CHARACTERS[id].sprite))
+      .setScale(h >= FRONT_H + 4 ? 1 : 0.5)
       .setAlpha(owned ? 1 : 0.4);
-    label(this, x - w / 2 + 46, top + 9, c.name, 16, { bold: true, align: 'left' });
-    label(this, x - w / 2 + 46, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
+    label(this, x - w / 2 + 58, top + 9, c.name, 16, { bold: true, align: 'left' });
+    label(this, x - w / 2 + 58, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
     // What this hero has already won, one mark per stage in the top-right corner (as on the Heróis tab, NU-10).
     const rec = this.save.records[id] ?? newHeroRecord();
     STAGE_IDS.forEach((stage, k) => {
@@ -194,22 +196,22 @@ export class SelectScene extends Phaser.Scene {
     // Low cards (phone lying down) keep name and role only: the description would spill out.
     if (h < 80) return;
     const desc = owned ? c.desc : t.select.unlock(CHARACTERS[id].cost);
-    const d = label(this, x - w / 2 + 10, top + 58, desc, 12, {
+    const d = label(this, x - w / 2 + 58, top + 48, desc, 12, {
       color: owned ? UI.text : UI.gold,
       align: 'left',
-      wrap: w - 20,
+      wrap: w - 66,
     });
     // The signature weapon, right under the description's real (wrapped) height, if it fits.
     const sig = label(
       this,
-      x - w / 2 + 10,
+      x - w / 2 + 58,
       d.y + d.height + 4,
       t.select.signature(t.weapons[CHARACTERS[id].weapon].name),
       12,
       {
         color: UI.gold,
         align: 'left',
-        wrap: w - 20,
+        wrap: w - 66,
       },
     );
     if (sig.y + sig.height > y + h / 2 - 4) sig.destroy();
@@ -219,14 +221,15 @@ export class SelectScene extends Phaser.Scene {
     const def = CHARACTERS[id];
     const c = t.characters[id];
     this.add.rectangle(cx, top, w, h, UI.panel, 0.85).setOrigin(0.5, 0).setStrokeStyle(2, HERO_COLOR[id]);
-    const big = Math.min(2.6, (h - 34) / 46);
+    // Pixel heroes only ever scale by whole numbers: 2x when the panel is tall enough for it, else 1x.
+    const big = h - 34 >= FRONT_H * 2 ? 2 : 1;
     const left = cx - w / 2;
-    this.add.ellipse(left + 52, top + h - 18, 70, 18, HERO_COLOR[id], 0.3);
+    this.add.ellipse(left + 56, top + h - 18, 40 * big + 10, 18, HERO_COLOR[id], 0.3);
     this.add
-      .image(left + 52, top + h - 16, `${def.sprite}.front`)
+      .image(left + 56, top + h - 16, `${def.sprite}.front`)
       .setOrigin(0.5, 1)
-      .setScale(ART_SCALE * big * frontFit(def.sprite));
-    const x = left + 108;
+      .setScale(big);
+    const x = left + 64 + 28 * big;
     // Short panels (wide screens) drop the role line, which the hero card already shows.
     const compact = h < 120;
     label(this, x, top + (compact ? 8 : 12), c.name, compact ? 19 : 22, { bold: true, align: 'left' });
