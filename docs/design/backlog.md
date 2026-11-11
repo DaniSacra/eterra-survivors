@@ -2493,6 +2493,27 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   FT-04 e FT-08 usam as mesmas formas.
 - Aceite: captura 420x820 de cada aviso; quem está dentro continua legível; nenhum aviso em seta sobra no jogo.
 
+**FT-18 · Fase nova: Pântano das Lamentações Clérigas** · game-director + impl + vfx + bal · G · proposto (ideia
+aprovada pelo Daniel em 2026-11-10; detalhes depois das respostas)
+
+- Por quê: o Daniel adorou a fase de pântano das referências (`docs/design/art-references/swamp-*.png`). O cânone já
+  tem o lugar: "Pântano das lamentações clérigas: tem este nome depois que Asi-hai queimou o monastério com 24
+  clérigos rezando" (`canone.md`, Locações). Atenção: no cânone "Asi-hai" não é o nome do Inimigo (decisão de
+  2026-11-04); o texto do jogador fala "o Inimigo" ou só "o monastério queimado".
+- Tema: água escura, lama, névoa e as ruínas do monastério queimado. Pede do jogador **ler o chão**: poças e limo
+  que deixam lento, água funda que só os inimigos atravessam, ilhas de terra firme.
+- Layout novo (`core/terrain.ts`, `kind: 'swamp'`, puro e por semente como `obstacles`): manchas de água lenta por
+  hash de célula, sempre com caminho de terra firme a partir do início; ruínas do monastério como obstáculos.
+- Elenco (ideias, nomes provisórios): Gosma Verde (sai da Cripta para cá, deixa rastro de limo, FT-16 já tem os
+  dados do `trail`), sanguessuga ou bicho do lodo que salta (FT-04), mosquitos em nuvem (rápidos), algo que emerge da
+  água (marca de surgimento, FT-02), um atirador que cospe lodo (FT-03).
+- Chefe e elite: originais do nosso mundo, **não um sapo gigante copiado da referência**. Usar o que a referência
+  ensina: chefe grande que salta com o círculo de anéis (FT-17), afunda e reaparece. A definir com o Daniel.
+- Ordem: depois da Cripta, ou no lugar dela como 3ª fase (pergunta 12). Clareia a fase anterior e abre a seguinte,
+  como as outras.
+- Aceite: os mesmos das outras fases (metas de sim definidas junto com a ordem, F4 a 60 FPS, capturas 420x820),
+  mais: o caminho de terra firme existe em 100% das sementes testadas.
+
 ### Equilíbrio de cada fase
 
 - Antes de cada fase mudar: `SIM_SEEDS=16 SIM_SHOP=all npm run sim` e `npm run lab` na linha de base; depois, a mesma
@@ -2564,3 +2585,7 @@ e mexe na primeira impressão de todo jogador novo, então merece as respostas a
    que só foge com o baú?
 10. **Gosma Verde**: na Cripta ela vira perigo (deixa limo que deixa lento) e sai por um tempo do jogo entre a fase 1
     nova e a Cripta nova. Pode?
+11. **Pântano (FT-18)**: os clérigos queimados aparecem de algum jeito (espíritos que lamentam, só ambiente) ou ficam
+    fora, já que a fé nunca aparece de forma negativa? E a Gosma Verde passa da Cripta para o Pântano?
+12. **Ordem das fases**: o Pântano entra depois da Cripta (4ª fase, com a Estrada por último) ou em outro lugar? Quem
+    é o chefe e a elite dele (originais, não um sapo gigante)?
