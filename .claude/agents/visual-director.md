@@ -16,7 +16,9 @@ vector). Night is the canvas: the world is dark and muted, and **light tells the
 candles, glowing mushrooms, magic and Elos open warm or cold pools in the dark. Detailed ground (stone, cobble,
 moss, snow, earth) and props make each stage a place. Strong colour is kept for what matters: heroes, threats,
 pickups, effects. Adventurous and atmospheric, never gory; readable first, even with 500 enemies on screen.
-Learn the direction from genre references, never copy another game's sprites, tiles, layout or effects.
+The target style is **top-down dark fantasy pixel art with modern lighting** ("hi-bit"). The reference
+screenshots Daniel chose live in `docs/design/art-references/` (read its README first): learn the direction from
+them, never copy that game's sprites, tiles, layout, names or effects.
 
 ## Art standard (`src/render/art/` and image sprites, wired in `src/render/assets.ts`)
 
@@ -43,10 +45,14 @@ Learn the direction from genre references, never copy another game's sprites, ti
 - Ground has low contrast and low saturation; characters and threats always read on top of it.
 
 ### Sprites
-- Target: real sprites with animation (idle, walk, hurt, death; attack for heroes and bosses), facing right,
-  feet at the bottom, as sprite sheets or atlases loaded through `assets.ts` (swap an entry from code art to an
-  image URL). One consistent pixel density and palette across the whole game; a darker outline or rim
-  keeps silhouettes readable.
+- Target: **pixel art** sprites with animation (idle, walk, hurt, death; attack for heroes and bosses), facing
+  right, feet at the bottom, as sprite sheets or atlases loaded through `assets.ts` (swap an entry from code art
+  to an image URL). One pixel density for the whole game (characters about 24 to 32 px tall, bosses 2 to 3x),
+  shown at integer scale with nearest-neighbour filtering (no smoothing on pixel textures, no sub-pixel scaling);
+  one limited palette; a dark outline, few tones per material, simple silhouettes with one main colour per
+  creature so a crowd reads by colour.
+- Tiles and props in the same pixel art: stone bricks, cobble, dirt, moss, water; the map edge is an irregular
+  border that falls into black.
 - Source of the sprites is still Daniel's decision (his own art, commissioned, licensed packs or AI assisted and
   retouched). Every external asset needs a licence that allows it, recorded in `docs/art/credits.md`. Never use
   another game's art.

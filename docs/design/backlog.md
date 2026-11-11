@@ -2481,6 +2481,18 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   `chama` existem nos dados dele em `src/data.js`), a decidir com o Daniel.
 - Elite: aberta (pergunta 4).
 
+**FT-17 · Avisos de ataque como formas no chão, não setas** · vfx · P · proposto
+
+- Por quê: o Daniel achou as referências em `docs/design/art-references/` (`swamp-lane-telegraphs.png`,
+  `cone-telegraph.png`, `swamp-frog-boss-leap.png`) muito mais claras que as setas de hoje (`Windup` dos inimigos e a
+  Mordida Funda). Uma faixa mostra exatamente onde a investida passa.
+- O quê: investida (charge comum, Encapuzado, Javali, Mordida Funda) = retângulo listrado translúcido, largura do
+  corpo, comprimento da investida, contorno claro grosso, preenchimento que cresce até o impacto; ataque em leque
+  (Corte Brutal) = cone listrado; salto, queda e badalada = círculo com anéis concêntricos e borda tracejada. Cor de
+  perigo atual (`UI.dangerHex`). Desenhado no `ground`, sem alocar; modo calmo sem listras rolando. Os itens FT-03,
+  FT-04 e FT-08 usam as mesmas formas.
+- Aceite: captura 420x820 de cada aviso; quem está dentro continua legível; nenhum aviso em seta sobra no jogo.
+
 ### Equilíbrio de cada fase
 
 - Antes de cada fase mudar: `SIM_SEEDS=16 SIM_SHOP=all npm run sim` e `npm run lab` na linha de base; depois, a mesma

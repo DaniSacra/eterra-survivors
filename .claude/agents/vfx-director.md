@@ -59,6 +59,12 @@ fire: flame tongues on the rim, embers, a hotter core.
   ones briefly light the ground around them through the darkness layer's light list. Sparks and embers as
   accents, gentle squash and stretch. Strong silhouettes that read at phone size. Warm gold for holy/magic, ice blues
   for frost, hero colors for signatures. Prefer colors already in `render/fx.ts`, `render/art` and `render/ui.ts`.
+- **Enemy telegraphs are ground shapes, not arrows** (see `docs/design/art-references/`): a charge or dash is a
+  striped rectangle as wide as the body and as long as the dash; a cone attack a striped translucent cone; a leap
+  or slam a circle with concentric rings and a dashed rim. Translucent red fill, thick light rim, a fill that grows
+  toward the moment of impact. They read from afar and never hide who stands inside.
+- Lightning is a jagged white-blue line with an additive halo that chains enemy to enemy; explosions are a burst of
+  light with rays, sparks and pale smoke.
 - Layering: ground effects (areas, auras, telegraphs) go under the enemies on the `ground` Graphics; projectiles,
   slashes, bolts and hit sparks go on `top`. A short anticipation and a quick fade read better than long effects.
 - **Readable chaos first**: effects never hide enemies, boss telegraphs or pickups. With 500 enemies on screen
