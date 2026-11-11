@@ -134,9 +134,11 @@ export class GameScene extends Phaser.Scene {
   private hud!: HudScene;
   private ground!: Phaser.GameObjects.TileSprite;
   private decals!: Decals;
-  private playerSprite!: Phaser.GameObjects.Image;
+  private playerSprite!: Phaser.GameObjects.Sprite;
+  /** The hero's walk and idle animations when they have pixel-art strips (else null: the code art bounces). */
+  private heroAnims: { walk: string; idle: string } | null = null;
   /** A light silhouette behind the hero: a permanent outline that reads over any crowd. */
-  private playerOutline!: Phaser.GameObjects.Image;
+  private playerOutline!: Phaser.GameObjects.Sprite;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
   private projectileMirror!: Mirror<Projectile, Phaser.GameObjects.Image>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
@@ -261,10 +263,12 @@ export class GameScene extends Phaser.Scene {
     const heroSprite = CHARACTERS[this.world.character].sprite;
     // Above enemies and effects, with a thick outline in the hero's own color.
     this.playerOutline = this.add
-      .image(0, 0, heroSprite)
+      .sprite(0, 0, heroSprite)
       .setDepth(13)
       .setTintFill(HERO_COLOR[this.world.character]);
-    this.playerSprite = this.add.image(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
+    this.playerSprite = this.add.sprite(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
+    const walk = `${heroSprite}.walk`;
+    this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
     this.projectileMirror = new Mirror(
       () => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
@@ -488,8 +492,10 @@ export class GameScene extends Phaser.Scene {
     this.bossMoments();
 
     this.placeView();
-    // The hero bounces while walking and turns to where it goes.
-    const step = w.player.moving ? Math.abs(Math.sin(w.time * 12)) : 0;
+    // The hero walks (pixel-art strips) or bounces (code art) and turns to where it goes.
+    const anims = this.heroAnims;
+    if (anims) this.playerSprite.play(w.player.moving ? anims.walk : anims.idle, true);
+    const step = w.player.moving && !anims ? Math.abs(Math.sin(w.time * 12)) : 0;
     const sx = ART_SCALE * (1 + step * 0.05);
     const sy = ART_SCALE * (1 - step * 0.05);
     this.playerSprite.setPosition(w.player.x, w.player.y - step * 2.5).setScale(sx, sy);
@@ -497,8 +503,10 @@ export class GameScene extends Phaser.Scene {
     const blink = w.player.iframes > 0 && Math.sin(w.time * 40) > 0;
     this.playerOutline
       .setPosition(w.player.x, w.player.y - step * 2.5 + 1)
-      .setScale(sx * 1.22, sy * 1.16)
+      // Pixel art already has its own dark outline: a thin rim in the hero's colour is enough.
+      .setScale(sx * (anims ? 1.07 : 1.22), sy * (anims ? 1.04 : 1.16))
       .setTintFill(blink ? TINT.blink : HERO_COLOR[w.character]);
+    if (anims) this.playerOutline.setTexture(this.playerSprite.texture.key, this.playerSprite.frame.name);
     if (w.player.facing.x !== 0) {
       this.playerSprite.setFlipX(w.player.facing.x < 0);
       this.playerOutline.setFlipX(w.player.facing.x < 0);

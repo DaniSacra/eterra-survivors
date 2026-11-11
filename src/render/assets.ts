@@ -14,13 +14,22 @@ import type { ArtDef } from './art/types';
  */
 export type AssetDef =
   /** `res`: texture pixels per world pixel (sprites ART_RES for sharpness; tiles 1). */
-  { kind: 'art'; art: ArtDef; res: number } | { kind: 'image'; url: string };
+  | { kind: 'art'; art: ArtDef; res: number }
+  | { kind: 'image'; url: string }
+  /** A horizontal strip of animation frames of w x h px (pixel art at ART_RES px per world px). */
+  | { kind: 'sheet'; url: string; w: number; h: number; fps: number };
+
+/** Phaser.Textures.FilterMode.NEAREST (a type-only import keeps this module loadable in Node tests). */
+const NEAREST = 1 as Phaser.Textures.FilterMode;
 
 /** Transparent margin (world px) around every sprite texture. */
 const PAD = 6;
 
 const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef> =>
   Object.fromEntries(Object.entries(defs).map(([k, d]) => [k, { kind: 'art', art: d, res }]));
+
+/** A hero frame in the strips: PixelLab's 48 x 64 canvas at ART_RES. */
+const HERO_FRAME = { w: 96, h: 128 };
 
 export const ASSETS: Record<string, AssetDef> = {
   ...art(TILE_ART, 1),
@@ -30,11 +39,27 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(DECAL_ART, ART_RES),
   ...art(OBSTACLE_ART, ART_RES),
   ...art(ICON_ART, ART_RES),
+  ...pixelHero('aldo', 8, 4),
 };
+
+/**
+ * A pixel-art hero (PixelLab, AR-05): a still frame facing right that replaces the code-drawn one everywhere, and
+ * walk and idle strips for the run (`<key>.walk`, `<key>.idle`). Files in public/sprites/, upscaled to ART_RES.
+ */
+function pixelHero(id: string, walk: number, idle: number): Record<string, AssetDef> {
+  const frame = { w: HERO_FRAME.w, h: HERO_FRAME.h };
+  return {
+    [`player.${id}`]: { kind: 'image', url: `sprites/${id}.png` },
+    [`player.${id}.walk`]: { kind: 'sheet', url: `sprites/${id}-walk.png`, ...frame, fps: walk },
+    [`player.${id}.idle`]: { kind: 'sheet', url: `sprites/${id}-idle.png`, ...frame, fps: idle },
+  };
+}
 
 export function preloadAssets(scene: Phaser.Scene): void {
   for (const [key, def] of Object.entries(ASSETS)) {
     if (def.kind === 'image') scene.load.image(key, def.url);
+    else if (def.kind === 'sheet')
+      scene.load.spritesheet(key, def.url, { frameWidth: def.w, frameHeight: def.h });
   }
 }
 
@@ -42,7 +67,20 @@ export function preloadAssets(scene: Phaser.Scene): void {
 export function generateAssets(scene: Phaser.Scene): void {
   const g = scene.make.graphics({}, false);
   for (const [key, def] of Object.entries(ASSETS)) {
-    if (def.kind === 'image' || scene.textures.exists(key)) continue;
+    if (def.kind !== 'art') {
+      // Pixel art stays crisp (no smoothing); strips become looping animations of the same key.
+      if (!scene.textures.exists(key)) continue;
+      scene.textures.get(key).setFilter(NEAREST);
+      if (def.kind === 'sheet' && !scene.anims.exists(key))
+        scene.anims.create({
+          key,
+          frames: scene.anims.generateFrameNumbers(key),
+          frameRate: def.fps,
+          repeat: -1,
+        });
+      continue;
+    }
+    if (scene.textures.exists(key)) continue;
     // Sprites get a margin so outlines, hats and ears never get cut; images stay centred on their box.
     const pad = def.art === TILE_ART[key] ? 0 : PAD;
     g.clear();
