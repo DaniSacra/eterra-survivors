@@ -1638,7 +1638,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - O quê: `config.pickups.bombDamage` 250 → **600**.
 - Aceite: teste/lab: a Badalada mata básico e rápido das três fases até as 10:00; sim sem mudança fora do ruído.
 
-**NE-05 · Luta do chefe de 30 a 45 s** · bal + impl · P · ⏸ precisa do Daniel (medido 2026-11-11)
+**NE-05 · Luta do chefe de 30 a 45 s** · bal + impl · P · ✅ feito (2026-11-11, decisão minha para o Daniel rever: a multidão sai quando o chefe chega, mordida sem rampa, vida x3,5 a x4,5; luta ~29 s; `docs/balance-baseline.md`)
 
 - Por quê: 01-balance: mediana de **13 s** com Loja inteira e 16 s com meia (a meta da R2 era 45 a 90 s; ontem ~28 s);
   o clímax da partida é uma corrida de DPS. Em Valmor com meia Loja, 18 de 49 corridas que chegam ao chefe morrem 4 a

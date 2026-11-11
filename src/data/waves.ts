@@ -39,7 +39,7 @@ const CURVE: [number, number, number, number, number, Partial<Record<Role, numbe
   [480, 0.55, 9, 10, 4.3, { basic: 3, fast: 2, tank: 3, extra: 1 }],
   [540, 0.5, 10, 12, 4.8, { basic: 2, fast: 3, tank: 3, extra: 2 }],
   // The boss fight: a trickle of escorts.
-  [600, 2, 3, 12.5, 4.8, { basic: 1 }],
+  [600, 2, 3, 12.5, 3, { basic: 1 }],
 ];
 
 /** The wave list of a stage: the shared curve with the stage's cast in each role. */

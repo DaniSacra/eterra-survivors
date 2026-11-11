@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { spawnEnemy } from '../../src/core/enemies';
 import { segmentAt } from '../../src/core/waves';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
@@ -65,5 +66,38 @@ describe('waves', () => {
     w.boss!.dead = true;
     w.step(1 / 60, { x: 0, y: 0 });
     expect(w.state).toBe('won');
+  });
+  it('the common crowd leaves when the boss arrives: no kills, no gems; elites stay', () => {
+    const w = new World(1);
+    w.player.stats.maxHp = w.player.hp = 1e9;
+    w.weapons.length = 0;
+    for (let i = 0; i < 20; i++) spawnEnemy(w, 'skeleton', 300 + i * 5, 0);
+    spawnEnemy(w, STAGES.valmor.elites[0]!.id, -300, 0);
+    w.time = STAGES.valmor.boss.at - 1 / 120;
+    const kills = w.kills;
+    w.step(1 / 60, { x: 0, y: 0 });
+    expect(w.boss).not.toBeNull();
+    expect(w.kills).toBe(kills);
+    expect(w.gems.size).toBe(0);
+    const left = w.enemies.active.filter((e) => !e.def.boss);
+    expect(left.length).toBeGreaterThan(0);
+    expect(left.every((e) => e.def.elite)).toBe(true);
+  });
+
+  it('a boss bites as hard late as early: the wave damage ramp skips it', () => {
+    const bite = (enemyDamage: number) => {
+      const w = new World(1);
+      w.spawner.update = () => {};
+      w.weapons.length = 0;
+      w.player.stats.maxHp = w.player.hp = 1e4;
+      w.player.stats.armor = 0;
+      const b = spawnEnemy(w, 'blackKnight', w.player.x + 1, w.player.y);
+      b.actT = 1e9;
+      w.enemyDamage = enemyDamage;
+      w.step(1 / 60, { x: 0, y: 0 });
+      return 1e4 - w.player.hp;
+    };
+    expect(bite(1)).toBeGreaterThan(0);
+    expect(bite(4.8)).toBeCloseTo(bite(1));
   });
 });

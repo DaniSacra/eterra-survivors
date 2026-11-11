@@ -122,7 +122,8 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   URL later); `render/sound.ts` plays them (unlocked on the first gesture, voice cap). Options (mute, damage
   numbers, calm screen) live in `core/settings.ts` (pure) + `render/settings.ts` (localStorage).
 - Bosses: each has one telegraphed ability (`data/enemies.ts` `ability`, logic in `core/bosses.ts`, marker in
-  `render/fx.ts`).
+  `render/fx.ts`). When a boss arrives the common crowd leaves the field (`clearCrowd`, no XP or drops;
+  elites stay), and a boss's bite skips the wave damage ramp, so the fight lasts ~30 s (NE-05).
 
 ## Performance rules (target: 500+ enemies at 60 FPS on phones)
 

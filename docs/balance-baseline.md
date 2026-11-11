@@ -1007,3 +1007,27 @@ Sim só com o Teo (24 sementes, nenhuma / meia / inteira):
 
 Sim completo depois (8 sementes, 288 corridas): Valmor 16% / 50% / 94%, Cripta 0% / 22% / 69%, Estrada 0% / 0% /
 44%; luta do chefe mediana 14 s (NE-05 continua aberto).
+
+## Luta do chefe de ~30 s (NE-05, 2026-11-11)
+
+Só subir a vida não servia: com x2,5 a luta ia a 37 s, mas as vitórias com Loja inteira caíam (Valmor 94% → 53%,
+Cripta 69% → 31%, Estrada 44% → 3%). Sondando o dano recebido na luta, quem mata é o próprio chefe: a mordida pegava a
+rampa de dano da onda (4,8x às 9:00, ~96 por toque). Decisão tomada sem o Daniel (ele revê):
+
+- Quando o chefe chega, a multidão comum sai do campo (`clearCrowd` em `core/waves.ts`): sem XP, sem drop, sem
+  contar abate; elites ficam. A escolta do chefe continua (segmento das 10:00, dano 4,8 → 3).
+- O chefe morde sempre com o mesmo dano (`def.damage` x `mult.damage`, sem a rampa): Sineiro e Lobo Velho 18 → 12,
+  Cavaleiro Negro 20 → 13; o perigo do chefe é a habilidade com aviso.
+- Vida: Cavaleiro Negro 20000 → 81000, Lobo Velho 18000 → 63000, Sineiro 14000 → 49000 (x3,5; ele invoca ossadas a
+  cada 8 s e uma luta longa pesa mais nele).
+- Conquistas: `bossFast` 15 → 30 s (54% das vitórias com Loja inteira); `damageRun` 750 mil → 1 milhão (48%).
+
+Sim completo (8 sementes, 288 corridas), nenhuma / meia / inteira:
+
+| Fase    | Depois           | Meta               |
+| ------- | ---------------- | ------------------ |
+| Valmor  | 13% / 47% / 97%  | 0–15 / 40–60 / 85+ |
+| Cripta  | 0% / 22% / 75%   | 0 / 15–35 / 70–85  |
+| Estrada | 0% / 0% / 47%    | 0 / 0–10 / 35–55   |
+
+Luta do chefe (Loja inteira, 12 sementes): mediana 29 s em cada fase (meia Loja 64 s).

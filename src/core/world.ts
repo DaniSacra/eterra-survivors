@@ -271,6 +271,10 @@ export class World {
   }
 
   onEnemyKilled(e: Enemy): void {
+    if (e.vanished) {
+      addPuff(this, e.x, e.y, e.def.radius, 'death');
+      return;
+    }
     this.kills++;
     this.killsBy[e.type] = (this.killsBy[e.type] ?? 0) + 1;
     this.tally.kills++;

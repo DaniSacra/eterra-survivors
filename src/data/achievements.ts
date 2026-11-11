@@ -79,7 +79,7 @@ const DEFS = {
   hit80: { group: 'damage', metric: 'bestHit', goal: 80, gold: 50 },
   // Calibrated with the sim (docs/balance-baseline.md, CC-04): about half of the veteran bot's victories.
   hit120: { group: 'damage', metric: 'bestHit', goal: 250, gold: 100 },
-  damageRun: { group: 'damage', metric: 'runDamage', goal: 750_000, gold: 100 },
+  damageRun: { group: 'damage', metric: 'runDamage', goal: 1_000_000, gold: 100 },
   damageTotal: { group: 'damage', metric: 'totalDamage', goal: 5_000_000, gold: 150 },
   // Sobrevivência
   survive5: { group: 'survival', metric: 'bestTime', goal: 300, gold: 25 },
@@ -107,7 +107,7 @@ const DEFS = {
   bossRinger: { group: 'stages', metric: 'enemyKills', enemies: ['bellRinger'], goal: 1, gold: 75 },
   bossWolf: { group: 'stages', metric: 'enemyKills', enemies: ['oldWolf'], goal: 1, gold: 75 },
   // Calibrated like hit120: the veteran bot's median boss fight is 16 s after the Etapa 6 curve (was 34 s).
-  bossFast: { group: 'stages', metric: 'bossFast', at: 15, goal: 1, gold: 100 },
+  bossFast: { group: 'stages', metric: 'bossFast', at: 30, goal: 1, gold: 100 },
   allStages: { group: 'stages', metric: 'stagesCleared', goal: STAGE_IDS.length, gold: 150 },
   // Coleção
   seen8: { group: 'collection', metric: 'seen', goal: 8, gold: 25 },

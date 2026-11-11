@@ -42,6 +42,8 @@ export interface Enemy extends Poolable {
   aimX: number;
   aimY: number;
   dead: boolean;
+  /** Swept without a kill: no XP, no drop, not counted (the crowd leaving when the boss arrives). */
+  vanished: boolean;
 }
 
 export const createEnemy = (): Enemy => ({
@@ -68,6 +70,7 @@ export const createEnemy = (): Enemy => ({
   act: 0,
   actT: 0,
   aimX: 1,
+  vanished: false,
   aimY: 0,
   dead: false,
 });
@@ -126,7 +129,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.actT = def.ability ? def.ability.every / 2 : def.move ? 2 : 0;
   e.aimX = 1;
   e.aimY = 0;
-  e.dead = false;
+  e.dead = e.vanished = false;
   world.seen[type] = true;
   return e;
 }
@@ -298,7 +301,8 @@ export function updateEnemies(world: World, dt: number): void {
       cx * cx + cy * cy < minD * minD &&
       !isFaded(e) &&
       e.stun <= 0 &&
-      hurtHero(world, e, e.def.damage * damageMult)
+      // A boss bites as hard all fight long: the wave curve's damage ramp is for the crowd (NE-05).
+      hurtHero(world, e, e.def.damage * (e.def.boss ? world.stage.mult.damage : damageMult))
     ) {
       world.events.push({ type: 'playerHit' });
       break;

@@ -1,6 +1,6 @@
 import { config } from '../data/config';
 import type { WaveSegment } from '../data/waves';
-import { spawnOnRing } from './enemies';
+import { spawnOnRing, type Enemy } from './enemies';
 import type { World } from './world';
 
 /** The segment active at time `t` (the last one that has started). */
@@ -8,6 +8,20 @@ export function segmentAt(t: number, waves: readonly WaveSegment[]): WaveSegment
   let seg = waves[0] as WaveSegment;
   for (const w of waves) if (w.from <= t) seg = w;
   return seg;
+}
+
+/**
+ * When the boss arrives the common crowd leaves the field (NE-05): elites stay, nothing drops, and the fight is the
+ * hero against the boss and its trickle of escorts, so it can last 30 to 45 s instead of a race against the 9:00
+ * wave.
+ */
+export function clearCrowd(world: World): void {
+  const list = world.enemies.active;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i] as Enemy;
+    if (e.dead || e.def.elite || e.def.boss) continue;
+    e.dead = e.vanished = true;
+  }
 }
 
 /** Time-driven spawner for the world's stage: batches on an interval, elites on schedule, boss at the end. */
@@ -37,6 +51,7 @@ export class Spawner {
     }
     if (!this.bossSpawned && world.time >= stage.boss.at) {
       this.bossSpawned = true;
+      clearCrowd(world);
       world.boss = spawnOnRing(world, stage.boss.id);
       world.events.push({ type: 'bossSpawned' });
     }
