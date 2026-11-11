@@ -224,6 +224,7 @@ export function drawFx(
   ovalRing(g, p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
+  drawLeaps(g, world);
   drawPushes(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
   // Many patches stacked (Espada de Fogo, Nevasca) must not wash the screen: the fills share a budget (NF-02).
@@ -335,6 +336,7 @@ export function drawFx(
   drawStuns(top, world);
   drawMarks(top, world);
   drawEnemyShots(top, world);
+  drawFoes(g, top, world);
   g = top;
   // Life under the hero's feet, so it can be read without looking at the corner.
   const hpK = Math.max(0, p.hp / p.stats.maxHp);
@@ -1124,6 +1126,46 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
   }
 }
 
+/** Rallied enemies shown with their ember, per frame. */
+const RALLY_SHOWN = 40;
+const RALLY_EMBER = 0xff8a3a;
+
+/**
+ * The new enemies' tells: a thrower winding up lights its spear tip coral (FT-03); a banner's reach is a faint red
+ * glow on the ground (FT-06); a rallied enemy carries a small ember over its head.
+ */
+function drawFoes(under: Phaser.GameObjects.Graphics, g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemies.active;
+  const t = world.time;
+  let rallied = 0;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i] as Enemy;
+    if (e.dead) continue;
+    if (e.def.banner) {
+      under.fillStyle(0xa02a1a, 0.08 + 0.03 * Math.sin(t * 3 + e.uid));
+      disc(under, e.x, e.y, e.def.banner.radius);
+      under.lineStyle(1.5, 0xc0402a, 0.3);
+      ring(under, e.x, e.y, e.def.banner.radius);
+    }
+    if (e.def.move === 'shoot' && e.act === BossAct.Windup) {
+      const tipX = e.x + (world.player.x < e.x ? -6 : 6);
+      const tipY = e.y - e.def.radius - 6;
+      g.fillStyle(INK, 1);
+      disc(g, tipX, tipY, 5);
+      g.fillStyle(WARN_COLOR, 1);
+      disc(g, tipX, tipY, 3.5 + Math.sin(t * 30) * 0.8);
+    }
+    if (e.rally > 0 && rallied < RALLY_SHOWN) {
+      rallied++;
+      const y = e.y - e.def.radius - 8 + Math.sin(t * 6 + e.uid) * 1.5;
+      g.fillStyle(INK, 0.9);
+      disc(g, e.x, y, 3.5);
+      g.fillStyle(RALLY_EMBER, 1);
+      disc(g, e.x, y, 2.4);
+    }
+  }
+}
+
 /** Enemy shots (FT-03): a pale core with a dark outline and a short trail behind, never a light. */
 function drawEnemyShots(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemyShots.active;
@@ -1178,13 +1220,19 @@ function drawPushes(g: Phaser.GameObjects.Graphics, world: World): void {
 /** Common chargers (Encapuzado, Rato, Goblin) winding up: a coral arrow on the ground shows where they will run. */
 function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemies.active;
-  // How far a dash runs (world px per second of base speed): the lane on the ground is exactly where it passes.
-  const reach = CHARGE.speedMult * CHARGE.dash * world.stage.mult.speed;
   const time = world.time;
   for (let i = 0; i < list.length; i++) {
     const e = list[i] as Enemy;
-    if (e.act !== BossAct.Windup || e.def.move !== 'charge') continue;
-    const k = 1 - Math.max(0, e.actT) / CHARGE.windup; // 0 -> 1 as the dash comes
+    if (e.act !== BossAct.Windup) continue;
+    if (e.def.move === 'leap') {
+      drawLeapMark(g, e, time);
+      continue;
+    }
+    if (e.def.move !== 'charge') continue;
+    const c = e.def.charge ?? CHARGE;
+    // How far a dash runs (world px per second of base speed): the lane on the ground is exactly where it passes.
+    const reach = c.speedMult * c.dash * world.stage.mult.speed;
+    const k = 1 - Math.max(0, e.actT) / c.windup; // 0 -> 1 as the dash comes
     const ux = e.aimX;
     const uy = e.aimY;
     const w = e.def.radius * 2;
@@ -1208,6 +1256,42 @@ function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void {
     dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
   }
 }
+
+/**
+ * A leap's landing (FT-04), from the crouch until it lands: a coral circle on the marked spot filling from the
+ * middle out, with the dashed edge and the leaper's shadow growing in it. (Drawn for the crouch here and for the
+ * flight by `drawLeaps`.)
+ */
+function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy, time: number): void {
+  const lp = e.def.leap;
+  if (!lp) return;
+  const total = lp.windup + lp.air;
+  const left = e.act === BossAct.Windup ? e.actT + lp.air : e.actT;
+  const k = Math.min(1, Math.max(0, 1 - left / total));
+  const r = lp.radius;
+  g.fillStyle(WARN_COLOR, 0.12);
+  disc(g, e.aimX, e.aimY, r);
+  g.fillStyle(WARN_COLOR, 0.3);
+  disc(g, e.aimX, e.aimY, r * k);
+  g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
+  const n = 12;
+  const spin = time * 1.5;
+  for (let i = 0; i < n; i += 2)
+    arcLine(g, e.aimX, e.aimY, r, spin + (i / n) * TAU_FX, spin + ((i + 1) / n) * TAU_FX);
+  g.fillStyle(INK, 0.15 + 0.3 * k);
+  oval(g, e.aimX, e.aimY + 2, e.def.radius * 2 * (0.4 + 0.6 * k), e.def.radius * (0.4 + 0.6 * k));
+}
+
+/** Leapers in the air: their landing mark keeps filling until they land. */
+function drawLeaps(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemies.active;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i] as Enemy;
+    if (e.def.move === 'leap' && e.act === BossAct.Active) drawLeapMark(g, e, world.time);
+  }
+}
+
+const TAU_FX = Math.PI * 2;
 
 /** A filled four-sided shape (no allocation). */
 function quad(

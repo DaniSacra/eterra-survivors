@@ -2224,7 +2224,7 @@ continua os `specials` no mesmo ritmo.
 Habilidade pedida: **esquiva lateral**. Corredor estreito, pressão das duas pontas, investidas e mergulhos que só se
 evitam saindo da linha.
 
-**FT-03 · Atirador: para longe e lança um projétil lento** · impl + vfx · P · proposto
+**FT-03 · Atirador: para longe e lança um projétil lento** · impl + vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: obriga a andar (Brotato: quem atira tira o jogador do círculo). Primeiro usuário: Goblin Lanceiro.
 - O quê: `move: 'shoot'`. Anda até `range`, fica entre `keep` e `range` (recua se o herói chega perto), a cada `every`
@@ -2243,7 +2243,7 @@ evitam saindo da linha.
 - Aceite: teste com o atirador no meio de 200 inimigos: atira no ritmo, para de atirar tonto; teto de 10 e de 60 tiros;
   no sim, `shot` abaixo de 30% do dano recebido na Estrada.
 
-**FT-04 · Salto: marca o chão, sobe e cai com dano em área** · impl + vfx · P · proposto
+**FT-04 · Salto: marca o chão, sobe e cai com dano em área** · impl + vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: ameaça que vem de cima, sem passar pela multidão: o círculo marcado pede um passo de lado.
 - O quê: `move: 'leap'`. Perto (`trigger`), marca o ponto do herói, agacha `windup`, voa `air` s (sem contato, sem
@@ -2258,7 +2258,7 @@ evitam saindo da linha.
   nele; no impacto, anel de neve e penas escuras.
 - Aceite: teste do aviso (1,05 s) e do dano só dentro do raio; no sim, `leap` abaixo de 30% do dano.
 
-**FT-05 · Matilha: cerca pelos lados** · impl · P · proposto
+**FT-05 · Matilha: cerca pelos lados** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: lobos que chegam em pinça mudam a rota de fuga; na estrada estreita, correm rente às árvores e cortam para
   dentro.
@@ -2268,7 +2268,7 @@ evitam saindo da linha.
 - Visual: nenhum aviso novo (é movimento); os olhos do lobo brilham frios, legíveis no escuro.
 - Aceite: teste: dois lobos de `uid` par e ímpar chegam por lados opostos, também dentro de uma multidão.
 
-**FT-06 · Estandarte: fortalece quem está perto até cair** · impl + vfx · P · proposto
+**FT-06 · Estandarte: fortalece quem está perto até cair** · impl + vfx · P · ✅ feito (2026-11-11)
 
 - Por quê: alvo de prioridade com recompensa. Derrubar o estandarte é uma decisão de rota (ir até ele no meio dos
   fortalecidos), e paga.
@@ -2286,7 +2286,7 @@ evitam saindo da linha.
 - Aceite: teste: dentro do raio, mais rápido e mais forte; fora, normal; ao cair, todos voltam ao normal em menos de
   0,5 s; ouro e item no chão.
 
-**FT-07 · Estrada do Sul: corredor estreito, elenco novo e o Golem só aqui** · impl + bal + visual · M · proposto
+**FT-07 · Estrada do Sul: corredor estreito, elenco novo e o Golem só aqui** · impl + bal + visual · M · ✅ feito (2026-11-11)
 
 - Por quê: a fase mais pobre hoje. Estreita, a estrada vira o que o nome promete: pressão das duas pontas e investidas
   que só se evitam de lado. Substitui a restrição do NA-02 ("sem mudar `width`").
@@ -2334,6 +2334,14 @@ evitam saindo da linha.
 - Aceite: sim `SIM_SEEDS=16 SIM_SHOP=all SIM_STAGE=southRoad`: 0% / 0–10% / 35–55%; nenhuma fonte nova acima de 30% do
   dano; capturas em 390x844 e 420x820 com a estrada inteira e a floresta visíveis; teste: herói parado no eixo de uma
   investida a 300 px escapa andando de lado assim que o aviso começa; F4 com 500 inimigos a 60 FPS.
+
+- Feito (FT-03 a FT-07, 2026-11-11), decisões para o Daniel revisar:
+  - O Goblin Lanceiro virou atirador comum (pergunta 8) e o Golem é a única elite das três fases.
+  - Nomes provisórios: "Javali da Geada", "Estandarte da Aliança Negra" e a conquista `elites25` "Pedra Partida"
+    (só o Golem conta).
+  - `mult` da Estrada calibrado para hp 2,1, damage 1,8, spawn 1,0, speed 1,1. Sim com 12 sementes: full 40%, half
+    0%, none 0%. Dano por fonte: contato 74%, tiro 19%, salto 6%. A morte agora vem cedo (mediana de 5,5 min).
+  - Falta o aviso de entrada (`stages.southRoad.intro`), que depende da ui. Capturas em 420x820 e 844x390 a ~55 FPS.
 
 **FT-08 · Lobo Velho: Uivo da Geada e a arena de gelo** · impl + vfx + bal · M · proposto
 

@@ -200,12 +200,49 @@ export const ENEMY_ART: Record<string, ArtDef> = {
   'enemy.crow': winged(0x34343e, 0x26262e, 'crow'),
   'enemy.frostWolf': wolf(0xe8eff8, 0xcbd8ec, 0xffffff, 1),
 
+  /** Javali da Geada (provisional name): low and wide, a frosted mane, pale tusks and small cold eyes (FT-07). */
+  'enemy.frostBoar': {
+    w: 46,
+    h: 34,
+    draw(p) {
+      p.shadow(22, 31, 34, 6);
+      const fur = 0x4e586c;
+      p.rrect(9, 22, 5, 9, 2, fur).rrect(15, 23, 5, 8, 2, fur).rrect(26, 23, 5, 8, 2, fur).rrect(32, 22, 5, 9, 2, fur);
+      p.ellipse(21, 18, 32, 18, fur); // body
+      p.circle(36, 18, 9, fur); // head
+      p.poly([40, 15, 46, 18, 45, 23, 39, 23], 0x5c667a); // snout
+      p.poly([8, 10, 14, 4, 18, 9, 23, 3, 27, 9, 32, 5, 33, 12, 8, 13], 0xdce8f4); // frosted mane
+      p.ink();
+      p.poly([41, 21, 44, 15, 43, 22], 0xf4f0e0).poly([37, 22, 39, 16, 40, 23], 0xf4f0e0); // tusks
+      p.glow(37, 15, 1.3, 0xa8d8ff);
+      p.fill(0xdce8f4, 0.6).fillEllipse(20, 13, 16, 4); // frost on the back
+      p.shine(18, 12, 9, 3, 0.25);
+    },
+  },
+  /** The war banner (provisional): a pole with a torn black cloth and a brazier on top, one of the road's lights. */
+  'enemy.warBanner': {
+    w: 32,
+    h: 66,
+    draw(p) {
+      p.shadow(16, 63, 22, 5);
+      p.rrect(14.5, 8, 3, 56, 1.5, 0x5a3a1e); // pole
+      p.rrect(9, 58, 14, 5, 2, 0x3a3a40); // foot
+      p.poly([17, 14, 31, 16, 29, 24, 31, 31, 26, 34, 28, 42, 17, 40], 0x16161c); // torn cloth
+      p.rrect(9, 4, 14, 6, 2, 0x3a3a40); // brazier
+      p.ink();
+      p.fill(0xff7a2a).fillEllipse(16, 3, 11, 6);
+      p.fill(0xffd060).fillEllipse(16, 3, 6, 3.5);
+      p.line(20, 22, 27, 21, 1.4, 0x7a1a24).line(20, 30, 26, 31, 1.4, 0x7a1a24); // red marks on the cloth
+    },
+  },
+
   // ---- Elites ----
+  /** Goblin Lanceiro: since FT-03 a common thrower (no elite ring); the long spear says it throws. */
   'enemy.goblin': {
     w: 42,
     h: 42,
     draw(p) {
-      p.eliteRing(19, 38.5, 32, 8);
+      p.shadow(19, 38.5, 26, 6);
       p.poly([30, 2, 33, 1, 33, 38, 31, 38], 0x9a6232); // spear shaft
       p.poly([29, 4, 31.5, -1, 34, 4, 31.5, 8], 0xcbd8ec); // spear tip
       p.rrect(11, 28, 6, 10, 3, 0x3a9a6a).rrect(20, 28, 6, 10, 3, 0x3a9a6a);

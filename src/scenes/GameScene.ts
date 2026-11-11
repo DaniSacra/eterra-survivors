@@ -360,8 +360,12 @@ export class GameScene extends Phaser.Scene {
             sy -= 0.08;
           }
         }
+        // A leaper in the air rises in an arc over its landing mark (FT-04).
+        const lp = e.def.leap;
+        const lift =
+          lp && e.act === BossAct.Active ? Math.sin(Math.PI * (1 - e.actT / lp.air)) * (lp.radius + 20) : 0;
         img
-          .setPosition(e.x, e.y)
+          .setPosition(e.x, e.y - lift)
           .setScale(ART_SCALE * sx, ART_SCALE * sy)
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
@@ -432,6 +436,14 @@ export class GameScene extends Phaser.Scene {
     this.obstacles.lights(l, w.time, this.calm);
     // Bosses carry their own light, so they are never a shape in the dark.
     if (w.boss) l.add(w.boss.x, w.boss.y, w.boss.def.radius * 5, BOSS_LIGHT, 0.7);
+    // A war banner's brazier is one of the road's lights: it is seen from afar (FT-06).
+    if (w.alive.warBanner) {
+      const foes = w.enemies.active;
+      for (let i = 0; i < foes.length; i++) {
+        const e = foes[i] as (typeof foes)[number];
+        if (e.def.banner && !e.dead) l.flame(e.x, e.y - 30, 160, 0xff8a3a, w.time, this.calm);
+      }
+    }
     const zones = w.zones.active;
     for (let i = 0; i < zones.length; i++) {
       const z = zones[i] as (typeof zones)[number];

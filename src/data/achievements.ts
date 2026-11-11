@@ -74,7 +74,7 @@ const DEFS = {
   killsTotal10k: { group: 'kills', metric: 'totalKills', goal: 10_000, gold: 100 },
   killsTotal50k: { group: 'kills', metric: 'totalKills', goal: 50_000, gold: 250, title: true },
   rats500: { group: 'kills', metric: 'enemyKills', enemies: ['rat', 'graveRat'], goal: 500, gold: 50 },
-  elites25: { group: 'kills', metric: 'enemyKills', enemies: ['goblin', 'golem'], goal: 25, gold: 100 },
+  elites25: { group: 'kills', metric: 'enemyKills', enemies: ['golem'], goal: 25, gold: 100 },
   // Dano (weapon hits only: a bomb is no build)
   hit80: { group: 'damage', metric: 'bestHit', goal: 80, gold: 50 },
   // Calibrated with the sim (docs/balance-baseline.md, CC-04): about half of the veteran bot's victories.

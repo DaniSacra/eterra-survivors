@@ -23,6 +23,8 @@ export interface Roles {
   tank: EnemyId;
   /** Optional fourth one with a way of moving of its own, mixed in from the third minute. */
   extra?: EnemyId;
+  /** Optional thrower (FT-03): one in the mix from the third minute, two from the sixth (its def's `max` holds). */
+  shooter?: EnemyId;
 }
 type Role = keyof Roles;
 
@@ -31,13 +33,13 @@ const CURVE: [number, number, number, number, number, Partial<Record<Role, numbe
   [0, 1.5, 1, 1, 1, { basic: 1 }],
   [30, 1.2, 2, 1, 1, { basic: 3, fast: 1 }],
   [60, 1, 2, 1.1, 1, { basic: 2, fast: 2 }],
-  [120, 1, 3, 1.6, 1.2, { basic: 3, fast: 2, tank: 1, extra: 1 }],
-  [180, 0.9, 4, 2.4, 1.4, { basic: 3, fast: 3, tank: 1, extra: 1 }],
-  [240, 0.8, 6, 3.4, 1.8, { basic: 2, fast: 3, tank: 2, extra: 1 }],
-  [300, 0.7, 7, 4.2, 2.1, { basic: 3, fast: 2, tank: 2, extra: 1 }],
-  [390, 0.6, 9, 6.5, 3.2, { basic: 2, fast: 3, tank: 2, extra: 2 }],
-  [480, 0.55, 9, 10, 4.3, { basic: 3, fast: 2, tank: 3, extra: 1 }],
-  [540, 0.5, 10, 12, 4.8, { basic: 2, fast: 3, tank: 3, extra: 2 }],
+  [120, 1, 3, 1.6, 1.2, { basic: 3, fast: 2, tank: 1, extra: 1, shooter: 1 }],
+  [180, 0.9, 4, 2.4, 1.4, { basic: 3, fast: 3, tank: 1, extra: 1, shooter: 1 }],
+  [240, 0.8, 6, 3.4, 1.8, { basic: 2, fast: 3, tank: 2, extra: 1, shooter: 1 }],
+  [300, 0.7, 7, 4.2, 2.1, { basic: 3, fast: 2, tank: 2, extra: 1, shooter: 2 }],
+  [390, 0.6, 9, 6.5, 3.2, { basic: 2, fast: 3, tank: 2, extra: 2, shooter: 2 }],
+  [480, 0.55, 9, 10, 4.3, { basic: 3, fast: 2, tank: 3, extra: 1, shooter: 2 }],
+  [540, 0.5, 10, 12, 4.8, { basic: 2, fast: 3, tank: 3, extra: 2, shooter: 2 }],
   // The boss fight: a trickle of escorts.
   [600, 2, 3, 12.5, 3, { basic: 1 }],
 ];

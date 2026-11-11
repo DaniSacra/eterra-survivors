@@ -63,7 +63,7 @@ describe('bestiaryOrder', () => {
     const order = bestiaryOrder();
     expect([...order].sort()).toEqual([...ENEMY_IDS].sort());
     expect(order.slice(0, 4)).toEqual(['bones', 'bat', 'skeleton', 'graveRat']);
-    expect(order.slice(-5)).toEqual(['golem', 'goblin', 'blackKnight', 'bellRinger', 'oldWolf']);
+    expect(order.slice(-4)).toEqual(['golem', 'blackKnight', 'bellRinger', 'oldWolf']);
   });
 });
 

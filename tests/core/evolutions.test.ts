@@ -161,7 +161,7 @@ describe('chests', () => {
 describe('elites', () => {
   it('drop a chest on death', () => {
     const w = quietWorld();
-    const e = spawnEnemy(w, 'goblin', 200, 0);
+    const e = spawnEnemy(w, 'golem', 200, 0);
     e.dead = true;
     w.step(1 / 60, still);
     expect(w.pickups.active.map((p) => p.type)).toEqual(['chest']);

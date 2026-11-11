@@ -254,6 +254,9 @@ export const t = {
       crow: 'Corvos mergulham do escuro!',
       // original src/chapter1.js (a traveller on the road)
       frostWolf: 'E não andem depois que escurece. Os lobos estão com fome este ano.',
+      // written for the Survivors (provisional, FT-07)
+      frostBoar: 'Abaixa a cabeça, raspa o gelo e vem. Na estrada estreita, só resta o lado.',
+      warBanner: 'Enquanto o pano estiver de pé, eles não recuam.',
       // canone.md, Criaturas e povos [C]
       goblin: 'Os goblins fizeram um acordo com os Nekaren: a Aliança Negra.',
       // original src/data.js (`sineiro.say.intro`)
@@ -397,7 +400,7 @@ export const t = {
         name: 'Na Minha Época',
         desc: (n) => `Derrote ${n} ratos. O Seu Joaquim fazia isso com uma vassoura.`,
       },
-      elites25: { name: 'Pedra e Lança', desc: (n) => `Derrote ${n} elites.` },
+      elites25: { name: 'Pedra Partida', desc: (n) => `Derrote ${n} elites.` },
       hit80: { name: 'Golpe Forte', desc: (n) => `Acerte um golpe de arma de ${n} ou mais.` },
       hit120: { name: 'Na Junta', desc: (n) => `Acerte um golpe de arma de ${n} ou mais.` },
       damageRun: { name: 'Forja Acesa', desc: (n) => `Cause ${n} de dano numa partida.` },
@@ -563,7 +566,7 @@ export const t = {
     },
     southRoad: {
       name: 'Estrada do Sul',
-      desc: 'Gelo, encapuzados e a matilha do Lobo Velho.',
+      desc: 'Uma estrada estreita entre pinheiros: encapuzados, goblins e a matilha do Lobo Velho.',
       won: 'O Lobo Velho caiu. A estrada para Erukh está aberta.',
     },
   } satisfies Record<StageId, { name: string; desc: string; won: string }>,
@@ -686,6 +689,8 @@ export const t = {
     crow: 'Corvo',
     frostWolf: 'Lobo da Geada',
     goblin: 'Goblin Lanceiro',
+    frostBoar: 'Javali da Geada',
+    warBanner: 'Estandarte da Aliança Negra',
     golem: 'Golem de Pedra',
     bellRinger: 'O Sineiro',
     oldWolf: 'Lobo Velho',

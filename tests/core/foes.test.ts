@@ -130,3 +130,91 @@ describe('loot', () => {
     expect(w.pickups.active.some((p) => p.type !== 'gold')).toBe(true);
   });
 });
+
+/** A crowd of 200 bones around (cx, cy), out of the way of the hero at the origin. */
+function crowd(w: World, cx: number, cy: number): void {
+  for (let i = 0; i < 200; i++) {
+    const e = spawnEnemy(w, 'bones', cx + (i % 20) * 22, cy + Math.floor(i / 20) * 22);
+    e.def = { ...e.def, speed: 0 };
+  }
+}
+
+describe("the road's hunters (FT-03 to FT-06)", () => {
+  it('a thrower holds its distance, throws on its rhythm, and not while stunned', () => {
+    const w = bareWorld();
+    w.setView(900, 700);
+    w.player.stats.maxHp = w.player.hp = 1e6;
+    crowd(w, -600, 300);
+    const g = spawnEnemy(w, 'goblin', 400, 0);
+    const sh = ENEMIES.goblin.shoot;
+    let shots = 0;
+    let before = 0;
+    for (let t = 0; t < 12; t += 1 / 60) {
+      w.step(1 / 60, still);
+      if (w.enemyShots.size > before) shots++;
+      before = w.enemyShots.size;
+    }
+    const d = Math.hypot(g.x - w.player.x, g.y - w.player.y);
+    expect(d).toBeGreaterThan(sh.keep - 20);
+    expect(d).toBeLessThan(sh.range + 40);
+    expect(shots).toBeGreaterThanOrEqual(2);
+    expect(shots).toBeLessThanOrEqual(5);
+    // Stunned: no shot.
+    w.enemyShots.clear();
+    for (let t = 0; t < 8; t += 1 / 60) {
+      g.stun = 1;
+      w.step(1 / 60, still);
+    }
+    expect(w.enemyShots.size).toBe(0);
+  });
+
+  it('a leaper warns for windup + air, and its landing hurts only within its radius', () => {
+    const leapIn = (heroDx: number) => {
+      const w = bareWorld();
+      w.setView(900, 700);
+      crowd(w, -700, 300);
+      const c = spawnEnemy(w, 'crow', 150, 0);
+      const lp = ENEMIES.crow.leap;
+      c.actT = 0;
+      w.step(1 / 60, still); // marks the spot
+      expect(c.act).toBe(1); // windup
+      const hp = w.player.hp;
+      w.player.x = heroDx;
+      for (let t = 0; t < lp.windup + lp.air - 0.05; t += 1 / 60) w.step(1 / 60, still);
+      expect(w.player.hp).toBe(hp); // nothing before it lands
+      for (let i = 0; i < 8; i++) w.step(1 / 60, still);
+      return { hit: w.player.hp < hp, leap: w.hurtBy.leap };
+    };
+    expect(leapIn(0).hit).toBe(true);
+    expect(leapIn(0).leap).toBeGreaterThan(0);
+    expect(leapIn(ENEMIES.crow.leap.radius + 40).hit).toBe(false);
+  });
+
+  it('two wolves of the pack come in from opposite sides', () => {
+    const w = bareWorld();
+    w.setView(900, 700);
+    crowd(w, -700, 300);
+    const a = spawnEnemy(w, 'frostWolf', 0, -500);
+    const b = spawnEnemy(w, 'frostWolf', 0, -500);
+    expect((a.uid & 1) !== (b.uid & 1)).toBe(true);
+    for (let i = 0; i < 60; i++) w.step(1 / 60, still);
+    expect(Math.sign(a.x)).toBe(-Math.sign(b.x));
+  });
+
+  it('a banner rallies those near it, not those far, and its fall ends it; it drops its loot', () => {
+    const w = bareWorld();
+    w.setView(900, 700);
+    w.player.stats.maxHp = w.player.hp = 1e6;
+    const banner = spawnEnemy(w, 'warBanner', 400, 0);
+    const near = spawnEnemy(w, 'skeleton', 450, 0);
+    const far = spawnEnemy(w, 'skeleton', -400, 0);
+    for (const e of [near, far]) e.def = { ...e.def, speed: 0 };
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    expect(near.rally).toBeGreaterThan(0);
+    expect(far.rally).toBe(0);
+    banner.dead = true;
+    for (let i = 0; i < 30; i++) w.step(1 / 60, still);
+    expect(near.rally).toBeLessThanOrEqual(0);
+    expect(w.pickups.active.filter((p) => p.type === 'gold').length).toBeGreaterThan(0);
+  });
+});

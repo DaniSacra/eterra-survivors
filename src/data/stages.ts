@@ -52,7 +52,7 @@ export const STAGES = {
     layout: { kind: 'open' },
     mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
-    elites: elites('golem', 'goblin'),
+    elites: elites('golem'),
     boss: { id: 'blackKnight', at: config.matchDuration },
   },
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
@@ -61,16 +61,17 @@ export const STAGES = {
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
     mult: { hp: 1.35, damage: 1.85, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({ basic: 'rat', fast: 'spider', tank: 'slime', extra: 'ghost' }),
-    elites: elites('golem', 'goblin'),
+    elites: elites('golem'),
     boss: { id: 'bellRinger', at: config.matchDuration },
   },
   /** Estrada do Sul: the frozen road, the hooded ones and the wolf pack. */
   southRoad: {
     tile: 'tile.road',
-    layout: { kind: 'corridor', width: 520, sides: 0.2 },
-    mult: { hp: 2.3, damage: 2.1, speed: 1.1, spawn: 1.25, gold: 2 },
-    waves: buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostWolf' }),
-    elites: elites('goblin', 'golem'),
+    layout: { kind: 'corridor', width: 320, sides: 0.05 },
+    mult: { hp: 2.1, damage: 1.8, speed: 1.1, spawn: 1.0, gold: 2 },
+    waves: buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostBoar', extra: 'frostWolf', shooter: 'goblin' }),
+    elites: elites('golem'),
+    specials: [{ id: 'warBanner', from: 120, every: 45 }],
     boss: { id: 'oldWolf', at: config.matchDuration },
   },
 } satisfies Record<string, StageDef>;
@@ -84,6 +85,7 @@ export function stageCast(id: StageId): EnemyId[] {
   const s: StageDef = STAGES[id];
   const ids = [
     ...s.waves.flatMap((w) => w.enemies.map((e) => e.id)),
+    ...(s.specials ?? []).map((e) => e.id),
     ...s.elites.map((e) => e.id),
     s.boss.id,
   ];
@@ -93,7 +95,10 @@ export function stageCast(id: StageId): EnemyId[] {
 /** The bestiary's order: each stage's wave cast in stage order, then every elite, then the bosses. */
 export function bestiaryOrder(): EnemyId[] {
   const ids = [
-    ...STAGE_IDS.flatMap((id) => STAGES[id].waves.flatMap((w) => w.enemies.map((e) => e.id))),
+    ...STAGE_IDS.flatMap((id) => {
+      const s: StageDef = STAGES[id];
+      return [...s.waves.flatMap((w) => w.enemies.map((e) => e.id)), ...(s.specials ?? []).map((e) => e.id)];
+    }),
     ...STAGE_IDS.flatMap((id) => STAGES[id].elites.map((e) => e.id)),
     ...STAGE_IDS.map((id) => STAGES[id].boss.id),
   ];

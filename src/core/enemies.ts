@@ -1,7 +1,7 @@
 import { config } from '../data/config';
 import { ENEMIES, MAX_ENEMY_RADIUS, type EnemyDef, type EnemyId } from '../data/enemies';
 import { updateBoss } from './bosses';
-import { behaviourStep, isFaded } from './behaviours';
+import { behaviourStep, isAirborne, isFaded, rallyDamage } from './behaviours';
 import { hurtHero, onKill } from './elos';
 import { BLOCKED, blockCircle, spawnPoint } from './terrain';
 import type { Poolable } from './pool';
@@ -39,6 +39,8 @@ export interface Enemy extends Poolable {
   dotBy: OwnedWeapon | null;
   /** Per weapon slot: match time when an orbit weapon may hit this enemy again. */
   orbitReady: number[];
+  /** Seconds left rallied by a banner (FT-06): faster and harder-hitting (config.rally). */
+  rally: number;
   /** Bosses only (core/bosses.ts): ability phase, seconds left in it, and the direction it aimed. */
   act: number;
   actT: number;
@@ -75,6 +77,7 @@ export const createEnemy = (): Enemy => ({
   act: 0,
   actT: 0,
   aimX: 1,
+  rally: 0,
   vanished: false,
   aimY: 0,
   dead: false,
@@ -133,9 +136,11 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.hitCrit = false;
   e.orbitReady.fill(0);
   e.act = 0;
-  e.actT = def.ability ? def.ability.every / 2 : def.move ? 2 : 0;
+  // A banner rallies at once; the others wait a little before their first move.
+  e.actT = def.ability ? def.ability.every / 2 : def.move && !def.banner ? 2 : 0;
   e.aimX = 1;
   e.aimY = 0;
+  e.rally = 0;
   e.dead = e.vanished = false;
   world.seen[type] = true;
   world.alive[type] = (world.alive[type] ?? 0) + 1;
@@ -219,6 +224,11 @@ export function updateEnemies(world: World, dt: number): void {
     const dy = p.y - e.y;
     const distSq = dx * dx + dy * dy;
     if (distSq > recycleSq && !e.def.boss) {
+      // Something rooted (a banner) left far behind just goes, with no drop.
+      if (e.def.move === 'still') {
+        e.dead = e.vanished = true;
+        continue;
+      }
       // Too far behind: reappear ahead, in the direction the player is heading.
       spawnPoint(world, Math.atan2(p.facing.y, p.facing.x) + (world.rng.next() - 0.5) * 1.5, e);
       continue;
@@ -236,14 +246,18 @@ export function updateEnemies(world: World, dt: number): void {
       e.slow -= dt;
       speed *= config.zones.slowFactor;
     }
+    if (e.rally > 0) {
+      e.rally -= dt;
+      speed *= config.rally.speed;
+    }
     let mx: number;
     let my: number;
     if (e.def.move && !frozen) {
       behaviourStep(world, e, dt, dx / dist, dy / dist, dist, speed, STEP);
       mx = STEP.x;
       my = STEP.y;
-      if (e.def.move === 'phase') {
-        // Passes through the crowd: no separation.
+      if (e.def.move === 'phase' || isAirborne(e)) {
+        // Passes through the crowd (or over it): no separation.
         e.x += mx + e.kbx * dt;
         e.y += my + e.kby * dt;
         e.kbx *= decay;
@@ -310,9 +324,10 @@ export function updateEnemies(world: World, dt: number): void {
     if (
       cx * cx + cy * cy < minD * minD &&
       !isFaded(e) &&
+      !isAirborne(e) &&
       e.stun <= 0 &&
       // A boss bites as hard all fight long: the wave curve's damage ramp is for the crowd (NE-05).
-      hurtHero(world, e, e.def.damage * (e.def.boss ? world.stage.mult.damage : damageMult))
+      hurtHero(world, e, e.def.damage * (e.def.boss ? world.stage.mult.damage : damageMult) * rallyDamage(e))
     ) {
       world.events.push({ type: 'playerHit' });
       break;

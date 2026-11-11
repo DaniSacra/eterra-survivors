@@ -138,7 +138,19 @@ export const ENEMIES = {
     knockbackResist: 0,
     move: 'charge',
   },
-  crow: { sprite: 'enemy.crow', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
+  /** Corvo: dives from the dark onto where the hero stood (FT-04). */
+  crow: {
+    sprite: 'enemy.crow',
+    radius: 8,
+    hp: 5,
+    speed: 126,
+    damage: 4,
+    xp: 1,
+    knockbackResist: 0,
+    move: 'leap',
+    leap: { trigger: 240, windup: 0.45, air: 0.6, radius: 24, rest: 3.5 },
+  },
+  /** Lobo da Geada: the pack comes in from the sides (FT-05). */
   frostWolf: {
     sprite: 'enemy.frostWolf',
     radius: 15,
@@ -147,18 +159,50 @@ export const ENEMIES = {
     damage: 8,
     xp: 3,
     knockbackResist: 0.5,
+    move: 'pack',
+    pack: { flank: 1.0, close: 150 },
   },
-  // Elites (stage `elites`): drop a chest.
+  /** Goblin Lanceiro: keeps its distance and throws its spear, slower than the hero (FT-03). */
   goblin: {
     sprite: 'enemy.goblin',
-    radius: 18,
-    hp: 400,
-    speed: 100,
-    damage: 12,
-    xp: 15,
-    knockbackResist: 0.8,
-    elite: true,
+    radius: 12,
+    hp: 16,
+    speed: 70,
+    damage: 6,
+    xp: 2,
+    knockbackResist: 0.2,
+    move: 'shoot',
+    max: 10,
+    shoot: { range: 260, keep: 190, every: 3.2, windup: 0.6, speed: 140, radius: 5, life: 2.2 },
   },
+  /** Javali da Geada (provisional name): a long charge down the road; only a step aside saves you (FT-07). */
+  frostBoar: {
+    sprite: 'enemy.frostBoar',
+    radius: 18,
+    hp: 55,
+    speed: 48,
+    damage: 10,
+    xp: 4,
+    knockbackResist: 0.7,
+    move: 'charge',
+    charge: { trigger: 340, windup: 0.9, dash: 1.0, speedMult: 5.5, rest: 4 },
+  },
+  /** The war banner (provisional name): rallies whoever stands near it until it falls (FT-06). */
+  warBanner: {
+    sprite: 'enemy.warBanner',
+    radius: 14,
+    hp: 70,
+    speed: 0,
+    damage: 0,
+    xp: 6,
+    knockbackResist: 1,
+    move: 'still',
+    max: 2,
+    banner: { radius: 150, tick: 0.25 },
+    loot: { gold: 15, item: true },
+  },
+  // Elites (stage `elites`): drop a chest.
+  /** Golem de Pedra: heavy, and it leaps, landing on a wide circle (FT-04). */
   golem: {
     sprite: 'enemy.golem',
     radius: 26,
@@ -168,6 +212,8 @@ export const ENEMIES = {
     xp: 25,
     knockbackResist: 0.95,
     elite: true,
+    move: 'leap',
+    leap: { trigger: 300, windup: 0.8, air: 0.9, radius: 64, rest: 4 },
   },
   // Bosses (stage `boss`): killing one wins the stage.
   bellRinger: {
