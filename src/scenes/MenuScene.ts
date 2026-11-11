@@ -47,14 +47,14 @@ const SIEGE: readonly {
   alpha?: number;
 }[] = [
   // Behind the pines on the left and right: only the upper body shows over them.
-  { key: 'enemy.skeleton', dx: -520, dy: -75, size: 0.7, depth: -3.5, left: false },
+  { key: 'enemy.skeleton', dx: -520, dy: -75, size: 0.56, depth: -3.5, left: false },
   { key: 'enemy.witch', dx: -440, dy: -85, size: 0.4, depth: -3.6, left: false },
   { key: 'enemy.emberBones', dx: 500, dy: -70, size: 0.9, depth: -3.5, left: true },
   { key: 'enemy.golem', dx: 290, dy: 5, size: 0.6, depth: -3.4, left: true },
   // In the air over the village.
-  { key: 'enemy.vampireBat', dx: -140, dy: -330, size: 0.45, depth: -2.5, left: false, fly: true },
-  { key: 'enemy.vampireBat', dx: -125, dy: -255, size: 0.45, depth: -2.5, left: true, fly: true },
-  { key: 'enemy.vampireBat', dx: -35, dy: -280, size: 0.45, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.vampireBat', dx: -140, dy: -330, size: 0.9, depth: -2.5, left: false, fly: true },
+  { key: 'enemy.vampireBat', dx: -125, dy: -255, size: 0.9, depth: -2.5, left: true, fly: true },
+  { key: 'enemy.vampireBat', dx: -35, dy: -280, size: 0.9, depth: -2.5, left: true, fly: true },
   { key: 'enemy.ghost', dx: 390, dy: -290, size: 0.6, depth: -2.5, left: true, fly: true },
   { key: 'enemy.blackKnight', dx: 240, dy: -250, size: 0.5, depth: -2.6, left: true, fly: true },
   { key: 'enemy.oldWolf', dx: 500, dy: -250, size: 0.5, depth: -4.6, left: true, fly: true, alpha: 0.55 },
@@ -366,7 +366,8 @@ export class MenuScene extends Phaser.Scene {
       this.prop(key, x, y, sc, d, 0xdcd8f4, left);
     });
     for (const f of SIEGE) {
-      const x = cx + f.dx * (sc / 1.5) * spread;
+      // On a phone the crowd opens up a little more, so it does not pile onto the heroes.
+      const x = cx + f.dx * (sc / 1.5) * spread * (w < 600 ? 1.25 : 1);
       const y = Math.max(top + 56, feet + f.dy * (sc / 1.5));
       const img = this.prop(f.key, x, y, sc * f.size, f.depth, 0xcfc8ee, f.left, f.alpha ?? 1, f.fly);
       // The ones in the air drift slowly (the ground ones stand still).
