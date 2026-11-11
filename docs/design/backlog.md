@@ -1906,7 +1906,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 - O quê: 12 px no mínimo; na Pausa, `UI.muted` com a parte que falta em `UI.gold`.
 - Aceite: `grep "11px"` nas cenas vazio.
 
-**NA-07 · Acabamento de cor e largura** · visual · P · proposto
+**NA-07 · Acabamento de cor e largura** · visual · P · ✅ feito (2026-11-11: olho das Ossadas 0xff5a6a, selo desligado em `UI.muted`, abas da Coleção até 960 px centradas; ícones dos cards ficam em 22)
 
 - Por quê: 04-visual #14 e #16. O olho das Ossadas é `0xe86a7a`, a cor da Andilla, em centenas de pontinhos
   (`art/enemies.ts:155`); o selo "Desligado" quase some (`ui.ts:136-143`); na Coleção em 1000x680 os cartões vão de

@@ -152,7 +152,8 @@ export const ENEMY_ART: Record<string, ArtDef> = {
   },
 
   // ---- Cripta da Igreja Velha ----
-  'enemy.bones': skeleton(0xb8b4cc, 0xe86a7a), // grey-lilac bones: the gems keep the blue
+  // Grey-lilac bones (the gems keep the blue), eyes a hot red that isn't Andilla's colour (NA-07).
+  'enemy.bones': skeleton(0xb8b4cc, 0xff5a6a),
   'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
   'enemy.ghost': {
     w: 30,

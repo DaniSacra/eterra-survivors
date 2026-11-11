@@ -76,11 +76,14 @@ export class CollectionScene extends Phaser.Scene {
 
     const gutter = 12;
     const top = tabsY + 20 + (short ? 8 : 12);
+    // On wide screens the content keeps to 960 px, centred, instead of running edge to edge (NA-07).
+    const free = width - safe.left - safe.right - gutter * 2;
+    const areaW = Math.min(960, free);
     const area: TabArea = {
       scene: this,
-      x: safe.left + gutter,
+      x: safe.left + gutter + (free - areaW) / 2,
       y: top,
-      w: width - safe.left - safe.right - gutter * 2,
+      w: areaW,
       h: height - top - (short ? 8 : 66),
       short,
       save,

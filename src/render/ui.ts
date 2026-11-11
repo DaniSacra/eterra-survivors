@@ -132,7 +132,8 @@ export function seal(scene: Phaser.Scene, x: number, y: number, text: string, on
   const box = scene.add.rectangle(x, y, 1, 1).setOrigin(1, 0.5);
   const txt = label(scene, x - 6, y, text, size, { bold: true }).setOrigin(1, 0.5);
   const set = (s: string, isOn: boolean) => {
-    txt.setText(s).setColor(isOn ? UI.okText : UI.textOff);
+    // "Desligado" stays readable: muted, not the disabled grey (NA-07).
+    txt.setText(s).setColor(isOn ? UI.okText : UI.muted);
     box
       .setSize(txt.width + 12, txt.height + 2)
       .setFillStyle(isOn ? UI.ok : UI.panelOff, isOn ? 0.18 : 1)
