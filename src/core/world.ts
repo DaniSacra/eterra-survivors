@@ -306,6 +306,7 @@ export class World {
     this.tally.kills++;
     addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
+    if (e.carry > 0) dropGem(this, e.x, e.y, e.carry);
     const loot = e.def.loot;
     if (e.def.elite || loot?.chest) dropPickup(this, 'chest', e.x, e.y);
     if (loot) dropLoot(this, loot, e.x, e.y);

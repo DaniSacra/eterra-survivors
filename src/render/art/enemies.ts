@@ -254,6 +254,28 @@ export const ENEMY_ART: Record<string, ArtDef> = {
     },
   },
 
+  /** Rato Ladrão (provisional): a thin rat in a kerchief with a sack on its back; the gems glow out of its mouth (FT-10). */
+  'enemy.thiefRat': {
+    w: 32,
+    h: 24,
+    draw(p) {
+      const fur = 0x7a6a5e;
+      p.shadow(16, 21, 20, 5);
+      p.line(6, 15, 0, 10, 2.4, INK).line(6, 15, 0, 10, 1.1, 0xe8a0a8); // tail
+      p.rrect(10, 16, 3.5, 5, 1.8, fur).rrect(19, 16, 3.5, 5, 1.8, fur); // legs
+      p.ellipse(15, 13, 19, 12, fur); // lean body
+      p.poly([20, 7, 31, 12, 30.5, 15, 20, 18], fur); // head and snout
+      p.circle(21, 5.5, 3.6, fur); // ear
+      p.ellipse(9, 8, 12, 11, 0x6a4a2a); // the sack
+      p.ink();
+      p.fill(0xe8a0a8).fillCircle(21, 5.5, 1.9).fillCircle(31, 12.5, 1.3);
+      p.poly([18, 9, 24, 9, 22, 12, 19, 12], 0xb0343c); // kerchief
+      p.eye(24, 10.5, 2);
+      p.glow(9, 3.5, 1.6, 0x8fe8ff); // the stolen gems, the one cyan thing on it
+      p.shine(10, 9, 5, 3, 0.25);
+    },
+  },
+
   // ---- Elites ----
   /** Goblin Lanceiro: since FT-03 a common thrower (no elite ring); the long spear says it throws. */
   'enemy.goblin': {

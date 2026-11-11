@@ -457,6 +457,14 @@ export class GameScene extends Phaser.Scene {
         l.add(e.x, e.y, 90, 0xc8e040, pulse);
       }
     }
+    // A thief's sack leaks the light of the gems it carries (FT-10).
+    if (w.alive.thiefRat) {
+      const foes = w.enemies.active;
+      for (let i = 0; i < foes.length; i++) {
+        const e = foes[i] as (typeof foes)[number];
+        if (e.def.flee && !e.dead) l.add(e.x, e.y, 50 + Math.min(70, e.carry * 4), 0x8fe8ff, 0.7);
+      }
+    }
     const zones = w.zones.active;
     for (let i = 0; i < zones.length; i++) {
       const z = zones[i] as (typeof zones)[number];
@@ -961,6 +969,13 @@ export class GameScene extends Phaser.Scene {
         case 'eliteSpawned':
           sound.play('elite');
           this.hud.announce(t.eliteWarning);
+          break;
+        case 'thiefSpawned':
+          sound.play('elite');
+          this.hud.announce(t.thiefWarning);
+          break;
+        case 'thiefEscaped':
+          this.hud.announce(t.thiefEscaped, true);
           break;
         case 'chest': {
           sound.play('chest');

@@ -67,7 +67,7 @@ export class EdgeArrows {
     const foes = world.enemies.active;
     for (let i = 0; i < foes.length && n < MAX; i++) {
       const e = foes[i] as (typeof foes)[number];
-      if (!e.def.elite || e.dead || view.contains(e.x, e.y)) continue;
+      if (!(e.def.elite || e.def.flee) || e.dead || view.contains(e.x, e.y)) continue;
       this.arrow(
         g,
         n++,

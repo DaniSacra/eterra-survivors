@@ -53,7 +53,10 @@ export const STAGES = {
     mult: { hp: 1, damage: 1.05, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'bones', fast: 'bat', tank: 'skeleton', extra: 'graveRat' }),
     elites: elites('golem'),
-    specials: [{ id: 'spiderNest', from: 45, every: 30 }],
+    specials: [
+      { id: 'spiderNest', from: 45, every: 30 },
+      { id: 'thiefRat', from: 150, every: 120 },
+    ],
     boss: { id: 'blackKnight', at: config.matchDuration },
   },
   /** Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. */
@@ -70,7 +73,13 @@ export const STAGES = {
     tile: 'tile.road',
     layout: { kind: 'corridor', width: 320, sides: 0.05 },
     mult: { hp: 2.1, damage: 1.8, speed: 1.1, spawn: 1.0, gold: 2 },
-    waves: buildWaves({ basic: 'hooded', fast: 'crow', tank: 'frostBoar', extra: 'frostWolf', shooter: 'goblin' }),
+    waves: buildWaves({
+      basic: 'hooded',
+      fast: 'crow',
+      tank: 'frostBoar',
+      extra: 'frostWolf',
+      shooter: 'goblin',
+    }),
     elites: elites('golem'),
     specials: [{ id: 'warBanner', from: 120, every: 45 }],
     boss: { id: 'oldWolf', at: config.matchDuration },

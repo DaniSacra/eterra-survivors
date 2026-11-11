@@ -97,6 +97,11 @@ export interface EnemyDef {
    */
   nest?: { spawn: string; every: number; count: number; total: number; range: number; once?: boolean };
   /**
+   * flee (FT-10): walks up to `keep` px of the hero, then runs from them (to the side), picking up every gem it
+   * crosses (`steal`) to carry; after `life` s it runs off the field for good.
+   */
+  flee?: { keep: number; life: number; steal: boolean };
+  /**
    * Besides its gem: gold (before greed and the stage's mult), a random floor item, a chest (an elite always drops
    * one) and a given pickup.
    */
@@ -247,6 +252,20 @@ export const ENEMIES = {
     max: 3,
     nest: { spawn: 'spider', every: 4, count: 2, total: 10, range: 520 },
     loot: { gold: 10, item: true },
+  },
+  /** Rato Ladrão (provisional name): runs off with the gems on the ground; catch it for them and a chest (FT-10). */
+  thiefRat: {
+    sprite: 'enemy.thiefRat',
+    radius: 10,
+    hp: 30,
+    speed: 135,
+    damage: 0,
+    xp: 0,
+    knockbackResist: 0.3,
+    move: 'flee',
+    max: 1,
+    flee: { keep: 200, life: 16, steal: true },
+    loot: { chest: true },
   },
   // Elites (stage `elites`): drop a chest.
   /** Golem de Pedra: heavy, and it leaps, landing on a wide circle (FT-04). */

@@ -8,6 +8,9 @@ export type GameEvent =
   | { type: 'playerHit' }
   | { type: 'bossSpawned' }
   | { type: 'eliteSpawned' }
+  /** A thief rat showed up with its eye on the gems, and when it got away with them (FT-10). */
+  | { type: 'thiefSpawned' }
+  | { type: 'thiefEscaped' }
   | { type: 'levelUp' }
   /** An elite's chest: the level it gave (null if nothing could level), with its gold and heal (data CHEST). */
   | { type: 'chest'; reward: UpgradeOption | null }

@@ -6,7 +6,7 @@ import { fireEnemyShot } from './enemyShots';
 import { hurtHero } from './elos';
 import type { World } from './world';
 import { BossAct as Act } from './bosses';
-import { riseAt } from './marks';
+import { inView, riseAt } from './marks';
 import { TAU } from './math';
 import { segmentAt } from './waves';
 
@@ -105,6 +105,8 @@ export function behaviourStep(
       out.y = (ux * s + uy * c) * step;
       return;
     }
+    case 'flee':
+      return flee(world, e, dt, ux, uy, dist, step, out);
     case 'still':
       out.x = out.y = 0;
       if (e.def.banner) rally(world, e, dt);
@@ -233,4 +235,79 @@ function nest(world: World, e: Enemy, dt: number, dist: number): void {
     e.spawned++;
   }
   if (e.spawned >= n.total && n.once) e.dead = e.vanished = true;
+}
+
+/** Gems within this many px of a fleeing thief draw it (it runs for the nearest one), and one it touches is taken. */
+const THIEF = { sight: 260, grab: 16, outMargin: 120 };
+
+/**
+ * Flee (FT-10): walks in until `keep` px from the hero, then runs from them, bending to the side by its uid and
+ * toward the nearest gem in sight, taking every gem it touches (`carry`). After `life` s it runs off for good
+ * (`thiefEscaped`, no drop): the gems it carries are lost. Slower than the hero, so it can be caught.
+ */
+function flee(
+  world: World,
+  e: Enemy,
+  dt: number,
+  ux: number,
+  uy: number,
+  dist: number,
+  step: number,
+  out: { x: number; y: number },
+): void {
+  const f = e.def.flee;
+  if (!f) return;
+  if (e.act === Act.Idle) {
+    if (dist > f.keep) return; // still closing in
+    e.act = Act.Active;
+    e.actT = f.life;
+  }
+  e.actT -= dt;
+  if (e.act === Act.Windup) {
+    // Running off: straight away from the hero, until out of the view.
+    out.x = -ux * step * 1.3;
+    out.y = -uy * step * 1.3;
+    if (!inView(world, e.x, e.y, THIEF.outMargin)) {
+      e.dead = e.vanished = true;
+      world.events.push({ type: 'thiefEscaped' });
+    }
+    return;
+  }
+  if (e.actT <= 0) {
+    e.act = Act.Windup;
+    return;
+  }
+  // Away from the hero, with a lean to its own side.
+  const side = e.uid & 1 ? 1 : -1;
+  let dx = -ux - uy * side * 0.6;
+  let dy = -uy + ux * side * 0.6;
+  if (f.steal) {
+    const gems = world.gems.active;
+    let best = -1;
+    let bestSq = THIEF.sight * THIEF.sight;
+    for (let i = 0; i < gems.length; i++) {
+      const g = gems[i] as (typeof gems)[number];
+      const dSq = (g.x - e.x) ** 2 + (g.y - e.y) ** 2;
+      if (dSq <= THIEF.grab * THIEF.grab) {
+        e.carry += g.value;
+        world.gems.release(g);
+        i--;
+        continue;
+      }
+      if (dSq < bestSq) {
+        bestSq = dSq;
+        best = i;
+      }
+    }
+    // A gem in sight pulls it, unless the hero is on top of it.
+    if (best >= 0 && dist > f.keep * 0.5) {
+      const g = gems[best] as (typeof gems)[number];
+      const gd = Math.sqrt(bestSq) || 1;
+      dx = (g.x - e.x) / gd;
+      dy = (g.y - e.y) / gd;
+    }
+  }
+  const len = Math.hypot(dx, dy) || 1;
+  out.x = (dx / len) * step;
+  out.y = (dy / len) * step;
 }

@@ -2413,7 +2413,7 @@ Valmor" (provisórios).
   doentia (amarelo-esverdeado ácido, longe do verde do Teo) antes de cada leva; a pulsação acelera no último segundo.
 - Aceite: teste: gera no ritmo só com o herói perto, para no `total`, solta ouro e item; teto de 3.
 
-**FT-10 · Ladrão: foge, leva as gemas e, se cair, deixa um baú** · impl + vfx · M · proposto
+**FT-10 · Ladrão: foge, leva as gemas e, se cair, deixa um baú** · impl + vfx · M · ✅ feito (2026-11-11)
 
 - Por quê: o pico de risco e recompensa da fase: largar a posição para caçar um bicho que corre com a sua experiência.
 - O quê: `move: 'flee'`. Chega até `keep` px e passa a fugir (afasta-se do herói, de lado); mais lento que o herói (dá
