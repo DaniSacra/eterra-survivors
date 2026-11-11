@@ -3184,3 +3184,71 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: testes: a fonte nasce em chão livre na distância pedida, cura só dentro, para no `charge` e no `ttl`; sim
   (meia Loja): a parte das mortes entre 4:00 e 5:30 cai de 2/3 para menos de 1/2, a Loja inteira não passa de 85%;
   medida de tempo dentro da fonte e cura por fonte; F4 igual.
+
+## Daniel 2026-11-11 tarde
+
+Ajustes pedidos depois do teste de 11/11 (tarde). Tamanhos: P = horas, M = um dia, G = vários dias. Ordem de
+execução: as fases abaixo, uma de cada vez, com um commit por passo (testes, lint, typecheck e build verdes) e push ao
+fim de cada fase. Arte segue o visual-director e as regras de pixel do CLAUDE.md (tamanho final, escala inteira);
+efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo com lore espera a aprovação do Daniel.
+
+### Fase 1 · Conserto e leitura
+
+- **DD-01 · Carregar só as poses declaradas** · impl · P. Os 20 inimigos só com andar pedem `-windup`, `-strike` e
+  `-death` que não existem (60 erros por carregamento). `enemySheets()` passa a carregar só as poses de
+  `ENEMY_ANIMS[...].frames`. Aceite: teste que toda pose carregada tem arquivo em `public/`; zero 404 no carregamento.
+- **DD-02 · Rato Ladrão com aviso** · impl + ui · M. Nasce a cerca de 200 px do herói (nunca dentro do alcance de
+  golpe), com uma marca no chão e o som de moedas 1 s antes, e então corre. Seta na borda enquanto estiver fora de vista
+  (`EdgeArrows`, prioridade acima de elite), contorno amarelo e o brilho das gemas no saco mais forte. Aceite: testes de
+  distância de nascimento, marca antes do nascimento e seta só enquanto fora da tela.
+
+### Fase 2 · Telas de início
+
+- **DD-03 · Tela Heróis** · ui + visual · G. Começar abre a tela Heróis: os quatro um embaixo do outro; cada linha com
+  o sprite grande em escala inteira, nome, classe, vantagem, arma inicial, recorde e, se bloqueado, o preço. Escolher
+  leva à tela Fase. Voltar em cada tela volta uma etapa.
+- **DD-04 · Tela Fase e história da fase** · ui + visual · G. Um cartão por fase com ilustração (recorte do chão e do
+  chefe), nome e a linha atual. Tocar no cartão abre a história: ilustração maior, texto curto, o chefe do fim, Partir e
+  Voltar. Fase bloqueada mostra como desbloquear. **Depende do Daniel (lore):** as três histórias saem do cânone
+  (prólogo e capítulo 1) e são mostradas antes de entrar no jogo.
+- **DD-05 · Encaixe em celular e PC** · ui · M. Celular em pé, deitado e PC: tudo cabe sem rolar na tela de Fase; a de
+  Heróis pode rolar no celular em pé. Capturas em 390x844, 844x390 e 1280x800.
+
+### Fase 3 · Inimigos
+
+- **DD-06 · Coveiro refeito** · visual · M. PixelLab, estilo cabeçudo do Aldo, mas ameaçador: rosto escondido pela aba
+  do chapéu, olhos acesos, pá grande e suja, postura curvada. Mantém andar, preparar, cavar e morrer.
+- **DD-07 · Fantasma em duas formas** · impl + visual + bal · G. Menor (cerca de 40 px na tela). Simpático; ao sumir
+  (move `phase`) e reaparecer vira um fantasma negro de olhos vermelhos, mais rápido e com mais dano de contato, com um
+  estalo de sombra na troca. Duas artes PixelLab do mesmo personagem; regra no core com teste (a forma escura só depois
+  do primeiro sumiço e vale até morrer). Troca também o fantasma da tela inicial. **Depende do Daniel:** o nome da forma
+  escura (provisório até a aprovação).
+- **DD-08 · Gosma Verde menos fofa** · visual · P. Duas propostas mostradas ao Daniel antes de trocar.
+
+### Fase 4 · Armas de órbita
+
+- **DD-09 · Escudos de Valmor e Espadas dos Paladinos** · impl + visual + bal · G. Arte PixelLab nova e comportamento
+  novo. Escudos deixam de girar: ficam como parede à frente do herói, na direção em que anda, com pancada periódica que
+  empurra o bando (a Muralha de Valmor fecha o anel). Espadas giram mais rápido, finas, com rastro de corte. Ambas
+  seguem dentro da banda de categoria (`bands.test.ts`) e ganham testes.
+
+### Fase 5 · Cenário
+
+- **DD-10 · Tiles refeitos no PixelLab** · visual · G. Cripta: lajes de piso com desgaste, rachaduras e limo, nunca
+  padrão de parede. Valmor e Estrada: neve, terra e pedra com variação e bordas. Testes de contraste do chão mantidos.
+- **DD-11 · Obstáculos que formam o cenário** · visual + impl · G. Maiores e em pixel: Cripta (colunas, sarcófagos,
+  estátuas de paladinos, montes de ossos), Valmor (cercas, carroças, fardos, poço), Estrada (troncos, rochas, carroça
+  virada). Círculo de colisão alinhado ao desenho. Valmor e Estrada ganham obstáculos esparsos que não fecham caminho.
+- **DD-12 · O herói se destaca do chão** · visual · P. Depois dos tiles novos, capturas em 420x820 e 1000x680 de todas
+  as fases e ajuste se o herói se perder.
+
+### Fase 6 · Efeitos
+
+- **DD-13 · Efeitos no padrão pixel** · vfx · G. Golpes em arco, zonas, raios e auras como os projéteis em pixel:
+  bordas firmes, partículas em blocos em vez de discos grandes, paleta por elemento, congelamento de 2 a 4 quadros nos
+  golpes fortes e luz no chão. Começa pela Lâmina de Valmor.
+
+### Regras
+
+- **DD-14** Código e commits em inglês; texto do jogador só em `src/i18n/pt-BR.ts`, em português, sem travessão; toda
+  arte nova registrada em `docs/art/credits.md`.
