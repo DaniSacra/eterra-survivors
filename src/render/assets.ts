@@ -28,8 +28,9 @@ const PAD = 6;
 const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef> =>
   Object.fromEntries(Object.entries(defs).map(([k, d]) => [k, { kind: 'art', art: d, res }]));
 
-/** A hero frame in the strips: PixelLab's 48 x 64 canvas at ART_RES. */
-const HERO_FRAME = { w: 96, h: 128 };
+/** PixelLab canvas sizes of the heroes (art px; files are at ART_RES). */
+const FRAME_48 = { w: 48, h: 64 };
+const FRAME_HIBIT = { w: 64, h: 80 };
 
 export const ASSETS: Record<string, AssetDef> = {
   ...art(TILE_ART, 1),
@@ -39,26 +40,32 @@ export const ASSETS: Record<string, AssetDef> = {
   ...art(DECAL_ART, ART_RES),
   ...art(OBSTACLE_ART, ART_RES),
   ...art(ICON_ART, ART_RES),
-  ...pixelHero('aldo', 8, 4),
-  ...pixelHero('lyra', 8, 4),
-  ...pixelHero('teo', 8, 4),
-  ...pixelHero('andilla', 8, 4),
+  ...pixelHero('aldo', FRAME_HIBIT, 8, 4),
+  ...pixelHero('lyra', FRAME_48, 8, 4),
+  ...pixelHero('teo', FRAME_48, 8, 4),
+  ...pixelHero('andilla', FRAME_48, 8, 4),
 };
 
 /** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
-const HERO_FIT = ((38 + PAD * 2) * ART_RES) / HERO_FRAME.h;
+const MENU_HERO_H = (38 + PAD * 2) * ART_RES;
 
 /** Scale factor that shows hero `key` at the size the menus were laid out for. */
 export function heroFit(key: string): number {
-  return ASSETS[key]?.kind === 'image' ? HERO_FIT : 1;
+  const walk = ASSETS[`${key}.walk`];
+  return walk?.kind === 'sheet' ? MENU_HERO_H / walk.h : 1;
 }
 
 /**
  * A pixel-art hero (PixelLab, AR-05): a still frame facing right that replaces the code-drawn one everywhere, and
  * walk and idle strips for the run (`<key>.walk`, `<key>.idle`). Files in public/sprites/, upscaled to ART_RES.
  */
-function pixelHero(id: string, walk: number, idle: number): Record<string, AssetDef> {
-  const frame = { w: HERO_FRAME.w, h: HERO_FRAME.h };
+function pixelHero(
+  id: string,
+  size: { w: number; h: number },
+  walk: number,
+  idle: number,
+): Record<string, AssetDef> {
+  const frame = { w: size.w * ART_RES, h: size.h * ART_RES };
   return {
     [`player.${id}`]: { kind: 'image', url: `sprites/${id}.png` },
     [`player.${id}.walk`]: { kind: 'sheet', url: `sprites/${id}-walk.png`, ...frame, fps: walk },
