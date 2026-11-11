@@ -1,6 +1,7 @@
 import { config } from '../data/config';
 import type { BossAbility, EnemyId } from '../data/enemies';
-import { spawnEnemy, type Enemy } from './enemies';
+import type { Enemy } from './enemies';
+import { riseAt } from './marks';
 import { TAU, angleDiff } from './math';
 import { hurtHero } from './elos';
 import { segmentAt } from './waves';
@@ -51,7 +52,7 @@ export function updateBoss(world: World, e: Enemy, dt: number): boolean {
         const r = config.player.radius + e.def.radius;
         if (
           (p.x - e.x) ** 2 + (p.y - e.y) ** 2 < r * r &&
-          hurtHero(world, e, ab.damage * world.stage.mult.damage)
+          hurtHero(world, e, ab.damage * world.stage.mult.damage, 'boss')
         )
           world.events.push({ type: 'playerHit' });
       }
@@ -69,7 +70,7 @@ function release(world: World, e: Enemy, ab: BossAbility): boolean {
       const dy = p.y - e.y;
       const inReach = Math.hypot(dx, dy) <= ab.range + config.player.radius;
       const inArc = Math.abs(angleDiff(Math.atan2(e.aimY, e.aimX), Math.atan2(dy, dx))) <= (ab.arc ?? 1) / 2;
-      if (inReach && inArc && hurtHero(world, e, ab.damage * world.stage.mult.damage))
+      if (inReach && inArc && hurtHero(world, e, ab.damage * world.stage.mult.damage, 'boss'))
         world.events.push({ type: 'playerHit' });
       e.act = BossAct.Active;
       e.actT = CLEAVE_SHOW;
@@ -80,13 +81,8 @@ function release(world: World, e: Enemy, ab: BossAbility): boolean {
       const hpMult = segmentAt(world.time, world.stage.waves).hpMult;
       for (let i = 0; i < n && world.enemies.size < config.enemies.maxActive; i++) {
         const a = (i * TAU) / n;
-        spawnEnemy(
-          world,
-          ab.summon as EnemyId,
-          e.x + Math.cos(a) * ab.range,
-          e.y + Math.sin(a) * ab.range,
-          hpMult,
-        );
+        // The dead rise out of marks on the ground (FT-02), never on top of the hero.
+        riseAt(world, ab.summon as EnemyId, e.x + Math.cos(a) * ab.range, e.y + Math.sin(a) * ab.range, hpMult);
       }
       e.act = BossAct.Idle;
       e.actT = ab.every;

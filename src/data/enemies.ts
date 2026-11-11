@@ -39,9 +39,44 @@ export interface EnemyDef {
   ability?: BossAbility;
   /**
    * A way of moving of its own (core/behaviours.ts): zigzag weaves sideways; charge crouches then dashes;
-   * phase passes through the others and now and then fades out (harmless and untouchable for a moment).
+   * phase passes through the others and now and then fades out (harmless and untouchable for a moment);
+   * shoot keeps its distance and throws slow shots; leap marks the hero's spot and lands there; pack comes in from
+   * the side; still stands where it is.
    */
-  move?: 'zigzag' | 'charge' | 'phase';
+  move?: 'zigzag' | 'charge' | 'phase' | 'shoot' | 'leap' | 'pack' | 'still';
+  /** Most of this type alive at once: the spawner sends the stage's basic instead, specials wait. */
+  max?: number;
+  /** charge: its own numbers instead of the default (core/behaviours.ts CHARGE). */
+  charge?: ChargeDef;
+  /** shoot: walks to `range`, holds between `keep` and `range`; every `every` s winds up and throws at the hero. */
+  shoot?: {
+    range: number;
+    keep: number;
+    every: number;
+    windup: number;
+    /** The shot: px/s, px, seconds; damage = contact damage x `damage` (default 1). */
+    speed: number;
+    radius: number;
+    life: number;
+    damage?: number;
+  };
+  /** leap: marks the hero's spot, crouches `windup`, flies `air` s (no contact), lands hurting within `radius`. */
+  leap?: { trigger: number; windup: number; air: number; radius: number; rest: number };
+  /** pack: heads for a point `flank` rad to its side (by uid parity) until within `close` px, then straight in. */
+  pack?: { flank: number; close: number };
+  /** banner: every `tick` s, the enemies within `radius` are rallied (config.rally) for a little over a tick. */
+  banner?: { radius: number; tick: number };
+  /** Besides its gem: gold (before greed and the stage's mult) and a random floor item. */
+  loot?: { gold?: number; item?: boolean };
+}
+
+/** A charge's numbers: within `trigger` px it crouches `windup` s, dashes `dash` s at x`speedMult`, rests `rest` s. */
+export interface ChargeDef {
+  trigger: number;
+  windup: number;
+  dash: number;
+  speedMult: number;
+  rest: number;
 }
 
 export const ENEMIES = {

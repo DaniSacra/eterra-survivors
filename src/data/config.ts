@@ -56,6 +56,15 @@ export const config = {
   },
   /** Damage over time (bleeding, burning): seconds between ticks. */
   dotTick: 0.5,
+  /** A banner's rally: what a rallied enemy gets. */
+  rally: { speed: 1.3, damage: 1.25 },
+  /** Enemy shots (their own pool). */
+  enemyShots: { max: 60 },
+  /**
+   * Ground marks (their own pool): an enemy about to rise inside the view shows `spawnTime` s first, never closer
+   * than `spawnMinDist` px to the hero.
+   */
+  marks: { max: 160, spawnTime: 0.5, spawnMinDist: 80 },
   xp: {
     /** XP to go from level L to L+1 = base + step * (L - 1). */
     base: 5,

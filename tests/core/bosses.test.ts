@@ -69,11 +69,20 @@ describe('boss abilities', () => {
   it('A badalada: raises a ring of the dead around the Sineiro', () => {
     const { w, boss, ab } = withBoss('bellRinger', 300, 0);
     runWindup(w, boss);
-    const raised = w.enemies.active.filter((e) => e.type === ab.summon);
-    expect(raised.length).toBe(ab.count);
-    for (const e of raised) expect(Math.hypot(e.x - boss.x, e.y - boss.y)).toBeLessThan(ab.range + 10);
     expect(boss.act).toBe(BossAct.Idle);
     expect(boss.actT).toBeCloseTo(ab.every, 1);
+    // In view, they rise out of marks on the ground first (FT-02), never on the hero.
+    const bx = boss.x;
+    const by = boss.y;
+    const now = w.enemies.active.filter((e) => e.type === ab.summon).length;
+    expect(w.marks.size).toBeGreaterThan(0);
+    expect(w.marks.size + now).toBe(ab.count);
+    for (const m of w.marks.active)
+      expect(Math.hypot(m.x - w.player.x, m.y - w.player.y)).toBeGreaterThanOrEqual(79);
+    for (let t = 0; t <= config.marks.spawnTime; t += STEP) w.step(STEP, still);
+    const raised = w.enemies.active.filter((e) => e.type === ab.summon);
+    expect(raised.length).toBe(ab.count);
+    for (const e of raised) expect(Math.hypot(e.x - bx, e.y - by)).toBeLessThan(ab.range + 60);
   });
 
   it('Mordida Funda: dashes in a straight line toward where the hero was, and bites', () => {

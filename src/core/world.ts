@@ -18,11 +18,13 @@ import {
   type Slash,
 } from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
+import { createEnemyShot, updateEnemyShots, type EnemyShot, type HurtSource } from './enemyShots';
+import { createMark, updateMarks, type Mark } from './marks';
 import { updateShatters } from './elos';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
 import type { Charges, RunBonuses } from './meta';
-import { createPickup, dropPickup, maybeDropRandom, updatePickups, type Pickup } from './pickups';
+import { createPickup, dropLoot, dropPickup, maybeDropRandom, updatePickups, type Pickup } from './pickups';
 import { createPlayer, updatePlayer, type Player } from './player';
 import { Pool } from './pool';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
@@ -110,6 +112,13 @@ export class World {
   readonly shatterBy: OwnedWeapon[] = [];
   readonly zones = new Pool<Zone>(createZone, 16);
   readonly puffs = new Pool<Puff>(createPuff, 32);
+  /** Shots thrown by enemies (FT-03) and marks on the ground (FT-02), each in its own capped pool. */
+  readonly enemyShots = new Pool<EnemyShot>(createEnemyShot, 16);
+  readonly marks = new Pool<Mark>(createMark, 16);
+  /** How many of each enemy type are alive (the spawner keeps each under its def's `max`). */
+  readonly alive: Partial<Record<EnemyId, number>> = {};
+  /** Damage the hero took this run, by where it came from (the sim's "DANO POR FONTE"). */
+  readonly hurtBy: Record<HurtSource, number> = { contact: 0, shot: 0, leap: 0, boss: 0 };
   /** Seconds left of Sopro de Geada (enemies frozen). */
   freeze = 0;
   readonly damageNumbers = new Pool<DamageNumber>(createDamageNumber, 64);
@@ -193,10 +202,12 @@ export class World {
     blockCircle(this, this.player, config.player.radius);
     if (this.freeze > 0) this.freeze = Math.max(0, this.freeze - dt);
     this.spawner.update(this, dt);
+    updateMarks(this, dt);
     updateEnemies(this, dt);
     updateWeapons(this, dt);
     updateZones(this, dt);
     updateProjectiles(this, dt);
+    updateEnemyShots(this, dt);
     updateShatters(this);
     sweepDeadEnemies(this);
     updateGems(this, dt);
@@ -281,6 +292,7 @@ export class World {
     addPuff(this, e.x, e.y, e.def.radius, 'death');
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
     if (e.def.elite) dropPickup(this, 'chest', e.x, e.y);
+    else if (e.def.loot) dropLoot(this, e.def.loot, e.x, e.y);
     else if (!e.def.boss) maybeDropRandom(this, e.x, e.y);
     if (e === this.boss) {
       this.boss = null;

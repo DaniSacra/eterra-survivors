@@ -35,6 +35,8 @@ export interface StageDef {
   waves: WaveSegment[];
   /** One elite at each of these times (seconds), with the HP multiplier of the segment then active. */
   elites: { id: EnemyId; at: number }[];
+  /** Scheduled one-offs besides the elites: from `from` s, one every `every` s (each waits under its def's `max`). */
+  specials?: { id: EnemyId; from: number; every: number }[];
   boss: { id: EnemyId; at: number };
 }
 

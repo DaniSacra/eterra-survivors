@@ -1,6 +1,9 @@
 import { config } from '../data/config';
 import type { WaveSegment } from '../data/waves';
+import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import { spawnOnRing, type Enemy } from './enemies';
+import { riseAt } from './marks';
+import { spawnPoint } from './terrain';
 import type { World } from './world';
 
 /** The segment active at time `t` (the last one that has started). */
@@ -22,6 +25,9 @@ export function clearCrowd(world: World): void {
     if (e.dead || e.def.elite || e.def.boss) continue;
     e.dead = e.vanished = true;
   }
+  // Nobody about to rise, and no shot in the air, either.
+  world.marks.clear();
+  world.enemyShots.clear();
 }
 
 /** Time-driven spawner for the world's stage: batches on an interval, elites on schedule, boss at the end. */
@@ -29,6 +35,9 @@ export class Spawner {
   private timer = 0;
   private nextElite = 0;
   bossSpawned = false;
+  /** Match time of each stage special's next one (StageDef `specials`), filled on the first update. */
+  private nextSpecial: number[] = [];
+  private readonly at = { x: 0, y: 0 };
 
   update(world: World, dt: number): void {
     if (world.endless) return this.vigil(world, dt);
@@ -39,16 +48,16 @@ export class Spawner {
     while (this.timer <= 0) {
       this.timer += seg.interval;
       const batch = this.batchSize(world, seg.batch);
-      for (let i = 0; i < batch && world.enemies.size < config.enemies.maxActive; i++) {
-        spawnOnRing(world, world.rng.weighted(seg.enemies).id, seg.hpMult);
-      }
+      for (let i = 0; i < batch && world.enemies.size < config.enemies.maxActive; i++)
+        this.send(world, this.capped(world, world.rng.weighted(seg.enemies).id, seg), seg.hpMult);
     }
     const elite = stage.elites[this.nextElite];
     if (elite && world.time >= elite.at) {
       this.nextElite++;
-      spawnOnRing(world, elite.id, seg.hpMult);
+      this.send(world, elite.id, seg.hpMult);
       world.events.push({ type: 'eliteSpawned' });
     }
+    if (!this.bossSpawned) this.specials(world, seg.hpMult);
     if (!this.bossSpawned && world.time >= stage.boss.at) {
       this.bossSpawned = true;
       clearCrowd(world);
@@ -72,16 +81,45 @@ export class Spawner {
       this.timer += Math.max(v.minInterval, seg.interval - v.intervalPerMinute * min);
       const batch = this.batchSize(world, base);
       for (let i = 0; i < batch && world.enemies.size < config.enemies.maxActive; i++)
-        spawnOnRing(world, world.rng.weighted(seg.enemies).id, hp);
+        this.send(world, this.capped(world, world.rng.weighted(seg.enemies).id, seg), hp);
     }
+    this.specials(world, hp);
     if (world.time - world.vigilStart >= (this.vigilElites + 1) * v.eliteEvery) {
       const elites = world.stage.elites;
       const elite = elites[this.vigilElites % elites.length];
       this.vigilElites++;
       if (elite) {
-        spawnOnRing(world, elite.id, hp);
+        this.send(world, elite.id, hp);
         world.events.push({ type: 'eliteSpawned' });
       }
+    }
+  }
+
+  /** One enemy on the stage's spawn ring; a spot inside the view gets a spawn mark first (FT-02). */
+  private send(world: World, id: EnemyId, hpMult: number): void {
+    spawnPoint(world, null, this.at);
+    riseAt(world, id, this.at.x, this.at.y, hpMult);
+  }
+
+  /** `id`, or the segment's first (basic) enemy when `id` is already at its def's `max`. */
+  private capped(world: World, id: EnemyId, seg: WaveSegment): EnemyId {
+    const max = (ENEMIES[id] as EnemyDef).max;
+    return max !== undefined && (world.alive[id] ?? 0) >= max ? (seg.enemies[0]?.id ?? id) : id;
+  }
+
+  /** The stage's scheduled specials (`specials`): one every `every` s from `from`, each waiting under its `max`. */
+  private specials(world: World, hpMult: number): void {
+    const list = world.stage.specials;
+    if (!list) return;
+    for (let i = 0; i < list.length; i++) {
+      const sp = list[i] as (typeof list)[number];
+      const next = this.nextSpecial[i] ?? sp.from;
+      this.nextSpecial[i] = next;
+      if (world.time < next) continue;
+      const max = (ENEMIES[sp.id] as EnemyDef).max;
+      if (max !== undefined && (world.alive[sp.id] ?? 0) >= max) continue;
+      this.nextSpecial[i] = Math.max(next, world.time) + sp.every;
+      this.send(world, sp.id, hpMult);
     }
   }
 

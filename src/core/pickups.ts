@@ -34,6 +34,19 @@ export function maybeDropRandom(world: World, x: number, y: number): void {
   else if (world.rng.next() < config.gold.dropChance) dropPickup(world, 'gold', x, y);
 }
 
+/**
+ * An enemy's `loot` (data/enemies.ts): coins worth `gold` in a little ring around (x, y), and a random floor item.
+ * Risk pays, and shows: the reward lies there to be picked up.
+ */
+export function dropLoot(world: World, loot: { gold?: number; item?: boolean }, x: number, y: number): void {
+  const coins = Math.max(0, Math.round((loot.gold ?? 0) / config.gold.coin));
+  for (let i = 0; i < coins; i++) {
+    const a = (i / Math.max(1, coins)) * Math.PI * 2;
+    dropPickup(world, 'gold', x + Math.cos(a) * 16, y + Math.sin(a) * 16);
+  }
+  if (loot.item) dropPickup(world, world.rng.weighted(RANDOM_DROPS).id, x, y);
+}
+
 /** Gold collected in the run, scaled by greed. */
 export function addGold(world: World, amount: number): void {
   world.gold += Math.round(amount * world.player.stats.greed * world.stage.mult.gold);

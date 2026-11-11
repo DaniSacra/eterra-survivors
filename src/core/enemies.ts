@@ -138,6 +138,7 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.aimY = 0;
   e.dead = e.vanished = false;
   world.seen[type] = true;
+  world.alive[type] = (world.alive[type] ?? 0) + 1;
   return e;
 }
 
@@ -325,6 +326,7 @@ export function sweepDeadEnemies(world: World): void {
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i] as Enemy;
     if (!e.dead) continue;
+    world.alive[e.type] = (world.alive[e.type] ?? 1) - 1;
     world.onEnemyKilled(e);
     world.enemies.release(e);
   }

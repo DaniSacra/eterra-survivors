@@ -3,6 +3,7 @@ import { WEAPONS, type WeaponDef } from '../data/weapons';
 import { addBolt } from './effects';
 import { damageEnemy, type Enemy } from './enemies';
 import { heal, hurtPlayer } from './player';
+import type { HurtSource } from './enemyShots';
 import type { OwnedWeapon } from './weapons';
 import type { World } from './world';
 import type { Zone } from './zones';
@@ -85,7 +86,12 @@ export function updateShatters(world: World): void {
  * The hero is hit by `attacker` for `amount`. Muralha de Valmor's guard, when ready, takes the hit and throws the
  * blow back at the attacker. Returns whether the hero took damage (as `hurtPlayer`).
  */
-export function hurtHero(world: World, attacker: Enemy, amount: number): boolean {
+export function hurtHero(
+  world: World,
+  attacker: Enemy | null,
+  amount: number,
+  source: HurtSource = 'contact',
+): boolean {
   const p = world.player;
   if (p.iframes > 0 || p.hp <= 0) return false;
   const guard = wardReady(world);
@@ -94,6 +100,9 @@ export function hurtHero(world: World, attacker: Enemy, amount: number): boolean
     const ward = def.ward as { every: number; damage: number };
     guard.stackTime = world.time + ward.every;
     p.iframes = Math.max(p.iframes, 0.3);
+    world.events.push({ type: 'ward' });
+    // A shot or a patch on the ground is blocked, but there is nobody to strike back at.
+    if (!attacker) return false;
     const level = def.levels[guard.level - 1] as { damage: number; knockback?: number };
     const dx = attacker.x - p.x;
     const dy = attacker.y - p.y;
@@ -107,10 +116,12 @@ export function hurtHero(world: World, attacker: Enemy, amount: number): boolean
       level.knockback ?? 0,
       guard,
     );
-    world.events.push({ type: 'ward' });
     return false;
   }
-  return hurtPlayer(p, amount);
+  const before = p.hp;
+  const hit = hurtPlayer(p, amount);
+  world.hurtBy[source] += before - p.hp;
+  return hit;
 }
 
 /** The owned weapon whose guard is up right now (Muralha de Valmor), or null. */

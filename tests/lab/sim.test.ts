@@ -1,3 +1,4 @@
+import { HURT_SOURCES } from '../../src/core/enemyShots';
 import { it } from 'vitest';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { EVOLUTIONS } from '../../src/data/evolutions';
@@ -111,6 +112,17 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
             .padStart(8)}  ${per.join(' · ')}`,
       );
     }
+  // Damage taken by source, per stage (no new source above 30% of a stage's damage).
+  out.push(
+    '\nDANO POR FONTE ' +
+      stages
+        .map((stage) => {
+          const rs = results.filter((r) => r.stage === stage);
+          const total = rs.reduce((a, r) => a + HURT_SOURCES.reduce((b, k) => b + r.hurtBy[k], 0), 0) || 1;
+          return `${stage}: ${HURT_SOURCES.map((k) => `${k} ${pct(rs.reduce((a, r) => a + r.hurtBy[k], 0) / total)}`).join(' ')}`;
+        })
+        .join(' · '),
+  );
   const avgOf = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
   // Elos: median minute of the first one (runs that formed any; goal 5-7 min) and Elos per run, per Loja profile.
   const firstElo = (r: SimResult) => Number((r.elos[0] ?? '').split('@')[1] ?? NaN) / 60;

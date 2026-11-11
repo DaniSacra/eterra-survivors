@@ -12,7 +12,19 @@ export type SpeedClass = 'slow' | 'medium' | 'fast' | 'faster';
 /** How far hits push it: 0.9+ not at all, 0.5+ a little, else easily. */
 export type PushClass = 'none' | 'little' | 'easy';
 /** Its own way: a way of moving, an elite's chest, or a boss's ability. */
-export type EnemyWay = 'charge' | 'zigzag' | 'phase' | 'elite' | 'cleave' | 'toll' | 'lunge';
+export type EnemyWay =
+  | 'charge'
+  | 'zigzag'
+  | 'phase'
+  | 'shoot'
+  | 'leap'
+  | 'pack'
+  | 'still'
+  | 'banner'
+  | 'elite'
+  | 'cleave'
+  | 'toll'
+  | 'lunge';
 
 export interface EnemyTraits {
   hp: number;
@@ -28,6 +40,7 @@ export function enemyTraits(def: EnemyDef, heroSpeed = config.player.stats.moveS
   const speed: SpeedClass = r <= 0.5 ? 'slow' : r <= 0.75 ? 'medium' : r <= 0.95 ? 'fast' : 'faster';
   const k = def.knockbackResist;
   const push: PushClass = k >= 0.9 ? 'none' : k >= 0.5 ? 'little' : 'easy';
-  const way: EnemyWay | null = def.ability?.kind ?? (def.elite ? 'elite' : (def.move ?? null));
+  const way: EnemyWay | null =
+    def.ability?.kind ?? (def.elite ? 'elite' : def.banner ? 'banner' : (def.move ?? null));
   return { hp: def.hp, speed, damage: def.damage, push, way };
 }

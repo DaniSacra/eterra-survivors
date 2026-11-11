@@ -1,3 +1,4 @@
+import type { HurtSource } from '../../src/core/enemyShots';
 import { config } from '../../src/data/config';
 import type { Enemy } from '../../src/core/enemies';
 import { weaponReport } from '../../src/core/report';
@@ -49,6 +50,8 @@ export interface SimResult {
   maxEnemies: number;
   /** Damage taken by the role of the enemy that dealt it. */
   taken: { fast: number; total: number };
+  /** Damage taken by where it came from (world.hurtBy). */
+  hurtBy: Record<HurtSource, number>;
 }
 
 /** Recipe passives of the weapons the hero owns. */
@@ -214,6 +217,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
+    hurtBy: { contact: 0, shot: 0, leap: 0, boss: 0 },
   };
   const side = seed % 2 ? 1 : -1;
   let bossAt = -1;
@@ -282,5 +286,6 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     .slice(0, 3)
     .map((r) => `${r.id}:${r.level}=${Math.round(r.dps)}`);
   res.owned = w.weapons.map((o) => EVOLUTIONS[o.id]?.from ?? o.id);
+  res.hurtBy = { ...w.hurtBy };
   return res;
 }

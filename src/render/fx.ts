@@ -333,6 +333,8 @@ export function drawFx(
   }
   drawWard(top, world);
   drawStuns(top, world);
+  drawMarks(top, world);
+  drawEnemyShots(top, world);
   g = top;
   // Life under the hero's feet, so it can be read without looking at the corner.
   const hpK = Math.max(0, p.hp / p.stats.maxHp);
@@ -1095,6 +1097,46 @@ function drawStuns(g: Phaser.GameObjects.Graphics, world: World): void {
         front ? 1 : 0.7,
       );
     }
+  }
+}
+
+/**
+ * Spawn marks (FT-02): the ground cracks in a circle the size of who is coming, with a faint coral glow growing
+ * until they rise. Enemy things are drawn solid (no additive light), above the darkness.
+ */
+function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.marks.active;
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i] as (typeof list)[number];
+    const k = 1 - m.ttl / m.total; // 0 -> 1
+    const r = m.radius * (0.6 + 0.6 * k);
+    g.fillStyle(WARN_COLOR, 0.12 + 0.25 * k);
+    oval(g, m.x, m.y + 2, r * 2.2, r * 1.1);
+    g.lineStyle(2, INK, 0.7);
+    for (let c = 0; c < 4; c++) {
+      const a = c * 1.57 + m.x * 0.03;
+      const cx = Math.cos(a) * r;
+      const cy = Math.sin(a) * r * 0.5;
+      g.lineBetween(m.x + cx * 0.2, m.y + 2 + cy * 0.2, m.x + cx, m.y + 2 + cy);
+    }
+    g.lineStyle(1.5, WARN_COLOR, 0.5 + 0.5 * k);
+    ovalRing(g, m.x, m.y + 2, r * 2.2, r * 1.1);
+  }
+}
+
+/** Enemy shots (FT-03): a pale core with a dark outline and a short trail behind, never a light. */
+function drawEnemyShots(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.enemyShots.active;
+  for (let i = 0; i < list.length; i++) {
+    const s = list[i] as (typeof list)[number];
+    const sp = Math.hypot(s.vx, s.vy) || 1;
+    const tail = Math.min(22, s.age * sp);
+    g.lineStyle(s.radius * 1.4, WARN_COLOR, 0.45);
+    g.lineBetween(s.x, s.y, s.x - (s.vx / sp) * tail, s.y - (s.vy / sp) * tail);
+    g.fillStyle(INK, 1);
+    disc(g, s.x, s.y, s.radius + 2);
+    g.fillStyle(0xffd8c8, 1);
+    disc(g, s.x, s.y, s.radius);
   }
 }
 

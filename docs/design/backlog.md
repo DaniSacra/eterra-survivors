@@ -2168,7 +2168,7 @@ continua os `specials` no mesmo ritmo.
 
 ### Base
 
-**FT-01 · Base dos inimigos novos: pools, tetos, agenda, chefes com várias habilidades e a métrica de dano** · impl + bal · M · proposto
+**FT-01 · Base dos inimigos novos: pools, tetos, agenda, chefes com várias habilidades e a métrica de dano** · impl + bal · M · ✅ feito (2026-11-11, enxuto)
 
 - Por quê: todo item FT precisa de projéteis do inimigo, marcas no chão, teto por tipo e uma medida de quem causa o
   dano. Feito uma vez, cada comportamento depois vira um `case` pequeno.
@@ -2200,7 +2200,12 @@ continua os `specials` no mesmo ritmo.
 - Aceite: testes de pool (teto, reuso), de `max` no spawner, de `specials`, de `abilities` em ciclo e de `loot`;
   `npm run sim` com `SIM_SHOP=all` idêntico ao anterior (só a linha nova de dano); F4 igual.
 
-**FT-02 · Marca no chão antes de surgir** · impl + vfx · P · proposto
+- Feito (FT-01, 2026-11-11): `core/enemyShots.ts` e `core/marks.ts` (pools com teto), `world.alive` e `max` no
+  spawner, `StageDef.specials`, `loot`, `hurtHero` com atacante nulo e fonte, `world.hurtBy` e a linha `DANO POR
+  FONTE` no sim. Ficaram para quando um item precisar: `abilities` (FT-08), `flee`/`still` fora do reciclar, bot
+  vendo tiros e marcas. Sim igual em Valmor e na Cripta.
+
+**FT-02 · Marca no chão antes de surgir** · impl + vfx · P · ✅ feito (2026-11-11, enxuto)
 
 - Por quê: inimigo que nasce dentro da tela (lados da Estrada, ovos, ninhos, a badalada do Sineiro) acerta sem aviso.
   Pilar 5.
