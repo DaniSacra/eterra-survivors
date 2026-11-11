@@ -1839,7 +1839,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 - O quê: pips sob o nome (barra contínua quando `maxLevel > 5`), 12 px, dentro do card de 40 px do RB-05.
 - Aceite: captura sem `?dev` em 360x740 e 420x820 com o nível de todos os itens.
 
-**NU-10 · Preparação: cartão deitado sem transbordar e vitórias por herói** · ui + visual · P · proposto
+**NU-10 · Preparação: cartão deitado sem transbordar e vitórias por herói** · ui + visual · P · ✅ feito (2026-11-11)
 
 - Por quê: 05-ui #10/#11/#12. Em 820x400 a descrição do herói passa da borda e encosta em "Fase" (`SelectScene.ts:69-71`,
   `171-176`); a Preparação não mostra o que cada herói já venceu, que é o convite para "agora com a Lyra" (pilar 4).

@@ -1,7 +1,7 @@
 import { heroFit } from '../render/assets';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
-import { heroUnlocked, lastRun, stageUnlocked, unlockHero } from '../core/meta';
+import { heroUnlocked, lastRun, newHeroRecord, stageUnlocked, unlockHero, type MetaSave } from '../core/meta';
 import type { RunSetup } from '../core/world';
 import { CHARACTERS, CHARACTER_IDS, type CharacterId } from '../data/characters';
 import { STAGES, STAGE_IDS, type StageId } from '../data/stages';
@@ -21,7 +21,7 @@ import {
   restartOnResize,
   seal,
 } from '../render/ui';
-import { ART_SCALE } from '../render/art/pen';
+import { ART_SCALE, INK } from '../render/art/pen';
 import { SCENES } from './keys';
 
 /** The last choice, kept in the game registry (and in the save, for the next visit). */
@@ -52,10 +52,13 @@ export class SelectScene extends Phaser.Scene {
     super(SCENES.select);
   }
 
+  /** The save read in create(), for the hero cards' stage marks. */
+  private save!: MetaSave;
+
   create(): void {
     const { width, height } = this.scale;
     const cx = width / 2;
-    const save = loadSave();
+    const save = (this.save = loadSave());
     const choice = lastChoice(this.registry);
     if (!stageUnlocked(save, choice.stage)) {
       choice.stage = 'valmor';
@@ -180,7 +183,16 @@ export class SelectScene extends Phaser.Scene {
       .setAlpha(owned ? 1 : 0.4);
     label(this, x - w / 2 + 46, top + 9, c.name, 16, { bold: true, align: 'left' });
     label(this, x - w / 2 + 46, top + 28, c.role, 12, { color: UI.muted, align: 'left' });
-    if (h < 70) return;
+    // What this hero has already won, one mark per stage in the top-right corner (as on the Heróis tab, NU-10).
+    const rec = this.save.records[id] ?? newHeroRecord();
+    STAGE_IDS.forEach((stage, k) => {
+      const won = (rec.wins[stage] ?? 0) > 0;
+      this.add
+        .circle(x + w / 2 - 12 - (STAGE_IDS.length - 1 - k) * 14, top + 14, 5, won ? UI.goldHex : UI.panelOff)
+        .setStrokeStyle(1.5, won ? INK : UI.border);
+    });
+    // Low cards (phone lying down) keep name and role only: the description would spill out.
+    if (h < 80) return;
     const desc = owned ? c.desc : t.select.unlock(CHARACTERS[id].cost);
     const d = label(this, x - w / 2 + 10, top + 58, desc, 12, {
       color: owned ? UI.text : UI.gold,
