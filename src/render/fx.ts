@@ -152,9 +152,9 @@ export const TINT = {
   frost: 0xf4f6ff,
   slowed: 0xe2def2,
   /** Bleeding (Leque de Facas): the shadow element's emerald; burning (Espada de Fogo): ember orange. */
-  bleed: 0x8ef0b4,
-  burn: 0xffa070,
-  heroHurt: 0xff9090,
+  bleed: 0xe0f4e8,
+  burn: 0xffd8c0,
+  heroHurt: 0xffd0d0,
   /** The hero's outline while invulnerable, and the snow under the menu's party. */
   blink: 0xffffff,
   snow: 0xe8eff8,
@@ -224,9 +224,19 @@ export function drawFx(
   drawMoments(g, top, world, m, hero);
   drawCharges(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
+  // Many patches stacked (Espada de Fogo, Nevasca) must not wash the screen: the fills share a budget (NF-02).
+  let frosts = 0;
+  let burns = 0;
+  for (let iZ = 0; iZ < world.zones.active.length; iZ++)
+    if ((world.zones.active[iZ] as (typeof world.zones.active)[number]).slows) frosts++;
+    else burns++;
+  const frostK = Math.min(1, FROST_FILLS / Math.max(1, frosts));
+  const burnK = Math.min(1, EMBER_FILLS / Math.max(1, burns));
+  const fewFlames = burns > 8;
   for (let iZ = 0; iZ < world.zones.active.length; iZ++) {
     const z = world.zones.active[iZ] as (typeof world.zones.active)[number];
-    drawZone(g, z, world.time);
+    if (z.slows) drawZone(g, z, world.time, frostK, frosts > 8);
+    else drawEmbers(g, z, world.time, burnK, fewFlames);
   }
   for (let iW = 0; iW < world.weapons.length; iW++) {
     const w = world.weapons[iW] as (typeof world.weapons)[number];
@@ -829,18 +839,27 @@ function drawAura(
  * every damage tick a ring of frost runs from the middle to the edge and the crystals pulse; at the end its rim
  * breaks into pieces. Nevasca adds falling snowflakes.
  */
-function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
-  if (!z.slows) return drawEmbers(g, z, time);
+function drawZone(
+  g: Phaser.GameObjects.Graphics,
+  z: Zone,
+  time: number,
+  fillK: number,
+  crowded: boolean,
+): void {
   const elo = !!z.source && isElo(z.source.id);
   const age = z.duration - z.ttl;
   const fade = Math.min(1, z.ttl / ZONE_BREAK);
   const land = Math.min(1, age / ZONE_LAND);
   const r = z.radius * (1 - (1 - land) * (1 - land));
   const tk = 1 - z.tick / config.zones.tick; // 0 right at a tick
-  g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade);
+  g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade * fillK);
   disc(g, z.x, z.y, r);
-  // The rim: whole while it lasts, broken into pieces as it melts away.
-  g.lineStyle(elo ? 4 : 2.5, elo ? BLIZZARD_EDGE : 0xffffff, 0.8 * fade);
+  // The rim: whole while it lasts, broken into pieces as it melts away (thinner when many overlap).
+  g.lineStyle(
+    elo && !crowded ? 4 : crowded ? 3 : 2.5,
+    elo ? BLIZZARD_EDGE : 0xffffff,
+    (crowded ? 0.6 : 0.8) * fade,
+  );
   if (z.ttl > ZONE_BREAK) ring(g, z.x, z.y, r);
   else {
     const gap = 0.5 * (1 - fade);
@@ -892,17 +911,23 @@ function drawZone(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
  * Espada de Fogo's burning ground: a glowing patch with a rim of embers and flame tongues flickering up from it,
  * fading out as it cools. Whoever walks in catches fire (the orange tint).
  */
-function drawEmbers(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void {
+function drawEmbers(
+  g: Phaser.GameObjects.Graphics,
+  z: Zone,
+  time: number,
+  fillK: number,
+  fewFlames: boolean,
+): void {
   const fade = Math.min(1, z.ttl / ZONE_BREAK);
   const r = z.radius;
   // Light fills: patches overlap a lot under a crowd, and stacked they must never hide who walks in them.
-  g.fillStyle(0x3a1408, 0.18 * fade);
+  g.fillStyle(0x3a1408, 0.18 * fade * fillK);
   disc(g, z.x, z.y, r);
-  g.fillStyle(ELEMENT_COLOR.fire, 0.14 * fade);
+  g.fillStyle(ELEMENT_COLOR.fire, 0.14 * fade * fillK);
   disc(g, z.x, z.y, r * 0.8);
   g.lineStyle(2, EMBER, 0.6 * fade);
   ring(g, z.x, z.y, r);
-  const n = 7;
+  const n = fewFlames ? 3 : 7;
   for (let i = 0; i < n; i++) {
     const ph = (time * 1.6 + i * 0.37 + z.x * 0.001) % 1;
     const a = (i * Math.PI * 2) / n + z.y * 0.01;
@@ -915,6 +940,10 @@ function drawEmbers(g: Phaser.GameObjects.Graphics, z: Zone, time: number): void
     disc(g, fx, fy, fr);
   }
 }
+
+/** How many stacked patches' worth of fill the screen takes: past it, each patch's fill fades (NF-02). */
+const FROST_FILLS = 5;
+const EMBER_FILLS = 6;
 
 /** Radius of Muralha de Valmor's guard around the hero (just outside the sprite and its light). */
 const WARD_R = 32;

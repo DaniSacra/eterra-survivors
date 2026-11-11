@@ -70,6 +70,9 @@ const DUST = 0xc8bca8;
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
 const SPIN: Record<string, boolean> = { 'proj.hammer': true, 'proj.forgeFury': true };
 /** Each Elo's projectile sprite, tinted with its element's colour. */
+/** How long the hero's outline shows the danger colour after a hit (s). */
+const HURT_OUTLINE = 0.12;
+
 /** Light colours (the light map multiplies the ground by them). */
 const PROJECTILE_LIGHT = 0xffe8b0;
 const BOSS_LIGHT = 0xd8b0ff;
@@ -184,6 +187,8 @@ export class GameScene extends Phaser.Scene {
   private bossAct = 0;
   private obstacles!: Obstacles;
   private lighting!: Lighting;
+  /** World time of the last hit on the hero (the outline flashes the danger colour). */
+  private hurtAt = -1;
   /** The view rectangle the ground covers this frame (world px), for the light map. */
   private view = { x: 0, y: 0, w: 1, h: 1 };
   private forest: Phaser.GameObjects.TileSprite[] = [];
@@ -204,6 +209,7 @@ export class GameScene extends Phaser.Scene {
     // The scene instance is reused by "play again": nothing may leak from the last run.
     this.controls = null;
     this.gemStreak = 0;
+    this.hurtAt = -1;
     this.lastGem = -1;
     this.liveSave = loadSave();
     this.liveShown.clear();
@@ -504,11 +510,12 @@ export class GameScene extends Phaser.Scene {
     this.playerSprite.setPosition(w.player.x, w.player.y - step * 2.5).setScale(sx, sy);
     // Hurt (invulnerable): the outline blinks white instead of the hero fading into the crowd.
     const blink = w.player.iframes > 0 && Math.sin(w.time * 40) > 0;
+    const hurt = w.time - this.hurtAt < HURT_OUTLINE;
     this.playerOutline
       .setPosition(w.player.x, w.player.y - step * 2.5 + 1)
       // Pixel art already has its own dark outline: a thin rim in the hero's colour is enough.
       .setScale(sx * (anims ? 1.07 : 1.22), sy * (anims ? 1.04 : 1.16))
-      .setTintFill(blink ? TINT.blink : HERO_COLOR[w.character]);
+      .setTintFill(hurt ? UI.dangerHex : blink ? TINT.blink : HERO_COLOR[w.character]);
     if (anims) this.playerOutline.setTexture(this.playerSprite.texture.key, this.playerSprite.frame.name);
     if (w.player.facing.x !== 0) {
       this.playerSprite.setFlipX(w.player.facing.x < 0);
@@ -883,9 +890,11 @@ export class GameScene extends Phaser.Scene {
         case 'playerHit':
           sound.play('hurt');
           this.shake(120, 0.006);
-          // A red wash (multiplied, so the face stays visible) while the outline blinks white.
+          // The hurt shows on the outline (danger colour, then blinking white): the hero keeps their own colours,
+          // with only a faint warm flash for a tenth of a second (NF-05).
+          this.hurtAt = w.time;
           this.playerSprite.setTint(TINT.heroHurt);
-          this.time.delayedCall(140, () => this.playerSprite.clearTint());
+          this.time.delayedCall(100, () => this.playerSprite.clearTint());
           break;
         case 'bossSpawned':
           sound.play('boss');

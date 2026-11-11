@@ -1673,7 +1673,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: capturas de Quebra-Junta, Estrela de Lyra, Tempestade e Espada de Fogo com 400 inimigos onde dá para contar
   os inimigos dentro do golpe.
 
-**NF-02 · Chão somado e tintas que apagam o inimigo** · vfx · P · proposto
+**NF-02 · Chão somado e tintas que apagam o inimigo** · vfx · P · ✅ feito (2026-11-11; sem a gotinha sobre a cabeça)
 
 - Por quê: 06-vfx #1 (alto), #6, #7. A Espada de Fogo deixa 21 a 28 chãos em brasa somados: um tapete laranja, e
   `TINT.burn 0xffa070` deixa a multidão inteira laranja chapada (`sheet-fireSword-p.png`); a Nevasca, ~15 zonas a 0,22,
@@ -1706,7 +1706,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   `drawCharges` num laço só.
 - Aceite: captura dos escudos e da onda da maça onde o empurrão se lê parado; F4 igual.
 
-**NF-05 · Herói ferido não perde a cor** · vfx + visual · P · proposto
+**NF-05 · Herói ferido não perde a cor** · vfx + visual · P · ✅ feito (2026-11-11: contorno na cor de perigo 0,12 s, tinta 0xffd0d0 por 0,1 s)
 
 - Por quê: 04-visual #7. `heroHurt: 0xff9090` (`fx.ts:169`) deixa a Lyra com cara de Andilla e o Teo um boneco
   vermelho sob multidão (`08-crowd-crypt-1000x680.png`, `16-teo-crypt-420x820.png`).
