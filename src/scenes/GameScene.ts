@@ -20,7 +20,8 @@ import { bankOnEnd, newRunSummary, summarizeRun, type RunSummary } from '../core
 import { liveAchievements } from '../core/achievements';
 import type { MetaSave } from '../core/meta';
 import type { AchievementId } from '../data/achievements';
-import { WEAPONS, WEAPON_IDS, type WeaponDef, type WeaponId } from '../data/weapons';
+import { WEAPONS, WEAPON_IDS, type AuraLevel, type WeaponDef, type WeaponId } from '../data/weapons';
+import { isElo, weaponStats } from '../core/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
@@ -36,6 +37,8 @@ import {
   PILE_SHAKE,
   SHOT_PLAIN,
   TINT,
+  HEAL_COLOR,
+  FX_LIGHTS,
   drawFx,
   newMoments,
   shotStyle,
@@ -190,6 +193,12 @@ export class GameScene extends Phaser.Scene {
   private pickupMirror!: Mirror<Pickup, Phaser.GameObjects.Image>;
   private fx!: Phaser.GameObjects.Graphics;
   private fxTop!: Phaser.GameObjects.Graphics;
+  /** The additive layer: flames, auras and sparks that add light over what is below. */
+  private fxGlow!: Phaser.GameObjects.Graphics;
+  /** The "+N" of a heal, rising and fading, and the life it adds up while it waits to be shown. */
+  private healText!: Phaser.GameObjects.Text;
+  private healAcc = 0;
+  private healAge = 9;
   private banked = false;
   /** The Noite Sem Fim was recorded (it ends once: death or quitting). */
   private vigilBanked = false;
@@ -313,6 +322,18 @@ export class GameScene extends Phaser.Scene {
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
     this.fxTop = this.add.graphics().setDepth(11);
+    this.fxGlow = this.add.graphics().setDepth(11.5).setBlendMode(Phaser.BlendModes.ADD);
+    this.healText = this.add
+      .text(0, 0, '', {
+        fontFamily: UI.font,
+        fontSize: `${NUMBER_FONT}px`,
+        fontStyle: 'bold',
+        color: '#9bf0a8',
+      })
+      .setStroke('#0b3a1c', 3)
+      .setOrigin(0.5)
+      .setDepth(12.6)
+      .setVisible(false);
     const heroSprite = CHARACTERS[this.world.character].sprite;
     this.shadows = this.add.graphics().setDepth(4.5);
     this.heroBar = this.add.graphics().setDepth(13.2);
@@ -437,7 +458,12 @@ export class GameScene extends Phaser.Scene {
             if (img.uid === e.uid && img.stunned && e.hitBy && (WEAPONS[e.hitBy] as WeaponDef).crush)
               this.crushSpark(e);
           }
-          if (e.dot > 0 && this.sparks.idle && this.sparks.rand() < DOT_SPARK) this.dotSpark(e);
+          if (
+            (e.dot > 0 || (e.def.burst && e.pile <= 0)) &&
+            this.sparks.idle &&
+            this.sparks.rand() < DOT_SPARK
+          )
+            this.dotSpark(e);
         }
         this.pileMoments(img, e);
         img.uid = e.uid;
@@ -541,11 +567,66 @@ export class GameScene extends Phaser.Scene {
       const color = z.burnDps > 0 ? BURN_LIGHT : z.slows ? FROST_LIGHT : ZONE_LIGHT;
       l.add(z.x, z.y, z.radius * 2.2, color, 0.6);
     }
+    this.effectLights();
     // Chests glow where they lie.
     const items = w.pickups.active;
     for (let i = 0; i < items.length; i++) {
       const it = items[i] as (typeof items)[number];
       l.add(it.x, it.y, 90, it.type === 'chest' ? 0xffd070 : 0xc8d8ff, 0.5);
+    }
+  }
+
+  /**
+   * Lights of weapon and status effects, at most FX_LIGHTS a frame: burning bodies (a pool of orange on the ground,
+   * flickering), the aura's breath, a fresh bolt. The pools over the crowd are drawn by drawFx's additive layer.
+   */
+  private effectLights(): void {
+    const w = this.world;
+    const l = this.lighting;
+    const calm = this.calm;
+    let used = 0;
+    for (let i = 0; i < w.weapons.length && used < FX_LIGHTS; i++) {
+      const wp = w.weapons[i] as (typeof w.weapons)[number];
+      const def = WEAPONS[wp.id] as WeaponDef;
+      if (def.kind !== 'aura') continue;
+      const st = weaponStats(wp) as AuraLevel;
+      const k = 1 - wp.timer / (st.cooldown * w.player.stats.cooldown);
+      const flare = calm ? 0 : Math.max(0, 1 - k * 3);
+      l.add(
+        w.player.x,
+        w.player.y,
+        st.radius * w.player.stats.area * 1.3,
+        isElo(wp.id) ? 0xff8a30 : 0xffc860,
+        0.45 + 0.4 * flare,
+        0.1 + 0.1 * flare,
+      );
+      used++;
+    }
+    const foes = w.enemies.active;
+    if (w.alive.emberBones) {
+      for (let i = 0; i < foes.length && used < FX_LIGHTS - 2; i++) {
+        const e = foes[i] as (typeof foes)[number];
+        if (!e.def.burst || e.dead || e.pile > 0) continue;
+        l.flame(e.x, e.y - 6, 120, 0xff7a24, w.time, calm);
+        used++;
+      }
+    }
+    const bolts = w.bolts.active;
+    for (let i = 0; i < bolts.length && used < FX_LIGHTS; i++) {
+      const b = bolts[i] as (typeof bolts)[number];
+      const k = Math.min(1, b.ttl / config.effects.boltTtl);
+      const c = HIT_SPARK[b.weapon]?.[1] ?? 0xfff0c0;
+      l.add(b.x, b.y, b.radius * 2 + 50, c, 0.6 * k, 0.15 * k);
+      used++;
+    }
+    if (!calm && w.state !== 'levelup') {
+      const slashes = w.slashes.active;
+      for (let i = 0; i < slashes.length && used < FX_LIGHTS; i++) {
+        const sl = slashes[i] as (typeof slashes)[number];
+        if (sl.form !== 'smash' && sl.form !== 'shock') continue;
+        l.add(sl.x, sl.y, sl.range * 1.5 + 40, HIT_SPARK[sl.weapon]?.[1] ?? 0xfff0c0, 0.4, 0);
+        used++;
+      }
     }
   }
 
@@ -623,7 +704,10 @@ export class GameScene extends Phaser.Scene {
     [this.pilesPrev, this.pilesNow] = [this.pilesNow, this.pilesPrev];
     this.nPrev = this.nNow;
     this.nNow = 0;
-    if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) this.healSpark();
+    if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) {
+      this.healAcc += w.player.hp - this.lastHp;
+      this.healSpark();
+    }
     this.lastHp = w.player.hp;
     this.deathSparks();
     this.swingSparks();
@@ -659,10 +743,11 @@ export class GameScene extends Phaser.Scene {
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);
-    drawFx(this.fx, this.fxTop, w, this.moments);
+    drawFx(this.fx, this.fxTop, w, this.moments, this.fxGlow, this.calm);
     // Sparks keep flying after the boss falls (the world stops), but hold still behind the level-up choice.
     if (w.state !== 'levelup') this.sparks.update(delta / 1000);
-    this.sparks.draw(this.fxTop);
+    this.sparks.draw(this.fxGlow);
+    this.showHealNumber(delta / 1000);
     const v = this.view;
     this.lighting.render(v.x, v.y, v.w, v.h, delta / 1000);
     this.showReward();
@@ -990,11 +1075,12 @@ export class GameScene extends Phaser.Scene {
     const sp = this.sparks;
     const r = e.def.radius;
     const x = e.x + (sp.rand() - 0.5) * r;
-    if (e.dotKind === 'bleed') sp.add(x, e.y + r * 0.2, 0, 20, 0.45, 8, ELEMENT_COLOR.shadow, SPARK.drop);
-    else sp.add(x, e.y - r * 0.4, 0, -25, 0.5, 6, ELEMENT_COLOR.fire, SPARK.ember);
+    if (e.dot > 0 && e.dotKind === 'bleed')
+      sp.add(x, e.y + r * 0.2, 0, 20, 0.45, 8, ELEMENT_COLOR.shadow, SPARK.drop);
+    else sp.add(x, e.y - r * 0.7, (sp.rand() - 0.5) * 16, -40, 0.7, 6, ELEMENT_COLOR.fire, SPARK.ember);
   }
 
-  /** The hero healed: red crosses (the life bar's colour) rising from the hero, and the bar glows (drawFx). */
+  /** The hero healed: green crosses and motes of light rising from the hero, and the bar glows green (drawFx). */
   private healSpark(): void {
     const p = this.world.player;
     const sp = this.sparks;
@@ -1005,12 +1091,44 @@ export class GameScene extends Phaser.Scene {
         p.y - 18 - sp.rand() * 12,
         0,
         -60,
-        0.6,
+        0.7,
         7,
-        UI.hp,
+        HEAL_COLOR,
         SPARK.cross,
         true,
       );
+    for (let i = 0; i < 3; i++)
+      sp.add(
+        p.x + (sp.rand() - 0.5) * 30,
+        p.y + 6,
+        (sp.rand() - 0.5) * 20,
+        -45 - sp.rand() * 30,
+        0.6,
+        5,
+        0xc8ffd0,
+        SPARK.ember,
+      );
+  }
+
+  /** The "+N" of recent healing, green, rising from the hero (only with the damage numbers on). */
+  private showHealNumber(dt: number): void {
+    const t = this.healText;
+    this.healAge += dt;
+    if (this.healAcc >= 1 && this.healAge > 0.5 && settings().damageNumbers) {
+      this.healAge = 0;
+      t.setText(`+${Math.round(this.healAcc)}`);
+      this.healAcc = 0;
+    }
+    if (this.healAge > 0.9) {
+      t.setVisible(false);
+      if (!settings().damageNumbers) this.healAcc = 0;
+      return;
+    }
+    const p = this.world.player;
+    t.setVisible(true)
+      .setPosition(p.x, p.y - 34 - this.healAge * 30)
+      .setScale(this.numberScale)
+      .setAlpha(Math.min(1, (0.9 - this.healAge) * 3));
   }
 
   /** Lobo Velho's lunge ending: dust where it stops. */

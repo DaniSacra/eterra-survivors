@@ -204,8 +204,8 @@ export const newMoments = (): Moments => ({
   frost: -Infinity,
   heal: -Infinity,
 });
-/** How long the life bar glows after a heal, seconds. */
-const HEAL_SHOW = 0.3;
+/** Regeneration is green, never the life bar's red (a red rise reads as losing life). */
+export const HEAL_COLOR = 0x7ae890;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
 export const CHEST_SHOW = 1.3;
 
@@ -218,22 +218,21 @@ export function drawFx(
   top: Phaser.GameObjects.Graphics,
   world: World,
   m: Moments,
+  glow?: Phaser.GameObjects.Graphics,
+  calm = false,
 ): void {
   let g = ground;
   g.clear();
   top.clear();
+  if (glow) {
+    glow.clear();
+    drawGlow(glow, world, m, calm);
+  }
   const p = world.player;
   const hero = HERO_COLOR[world.character];
   drawIce(g, world);
+  drawSlime(g, world);
   drawPatches(g, world);
-  // The hero's light: a solid ring with a slow pulse around it, so the eye finds them in any crowd.
-  const pulse = 1 + 0.12 * Math.sin(world.time * 4);
-  g.fillStyle(hero, 0.35);
-  oval(g, p.x, p.y + 15, 44, 16);
-  g.lineStyle(3, hero, 1);
-  ovalRing(g, p.x, p.y + 15, 44, 16);
-  g.lineStyle(2, 0xffffff, 0.35);
-  ovalRing(g, p.x, p.y + 15, 52 * pulse, 20 * pulse);
   drawMoments(g, top, world, m, hero);
   drawBursts(g, top, world.time, m);
   drawCharges(g, world);
@@ -352,19 +351,6 @@ export function drawFx(
   drawEnemyShots(top, world);
   drawFoes(g, top, world);
   g = top;
-  // Life under the hero's feet, so it can be read without looking at the corner.
-  const hpK = Math.max(0, p.hp / p.stats.maxHp);
-  g.fillStyle(INK, 0.8).fillRoundedRect(p.x - 17, p.y + 25, 34, 6, 3);
-  // The HUD's life color; low (under 35%) it blinks in the danger coral.
-  const low = hpK <= 0.35 && Math.sin(world.time * 12) > 0;
-  g.fillStyle(low ? UI.dangerHex : UI.hp).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
-  // Healed: the bar glows white for a moment, so the gain is seen where the life is read.
-  const healed = world.time - m.heal;
-  if (healed < HEAL_SHOW) {
-    const hk = 1 - healed / HEAL_SHOW;
-    g.lineStyle(2, 0xffffff, 0.9 * hk).strokeRoundedRect(p.x - 18, p.y + 24, 36, 8, 4);
-    g.fillStyle(0xffffff, 0.5 * hk).fillRoundedRect(p.x - 16, p.y + 26, 32 * hpK, 4, 2);
-  }
   // A chest on the ground twinkles: a soft gold ring around it and a star that blinks on its lid.
   for (let iIt = 0; iIt < world.pickups.active.length; iIt++) {
     const it = world.pickups.active[iIt] as (typeof world.pickups.active)[number];
@@ -850,6 +836,135 @@ function drawSouls(g: Phaser.GameObjects.Graphics, world: World, n: number, left
     disc(g, x, y, 6);
     g.fillStyle(0xffffff, a);
     disc(g, x, y, 2.5);
+  }
+}
+
+/** The most effect lights a frame may ask of the light map (flames, auras, bolts: the budget of NF-02). */
+export const FX_LIGHTS = 8;
+/** The most burning bodies drawn with flames in a frame. */
+const BURNING_SHOWN = 14;
+const FLAME_OUTER = 0xff5a14;
+const FLAME_MID = 0xffa030;
+const FLAME_CORE = 0xfff2c0;
+const HEAL_FLASH = 0.45;
+
+/** A soft pool of light: nested ovals on the additive layer, brighter in the middle. */
+function softPool(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  rx: number,
+  ry: number,
+  color: number,
+  alpha: number,
+): void {
+  for (let i = 0; i < 4; i++) {
+    const f = 1 - i * 0.24;
+    g.fillStyle(color, alpha * 0.28);
+    oval(g, x, y, rx * f, ry * f);
+  }
+}
+
+/** One tongue of fire: a teardrop of three nested layers whose tip sways and flickers. */
+function tongue(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  t: number,
+  seed: number,
+  a: number,
+): void {
+  const sway = Math.sin(t * 9 + seed * 1.7) * w * 0.5;
+  const flick = 0.82 + 0.18 * Math.sin(t * 17 + seed * 2.3);
+  const hh = h * flick;
+  g.fillStyle(FLAME_OUTER, 0.5 * a);
+  disc(g, x, y, w);
+  g.fillTriangle(x - w, y, x + w, y, x + sway, y - hh);
+  g.fillStyle(FLAME_MID, 0.6 * a);
+  disc(g, x, y, w * 0.65);
+  g.fillTriangle(x - w * 0.65, y, x + w * 0.65, y, x + sway * 0.8, y - hh * 0.72);
+  g.fillStyle(FLAME_CORE, 0.8 * a);
+  g.fillTriangle(x - w * 0.3, y, x + w * 0.3, y, x + sway * 0.5, y - hh * 0.42);
+}
+
+/**
+ * The additive layer: light that adds to what is below. A burning body (the Ossada em Brasa, anything with a burn)
+ * wears real flames, several tongues climbing from the shoulders and trembling, over a pool of orange light on the
+ * ground that also washes its neighbours. The aura breathes light; orbiting blades carry a glint; a heal glows green.
+ * The calm screen holds flames steady and dims the pools.
+ */
+function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm: boolean): void {
+  const t = calm ? 0 : world.time;
+  const dim = calm ? 0.6 : 1;
+  const p = world.player;
+  const foes = world.enemies.active;
+  let shown = 0;
+  for (let i = 0; i < foes.length && shown < BURNING_SHOWN; i++) {
+    const e = foes[i] as (typeof foes)[number];
+    const ember = !!e.def.burst && e.pile <= 0;
+    if (e.dead || !(ember || (e.dot > 0 && e.dotKind !== 'bleed'))) continue;
+    shown++;
+    const r = e.def.radius;
+    const pulse = 0.85 + 0.15 * Math.sin(t * 7 + e.uid);
+    softPool(g, e.x, e.y + r * 0.6, r * 3.4 * pulse, r * 2.2 * pulse, FLAME_OUTER, 0.5 * dim);
+    softPool(g, e.x, e.y + r * 0.5, r * 1.6, r * 1.0, FLAME_MID, 0.4 * dim);
+    const n = ember ? (calm ? 3 : 5) : 3;
+    const big = ember ? 1 : 0.6;
+    for (let k = 0; k < n; k++) {
+      const u = k / (n - 1) - 0.5; // -0.5 .. 0.5 across the shoulders
+      const hk = 1 - Math.abs(u) * 0.9;
+      tongue(
+        g,
+        e.x + u * r * 1.5,
+        e.y + r * (0.15 - 0.2 * hk),
+        (4.2 + 2.6 * hk) * big,
+        (20 + 16 * hk) * big,
+        t,
+        e.uid + k * 1.9,
+        dim > 0.9 ? 1 : 0.8,
+      );
+    }
+  }
+  for (let iW = 0; iW < world.weapons.length; iW++) {
+    const w = world.weapons[iW] as (typeof world.weapons)[number];
+    const def = WEAPONS[w.id] as WeaponDef;
+    if (def.kind === 'aura') {
+      const st = weaponStats(w) as AuraLevel;
+      const r = st.radius * p.stats.area;
+      const k = 1 - w.timer / (st.cooldown * p.stats.cooldown);
+      const flare = Math.max(0, 1 - k * 3);
+      const c = isElo(w.id) ? 0xff9a30 : 0xffd060;
+      softPool(g, p.x, p.y, r * 0.9, r * 0.8, c, (0.22 + 0.4 * flare) * dim);
+      g.lineStyle(3, 0xfff0c0, (0.15 + 0.5 * flare) * dim);
+      ring(g, p.x, p.y, r);
+    } else if (def.kind === 'orbit') {
+      const s = weaponStats(w) as OrbitLevel;
+      const count = s.count + p.stats.amount;
+      const orbitR = s.orbitRadius * p.stats.area;
+      const r = s.radius * p.stats.area;
+      const elo = isElo(w.id);
+      for (let i = 0; i < count; i++) {
+        const a = orbitAngle(world.time, s.spin, i, count);
+        const br = bladeRadius(w, a, orbitR);
+        const bx = p.x + Math.cos(a) * br;
+        const by = p.y + Math.sin(a) * br;
+        g.fillStyle(elo ? 0xfff0b0 : 0xcfe4ff, 0.22 * dim);
+        disc(g, bx, by, r * 1.5);
+        g.fillStyle(0xffffff, 0.45 * dim);
+        disc(g, bx, by, r * 0.5);
+      }
+    }
+  }
+  // Healed: a green glow under the hero and green motes of light rising from it.
+  const healed = world.time - m.heal;
+  if (healed < HEAL_FLASH) {
+    const hk = 1 - healed / HEAL_FLASH;
+    softPool(g, p.x, p.y + 6, 34, 26, HEAL_COLOR, 0.45 * hk * dim);
+    // The life bar under the feet (GameScene.heroBar: 44 px wide, 44 px below the centre) glows green too.
+    g.lineStyle(2, HEAL_COLOR, 0.9 * hk * dim).strokeRoundedRect(p.x - 24, p.y + 42, 48, 10, 3);
+    softPool(g, p.x, p.y + 47, 34, 9, HEAL_COLOR, 0.6 * hk * dim);
   }
 }
 
@@ -1712,7 +1827,7 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
     if (m.kind !== 'poison' && m.kind !== 'tar' && m.kind !== 'web' && m.kind !== 'slime') continue;
     const r = m.radius;
     const color = m.kind === 'poison' ? POISON : m.kind === 'web' ? WEB : m.kind === 'slime' ? SLIME : TAR;
-    if (m.ttl > 0 && m.kind === 'slime') continue;
+    if (m.kind === 'slime') continue;
     if (m.ttl > 0) {
       const k = 1 - m.ttl / m.total; // 0 -> 1
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
@@ -1749,19 +1864,6 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
     if (m.kind === 'tar') {
       g.fillStyle(0xb07020, 0.3 * fade);
       disc(g, m.x - r * 0.3, m.y - r * 0.3, r * 0.35);
-    } else if (m.kind === 'slime') {
-      // Thick green ooze: a darker core, glossy blobs and a pale sheen; it clings, so no rising bubbles.
-      g.fillStyle(0x1e6a46, 0.35 * fade);
-      disc(g, m.x + r * 0.1, m.y + r * 0.1, r * 0.6);
-      for (let b = 0; b < 5; b++) {
-        const bx = m.x + Math.cos(b * 1.9 + m.y) * r * 0.55;
-        const by = m.y + Math.sin(b * 2.7 + m.x) * r * 0.45;
-        const pulse = 1 + 0.15 * Math.sin(world.time * 2 + b);
-        g.fillStyle(0x7ae8a8, 0.35 * fade);
-        disc(g, bx, by, (3 + (b % 3)) * pulse);
-        g.fillStyle(0xe0fff0, 0.55 * fade);
-        disc(g, bx - 1, by - 1, 1.2);
-      }
     } else {
       // Bubbles that rise and burst, fixed to the patch.
       for (let b = 0; b < 4; b++) {
@@ -1770,6 +1872,117 @@ function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void {
         const by = m.y + Math.sin(b * 1.7 + m.x) * r * 0.4 - ph * 8;
         g.fillStyle(0xe8f0a0, (1 - ph) * 0.8 * fade);
         disc(g, bx, by, 2 + ph * 2);
+      }
+    }
+  }
+}
+
+const SLIME_N = 16;
+const BLOB_X = new Float32Array(SLIME_N);
+const BLOB_Y = new Float32Array(SLIME_N);
+const SLIME_RIM = 0x1b5238;
+const SLIME_BODY = 0x35a56a;
+const SLIME_WET = 0xb8ffd8;
+
+/** A fan-filled organic blob: its edge wobbles between 0.82 and 1.0 of `r` (never past the true radius). */
+function blob(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  r: number,
+  seed: number,
+  time: number,
+): void {
+  for (let i = 0; i < SLIME_N; i++) {
+    const a = (i / SLIME_N) * Math.PI * 2;
+    const w = 0.91 + 0.06 * Math.sin(seed * 1.3 + i * 2.1) + 0.03 * Math.sin(seed + i * 3.7 + time * 1.2);
+    BLOB_X[i] = x + Math.cos(a) * r * w;
+    BLOB_Y[i] = y + Math.sin(a) * r * w * 0.92;
+  }
+  for (let i = 0; i < SLIME_N; i++) {
+    const j = (i + 1) % SLIME_N;
+    g.fillTriangle(x, y, BLOB_X[i] as number, BLOB_Y[i] as number, BLOB_X[j] as number, BLOB_Y[j] as number);
+  }
+}
+
+/**
+ * Slime on the ground (the Gosma's slow): one clinging puddle with an irregular edge that fuses with its neighbours.
+ * Three passes over all patches (rims, then bodies, then shine) so overlaps do not pile up transparency: wet gloss,
+ * bubbles that swell and pop with a few droplets, all inside the exact slow radius.
+ */
+function drawSlime(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.marks.active;
+  const t = world.time;
+  for (let pass = 0; pass < 3; pass++) {
+    for (let i = 0; i < list.length; i++) {
+      const m = list[i] as (typeof list)[number];
+      if (m.kind !== 'slime') continue;
+      const r = m.radius;
+      if (m.ttl > 0) {
+        // The flask is still in the air: the warning (pass 0 only).
+        if (pass > 0) continue;
+        const k = 1 - m.ttl / m.total;
+        g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
+        disc(g, m.x, m.y, r);
+        g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
+        dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (t * (30 + 50 * k)) % (DASH * 2));
+        const fx = m.fromX + (m.x - m.fromX) * k;
+        const fy = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
+        g.fillStyle(INK, 1);
+        disc(g, fx, fy, 6.5);
+        g.fillStyle(SLIME, 1);
+        disc(g, fx, fy, 4.5);
+        continue;
+      }
+      const fade = Math.min(1, m.life / 0.6);
+      const seed = m.x * 0.013 + m.y * 0.021;
+      if (pass === 0) {
+        g.fillStyle(SLIME_RIM, 0.92 * fade);
+        blob(g, m.x, m.y, r, seed, t);
+        // Lobes that bulge out and fuse with neighbours.
+        for (let b = 0; b < 3; b++) {
+          const a = seed * 7 + b * 2.1;
+          disc(g, m.x + Math.cos(a) * r * 0.78, m.y + Math.sin(a) * r * 0.72, r * 0.2);
+        }
+      } else if (pass === 1) {
+        g.fillStyle(SLIME_BODY, 0.95 * fade);
+        blob(g, m.x, m.y, r * 0.88, seed + 1, t);
+        g.fillStyle(0x2a8a58, 0.8 * fade);
+        blob(g, m.x + r * 0.08, m.y + r * 0.1, r * 0.55, seed + 2, t);
+      } else {
+        // Wet gloss: a pale crescent and two glints.
+        g.fillStyle(SLIME_WET, 0.35 * fade);
+        oval(g, m.x - r * 0.28, m.y - r * 0.32, r * 0.34, r * 0.12);
+        g.fillStyle(0xffffff, 0.6 * fade);
+        disc(g, m.x - r * 0.42, m.y - r * 0.34, 1.6);
+        disc(g, m.x + r * 0.3, m.y + r * 0.18, 1.2);
+        // Bubbles that swell and pop, each with a few droplets.
+        for (let b = 0; b < 3; b++) {
+          const ph = (t * 0.55 + b * 0.33 + seed) % 1;
+          const a = b * 2.4 + Math.floor(t * 0.55 + b * 0.33 + seed) * 1.7;
+          const d = r * (0.2 + 0.45 * ((b * 0.37 + Math.floor(t * 0.55 + seed)) % 1));
+          const bx = m.x + Math.cos(a) * d;
+          const by = m.y + Math.sin(a) * d * 0.8;
+          if (ph < 0.8) {
+            const br = 1.5 + 4 * (ph / 0.8);
+            g.fillStyle(SLIME_WET, 0.45 * fade);
+            disc(g, bx, by, br);
+            g.lineStyle(1, 0xffffff, 0.7 * fade);
+            ring(g, bx, by, br);
+            g.fillStyle(0xffffff, 0.8 * fade);
+            disc(g, bx - br * 0.35, by - br * 0.35, br * 0.25);
+          } else {
+            // The pop: a ring and droplets flung out.
+            const pk = (ph - 0.8) / 0.2;
+            g.lineStyle(1.5, SLIME_WET, 0.8 * (1 - pk) * fade);
+            ring(g, bx, by, 5.5 + 5 * pk);
+            g.fillStyle(SLIME_WET, 0.8 * (1 - pk) * fade);
+            for (let q = 0; q < 4; q++) {
+              const qa = q * 1.57 + b;
+              disc(g, bx + Math.cos(qa) * (4 + 7 * pk), by + Math.sin(qa) * (3 + 5 * pk) - 4 * pk, 1.4);
+            }
+          }
+        }
       }
     }
   }
