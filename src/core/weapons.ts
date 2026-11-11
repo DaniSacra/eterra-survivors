@@ -110,7 +110,7 @@ export function updateWeapons(world: World, dt: number): void {
     const kind = WEAPONS[w.id].kind;
     // Orbit blades are always out: they test contact every frame, and the cooldown is the re-hit delay.
     if (kind === 'orbit') {
-      sweepOrbit(world, weaponStats(w) as OrbitLevel, w, slot);
+      sweepOrbit(world, weaponStats(w) as OrbitLevel, w, slot, dt);
       continue;
     }
     if (w.after > 0) {
@@ -141,7 +141,13 @@ const amount = (world: World, base: number): number => base + world.player.stats
  * right on it.
  */
 export function bladeRadius(w: OwnedWeapon, a: number, orbitR: number): number {
-  const dart = (WEAPONS[w.id] as WeaponDef).dart;
+  const def = WEAPONS[w.id] as WeaponDef;
+  // A wall surges out while it bashes (`w.after` counts the bash down).
+  if (def.wall)
+    return w.after > 0
+      ? orbitR + def.wall.reach * Math.sin(Math.PI * (1 - w.after / def.wall.window))
+      : orbitR;
+  const dart = def.dart;
   if (!dart || w.aimReach <= 0) return orbitR;
   // How far from the aim the blade is, in turns (-0.5..0.5).
   let d = (a - w.aim) / TAU;
@@ -153,6 +159,70 @@ export function bladeRadius(w: OwnedWeapon, a: number, orbitR: number): number {
 /** Angle of blade `i` of `count` of an orbit weapon at time `t` (shared with the renderer). */
 export const orbitAngle = (t: number, spin: number, i: number, count: number): number =>
   t * spin + (i * TAU) / count;
+
+/**
+ * Angle of piece `i` of `count` of an orbit weapon, spinning or, for a wall of shields, standing side by side
+ * around `w.aim` (the way the hero walks), or evenly round the whole ring when the wall is closed.
+ * `r` is a piece's hit radius and `orbitR` its distance from the hero.
+ */
+export function pieceAngle(
+  w: OwnedWeapon,
+  t: number,
+  s: OrbitLevel,
+  i: number,
+  count: number,
+  r: number,
+  orbitR: number,
+): number {
+  const wall = (WEAPONS[w.id] as WeaponDef).wall;
+  if (!wall) return orbitAngle(t, s.spin, i, count);
+  if (wall.arc >= TAU) return (i * TAU) / count;
+  // Shield to shield, a little overlapped, never wider than the arc.
+  const step = Math.min((2 * r * 0.9) / orbitR, wall.arc / count);
+  return w.aim + (i - (count - 1) / 2) * step;
+}
+
+/** A wall of shields: turns after the hero's heading and, every `every` s, bashes (`updateWall`). */
+function updateWall(
+  world: World,
+  s: OrbitLevel,
+  w: OwnedWeapon,
+  dt: number,
+  count: number,
+  orbitR: number,
+  hitR: number,
+): void {
+  const wall = (WEAPONS[w.id] as WeaponDef).wall as NonNullable<WeaponDef['wall']>;
+  const p = world.player;
+  if (wall.turn > 0) {
+    const want = Math.atan2(p.facing.y, p.facing.x);
+    const d = angleDiff(w.aim, want);
+    const step = wall.turn * dt;
+    w.aim += Math.abs(d) <= step ? d : Math.sign(d) * step;
+  }
+  if (w.after > 0) w.after = Math.max(0, w.after - dt);
+  w.timer -= dt;
+  if (w.timer > 0) return;
+  w.timer = wall.every * p.stats.cooldown;
+  w.after = wall.window;
+  w.swings++;
+  // The blow: everything in front of the wall (all round it, when closed) is hurt and thrown back.
+  const list = world.enemies.active;
+  const reach = orbitR + wall.reach + hitR;
+  const half = wall.arc >= TAU ? Math.PI : (wall.arc + (2 * hitR) / orbitR) / 2;
+  const ids = world.enemyHash.query(p.x, p.y, reach + MAX_ENEMY_RADIUS, world.scratch);
+  for (let n = 0; n < ids.length; n++) {
+    const e = list[ids[n] as number] as Enemy;
+    if (e.dead || isFaded(e)) continue;
+    const ox = e.x - p.x;
+    const oy = e.y - p.y;
+    const d = Math.hypot(ox, oy) || 1;
+    if (d > reach + e.def.radius) continue;
+    if (half < Math.PI && Math.abs(angleDiff(w.aim, Math.atan2(oy, ox))) > half) continue;
+    damageEnemy(world, e, dmg(world, s.damage * wall.damage), ox / d, oy / d, wall.push, w);
+  }
+  if (count > 0) world.tally.attacks++;
+}
 
 function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   const p = world.player;
@@ -421,13 +491,14 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   return true;
 }
 
-function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): void {
+function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number, dt: number): void {
   const p = world.player;
   const list = world.enemies.active;
   const count = amount(world, s.count);
   const orbitR = s.orbitRadius * p.stats.area;
   const hitR = s.radius * p.stats.area;
   const rehit = s.cooldown * p.stats.cooldown;
+  if ((WEAPONS[w.id] as WeaponDef).wall) updateWall(world, s, w, dt, count, orbitR, hitR);
   const dart = (WEAPONS[w.id] as WeaponDef).dart;
   if (dart) {
     // Out to the nearest enemy beyond the circle (those inside it, the swords already pass through).
@@ -451,7 +522,7 @@ function sweepOrbit(world: World, s: OrbitLevel, w: OwnedWeapon, slot: number): 
     w.aimReach = found ? Math.min(reach, best - orbitR) : 0;
   }
   for (let i = 0; i < count; i++) {
-    const a = orbitAngle(world.time, s.spin, i, count);
+    const a = pieceAngle(w, world.time, s, i, count, hitR, orbitR);
     const br = bladeRadius(w, a, orbitR);
     const bx = p.x + Math.cos(a) * br;
     const by = p.y + Math.sin(a) * br;

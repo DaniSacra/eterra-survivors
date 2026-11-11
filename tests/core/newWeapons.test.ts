@@ -196,3 +196,48 @@ describe('Cajado de Lyra (thrown, bursts)', () => {
     expect(w.projectiles.size).toBe(0);
   });
 });
+
+describe('Escudos de Valmor (a wall, not a spin)', () => {
+  const still0 = (e: ReturnType<typeof spawnEnemy>) => {
+    e.hp = e.maxHp = 1e6;
+    e.def = { ...e.def, speed: 0, knockbackResist: 0 };
+  };
+
+  it('the shields stand in front of the walking direction and turn with it', () => {
+    const w = prepared('shields');
+    w.weapons[0]!.level = 7;
+    w.player.facing.x = 0;
+    w.player.facing.y = 1; // walking down
+    for (let i = 0; i < 90; i++) w.step(1 / 60, still);
+    const aim = w.weapons[0]!.aim;
+    expect(Math.sin(aim)).toBeGreaterThan(0.99);
+    // They do not spin: the heading stays put with the hero standing still.
+    const before = w.weapons[0]!.aim;
+    for (let i = 0; i < 60; i++) w.step(1 / 60, still);
+    expect(w.weapons[0]!.aim).toBeCloseTo(before, 5);
+  });
+
+  it('the bash throws back what is in front, not what is behind', () => {
+    const w = prepared('shields');
+    w.player.facing.x = 1;
+    w.player.facing.y = 0;
+    const front = spawnEnemy(w, 'bones', 90, 0);
+    const behind = spawnEnemy(w, 'bones', -90, 0);
+    still0(front);
+    still0(behind);
+    for (let i = 0; i < 40; i++) w.step(1 / 60, still);
+    expect(front.x).toBeGreaterThan(90 + 20);
+    expect(behind.x).toBeCloseTo(-90, 0);
+  });
+
+  it('the Muralha de Valmor closes the ring: it bashes on every side', () => {
+    const w = prepared('valmorWall');
+    const a = spawnEnemy(w, 'bones', 110, 0);
+    const b = spawnEnemy(w, 'bones', -110, 0);
+    still0(a);
+    still0(b);
+    for (let i = 0; i < 40; i++) w.step(1 / 60, still);
+    expect(a.x).toBeGreaterThan(110 + 20);
+    expect(b.x).toBeLessThan(-110 - 20);
+  });
+});

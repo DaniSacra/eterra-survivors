@@ -152,6 +152,20 @@ export type WeaponDef = {
      * enemy (over `window` of the turn).
      */
     dart?: { reach: number; window: number };
+    /**
+     * Shields that do not spin: they stand as a wall in front of the hero (`arc` = 2 PI closes the ring), turning
+     * after the walking direction at `turn` rad/s. Every `every` s the wall bashes: it surges out `reach` px for
+     * `window` s and throws everything in front of it back (`push`, x`damage` of a shield's blow).
+     */
+    wall?: {
+      arc: number;
+      turn: number;
+      every: number;
+      window: number;
+      reach: number;
+      push: number;
+      damage: number;
+    };
     /** Nevasca: an enemy that dies inside its frost shatters, hurting all around it (x`damage` of a tick). */
     shatter?: { damage: number; radius: number };
     /** Tempestade: each bolt jumps to `count` more enemies within `range`, x`damage` each. */
@@ -292,13 +306,13 @@ export const WEAPONS = {
     kind: 'orbit',
     category: 'area',
     levels: levels<OrbitLevel>(
-      { damage: 6.8, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 12, spin: 3, knockback: 80 },
+      { damage: 7.6, cooldown: 0.4, count: 1, orbitRadius: 70, radius: 9, spin: 5, knockback: 80 },
       { count: 2 },
-      { damage: 9.6 },
-      { count: 3, spin: 3.5 },
-      { orbitRadius: 82, radius: 14 },
+      { damage: 10.7 },
+      { count: 3, spin: 5.8 },
+      { orbitRadius: 82, radius: 10 },
       { count: 4 },
-      { damage: 12, spin: 4 },
+      { damage: 13.4, spin: 6.6 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
@@ -381,14 +395,15 @@ export const WEAPONS = {
   shields: {
     kind: 'orbit',
     category: 'area',
+    wall: { arc: 2.4, turn: 7, every: 3.2, window: 0.28, reach: 36, push: 900, damage: 3 },
     levels: levels<OrbitLevel>(
-      { damage: 9.4, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 2.2, knockback: 600 },
-      { damage: 12 },
+      { damage: 11.3, cooldown: 0.8, count: 1, orbitRadius: 80, radius: 11, spin: 0, knockback: 600 },
+      { damage: 14.4 },
       { count: 2 },
       { orbitRadius: 88, radius: 12 },
-      { damage: 16, cooldown: 0.7 },
+      { damage: 19.2, cooldown: 0.7 },
       { count: 3 },
-      { damage: 23, spin: 2.6 },
+      { damage: 27.6 },
     ),
   },
   /** Maça de Ferro: a heavy blow in front that leaves enemies reeling; every third, a shock wave throws them back. */
@@ -570,10 +585,9 @@ export const WEAPONS = {
   /** Muralha de Valmor: a ring of shields, wide and close-set, that the dead can't get through. */
   valmorWall: {
     kind: 'orbit',
+    wall: { arc: Math.PI * 2, turn: 0, every: 3, window: 0.3, reach: 44, push: 1100, damage: 1.5 },
     ward: { every: 10, damage: 3 },
-    levels: [
-      { damage: 110, cooldown: 0.5, count: 6, orbitRadius: 100, radius: 16, spin: 2.6, knockback: 750 },
-    ],
+    levels: [{ damage: 37, cooldown: 0.5, count: 10, orbitRadius: 72, radius: 21, spin: 0, knockback: 750 }],
   },
   /** Estrela de Lyra: the orb bursts and splits into small stars that fall around it and burst again. */
   lyraStar: {

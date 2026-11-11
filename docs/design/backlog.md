@@ -3227,7 +3227,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 4 · Armas de órbita
 
-- **DD-09 · Escudos de Valmor e Espadas dos Paladinos** · impl + visual + bal · G. Arte PixelLab nova e comportamento
+- ✅ **DD-09 · Escudos de Valmor e Espadas dos Paladinos** · impl + visual + bal · G. Arte PixelLab nova e comportamento
   novo. Escudos deixam de girar: ficam como parede à frente do herói, na direção em que anda, com pancada periódica que
   empurra o bando (a Muralha de Valmor fecha o anel). Espadas giram mais rápido, finas, com rastro de corte. Ambas
   seguem dentro da banda de categoria (`bands.test.ts`) e ganham testes.

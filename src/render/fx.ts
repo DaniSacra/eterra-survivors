@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
 import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponDef, type WeaponId } from '../data/weapons';
-import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
+import { bladeRadius, isElo, pieceAngle, weaponStats } from '../core/weapons';
 import { wardReady } from '../core/elos';
 import { config } from '../data/config';
 import { BossAct, CLEAVE_SHOW, bossAbility } from '../core/bosses';
@@ -209,7 +209,9 @@ export const newMoments = (): Moments => ({
 /** No ground zone is filled more opaque than this: the ring says where it ends, the fill only tints. */
 export const ZONE_FILL_MAX = 0.35;
 /** Texture width of the shield sprite (art px). */
+/** Width of the shield art and length of the sword art, in art px. */
 const SHIELD_ART = 24;
+const SWORD_ART = 40;
 export const HEAL_COLOR = 0x7ae890;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
 export const CHEST_SHOW = 1.3;
@@ -304,10 +306,10 @@ export function drawFx(
           }
       }
       // Swords leave a trail along their circle, so the turn reads even in a still frame.
-      const trail = elo ? 1 : 0.6;
+      const trail = elo ? 1 : 1.1;
       const dir = s.spin >= 0 ? 1 : -1;
       for (let i = 0; i < count; i++) {
-        const a = orbitAngle(world.time, s.spin, i, count);
+        const a = pieceAngle(w, world.time, s, i, count, r, orbitR);
         // Vigília's swords dart out toward the nearest enemy and back.
         const br = bladeRadius(w, a, orbitR);
         const x = p.x + Math.cos(a) * br;
@@ -318,26 +320,33 @@ export function drawFx(
         }
         if (style.blade) {
           const tc = elo ? ITEM_GLINT : style.color;
-          top.fillStyle(tc, 0.16);
+          // A thin cut that fades behind the blade: a pale band and a bright edge line at its tip.
+          top.fillStyle(tc, elo ? 0.16 : 0.2);
           band(
             top,
             p.x,
             p.y,
-            orbitR - r * 0.6,
-            orbitR + r * 0.6,
+            orbitR - r * (elo ? 0.6 : 0.3),
+            orbitR + r * (elo ? 0.6 : 0.3),
             dir > 0 ? a - trail : a,
             dir > 0 ? a : a + trail,
           );
-          top.fillStyle(tc, 0.28);
+          top.fillStyle(tc, elo ? 0.28 : 0.45);
           band(
             top,
             p.x,
             p.y,
-            orbitR - r * 0.4,
-            orbitR + r * 0.4,
+            orbitR - r * (elo ? 0.4 : 0.15),
+            orbitR + r * (elo ? 0.4 : 0.15),
             dir > 0 ? a - trail * 0.4 : a,
             dir > 0 ? a : a + trail * 0.4,
           );
+          if (!elo) {
+            top.lineStyle(2, 0xffffff, 0.8);
+            top.beginPath();
+            top.arc(p.x, p.y, orbitR, dir > 0 ? a - trail * 0.5 : a, dir > 0 ? a : a + trail * 0.5);
+            top.strokePath();
+          }
           // Vigília: a white-gold glow exactly the size of the hit.
           if (elo) {
             top.fillStyle(0xfff6d0, 0.3);
@@ -345,8 +354,10 @@ export function drawFx(
             top.lineStyle(1.5, ITEM_GLINT, 0.7);
             ring(top, x, y, r);
           }
-          drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
-        } else drawShield(x, y, r);
+          if (elo) drawSword(top, x, y, a + (dir * Math.PI) / 2, r, style);
+          // The pixel sword points the way it turns (its tip is up in the art).
+          else fxSprites.put('fx.sword', x, y, a + (dir * Math.PI) / 2 + Math.PI / 2, (r * 6) / SWORD_ART);
+        } else drawShield(x, y, r, a);
       }
     }
   }
@@ -935,14 +946,14 @@ function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm
       const r = s.radius * p.stats.area;
       const elo = isElo(w.id);
       for (let i = 0; i < count; i++) {
-        const a = orbitAngle(world.time, s.spin, i, count);
+        const a = pieceAngle(w, world.time, s, i, count, r, orbitR);
         const br = bladeRadius(w, a, orbitR);
         const bx = p.x + Math.cos(a) * br;
         const by = p.y + Math.sin(a) * br;
-        g.fillStyle(elo ? 0xfff0b0 : 0xcfe4ff, 0.22 * dim);
-        disc(g, bx, by, r * 1.5);
-        g.fillStyle(0xffffff, 0.45 * dim);
-        disc(g, bx, by, r * 0.5);
+        g.fillStyle(elo ? 0xfff0b0 : 0xcfe4ff, 0.14 * dim);
+        disc(g, bx, by, r * 1.3);
+        g.fillStyle(0xffffff, 0.3 * dim);
+        disc(g, bx, by, r * 0.4);
       }
     }
   }
@@ -2287,6 +2298,6 @@ function drawSword(
 }
 
 /** A round shield of hit radius `r`: the pixel shield, grown to the size of the hit. */
-function drawShield(x: number, y: number, r: number): void {
-  fxSprites.put('fx.shield', x, y, 0, (r * 2) / SHIELD_ART);
+function drawShield(x: number, y: number, r: number, rot = 0): void {
+  fxSprites.put('fx.shield', x, y, rot, (r * 2.2) / SHIELD_ART);
 }
