@@ -1,7 +1,7 @@
 import { config } from '../data/config';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import { hurtHero } from './elos';
-import { spawnEnemy } from './enemies';
+import { damageEnemy, spawnEnemy, type Enemy } from './enemies';
 import type { Poolable } from './pool';
 import type { World } from './world';
 
@@ -10,9 +10,9 @@ import type { World } from './world';
  * (FT-02: nothing appears inside the view without warning). `ice`: a patch of the Lobo Velho's ice, forming while
  * `ttl` runs out, then slowing the hero to `slow` until the fight ends (core/arena.ts, FT-08).
  */
-export type MarkKind = 'spawn' | 'ice' | 'poison' | 'tar' | 'web';
+export type MarkKind = 'spawn' | 'ice' | 'poison' | 'tar' | 'web' | 'burst';
 /** The marks that are patches of ground the hero can stand in. */
-export const isPatch = (k: MarkKind): boolean => k !== 'spawn';
+export const isPatch = (k: MarkKind): boolean => k !== 'spawn' && k !== 'burst';
 
 export interface Mark extends Poolable {
   kind: MarkKind;
@@ -38,6 +38,8 @@ export interface Mark extends Poolable {
   tick: number;
   fromX: number;
   fromY: number;
+  /** burst (FT-14): damage to each other enemy within `radius` when it goes off. */
+  foe: number;
 }
 
 export const createMark = (): Mark => ({
@@ -57,6 +59,7 @@ export const createMark = (): Mark => ({
   tick: 0,
   fromX: 0,
   fromY: 0,
+  foe: 0,
 });
 
 /** A patch of ground (poison, tar, web) warning for `arm` s, then lasting `life` s (see Mark). */
@@ -86,6 +89,32 @@ export function addPatch(
   m.tick = config.marks.poolTick;
   m.fromX = fromX;
   m.fromY = fromY;
+  m.born = world.time;
+  return true;
+}
+
+/**
+ * A burst (FT-14): the mark of a fallen Ossada em Brasa, going off in `delay` s. `hero` damage to the hero inside
+ * `radius`, `foe` to every other enemy there.
+ */
+export function addBurst(
+  world: World,
+  x: number,
+  y: number,
+  radius: number,
+  delay: number,
+  hero: number,
+  foe: number,
+): boolean {
+  if (world.marks.size >= config.marks.max) return false;
+  const m = world.marks.acquire();
+  m.kind = 'burst';
+  m.x = x;
+  m.y = y;
+  m.radius = radius;
+  m.ttl = m.total = delay;
+  m.damage = hero;
+  m.foe = foe;
   m.born = world.time;
   return true;
 }
@@ -129,6 +158,21 @@ export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult =
   return true;
 }
 
+/** A burst goes off: the hero inside is hurt, and so is every enemy there. Kills are swept with the step. */
+function explode(world: World, m: Mark): void {
+  const p = world.player;
+  const rr = m.radius * m.radius;
+  if ((p.x - m.x) ** 2 + (p.y - m.y) ** 2 < (m.radius + config.player.radius) ** 2)
+    if (hurtHero(world, null, m.damage, 'ground')) world.events.push({ type: 'playerHit' });
+  const list = world.enemies.active;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i] as Enemy;
+    if (e.dead || e.def.boss || (e.x - m.x) ** 2 + (e.y - m.y) ** 2 > rr) continue;
+    damageEnemy(world, e, m.foe, 0, 0, 0, null);
+  }
+  world.events.push({ type: 'burst', x: m.x, y: m.y, radius: m.radius });
+}
+
 /** Counts the marks down; a spawn mark that runs out lets its enemy rise. */
 export function updateMarks(world: World, dt: number): void {
   const list = world.marks.active;
@@ -139,6 +183,11 @@ export function updateMarks(world: World, dt: number): void {
     if (m.ttl > 0) continue;
     if (m.kind === 'ice') {
       m.ttl = 0; // formed: stays until the fight ends
+      continue;
+    }
+    if (m.kind === 'burst') {
+      explode(world, m);
+      world.marks.release(m);
       continue;
     }
     if (m.kind !== 'spawn') {

@@ -10,17 +10,17 @@ import { bareWorld, quietWorld, still } from './helpers';
 describe('run counters', () => {
   it('counts kills by type and marks every type that appeared', () => {
     const w = bareWorld();
-    for (const type of ['bones', 'bones', 'bat'] as const) {
+    for (const type of ['graveRat', 'graveRat', 'bat'] as const) {
       const e = spawnEnemy(w, type, 300, 0);
       damageEnemy(w, e, 9999);
     }
     spawnEnemy(w, 'skeleton', 300, 300);
     w.step(1 / 60, still);
-    expect(w.killsBy).toEqual({ bones: 2, bat: 1 });
-    expect(w.seen).toEqual({ bones: true, bat: true, skeleton: true });
+    expect(w.killsBy).toEqual({ graveRat: 2, bat: 1 });
+    expect(w.seen).toEqual({ graveRat: true, bat: true, skeleton: true });
     const s = summarizeRun(w);
-    expect(s.killsBy).toEqual({ bones: 2, bat: 1 });
-    expect(s.seen).toEqual(['bones', 'bat', 'skeleton']);
+    expect(s.killsBy).toEqual({ graveRat: 2, bat: 1 });
+    expect(s.seen).toEqual(['bat', 'skeleton', 'graveRat']);
     expect(s.kills).toBe(3);
   });
 
@@ -42,7 +42,7 @@ describe('run counters', () => {
     w.step(1, still);
     expect(w.firstHitAt).toBe(-1);
     expect(summarizeRun(w).untouched).toBeCloseTo(w.time);
-    spawnEnemy(w, 'bones', 0, 0);
+    spawnEnemy(w, 'graveRat', 0, 0);
     w.step(1 / 60, still);
     expect(w.player.hitsTaken).toBe(1);
     const at = w.firstHitAt;

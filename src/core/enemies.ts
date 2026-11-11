@@ -55,6 +55,9 @@ export interface Enemy extends Poolable {
   actT: number;
   aimX: number;
   aimY: number;
+  /** reassemble: seconds left as a pile (0: standing), and whether it has already stood up once. */
+  pile: number;
+  rose: boolean;
   dead: boolean;
   /** Swept without a kill: no XP, no drop, not counted (the crowd leaving when the boss arrives). */
   vanished: boolean;
@@ -94,6 +97,8 @@ export const createEnemy = (): Enemy => ({
   abilityIdx: 0,
   vanished: false,
   aimY: 0,
+  pile: 0,
+  rose: false,
   dead: false,
 });
 
@@ -160,6 +165,8 @@ export function spawnEnemy(world: World, type: EnemyId, x: number, y: number, hp
   e.stir = 0;
   e.carry = 0;
   e.abilityIdx = 0;
+  e.pile = 0;
+  e.rose = false;
   e.dead = e.vanished = false;
   world.seen[type] = true;
   world.alive[type] = (world.alive[type] ?? 0) + 1;
@@ -202,6 +209,15 @@ export function damageEnemy(
   source: OwnedWeapon | null = null,
 ): void {
   if (e.dead || isFaded(e)) return;
+  if (e.pile > 0) {
+    // A pile of bones: any hit breaks it for good.
+    e.pile = 0;
+    e.hp = 0;
+    e.dead = true;
+    world.tally.hits++;
+    onKill(world, e, source);
+    return;
+  }
   if (source) {
     source.damage += Math.min(amount, e.hp);
     if (amount > world.bestHit) world.bestHit = amount;
@@ -217,6 +233,15 @@ export function damageEnemy(
   e.kby += ky * kb;
   world.onEnemyDamaged(e, amount, source);
   if (e.hp <= 0) {
+    const re = e.def.reassemble;
+    if (re && !e.rose) {
+      // Not dead yet: a pile that stands up again unless something hits it (FT-15).
+      e.pile = re.delay;
+      e.hp = 0;
+      e.dot = e.dotDps = 0;
+      e.kbx = e.kby = 0;
+      return;
+    }
     e.dead = true;
     onKill(world, e, source);
   }
@@ -238,6 +263,18 @@ export function updateEnemies(world: World, dt: number): void {
     const e = list[i] as Enemy;
     if (e.dead) continue;
     if (e.flash > 0) e.flash -= dt;
+    if (e.pile > 0) {
+      // A pile lies still; it stands up when its time is out (the frozen world waits).
+      if (!frozen) {
+        e.pile -= dt;
+        if (e.pile <= 0) {
+          e.pile = 0;
+          e.rose = true;
+          e.hp = e.maxHp * (e.def.reassemble as { hp: number }).hp;
+        }
+      }
+      continue;
+    }
 
     // Seek: straight vector to the player.
     const dx = p.x - e.x;
@@ -345,6 +382,7 @@ export function updateEnemies(world: World, dt: number): void {
       cx * cx + cy * cy < minD * minD &&
       !isFaded(e) &&
       !isAirborne(e) &&
+      e.pile <= 0 &&
       e.def.damage > 0 &&
       e.stun <= 0 &&
       // A boss bites as hard all fight long: the wave curve's damage ramp is for the crowd (NE-05).

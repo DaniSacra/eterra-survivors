@@ -241,6 +241,8 @@ export const t = {
       frost: 'Uivo da Geada',
       web: 'Teia',
       eggs: 'Ovos',
+      reassemble: 'Levanta se a pilha não for quebrada',
+      burst: 'Estoura ao cair',
     },
     /** A boss with several abilities lists them by name (the same kind can have another name in another boss). */
     bossAbilities: {
@@ -276,6 +278,8 @@ export const t = {
       spiderEgg: 'Quebre antes que trinque.',
       // written for the Survivors (provisional, FT-11)
       witch: 'Ri sozinha mexendo o caldeirão. Derrube a velha e a última poção é sua.',
+      // written for the Survivors (provisional, FT-14)
+      emberBones: 'As brasas no peito não apagam com a queda. Longe dela, quando estourar.',
       // written for the Survivors (provisional, FT-10)
       thiefRat: 'Leva tudo o que brilha no chão. Pegue o rato e pegue o saco.',
       spiderNest: 'Um novelo de teia que pulsa. Cada pulso é mais uma aranha.',
@@ -717,6 +721,7 @@ export const t = {
     warBanner: 'Estandarte da Aliança Negra',
     spiderNest: 'Ninho de Aranha',
     thiefRat: 'Rato Ladrão',
+    emberBones: 'Ossada em Brasa',
     witch: 'Bruxa do Caldeirão',
     spiderEgg: 'Ovo de Aranha',
     spiderMother: 'Mãe-Aranha',

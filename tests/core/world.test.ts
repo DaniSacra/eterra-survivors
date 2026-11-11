@@ -47,7 +47,7 @@ describe('tally', () => {
   it('counts attacks, hits, kills and gems for the renderer', () => {
     const w = bareWorld();
     w.addWeapon('blade');
-    spawnEnemy(w, 'bones', 30, 0);
+    spawnEnemy(w, 'graveRat', 30, 0);
     w.step(1 / 60, still);
     expect(w.tally.attacks).toBe(1);
     expect(w.tally.hits).toBe(1);

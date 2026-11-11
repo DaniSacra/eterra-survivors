@@ -336,8 +336,9 @@ export class GameScene extends Phaser.Scene {
       (): EnemyImage => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
       (img, e) => {
         const w = this.world;
-        if (img.texture.key !== e.def.sprite) {
-          img.setTexture(e.def.sprite);
+        const key = e.pile > 0 ? (e.def.reassemble as { sprite: string }).sprite : e.def.sprite;
+        if (img.texture.key !== key) {
+          img.setTexture(key);
           // Bosses over their escort and elites over the crowd, so they always show whole.
           img.setDepth(e.def.boss ? 7 : e.def.elite ? 6 : 5);
         }
@@ -964,6 +965,10 @@ export class GameScene extends Phaser.Scene {
           this.hurtAt = w.time;
           this.playerSprite.setTint(TINT.heroHurt);
           this.time.delayedCall(100, () => this.playerSprite.clearTint());
+          break;
+        case 'burst':
+          this.sparks.burst(e.x, e.y, 14, e.radius * 3, 5, 0xff8a3a, SPARK.ember, 0.45, true);
+          this.sparks.add(e.x, e.y, 0, 0, 0.25, e.radius, 0xff8a3a, SPARK.ring, true);
           break;
         case 'bossSpawned':
           sound.play('boss');

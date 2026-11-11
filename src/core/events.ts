@@ -11,6 +11,8 @@ export type GameEvent =
   /** A thief rat showed up with its eye on the gems, and when it got away with them (FT-10). */
   | { type: 'thiefSpawned' }
   | { type: 'thiefEscaped' }
+  /** An Ossada em Brasa's mark went off (FT-14). */
+  | { type: 'burst'; x: number; y: number; radius: number }
   | { type: 'levelUp' }
   /** An elite's chest: the level it gave (null if nothing could level), with its gold and heal (data CHEST). */
   | { type: 'chest'; reward: UpgradeOption | null }

@@ -48,7 +48,7 @@ describe('enemyTraits (bestiary sheet)', () => {
     expect(enemyTraits(ENEMIES.rat).way).toBe('charge');
     expect(enemyTraits(ENEMIES.spider).way).toBe('zigzag');
     expect(enemyTraits(ENEMIES.ghost).way).toBe('phase');
-    expect(enemyTraits(ENEMIES.bones).way).toBeNull();
+    expect(enemyTraits(ENEMIES.graveRat).way).toBeNull();
   });
 
   it('keeps hp and contact damage as they are', () => {

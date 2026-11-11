@@ -19,7 +19,7 @@ import {
 } from './effects';
 import { createEnemy, sweepDeadEnemies, updateEnemies, type Enemy } from './enemies';
 import { createEnemyShot, updateEnemyShots, type EnemyShot, type HurtSource } from './enemyShots';
-import { createMark, updateMarks, type Mark } from './marks';
+import { addBurst, createMark, updateMarks, type Mark } from './marks';
 import { updateShatters } from './elos';
 import type { GameEvent } from './events';
 import { Rng, type Vec2 } from './math';
@@ -308,6 +308,11 @@ export class World {
     this.killsBy[e.type] = (this.killsBy[e.type] ?? 0) + 1;
     this.tally.kills++;
     addPuff(this, e.x, e.y, e.def.radius, 'death');
+    const burst = e.def.burst;
+    if (burst) {
+      const hero = e.def.damage * burst.damage * this.enemyDamage * this.stage.mult.damage;
+      addBurst(this, e.x, e.y, burst.radius, burst.delay, hero, e.maxHp * burst.foes);
+    }
     if (e.def.xp > 0) dropGem(this, e.x, e.y, e.def.xp);
     if (e.carry > 0) dropGem(this, e.x, e.y, e.carry);
     const loot = e.def.loot;

@@ -154,6 +154,30 @@ export const ENEMY_ART: Record<string, ArtDef> = {
   // ---- Cripta da Igreja Velha ----
   // Grey-lilac bones (the gems keep the blue), eyes a hot red that isn't Andilla's colour (NA-07).
   'enemy.bones': skeleton(0xb8b4cc, 0xff5a6a),
+  /** Ossada em Brasa (provisional): darker bones, an orange glow burning in the chest and the eyes (FT-14). */
+  'enemy.emberBones': {
+    w: 26,
+    h: 30,
+    draw(p) {
+      const sk = skeleton(0x8a7a78, 0xff9a2a);
+      sk.draw(p);
+      p.glow(13.5, 16, 3.2, 0xff7a2a);
+      p.glow(13.5, 16, 1.6, 0xffd060);
+    },
+  },
+  /** A pile of bones: what an Ossada leaves for three seconds, eyes still lit (FT-15). */
+  'enemy.bonePile': {
+    w: 26,
+    h: 16,
+    draw(p) {
+      p.shadow(13, 13, 20, 4);
+      p.rrect(3, 8, 20, 4, 2, 0xb8b4cc).rrect(6, 5, 14, 4, 2, 0xa8a4bc);
+      p.rrect(2, 4, 8, 2.5, 1.2, 0xb8b4cc).rrect(16, 3, 8, 2.5, 1.2, 0xb8b4cc);
+      p.circle(15, 6, 4.2, 0xc8c4dc); // the skull on top
+      p.ink();
+      p.glow(14, 6, 0.8, 0xff5a6a).glow(16.5, 6, 0.8, 0xff5a6a);
+    },
+  },
   'enemy.bat': winged(0x5e6a84, 0x434c62, 'bat'), // grey-blue: Lyra keeps purple
   'enemy.ghost': {
     w: 30,

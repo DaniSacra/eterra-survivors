@@ -1113,6 +1113,17 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
   for (let i = 0; i < list.length; i++) {
     const m = list[i] as (typeof list)[number];
+    if (m.kind === 'burst') {
+      // The embers swelling to the exact size of the blast.
+      const bk = 1 - m.ttl / m.total;
+      g.fillStyle(WARN_COLOR, 0.1 + 0.15 * bk);
+      disc(g, m.x, m.y, m.radius);
+      g.fillStyle(0xff8a3a, 0.2 + 0.3 * bk);
+      disc(g, m.x, m.y, m.radius * bk);
+      g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * bk);
+      dashedArc(g, m.x, m.y, m.radius, 0, Math.PI * 2, (world.time * (30 + 50 * bk)) % (DASH * 2));
+      continue;
+    }
     if (m.kind !== 'spawn') continue;
     const k = 1 - m.ttl / m.total; // 0 -> 1
     const r = m.radius * (0.6 + 0.6 * k);

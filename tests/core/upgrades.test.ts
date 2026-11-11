@@ -190,7 +190,6 @@ describe('passive limit', () => {
     for (const o of passives) expect(owned).toContain(o.id);
   });
 
-
   it('bumps buildRev on every build change, not on a heal', () => {
     const w = quietWorld();
     const r0 = w.buildRev;

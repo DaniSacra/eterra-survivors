@@ -2542,7 +2542,7 @@ Valmor" (provisórios).
 
 Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depende das respostas 4 e 10.
 
-**FT-14 · Explode ao morrer** · impl + vfx · P · proposto (espera as respostas 4 e 10)
+**FT-14 · Explode ao morrer** · impl + vfx · P · ✅ feito (2026-11-11, decidido sem as respostas)
 
 - O quê: `burst`. Ao morrer, deixa uma marca que estoura em `delay` s: fere o herói no raio (contato x `damage`) e os
   inimigos no raio (`foes` da vida máxima do próprio estourador, que já cresce com o `hpMult`). Atrair a multidão para o
@@ -2552,7 +2552,7 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   tremor (não é bomba do herói).
 - Aceite: teste do aviso e dos dois danos; sim: `burst` abaixo de 30% do dano.
 
-**FT-15 · Remonta se a pilha não for quebrada** · impl + vfx · P · proposto (com a Cripta)
+**FT-15 · Remonta se a pilha não for quebrada** · impl + vfx · P · ✅ feito (2026-11-11; a Ossada remonta com 30% da vida, não 50%, para a Cripta ficar na faixa)
 
 - O quê: `reassemble`. A primeira morte não mata: vira pilha (sem contato, parada, sem gema, sem `onKill`), que levanta
   em `delay` s com metade da vida; qualquer acerto na pilha a destrói de vez (aí sim gema e abate). Mira automática pode
@@ -2561,7 +2561,13 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
 - Visual: pilha de ossos com os olhos ainda acesos, que tremem e se juntam no último segundo.
 - Aceite: teste: levanta sem acerto, acerto destrói, Nevasca e Procissão só contam a morte de verdade.
 
-**FT-16 · Cripta montada** · impl + bal + visual · M · proposto (depois das respostas do Daniel)
+**FT-16 · Cripta montada** · impl + bal + visual · M · parcial (2026-11-11)
+
+- Feito: Ossada que remonta (básico), Ossada em Brasa como especial (`from` 40 s, a cada 12 s, máx. 8), `mult.hp` 1.35
+  para 1.25. Sim `SIM_SEEDS=16`: Cripta 0% / 17% / 83%. Decisões para o Daniel mudar: elite continua o Golem (pergunta 4),
+  Morcego Vampiro e Espectro atirador (Toque Gélido) ainda não entraram, o rastro de limo da Gosma Verde (pergunta 10)
+  e a segunda habilidade do Sineiro também não; o morcego cinzento segue na fase.
+- Falta: rastro (`trail`) da Gosma Verde, atirador espiritual, Sineiro com 2ª habilidade, arte final da Ossada em Brasa.
 
 - Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
   Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do

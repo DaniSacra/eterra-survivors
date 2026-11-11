@@ -125,6 +125,16 @@ export interface EnemyDef {
    */
   flee?: { keep: number; life: number; steal: boolean };
   /**
+   * reassemble (FT-15): the first death is not one. It falls in a pile (harmless, still, no gem) that stands up again
+   * after `delay` s with `hp` of its max life; any hit on the pile breaks it for good.
+   */
+  reassemble?: { delay: number; hp: number; sprite: string };
+  /**
+   * burst (FT-14): when it dies for good it leaves a mark that bursts after `delay` s: hurts the hero within `radius`
+   * px (contact damage x `damage`) and the other enemies there (`foes` of its own max HP).
+   */
+  burst?: { delay: number; radius: number; damage: number; foes: number };
+  /**
    * Besides its gem: gold (before greed and the stage's mult), a random floor item, a chest (an elite always drops
    * one) and a given pickup.
    */
@@ -151,7 +161,29 @@ export interface ChargeDef {
 
 export const ENEMIES = {
   // Arredores de Valmor: the graveyard of the original (Ossadas, grey bats, grave rats) and its sturdier dead.
-  bones: { sprite: 'enemy.bones', radius: 11, hp: 10, speed: 70, damage: 5, xp: 1, knockbackResist: 0 },
+  /** Ossada: in the crypt it does not stay down unless the pile is broken (FT-15). */
+  bones: {
+    sprite: 'enemy.bones',
+    radius: 11,
+    hp: 10,
+    speed: 70,
+    damage: 5,
+    xp: 1,
+    knockbackResist: 0,
+    reassemble: { delay: 3, hp: 0.3, sprite: 'enemy.bonePile' },
+  },
+  /** Ossada em Brasa (provisional name): the embers in its chest go off a second after it falls (FT-14). */
+  emberBones: {
+    sprite: 'enemy.emberBones',
+    radius: 11,
+    hp: 14,
+    speed: 66,
+    damage: 5,
+    xp: 2,
+    knockbackResist: 0,
+    max: 8,
+    burst: { delay: 1, radius: 48, damage: 1.5, foes: 0.6 },
+  },
   bat: { sprite: 'enemy.bat', radius: 8, hp: 5, speed: 126, damage: 4, xp: 1, knockbackResist: 0 },
   skeleton: {
     sprite: 'enemy.skeleton',

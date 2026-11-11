@@ -23,6 +23,8 @@ export type EnemyWay =
   | 'banner'
   | 'nest'
   | 'flee'
+  | 'reassemble'
+  | 'burst'
   | 'elite'
   | 'cleave'
   | 'frost'
@@ -47,6 +49,16 @@ export function enemyTraits(def: EnemyDef, heroSpeed = config.player.stats.moveS
   const push: PushClass = k >= 0.9 ? 'none' : k >= 0.5 ? 'little' : 'easy';
   const way: EnemyWay | null =
     def.ability?.kind ??
-    (def.elite ? 'elite' : def.banner ? 'banner' : def.nest ? 'nest' : (def.move ?? null));
+    (def.elite
+      ? 'elite'
+      : def.banner
+        ? 'banner'
+        : def.nest
+          ? 'nest'
+          : def.burst
+            ? 'burst'
+            : def.reassemble
+              ? 'reassemble'
+              : (def.move ?? null));
   return { hp: def.hp, speed, damage: def.damage, push, way };
 }
