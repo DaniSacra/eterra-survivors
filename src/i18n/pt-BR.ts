@@ -233,6 +233,7 @@ export const t = {
       cleave: 'Corte Brutal',
       toll: 'Badalada',
       lunge: 'Mordida Funda',
+      frost: 'Uivo da Geada',
     },
     /** A line about each enemy: from the original where it has one, else written for the Survivors (docs/design/conquistas.md). */
     quote: (line: string) => `"${line}"`,
@@ -526,6 +527,7 @@ export const t = {
   },
 
   bossWarning: (boss: string) => `${boss} chegou!`,
+  arenaClosed: (boss: string) => `${boss} fecha a estrada!`,
   /** Segunda Chance used: the hero got up again. */
   revived: 'Segunda Chance! De pé outra vez.',
 

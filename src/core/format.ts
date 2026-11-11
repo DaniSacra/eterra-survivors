@@ -23,6 +23,7 @@ export type EnemyWay =
   | 'banner'
   | 'elite'
   | 'cleave'
+  | 'frost'
   | 'toll'
   | 'lunge';
 

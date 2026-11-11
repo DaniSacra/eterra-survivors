@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { DamageNumber } from '../core/effects';
-import { BossAct } from '../core/bosses';
+import { BossAct, bossAbility } from '../core/bosses';
+import type { BossAbility } from '../data/enemies';
 import { CHARGE, isFaded } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Projectile } from '../core/projectiles';
@@ -194,6 +195,7 @@ export class GameScene extends Phaser.Scene {
   private lastHp = 0;
   /** The boss's ability phase last frame, to catch the moment it lands. */
   private bossAct = 0;
+  private bossAb: BossAbility | undefined;
   private obstacles!: Obstacles;
   private lighting!: Lighting;
   /** World time of the last hit on the hero (the outline flashes the danger colour). */
@@ -369,7 +371,7 @@ export class GameScene extends Phaser.Scene {
           .setScale(ART_SCALE * sx, ART_SCALE * sy)
           .setFlipX(w.player.x < e.x)
           // A boss winding up shakes (rings the bell, raises the sword).
-          .setRotation(e.act === BossAct.Windup && e.def.ability ? Math.sin(w.time * 18) * 0.18 : 0);
+          .setRotation(e.act === BossAct.Windup && bossAbility(e) ? Math.sin(w.time * 18) * 0.18 : 0);
         if (this.stepDt > 0) {
           if (e.flash === HIT_FLASH) {
             this.sparks.hit(
@@ -709,7 +711,9 @@ export class GameScene extends Phaser.Scene {
     const act = b ? b.act : 0;
     const was = this.bossAct;
     this.bossAct = act;
-    const ab = b?.def.ability;
+    // The ability that was running last frame: the cycle moves on in the same step the act changes.
+    const ab = this.bossAb;
+    this.bossAb = b ? bossAbility(b) : undefined;
     if (!b || !ab || act === was) return;
     if (was === BossAct.Active && ab.kind === 'lunge') this.lungeDust(b);
     if (was !== BossAct.Windup) return;
@@ -723,6 +727,10 @@ export class GameScene extends Phaser.Scene {
         const y = b.y + Math.sin(a) * ab.range;
         this.sparks.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 30, 0.45, 6, 0xe8e2d0, SPARK.star, true);
       }
+    } else if (ab.kind === 'frost') {
+      // The howl lands: the ground freezes (drawIce) and the screen shakes, a boss's right.
+      this.shake(300, 0.008);
+      this.sparks.burst(b.x, b.y - b.def.radius * 0.5, 8, 160, 6, 0xe8e2f4, SPARK.star, 0.5, false);
     } else if (ab.kind === 'toll') {
       // The dead rise: a puff of earth and bone on each mark.
       const n = ab.count ?? 6;
@@ -932,7 +940,11 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'bossSpawned':
           sound.play('boss');
-          this.hud.announce(t.bossWarning(t.enemies[w.stage.boss.id]));
+          this.hud.announce(
+            w.arena.on
+              ? t.arenaClosed(t.enemies[w.stage.boss.id])
+              : t.bossWarning(t.enemies[w.stage.boss.id]),
+          );
           this.shake(400, 0.01);
           break;
         case 'eliteSpawned':

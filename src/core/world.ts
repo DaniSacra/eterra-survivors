@@ -39,6 +39,7 @@ import {
   type UpgradeOption,
 } from './upgrades';
 import { blockCircle } from './terrain';
+import { holdInArena, iceSlow, openArena } from './arena';
 import { Spawner } from './waves';
 import { updateWeapons, type OwnedWeapon } from './weapons';
 import { createZone, updateZones, type Zone } from './zones';
@@ -53,7 +54,11 @@ export interface RunSetup {
   bonuses?: RunBonuses;
 }
 
+/** Reused input of a hero on ice. */
+const ICE_INPUT = { x: 0, y: 0 };
+
 /** The whole match state. Pure logic: the render layer reads it, never writes it. */
+
 export class World {
   time = 0;
   kills = 0;
@@ -128,6 +133,8 @@ export class World {
   readonly stageId: StageId;
   readonly stage: StageDef;
   boss: Enemy | null = null;
+  /** A boss's arena (FT-08): while `on`, the hero is held between y0 and y1 (core/arena.ts). */
+  readonly arena = { on: false, y0: 0, y1: 0 };
   /** Drained by the renderer each frame. */
   readonly events: GameEvent[] = [];
   /**
@@ -198,8 +205,16 @@ export class World {
     if (this.state !== 'playing') return;
     dt = Math.min(dt, config.maxDt);
     this.time += dt;
+    // On the Lobo Velho's ice the hero is slower (FT-08).
+    const ice = this.marks.size > 0 ? iceSlow(this) : 1;
+    if (ice < 1) {
+      ICE_INPUT.x = input.x * ice;
+      ICE_INPUT.y = input.y * ice;
+      input = ICE_INPUT;
+    }
     updatePlayer(this.player, input, dt);
     blockCircle(this, this.player, config.player.radius);
+    holdInArena(this, config.player.radius);
     if (this.freeze > 0) this.freeze = Math.max(0, this.freeze - dt);
     this.spawner.update(this, dt);
     updateMarks(this, dt);
@@ -296,6 +311,7 @@ export class World {
     else if (!e.def.boss) maybeDropRandom(this, e.x, e.y);
     if (e === this.boss) {
       this.boss = null;
+      openArena(this);
       this.end('won');
     }
   }

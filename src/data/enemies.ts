@@ -3,10 +3,12 @@
  * stops for `windup` seconds while a marker shows where it will hit, then:
  * - cleave: hurts the hero if inside the `arc` (radians) of radius `range` toward where it aimed;
  * - toll: `count` `summon`s rise in a ring of radius `range` around the boss (no direct damage);
- * - lunge: dashes `range` px straight at where it aimed, hurting the hero it runs into.
+ * - lunge: dashes `range` px straight at where it aimed, hurting the hero it runs into;
+ * - frost: howls, and `count` patches of ice of `radius` form where it marked (`near`..`far` px from the hero, never
+ *   under them), slowing the hero to `slow` until the fight ends; at most `cap` (the oldest melts).
  */
 export interface BossAbility {
-  kind: 'cleave' | 'toll' | 'lunge';
+  kind: 'cleave' | 'toll' | 'lunge' | 'frost';
   every: number;
   windup: number;
   trigger: number;
@@ -18,7 +20,24 @@ export interface BossAbility {
   count?: number;
   /** lunge: dash duration, seconds. */
   dash?: number;
+  /** frost: patch radius, the most at once, how near and far from the hero, and the hero's speed on the ice. */
+  radius?: number;
+  cap?: number;
+  near?: number;
+  far?: number;
+  slow?: number;
 }
+
+/** Mordida Funda: the Lobo Velho crouches, then lunges in a straight line. */
+const DEEP_BITE: BossAbility = {
+  kind: 'lunge',
+  every: 4.5,
+  windup: 0.8,
+  trigger: 320,
+  range: 280,
+  damage: 22,
+  dash: 0.5,
+};
 
 /** Enemy roster, from the original Crônicas de Eterra cast. Names live in i18n under `enemies`. */
 export interface EnemyDef {
@@ -37,6 +56,10 @@ export interface EnemyDef {
   /** Elites are rare and tough, and drop a chest. */
   elite?: boolean;
   ability?: BossAbility;
+  /** A boss with more than one ability uses them in this order, round and round (`ability` is the first). */
+  abilities?: BossAbility[];
+  /** A boss that closes the ground around the hero on arrival: half the length of the arena, px (FT-08). */
+  arena?: number;
   /**
    * A way of moving of its own (core/behaviours.ts): zigzag weaves sideways; charge crouches then dashes;
    * phase passes through the others and now and then fades out (harmless and untouchable for a moment);
@@ -246,8 +269,27 @@ export const ENEMIES = {
     xp: 0,
     knockbackResist: 1,
     boss: true,
-    // Mordida Funda: crouches, then lunges in a straight line.
-    ability: { kind: 'lunge', every: 4.5, windup: 0.8, trigger: 320, range: 280, damage: 22, dash: 0.5 },
+    ability: DEEP_BITE,
+    // Two bites, then the Uivo da Geada (provisional name): ice that stays until the fight ends (FT-08).
+    abilities: [
+      DEEP_BITE,
+      DEEP_BITE,
+      {
+        kind: 'frost',
+        every: 4.5,
+        windup: 1.2,
+        trigger: 600,
+        range: 0,
+        damage: 0,
+        count: 2,
+        radius: 64,
+        cap: 6,
+        near: 120,
+        far: 220,
+        slow: 0.6,
+      },
+    ],
+    arena: 450,
   },
   blackKnight: {
     sprite: 'enemy.blackKnight',

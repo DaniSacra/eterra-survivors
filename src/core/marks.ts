@@ -6,10 +6,11 @@ import type { World } from './world';
 
 /**
  * A mark on the ground (its own pool, capped at config.marks.max). `spawn`: an enemy rising here when it runs out
- * (FT-02: nothing appears inside the view without warning).
+ * (FT-02: nothing appears inside the view without warning). `ice`: a patch of the Lobo Velho's ice, forming while
+ * `ttl` runs out, then slowing the hero to `slow` until the fight ends (core/arena.ts, FT-08).
  */
 export interface Mark extends Poolable {
-  kind: 'spawn';
+  kind: 'spawn' | 'ice';
   x: number;
   y: number;
   radius: number;
@@ -19,6 +20,9 @@ export interface Mark extends Poolable {
   /** spawn: who rises, and their HP multiplier. */
   enemy: EnemyId;
   hpMult: number;
+  /** ice: the hero's speed on it, and when it formed (match time; the oldest melts first). */
+  slow: number;
+  born: number;
 }
 
 export const createMark = (): Mark => ({
@@ -31,6 +35,8 @@ export const createMark = (): Mark => ({
   total: 0,
   enemy: 'bones',
   hpMult: 1,
+  slow: 1,
+  born: 0,
 });
 
 /** Whether (x, y) is inside the hero's view (plus a margin, px). */
@@ -79,6 +85,10 @@ export function updateMarks(world: World, dt: number): void {
     const m = list[i] as Mark;
     m.ttl -= dt;
     if (m.ttl > 0) continue;
+    if (m.kind === 'ice') {
+      m.ttl = 0; // formed: stays until the fight ends
+      continue;
+    }
     if (world.enemies.size < config.enemies.maxActive) spawnEnemy(world, m.enemy, m.x, m.y, m.hpMult);
     world.marks.release(m);
   }

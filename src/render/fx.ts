@@ -4,7 +4,7 @@ import { WEAPONS, type AuraLevel, type OrbitLevel, type WeaponDef, type WeaponId
 import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { wardReady } from '../core/elos';
 import { config } from '../data/config';
-import { BossAct, CLEAVE_SHOW } from '../core/bosses';
+import { BossAct, CLEAVE_SHOW, bossAbility } from '../core/bosses';
 import { CHARGE } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import type { Bolt, Slash } from '../core/effects';
@@ -214,6 +214,7 @@ export function drawFx(
   top.clear();
   const p = world.player;
   const hero = HERO_COLOR[world.character];
+  drawIce(g, world);
   // The hero's light: a solid ring with a slow pulse around it, so the eye finds them in any crowd.
   const pulse = 1 + 0.12 * Math.sin(world.time * 4);
   g.fillStyle(hero, 0.35);
@@ -227,6 +228,7 @@ export function drawFx(
   drawLeaps(g, world);
   drawPushes(g, world);
   if (world.boss) drawBossWarning(g, top, world.boss, world.time);
+  drawArenaWalls(top, world);
   // Many patches stacked (Espada de Fogo, Nevasca) must not wash the screen: the fills share a budget (NF-02).
   let frosts = 0;
   let burns = 0;
@@ -1110,6 +1112,7 @@ function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
   for (let i = 0; i < list.length; i++) {
     const m = list[i] as (typeof list)[number];
+    if (m.kind !== 'spawn') continue;
     const k = 1 - m.ttl / m.total; // 0 -> 1
     const r = m.radius * (0.6 + 0.6 * k);
     g.fillStyle(WARN_COLOR, 0.12 + 0.25 * k);
@@ -1422,6 +1425,64 @@ function drawMoments(
   }
 }
 
+/**
+ * The Lobo Velho's ice (FT-08), on the ground: while it forms, the danger colour filling from the centre with a
+ * marching edge; formed, a frosted white-lilac patch with cracks and a faint cold rim, the exact size of the slow.
+ */
+function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
+  const list = world.marks.active;
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i] as (typeof list)[number];
+    if (m.kind !== 'ice') continue;
+    const r = m.radius;
+    if (m.ttl > 0) {
+      const k = 1 - m.ttl / m.total; // 0 -> 1
+      g.fillStyle(WARN_COLOR, 0.12);
+      disc(g, m.x, m.y, r);
+      g.fillStyle(ICE, 0.18 + 0.3 * k);
+      disc(g, m.x, m.y, r * k);
+      g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
+      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (world.time * (30 + 50 * k)) % (DASH * 2));
+      continue;
+    }
+    g.fillStyle(ICE, 0.3);
+    disc(g, m.x, m.y, r);
+    g.fillStyle(0xffffff, 0.12);
+    disc(g, m.x - r * 0.25, m.y - r * 0.25, r * 0.45);
+    // Cracks: fixed by the patch's place, so they never crawl.
+    g.lineStyle(1.5, 0x8a84a8, 0.6);
+    for (let c = 0; c < 5; c++) {
+      const a = c * 1.26 + (m.x + m.y) * 0.01;
+      const l = r * (0.55 + 0.35 * (((c * 37 + Math.abs(m.y | 0)) % 7) / 7));
+      const mx = m.x + Math.cos(a) * l * 0.5;
+      const my = m.y + Math.sin(a) * l * 0.5;
+      g.lineBetween(m.x, m.y, mx + Math.sin(a) * 4, my - Math.cos(a) * 4);
+      g.lineBetween(mx + Math.sin(a) * 4, my - Math.cos(a) * 4, m.x + Math.cos(a) * l, m.y + Math.sin(a) * l);
+    }
+    const glow = 0.45 + 0.15 * Math.sin(world.time * 2 + m.x);
+    g.lineStyle(2, ICE, glow);
+    ring(g, m.x, m.y, r);
+  }
+}
+
+/** The arena's walls (FT-08): a row of tall ice crystals across the road at each end, over the crowd. */
+function drawArenaWalls(g: Phaser.GameObjects.Graphics, world: World): void {
+  const a = world.arena;
+  if (!a.on) return;
+  const layout = world.stage.layout;
+  const half = layout.kind === 'corridor' ? layout.width / 2 + 40 : world.view.w / 2;
+  const cx = layout.kind === 'corridor' ? 0 : world.player.x;
+  for (let end = 0; end < 2; end++) {
+    const y = end === 0 ? a.y0 : a.y1;
+    g.fillStyle(ICE, 0.25);
+    g.fillRect(cx - half, y - 6, half * 2, 12);
+    for (let x = -half + 8; x < half; x += 18) {
+      const h = 16 + ((((x * 7919) % 13) + 13) % 13);
+      shard(g, cx + x, y - h * 0.4, -Math.PI / 2 + (((x * 31) % 5) - 2) * 0.08, h, 0.85);
+    }
+  }
+}
+
 /** An ice shard: a small white-lilac diamond pointing along `a`. */
 function shard(
   g: Phaser.GameObjects.Graphics,
@@ -1446,7 +1507,7 @@ function drawBossWarning(
   e: Enemy,
   time: number,
 ): void {
-  const ab = e.def.ability;
+  const ab = bossAbility(e);
   if (!ab || e.act === BossAct.Idle) return;
   const aim = Math.atan2(e.aimY, e.aimX);
   if (e.act === BossAct.Active) {
@@ -1534,6 +1595,15 @@ function drawBossWarning(
       dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
       g.fillStyle(WARN_COLOR, 0.45);
       disc(g, e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
+      break;
+    }
+    case 'frost': {
+      // The howl: cold rings rolling out from the wolf (the patches fill on the ground, drawIce).
+      for (let i = 0; i < 3; i++) {
+        const r = e.def.radius + 90 * ((i / 3 + time * 1.2) % 1);
+        g.lineStyle(3, ICE, 0.6 * (1 - (r - e.def.radius) / 90));
+        ring(g, e.x, e.y, r);
+      }
       break;
     }
     case 'toll': {

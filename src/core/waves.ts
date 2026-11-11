@@ -1,3 +1,4 @@
+import { closeArena } from './arena';
 import { config } from '../data/config';
 import type { WaveSegment } from '../data/waves';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
@@ -62,6 +63,8 @@ export class Spawner {
       this.bossSpawned = true;
       clearCrowd(world);
       world.boss = spawnOnRing(world, stage.boss.id);
+      const arena = world.boss.def.arena;
+      if (arena) closeArena(world, arena);
       world.events.push({ type: 'bossSpawned' });
     }
   }

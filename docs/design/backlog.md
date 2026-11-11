@@ -2343,7 +2343,7 @@ evitam saindo da linha.
     0%, none 0%. Dano por fonte: contato 74%, tiro 19%, salto 6%. A morte agora vem cedo (mediana de 5,5 min).
   - Falta o aviso de entrada (`stages.southRoad.intro`), que depende da ui. Capturas em 420x820 e 844x390 a ~55 FPS.
 
-**FT-08 · Lobo Velho: Uivo da Geada e a arena de gelo** · impl + vfx + bal · M · proposto
+**FT-08 · Lobo Velho: Uivo da Geada e a arena de gelo** · impl + vfx + bal · M · ✅ feito (2026-11-11, enxuto)
 
 - Por quê: o chefe da Estrada é hoje uma investida repetida. Com o gelo, a luta vira um lugar que o lobo desenha: o
   espaço encolhe e cada investida precisa ser lida contra o gelo.
@@ -2379,6 +2379,15 @@ evitam saindo da linha.
 - Aceite: testes: nenhuma área a menos de 120 px do herói, nunca duas na mesma faixa, teto 6, arena prende só o herói e
   abre na morte do chefe; sim: luta do chefe com mediana de 45 a 90 s, `boss` abaixo de 30% do dano e a habilidade não
   mata sozinha um herói de vida cheia (regra do E-07).
+
+- Feito (FT-08, 2026-11-11), decisões para o Daniel revisar:
+  - **Lento** (x0,6), como recomendado; sem a variação do escorregão.
+  - `abilities` em ciclo (Mordida, Mordida, Uivo); `arena: 450` no Lobo Velho; o gelo é uma marca `ice` no pool das
+    marcas (`core/arena.ts`), com teto 6, derrete todo quando o chefe cai.
+  - A luta continua em ~26 s (mediana do sim), não 45–90 s: mantive a decisão do NE-05 (~30 s). Sim da Estrada igual
+    (full 40%), `boss` 1% do dano.
+  - Nome "Uivo da Geada" provisório. O bestiário ainda mostra só a Mordida Funda (a lista de habilidades por chefe
+    ficou para depois).
 
 ### Fase 1 · Arredores de Valmor: "a praga"
 
