@@ -1740,7 +1740,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - O quê: `SPRITE_RADIUS` por `proj.*` e `setScale(ART_SCALE * p.radius / SPRITE_RADIUS[sprite])`; rastro `fury`.
 - Aceite: captura da Fúria com círculo de acerto desenhado batendo com a meia-lua.
 
-**NF-08 · Verbos dos Elos anunciados** · vfx · P · proposto
+**NF-08 · Verbos dos Elos anunciados** · vfx · P · ✅ feito (2026-11-11: borda da Chama esquenta e anel no raio da onda no tique anterior, 10 línguas grandes; almas da Procissão girando; estrelinhas pulam em arco)
 
 - Por quê: 06-vfx #8, #11 e a tabela (Estrela). O pulso da Chama de Yah (a cada 10 ticks) chega sem aviso e as línguas
   parecem velinhas; o acúmulo de almas da Procissão não aparece; as estrelinhas da Estrela de Lyra voam retas, sem

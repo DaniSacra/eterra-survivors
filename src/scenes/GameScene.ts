@@ -112,6 +112,9 @@ const NUMBER_SCREEN = 14;
 /** An enemy's sprite, with who it showed last frame and whether they were stunned (to catch a crush). */
 type EnemyImage = Phaser.GameObjects.Image & { uid?: number; stunned?: boolean };
 
+/** How long Estrela de Lyra's starlets fly before they burst (their hop spans it). */
+const STARLET_FALL = (WEAPONS.lyraStar as WeaponDef).split?.fall ?? 0.4;
+
 /** A hit at least this hard squashes harder and throws a bigger spark (NF-06; the same bar as the gold numbers). */
 const STRONG_HIT = config.effects.strongHit;
 
@@ -293,7 +296,9 @@ export class GameScene extends Phaser.Scene {
           else img.setTint(tint);
         }
         // Hammers spin end over end as they fly.
-        img.setPosition(p.x, p.y).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
+        // Estrela de Lyra's starlets hop in an arc and fall where they burst (NF-08): ttl runs from FALL to 0.
+        const hop = p.fuse ? Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - p.ttl / STARLET_FALL))) * 22 : 0;
+        img.setPosition(p.x, p.y - hop).setRotation(SPIN[p.sprite] ? this.world.time * 14 : p.angle);
         // A shot that hits wider than its sprite (Fúria's wave, Área) grows to its hit size (NF-07); never shrinks.
         img.setScale(ART_SCALE * Math.max(1, p.radius / (img.baseR ?? p.radius)));
         // Fúria da Forja drops embers behind it.

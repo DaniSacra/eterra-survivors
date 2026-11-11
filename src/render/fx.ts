@@ -245,8 +245,11 @@ export function drawFx(
   for (let iW = 0; iW < world.weapons.length; iW++) {
     const w = world.weapons[iW] as (typeof world.weapons)[number];
     const kind = WEAPONS[w.id].kind;
+    if ((WEAPONS[w.id] as WeaponDef).swell && w.stacks > 0 && w.stackTime > world.time)
+      drawSouls(top, world, w.stacks, w.stackTime - world.time);
     if (kind === 'aura') {
       const st = weaponStats(w) as AuraLevel;
+      const pulse = (WEAPONS[w.id] as WeaponDef).pulse;
       drawAura(
         g,
         top,
@@ -255,6 +258,9 @@ export function drawFx(
         1 - w.timer / (st.cooldown * p.stats.cooldown),
         w.level,
         isElo(w.id),
+        // Chama de Yah heats up towards its wave: 0 just after one, 1 on the tick before the next.
+        pulse ? (w.swings % pulse.every) / (pulse.every - 1) : 0,
+        pulse ? pulse.radius : 0,
       );
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
@@ -767,6 +773,25 @@ const AURA_CORE: readonly [number, number][] = [
 ];
 
 /**
+ * Procissão: the souls it has gathered (one per kill, up to its cap; each adds a wisp to the next volley) circle the
+ * hero as small lights, blinking in their last second before they go (NF-08).
+ */
+function drawSouls(g: Phaser.GameObjects.Graphics, world: World, n: number, left: number): void {
+  const p = world.player;
+  const t = world.time;
+  const a = left < 1 ? 0.45 + 0.45 * Math.sin(t * 24) : 0.9;
+  for (let i = 0; i < n; i++) {
+    const ang = t * 2.2 + (i * Math.PI * 2) / n;
+    const x = p.x + Math.cos(ang) * 30;
+    const y = p.y - 6 + Math.sin(ang) * 12 + Math.sin(t * 5 + i) * 2;
+    g.fillStyle(ELEMENT_COLOR.soul, 0.35 * a);
+    disc(g, x, y, 6);
+    g.fillStyle(0xffffff, a);
+    disc(g, x, y, 2.5);
+  }
+}
+
+/**
  * Aura de Yah: warm light around the hero that beats with its damage. `k` is the tick phase (0 right at a tick,
  * 1 just before the next): each tick a wave runs out to exactly the damage radius and the rim lights up. Motes of
  * light drift up inside. Chama de Yah: a white-hot core, round flame tongues on the rim and rising embers, over a
@@ -780,10 +805,17 @@ function drawAura(
   k: number,
   level: number,
   elo: boolean,
+  heat = 0,
+  pulseR = 0,
 ): void {
   const p = world.player;
   const t = world.time;
   const c = elo ? FLAME_COLOR : AURA_COLOR;
+  // Chama de Yah, the tick before its wave: a thin ring where the wave will reach, fading in (NF-08).
+  if (pulseR > 0 && heat >= 1) {
+    top.lineStyle(2, 0xffd080, 0.25 + 0.5 * k);
+    ring(top, p.x, p.y, r * pulseR);
+  }
   if (elo) {
     g.fillStyle(c, 0.06);
     disc(g, p.x, p.y, r);
@@ -795,7 +827,8 @@ function drawAura(
   }
   // The rim flares on the tick and rests between ticks.
   const flare = Math.max(0, 1 - k * 3);
-  g.lineStyle(2 + 2 * flare, c, 0.35 + 0.55 * flare);
+  // ...and the Chama's rim glows hotter and thicker as its wave comes near.
+  g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
   ring(g, p.x, p.y, r);
   // The beat: a wave from the core out to the exact edge (over the crowd, thin, so it is seen but hides nothing).
   if (k < 0.45) {
@@ -822,13 +855,14 @@ function drawAura(
   }
   if (!elo) return;
   // Round flame tongues licking up from the rim (they rise in screen space, like real flames), taller on a tick.
-  const n = 16;
+  // Ten big tongues (not a ring of candles), taller as the wave comes near.
+  const n = 10;
   for (let i = 0; i < n; i++) {
     const a = (i * Math.PI * 2) / n + t * 0.4;
     const bx = p.x + Math.cos(a) * r;
     const by = p.y + Math.sin(a) * r;
-    const h = 9 + 5 * Math.sin(t * 9 + i * 1.7) + 6 * flare;
-    const w = 5;
+    const h = 16 + 5 * Math.sin(t * 9 + i * 1.7) + 4 * flare + 9 * heat;
+    const w = 9;
     g.fillStyle(i % 2 ? AURA_COLOR : FLAME_COLOR, 0.55);
     disc(g, bx, by, w);
     g.fillTriangle(bx - w, by, bx + w, by, bx + Math.sin(t * 5 + i) * 2, by - h - w);
