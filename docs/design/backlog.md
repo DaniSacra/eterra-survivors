@@ -2927,7 +2927,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   menos 10x o de hoje (bot que foge; um humano pisa mais); `ground` abaixo de 30% do dano; tirar o limo muda o
   resultado para fora do ruído.
 
-**CE-02 · Cripta com a meia Loja de volta na faixa** · bal + impl · P · parcial (2026-11-11: `mult` da Cripta hp 1.6 / damage 1.5 → 0% / 13% / 81%; a meia Loja fica 2 pontos abaixo da faixa, o resto depende do CD-01 e do Daniel) (depois de CB-01, CB-02, CE-01 e, se aprovado, CD-01)
+**CE-02 · Cripta com a meia Loja de volta na faixa** · bal + impl · P · ✅ feito (2026-11-11, pedido do Daniel: com a meia Loja deve-se vencer cerca de 60% da Cripta; `mult` hp 1.0 / damage 1.15 → 2% / 59% / 94%, meta nova no CLAUDE.md)
 
 - Por quê: 01-balance D1, D2, D4. Meia Loja em 12,5% (128 corridas) contra 15 a 35%; 25 de 37 mortes antes do chefe
   caem entre 4:00 e 5:30, o vale antes do 1º Elo. A alavanca de dano funciona (`mult.damage` 1.5: 18% / 88%); a de
