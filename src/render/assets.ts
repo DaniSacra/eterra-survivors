@@ -3,6 +3,7 @@ import { ENEMY_ART } from './art/enemies';
 import { ENEMY_ANIMS, declaredPoses, poseKey } from './enemyAnims';
 import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
+import { OBSTACLE_FILES } from '../data/obstacles';
 import { ITEM_ART } from './art/items';
 import { ART_RES, Pen } from './art/pen';
 import type { ArtDef } from './art/types';
@@ -50,7 +51,6 @@ const DECALS = [
   'ruts',
   'stones',
 ];
-const OBSTACLES = ['0', '0t', '1', '2'];
 
 export const ASSETS: Record<string, AssetDef> = {
   // Ground tiles: PixelLab ground (2x2 mirrored so it repeats without a seam, at ART_RES), see docs/art/credits.md.
@@ -75,7 +75,7 @@ export const ASSETS: Record<string, AssetDef> = {
   'fx.maceHead': { kind: 'image', url: 'sprites/fx/maceHead.png' },
   // Ground decals and the Cripta's obstacles: PixelLab pixel art (files already at ART_RES), see decals.ts / obstacles.ts.
   ...props('decals', DECALS),
-  ...props('obstacles', OBSTACLES),
+  ...props('obstacles', [...OBSTACLE_FILES]),
   ...art(ICON_ART, ART_RES),
   ...pixelEnemies([
     'bones',

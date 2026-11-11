@@ -1,20 +1,21 @@
 import type Phaser from 'phaser';
-import { obstacleAt, type Obstacle } from '../core/terrain';
+import { obstacleAt, scatterOf, type Obstacle } from '../core/terrain';
+import { OBSTACLE_SETS } from '../data/obstacles';
 import type { World } from '../core/world';
 import { ART_SCALE } from './art/pen';
 import type { Lighting } from './lighting';
 
-/** Where each obstacle sprite's foot is (a fraction of its texture height): that point sits on the hit circle. */
-const FOOT = [0.92, 0.64, 0.64];
 const MAX = 60;
 /**
- * Obstacles are drawn 1.5x the shared pixel scale: their art fills only part of its canvas, and at 1x a column's shaft
- * is half as wide as the circle that blocks (the one exception to whole-number scaling, on purpose).
+ * The Cripta's first four obstacles are drawn 1.5x the shared pixel scale (`scale` in data/obstacles.ts): their art
+ * fills only part of its canvas, and at 1x a column's shaft is half as wide as the circle that blocks (an exception
+ * to whole-number scaling, on purpose). The newer ones are drawn to fill their circle at 1x.
  */
-const SCALE = ART_SCALE * 1.5;
 /** The column with a torch (public/sprites/obstacles/0t.png) and its flame's height over the foot (world px). */
 const TORCH = 'obstacle.0t';
 const TORCH_DY = 49 * 1.5;
+/** Every other Cripta column carries a torch. */
+const CRYPT_COLUMN = 'obstacle.0';
 
 /**
  * The Cripta's obstacles on screen: like the decals, a fixed set of reused images laid out over the view's cells,
@@ -35,13 +36,16 @@ export class Obstacles {
     private readonly world: World,
   ) {
     for (let i = 0; i < MAX; i++)
-      this.images.push(scene.add.image(0, 0, 'obstacle.0').setDepth(2.5).setScale(SCALE).setVisible(false));
+      this.images.push(
+        scene.add.image(0, 0, 'obstacle.0').setDepth(2.5).setScale(ART_SCALE).setVisible(false),
+      );
   }
 
   /** Lays out the obstacles over the view rectangle (x, y, w, h) in world px. */
   update(x: number, y: number, w: number, h: number): void {
-    const layout = this.world.stage.layout;
-    if (layout.kind !== 'obstacles') return;
+    const layout = scatterOf(this.world.stage.layout);
+    if (!layout) return;
+    const set = OBSTACLE_SETS[layout.set];
     const c = layout.cell;
     // One cell of margin: a tall column whose foot is just below the view still shows its top.
     const cx = Math.floor(x / c) - 1;
@@ -57,12 +61,13 @@ export class Obstacles {
     for (let j = 0; j < rows; j++)
       for (let i = 0; i < cols; i++) {
         if (n >= MAX || !obstacleAt(this.world.seed, layout, cx + i, cy + j, this.ob)) continue;
-        const k = this.ob.kind;
+        const d = set[this.ob.kind] as (typeof set)[number];
         // Every other column carries a torch.
-        const torch = k === 0 && ((cx + i) * 7 + (cy + j) * 3) % 2 === 0;
+        const torch = d.sprite === CRYPT_COLUMN && ((cx + i) * 7 + (cy + j) * 3) % 2 === 0;
         (this.images[n++] as Phaser.GameObjects.Image)
-          .setTexture(torch ? TORCH : `obstacle.${k}`)
-          .setOrigin(0.5, FOOT[k] ?? 0.5)
+          .setTexture(torch ? TORCH : d.sprite)
+          .setScale(ART_SCALE * d.scale)
+          .setOrigin(0.5, d.foot)
           .setPosition(this.ob.x, this.ob.y)
           .setFlipX(((cx + i + cy + j) & 1) === 1)
           .setVisible(true);

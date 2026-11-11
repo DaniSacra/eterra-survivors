@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy, spawnOnRing, updateEnemies } from '../../src/core/enemies';
 import { addGold } from '../../src/core/pickups';
-import { blockCircle, obstacleAt, spawnPoint, type Obstacle } from '../../src/core/terrain';
+import { blockCircle, obstacleAt, scatterOf, spawnPoint, type Obstacle } from '../../src/core/terrain';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { ENEMIES } from '../../src/data/enemies';
@@ -191,5 +191,27 @@ describe('stage multipliers', () => {
     const ratio = count('southRoad') / count('valmor');
     expect(ratio).toBeGreaterThan(STAGES.southRoad.mult.spawn * 0.85);
     expect(ratio).toBeLessThan(STAGES.southRoad.mult.spawn * 1.15);
+  });
+});
+
+describe('obstacles never wall the hero in', () => {
+  it.each(['valmor', 'crypt', 'southRoad'] as const)('%s: neighbours leave a gap the hero fits through', (stage) => {
+    const layout = STAGES[stage].layout;
+    const scatter = scatterOf(layout);
+    expect(scatter).toBeDefined();
+    const found: Obstacle[] = [];
+    for (let cx = -12; cx <= 12; cx++)
+      for (let cy = -12; cy <= 12; cy++) {
+        const o: Obstacle = { x: 0, y: 0, r: 0, kind: 0 };
+        if (obstacleAt(9, scatter!, cx, cy, o)) found.push(o);
+      }
+    expect(found.length).toBeGreaterThan(0);
+    for (let i = 0; i < found.length; i++)
+      for (let j = i + 1; j < found.length; j++) {
+        const a = found[i]!;
+        const b = found[j]!;
+        const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.r - b.r;
+        expect(gap).toBeGreaterThan(2 * config.player.radius);
+      }
   });
 });

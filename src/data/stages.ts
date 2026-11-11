@@ -1,4 +1,5 @@
 import { config } from './config';
+import type { ObstacleSet } from './obstacles';
 import { ENEMIES, ENEMY_IDS, type EnemyDef, type EnemyId } from './enemies';
 import { buildWaves, type WaveSegment } from './waves';
 
@@ -11,10 +12,20 @@ import { buildWaves, type WaveSegment } from './waves';
  * - `corridor`: an endless road running north–south, `width` px wide, between impassable frozen forest. Enemies come
  *   from both ends, and `sides` of them out of the forest.
  */
+/** Obstacles scattered by the run's seed in cells of `cell` px (one in `chance` of the cells has one), none within `clear` px of the start. */
+export interface Scatter {
+  set: ObstacleSet;
+  cell: number;
+  chance: number;
+  clear: number;
+  /** On a road: only obstacles wholly inside |x| <= limitX (the road's half width). */
+  limitX?: number;
+}
+
 export type StageLayout =
   | { kind: 'open' }
-  | { kind: 'obstacles'; cell: number; chance: number; clear: number }
-  | { kind: 'corridor'; width: number; sides: number };
+  | ({ kind: 'obstacles' } & Scatter)
+  | { kind: 'corridor'; width: number; sides: number; scatter?: Scatter };
 
 /** Multipliers over the shared wave curve (enemies, elites and the boss alike), and the gold a run brings. */
 export interface StageMult {
@@ -49,7 +60,7 @@ export const STAGES = {
   /** Arredores de Valmor: barns, fences and fields around the village, in the snow, taken by rats and spiders (FT-13). */
   valmor: {
     tile: 'tile',
-    layout: { kind: 'open' },
+    layout: { kind: 'obstacles', set: 'village', cell: 260, chance: 0.16, clear: 220 },
     mult: { hp: 0.9, damage: 0.95, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' }),
     elites: elites('witch'),
@@ -65,7 +76,7 @@ export const STAGES = {
    */
   crypt: {
     tile: 'tile.crypt',
-    layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
+    layout: { kind: 'obstacles', set: 'crypt', cell: 170, chance: 0.4, clear: 260 },
     mult: { hp: 0.85, damage: 0.9, speed: 1.0, spawn: 1.0, gold: 1.5 },
     waves: buildWaves({
       basic: 'bones',
@@ -84,7 +95,12 @@ export const STAGES = {
   /** Estrada do Sul: the frozen road, the hooded ones and the wolf pack. */
   southRoad: {
     tile: 'tile.road',
-    layout: { kind: 'corridor', width: 320, sides: 0.05 },
+    layout: {
+      kind: 'corridor',
+      width: 320,
+      sides: 0.05,
+      scatter: { set: 'road', cell: 230, chance: 0.18, clear: 200, limitX: 160 },
+    },
     mult: { hp: 2.1, damage: 1.8, speed: 1.1, spawn: 1.0, gold: 2 },
     waves: buildWaves({
       basic: 'hooded',

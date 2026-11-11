@@ -3236,7 +3236,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 - ✅ **DD-10 · Tiles refeitos no PixelLab** · visual · G. Cripta: lajes de piso com desgaste, rachaduras e limo, nunca
   padrão de parede. Valmor e Estrada: neve, terra e pedra com variação e bordas. Testes de contraste do chão mantidos.
-- **DD-11 · Obstáculos que formam o cenário** · visual + impl · G. Maiores e em pixel: Cripta (colunas, sarcófagos,
+- **DD-11 · Obstáculos que formam o cenário** · visual + impl · G. Maiores e em pixel: Cripta (colunas, sarcófagos, ✅
   estátuas de paladinos, montes de ossos), Valmor (cercas, carroças, fardos, poço), Estrada (troncos, rochas, carroça
   virada). Círculo de colisão alinhado ao desenho. Valmor e Estrada ganham obstáculos esparsos que não fecham caminho.
 - **DD-12 · O herói se destaca do chão** · visual · P. Depois dos tiles novos, capturas em 420x820 e 1000x680 de todas
