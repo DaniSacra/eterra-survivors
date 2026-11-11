@@ -44,7 +44,11 @@ export class Spawner {
   update(world: World, dt: number): void {
     if (world.endless) return this.vigil(world, dt);
     const stage = world.stage;
-    const seg = segmentAt(world.time, stage.waves);
+    // In test mode the boss comes early; the crowd after it is the boss fight's own trickle, as in a real run.
+    const seg =
+      this.bossSpawned && playtest.bossAt !== null
+        ? (stage.waves[stage.waves.length - 1] as WaveSegment)
+        : segmentAt(world.time, stage.waves);
     world.enemyDamage = seg.damage;
     this.timer -= dt;
     while (this.timer <= 0) {
@@ -56,7 +60,7 @@ export class Spawner {
     const elite = stage.elites[this.nextElite];
     if (elite && world.time >= elite.at) {
       this.nextElite++;
-      this.send(world, elite.id, seg.hpMult);
+      this.send(world, elite.id, seg.hpMult, true);
       world.events.push({ type: 'eliteSpawned' });
     }
     if (!this.bossSpawned) this.specials(world, seg.hpMult);
@@ -93,16 +97,16 @@ export class Spawner {
       const elite = elites[this.vigilElites % elites.length];
       this.vigilElites++;
       if (elite) {
-        this.send(world, elite.id, hp);
+        this.send(world, elite.id, hp, true);
         world.events.push({ type: 'eliteSpawned' });
       }
     }
   }
 
   /** One enemy on the stage's spawn ring; a spot inside the view gets a spawn mark first (FT-02). */
-  private send(world: World, id: EnemyId, hpMult: number): void {
+  private send(world: World, id: EnemyId, hpMult: number, force = false): void {
     spawnPoint(world, null, this.at);
-    riseAt(world, id, this.at.x, this.at.y, hpMult);
+    riseAt(world, id, this.at.x, this.at.y, hpMult, force);
   }
 
   /** `id`, or the segment's first (basic) enemy when `id` is already at its def's `max`. */

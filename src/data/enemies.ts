@@ -142,9 +142,9 @@ export interface EnemyDef {
   trail?: { every: number; cap: number; pool: GroundPool };
   /**
    * dig (FT-16, the Coveiro): every `every` s it stops `windup` s, then `count` of `spawn` rise in a ring of
-   * `radius` px around it (each out of a spawn mark).
+   * `radius` px around it (each out of a spawn mark). Only while the hero is within `range` px; a stun during the windup cancels it.
    */
-  dig?: { every: number; windup: number; count: number; radius: number; spawn: string };
+  dig?: { every: number; windup: number; count: number; radius: number; spawn: string; range: number };
   /**
    * reassemble (FT-15): the first death is not one. It falls in a pile (harmless, still, no gem) that stands up again
    * after `delay` s with `hp` of its max life; any hit on the pile breaks it for good.
@@ -276,7 +276,7 @@ export const ENEMIES = {
     xp: 3,
     knockbackResist: 0.6,
     max: 6,
-    trail: { every: 1.2, cap: 5, pool: { kind: 'slime', radius: 26, ttl: 4, slow: 0.7 } },
+    trail: { every: 0.6, cap: 10, pool: { kind: 'slime', radius: 34, ttl: 6, slow: 0.6 } },
   },
   ghost: {
     sprite: 'enemy.ghost',
@@ -463,7 +463,7 @@ export const ENEMIES = {
     knockbackResist: 0.85,
     elite: true,
     move: 'dig',
-    dig: { every: 7, windup: 1.1, count: 4, radius: 110, spawn: 'bones' },
+    dig: { every: 7, windup: 1.1, count: 4, radius: 110, spawn: 'bones', range: 420 },
   },
   // Bosses (stage `boss`): killing one wins the stage.
   bellRinger: {

@@ -66,7 +66,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 1.4, damage: 1.65, speed: 1.05, spawn: 1.15, gold: 1.5 },
+    mult: { hp: 1.6, damage: 1.5, speed: 1.05, spawn: 1.15, gold: 1.5 },
     waves: buildWaves({
       basic: 'bones',
       fast: 'vampireBat',
@@ -77,7 +77,7 @@ export const STAGES = {
     elites: elites('gravedigger'),
     specials: [
       { id: 'emberBones', from: 40, every: 12 },
-      { id: 'slime', from: 70, every: 15 },
+      { id: 'slime', from: 70, every: 10 },
     ],
     boss: { id: 'bellRinger', at: config.matchDuration },
   },

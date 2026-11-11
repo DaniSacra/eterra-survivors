@@ -108,6 +108,9 @@ function aimingSoon(w: World): boolean {
 /** Thrown weapons that pick their own target (no aiming needed). */
 const aimsItself = (id: WeaponId): boolean => (WEAPONS[id] as { aim?: string }).aim === 'nearest';
 
+/** Distance a healthy bot keeps from the boss, px. */
+const BOSS_ORBIT = 180;
+
 function steer(w: World, side: number): void {
   const p = w.player;
   const list = w.enemies.active;
@@ -115,6 +118,8 @@ function steer(w: World, side: number): void {
   let fy = 0;
   let nearest: Enemy | null = null;
   let nearestD = Infinity;
+  // A healthy hero stays near the boss (orbiting at ~180 px) instead of running off for good (CT-05).
+  const calm = w.boss !== null && p.hp > p.stats.maxHp * 0.5;
   for (const e of list) {
     const dx = p.x - e.x;
     const dy = p.y - e.y;
@@ -124,6 +129,7 @@ function steer(w: World, side: number): void {
       nearestD = d;
       nearest = e;
     }
+    if (calm && e.def.boss && d > BOSS_ORBIT) continue;
     const weight = (e.def.boss ? 5 : e.def.elite ? 2.5 : 1) / (d * d);
     fx += (dx / d) * weight;
     fy += (dy / d) * weight;
@@ -133,7 +139,7 @@ function steer(w: World, side: number): void {
     const dx = p.x - w.boss.x;
     const dy = p.y - w.boss.y;
     const d = Math.max(6, Math.hypot(dx, dy) - w.boss.def.radius);
-    if (d < 260) {
+    if (d < (calm ? BOSS_ORBIT : 260)) {
       fx += (dx / d) * (8 / (d * d));
       fy += (dy / d) * (8 / (d * d));
     }

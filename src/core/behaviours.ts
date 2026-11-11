@@ -350,19 +350,28 @@ function dig(world: World, e: Enemy, dt: number, out: { x: number; y: number }):
   const d = e.def.dig;
   if (!d) return;
   if (e.stir > 0) {
-    e.stir -= dt;
     out.x = out.y = 0;
+    // A blow that stuns him (the Maça de Ferro) breaks the windup: the grave stays shut, and he tries again later.
+    if (e.stun > 0) {
+      e.stir = 0;
+      e.brewT = d.every * 0.5;
+      return;
+    }
+    e.stir -= dt;
     if (e.stir > 0) return;
     e.brewT = d.every;
     const start = world.rng.next() * TAU;
+    const hpMult = segmentAt(world.time, world.stage.waves).hpMult;
     for (let i = 0; i < d.count; i++) {
       const a = start + (i / d.count) * TAU;
-      riseAt(world, d.spawn as EnemyId, e.x + Math.cos(a) * d.radius, e.y + Math.sin(a) * d.radius);
+      riseAt(world, d.spawn as EnemyId, e.x + Math.cos(a) * d.radius, e.y + Math.sin(a) * d.radius, hpMult);
     }
     return;
   }
   e.brewT -= dt;
-  if (e.brewT <= 0 && e.stun <= 0) e.stir = d.windup;
+  const p = world.player;
+  const near = (p.x - e.x) ** 2 + (p.y - e.y) ** 2 <= d.range * d.range;
+  if (e.brewT <= 0 && e.stun <= 0 && near && world.enemies.size < config.enemies.maxActive) e.stir = d.windup;
 }
 
 /**

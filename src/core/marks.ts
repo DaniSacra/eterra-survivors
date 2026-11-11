@@ -40,6 +40,10 @@ export interface Mark extends Poolable {
   fromY: number;
   /** burst (FT-14): damage to each other enemy within `radius` when it goes off. */
   foe: number;
+  /** slime: uid of the enemy whose trail it is (each keeps its own cap, CE-01). */
+  owner: number;
+  /** spawn: rises even over the crowd's ceiling (an elite). */
+  force: boolean;
 }
 
 export const createMark = (): Mark => ({
@@ -60,7 +64,22 @@ export const createMark = (): Mark => ({
   fromX: 0,
   fromY: 0,
   foe: 0,
+  owner: 0,
+  force: false,
 });
+
+/** A mark taken from the pool starts clean: nothing left over from what it was before. */
+export function resetMark(m: Mark): Mark {
+  m.kind = 'spawn';
+  m.x = m.y = m.radius = m.ttl = m.total = 0;
+  m.enemy = 'bones';
+  m.hpMult = 1;
+  m.slow = 1;
+  m.born = 0;
+  m.life = m.damage = m.tick = m.fromX = m.fromY = m.foe = m.owner = 0;
+  m.force = false;
+  return m;
+}
 
 /** A patch of ground (poison, tar, web) warning for `arm` s, then lasting `life` s (see Mark). */
 export function addPatch(
@@ -77,7 +96,7 @@ export function addPatch(
   fromY = y,
 ): boolean {
   if (world.marks.size >= config.marks.max) return false;
-  const m = world.marks.acquire();
+  const m = resetMark(world.marks.acquire());
   m.kind = kind;
   m.x = x;
   m.y = y;
@@ -107,7 +126,7 @@ export function addBurst(
   foe: number,
 ): boolean {
   if (world.marks.size >= config.marks.max) return false;
-  const m = world.marks.acquire();
+  const m = resetMark(world.marks.acquire());
   m.kind = 'burst';
   m.x = x;
   m.y = y;
@@ -130,7 +149,9 @@ export function inView(world: World, x: number, y: number, margin = 0): boolean 
  * and never closer than config.marks.spawnMinDist px to the hero (the spot is pushed out). Returns whether it
  * rose (or will): false when the marks are full.
  */
-export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult = 1): boolean {
+export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult = 1, force = false): boolean {
+  // The crowd's ceiling holds for everything but what the stage promises (an elite).
+  if (!force && world.enemies.size >= config.enemies.maxActive) return false;
   if (!inView(world, x, y, 20)) {
     spawnEnemy(world, id, x, y, hpMult);
     return true;
@@ -147,12 +168,13 @@ export function riseAt(world: World, id: EnemyId, x: number, y: number, hpMult =
     x = d > 1e-3 ? p.x + dx * k : p.x + min;
     y = d > 1e-3 ? p.y + dy * k : p.y;
   }
-  const m = world.marks.acquire();
+  const m = resetMark(world.marks.acquire());
   m.kind = 'spawn';
   m.x = x;
   m.y = y;
   m.enemy = id;
   m.hpMult = hpMult;
+  m.force = force;
   m.radius = (ENEMIES[id] as EnemyDef).radius;
   m.ttl = m.total = config.marks.spawnTime;
   return true;
@@ -207,7 +229,8 @@ export function updateMarks(world: World, dt: number): void {
       }
       continue;
     }
-    if (world.enemies.size < config.enemies.maxActive) spawnEnemy(world, m.enemy, m.x, m.y, m.hpMult);
+    if (m.force || world.enemies.size < config.enemies.maxActive)
+      spawnEnemy(world, m.enemy, m.x, m.y, m.hpMult);
     world.marks.release(m);
   }
 }

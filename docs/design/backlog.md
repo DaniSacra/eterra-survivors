@@ -2810,7 +2810,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C1 · Bugs
 
-**CB-03 · `elites25` só conta o Golem** · impl · P · proposto
+**CB-03 · `elites25` só conta o Golem** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code M1. `data/achievements.ts:77` tem `enemies: ['golem']`, e o Golem só existe na Estrada; a Bruxa
   (Valmor) e o Coveiro (Cripta) não contam, embora o texto diga "Derrote 25 elites" (`pt-BR.ts:437`). O FT-07 já
@@ -2829,14 +2829,14 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   - `southRoad`: "${hero} caiu na Estrada do Sul. A matilha ainda uiva."
 - Aceite: captura do fim de jogo nas três fases com a frase da fase; nenhum texto fora do `pt-BR.ts`.
 
-**CB-05 · `markWeb` mexe na marca errada com o pool cheio** · impl · P · proposto
+**CB-05 · `markWeb` mexe na marca errada com o pool cheio** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code B1. `arena.ts:111-113` ignora o `false` de `addPatch` quando há 160 marcas e sobrescreve o `born`
   da última marca qualquer, bagunçando "a mais antiga derrete".
 - O quê: `if (addPatch(...)) { ... }`.
 - Aceite: teste com o pool de marcas cheio: nenhuma marca existente muda.
 
-**CB-01 · A pilha de ossos quebra no segundo acerto do mesmo ataque** · impl + bal · P · proposto
+**CB-01 · A pilha de ossos quebra no segundo acerto do mesmo ataque** · impl + bal · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code M2, 06-vfx #2, 01-balance (remontagem dentro do ruído: 8 contra 11 vitórias). Em
   `core/enemies.ts:216-249` o golpe que zera a vida vira pilha e qualquer `damageEnemy` seguinte, mesmo no mesmo passo,
@@ -2849,7 +2849,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: teste dentro de uma multidão: Aura e um projétil no mesmo passo não quebram a pilha; um acerto 0,2 s depois
   quebra; dano da quebra aparece no relatório. Sim: nenhuma categoria com taxa de remontagem abaixo da metade da outra.
 
-**CB-02 · Coveiro: Ossadas sem a vida da onda, cova longe do herói, Maça que não interrompe** · impl + bal · P · proposto
+**CB-02 · Coveiro: Ossadas sem a vida da onda, cova longe do herói, Maça que não interrompe** · impl + bal · P · ✅ feito (2026-11-11)
 
 - Por quê: 01-balance B1, 02-code M3 (parte) e M4, 02-code B4. `behaviours.ts:360` chama `riseAt` sem `hpMult`: as 4
   Ossadas do Coveiro têm 14 de vida aos 9:00 (a comum tem 168) e morrem de um golpe mordendo como as outras (40). O
@@ -2864,7 +2864,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C2 · Técnico
 
-**CT-01 · Teto de inimigos em todo surgimento e marcas reaproveitadas limpas** · impl · P · proposto
+**CT-01 · Teto de inimigos em todo surgimento e marcas reaproveitadas limpas** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code M3, B2, B9. `riseAt` fora da vista chama `spawnEnemy` direto e o `send` dos `specials` também não
   confere `maxActive` (`Pool.acquire` nunca recusa); `addBurst`, `riseAt` e `markIce` não resetam `slow`, `life`,
@@ -2874,7 +2874,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: teste com 700 inimigos: nada novo surge por `riseAt` nem por `specials`; teste de marca reaproveitada sem
   campo velho; typecheck pega um id errado.
 
-**CT-04 · `?dev`: o chefe das 5:00 chega com a escolta da última faixa** · impl · P · proposto
+**CT-04 · `?dev`: o chefe das 5:00 chega com a escolta da última faixa** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 03-qa B2. Com `config.devBossAt` a curva continua lendo o tempo da partida: o Sineiro chega com a multidão
   das 5:00 (4 → 222 inimigos em 26 s) e não com o fio de escoltas da faixa final (NE-05). O Daniel testa uma luta que o
@@ -2884,7 +2884,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: teste em `waves.test.ts`: com `bossAt` 300, o lote depois do chefe é o do segmento final; contagem de
   inimigos no `?dev` parecida com a de `world.time = 598`.
 
-**CT-05 · Bot do sim enfrenta o chefe** · bal · P · proposto
+**CT-05 · Bot do sim enfrenta o chefe** · bal · P · ✅ feito (2026-11-11)
 
 - Por quê: 01-balance. 3 de 192 corridas "perdem" aos 15:00 com o herói intacto: o bot foge do chefe (peso 5 em
   `tests/lab/bot.ts` `steer`) e o chefe (89 px/s) nunca o alcança. A vitória da Loja inteira na Cripta fica um pouco
@@ -2892,7 +2892,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - O quê: com o chefe vivo e o herói acima de 50% da vida, o peso de fuga do chefe cai e o bot orbita a ~180 px dele.
 - Aceite: nenhuma corrida chega aos 15:00 sem morrer nem vencer; sim da Cripta antes e depois na tabela.
 
-**CT-02 · Testes que faltam na Cripta** · impl · P · proposto
+**CT-02 · Testes que faltam na Cripta** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code "Testes que faltam".
 - O quê: `coldSpirit`/`shoot` como comportamento; pilha sob `world.freeze` e sob `clearCrowd`; `burst` com a Muralha
@@ -2910,7 +2910,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C3 · Equilíbrio
 
-**CE-01 · O limo da Gosma Verde prende de verdade** · impl + bal · P · proposto
+**CE-01 · O limo da Gosma Verde prende de verdade** · impl + bal · P · ✅ feito (2026-11-11)
 
 - Por quê: 01-balance B2, 02-code B3, 06-vfx #8. Com o bot, o herói passa **0,19%** do tempo no limo, com 1,15 gosmas
   vivas e 1,9 manchas no chão. O teto `trail.cap` (5) conta as manchas de todas as gosmas juntas
@@ -2927,7 +2927,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   menos 10x o de hoje (bot que foge; um humano pisa mais); `ground` abaixo de 30% do dano; tirar o limo muda o
   resultado para fora do ruído.
 
-**CE-02 · Cripta com a meia Loja de volta na faixa** · bal + impl · P · proposto (depois de CB-01, CB-02, CE-01 e, se aprovado, CD-01)
+**CE-02 · Cripta com a meia Loja de volta na faixa** · bal + impl · P · parcial (2026-11-11: `mult` da Cripta hp 1.6 / damage 1.5 → 0% / 13% / 81%; a meia Loja fica 2 pontos abaixo da faixa, o resto depende do CD-01 e do Daniel) (depois de CB-01, CB-02, CE-01 e, se aprovado, CD-01)
 
 - Por quê: 01-balance D1, D2, D4. Meia Loja em 12,5% (128 corridas) contra 15 a 35%; 25 de 37 mortes antes do chefe
   caem entre 4:00 e 5:30, o vale antes do 1º Elo. A alavanca de dano funciona (`mult.damage` 1.5: 18% / 88%); a de

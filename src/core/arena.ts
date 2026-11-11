@@ -1,6 +1,6 @@
 import type { BossAbility } from '../data/enemies';
 import type { Enemy } from './enemies';
-import { addPatch, type Mark } from './marks';
+import { addPatch, resetMark, type Mark } from './marks';
 import type { World } from './world';
 
 /**
@@ -78,7 +78,7 @@ export function markIce(world: World, boss: Enemy, ab: BossAbility): void {
     }
     if (dir > 0) usedPos = off;
     else usedNeg = off;
-    const m = world.marks.acquire();
+    const m = resetMark(world.marks.acquire());
     m.kind = 'ice';
     m.x = (layout.kind === 'corridor' ? 0 : p.x) + quarter * (i % 2 === 0 ? side : -side);
     m.y = p.y + dir * off;
@@ -108,9 +108,10 @@ export function markWeb(world: World, boss: Enemy, ab: BossAbility): void {
       x += Math.cos(a) * d;
       y += Math.sin(a) * d;
     }
-    addPatch(world, 'web', x, y, r, ab.windup, ab.life ?? 8, ab.slow ?? 0.55, 0, boss.x, boss.y);
-    const m = world.marks.active[world.marks.size - 1];
-    if (m) m.born = world.time + i * 1e-3;
+    if (addPatch(world, 'web', x, y, r, ab.windup, ab.life ?? 8, ab.slow ?? 0.55, 0, boss.x, boss.y)) {
+      const m = world.marks.active[world.marks.size - 1];
+      if (m) m.born = world.time + i * 1e-3;
+    }
   }
   meltOldest(world, ab.cap ?? 6, 'web');
 }

@@ -114,6 +114,18 @@ describe('test mode boss time', () => {
     } finally {
       playtest.bossAt = null;
     }
+    // After it, the crowd is the boss fight's trickle, not the 5:00 wave (CT-04).
+    const d = new World(1);
+    playtest.bossAt = config.devBossAt;
+    try {
+      d.time = config.devBossAt + 0.1;
+      d.spawner.update(d, 1 / 60);
+      const last = STAGES.valmor.waves[STAGES.valmor.waves.length - 1];
+      d.spawner.update(d, 1 / 60);
+      expect(d.enemyDamage).toBe(last?.damage);
+    } finally {
+      playtest.bossAt = null;
+    }
     const n = new World(1);
     n.time = config.devBossAt + 0.1;
     n.spawner.update(n, 1 / 60);

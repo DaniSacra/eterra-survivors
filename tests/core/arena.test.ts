@@ -117,3 +117,20 @@ describe('the Lobo Velho arena (FT-08)', () => {
     expect(ENEMIES.blackKnight).not.toHaveProperty('arena');
   });
 });
+
+describe('Teia with the marks full (CB-05)', () => {
+  it('touches no existing mark when no web can be made', async () => {
+    const { addPatch } = await import('../../src/core/marks');
+    const { markWeb } = await import('../../src/core/arena');
+    const { config } = await import('../../src/data/config');
+    const { quietWorld } = await import('./helpers');
+    const w = quietWorld();
+    for (let i = 0; i < config.marks.max; i++) addPatch(w, 'poison', i, 0, 10, 1, 5, 1, 0);
+    const boss = spawnEnemy(w, 'spiderMother', 200, 0);
+    const born = w.marks.active.map((m) => m.born);
+    const web = ENEMIES.spiderMother.abilities?.find((a) => a.kind === 'web');
+    if (!web) throw new Error('the mother has her web');
+    markWeb(w, boss, web);
+    expect(w.marks.active.map((m) => m.born)).toEqual(born);
+  });
+});

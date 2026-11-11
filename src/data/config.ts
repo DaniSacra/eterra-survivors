@@ -54,6 +54,8 @@ export const config = {
     separation: 0.5,
     knockbackDecay: 10, // per second
     hitFlash: 0.1,
+    /** A fresh pile of bones ignores hits for this long, so one swing of many hits does not break it (CB-01). */
+    pileGuard: 0.15,
   },
   /** Damage over time (bleeding, burning): seconds between ticks. */
   dotTick: 0.5,

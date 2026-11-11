@@ -215,11 +215,23 @@ export function damageEnemy(
 ): void {
   if (e.dead || isFaded(e)) return;
   if (e.pile > 0) {
-    // A pile of bones: any hit breaks it for good.
+    const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
+    // Just fallen: the same swing's other hits (an aura, an orbit, a piercing shot) pass over it (CB-01).
+    if (e.pile > re.delay - config.enemies.pileGuard) return;
+    // After that, any hit breaks it for good, and counts like the hit it is.
+    const dealt = Math.min(amount, e.maxHp * re.hp);
+    if (source) {
+      source.damage += dealt;
+      if (amount > world.bestHit) world.bestHit = amount;
+    }
     e.pile = 0;
     e.hp = 0;
     e.dead = true;
+    e.hitBy = source ? source.id : null;
+    e.hitAmount = amount;
+    e.hitCrit = false;
     world.tally.hits++;
+    world.onEnemyDamaged(e, amount, source);
     onKill(world, e, source);
     return;
   }
@@ -400,7 +412,7 @@ export function updateEnemies(world: World, dt: number): void {
   }
 }
 
-/** A trail (FT-16): every `every` s a patch under it, unless its `cap` of patches is already on the ground. */
+/** A trail (FT-16): every `every` s a patch under it, unless its own `cap` of patches is already on the ground. */
 function leaveTrail(world: World, e: Enemy, dt: number): void {
   const tr = e.def.trail as NonNullable<EnemyDef['trail']>;
   e.trailT -= dt;
@@ -408,9 +420,15 @@ function leaveTrail(world: World, e: Enemy, dt: number): void {
   e.trailT = tr.every;
   let n = 0;
   const marks = world.marks.active;
-  for (let i = 0; i < marks.length; i++) if (marks[i]?.kind === tr.pool.kind) n++;
+  for (let i = 0; i < marks.length; i++) {
+    const m = marks[i] as (typeof marks)[number];
+    if (m.kind === tr.pool.kind && m.owner === e.uid) n++;
+  }
   if (n >= tr.cap) return;
-  addPatch(world, tr.pool.kind, e.x, e.y, tr.pool.radius, 0.01, tr.pool.ttl, tr.pool.slow ?? 1, 0);
+  if (addPatch(world, tr.pool.kind, e.x, e.y, tr.pool.radius, 0.01, tr.pool.ttl, tr.pool.slow ?? 1, 0)) {
+    const m = world.marks.active[world.marks.size - 1];
+    if (m) m.owner = e.uid;
+  }
 }
 
 /** Removes dead enemies (backwards, so swap-remove is safe) and reports each death to the world. */

@@ -288,3 +288,12 @@ describe('optional charges', () => {
     }
   });
 });
+
+describe('elites25 (CB-03)', () => {
+  it('counts every elite a stage sends', async () => {
+    const { STAGES } = await import('../../src/data/stages');
+    const def = ACHIEVEMENTS.elites25 as AchievementDef & { enemies?: string[] };
+    for (const stage of Object.values(STAGES))
+      for (const e of stage.elites) expect(def.enemies, e.id).toContain(e.id);
+  });
+});
