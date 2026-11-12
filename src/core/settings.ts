@@ -13,6 +13,8 @@ export interface Settings {
   music: boolean;
   /** How loud the music plays while `music` is on (PS-01); an old save without it plays at Normal. */
   musicLevel: MusicLevel;
+  /** First-time tips for enemies with a verb (CU-01). */
+  tips: boolean;
   /** Gaspar already greeted the player (his line shows on the first visit to the Loja). */
   gasparMet: boolean;
 }
@@ -21,8 +23,9 @@ export const defaultSettings = (): Settings => ({
   damageNumbers: true,
   calm: false,
   muted: false,
-  music: true,
+  music: false,
   musicLevel: 'normal',
+  tips: true,
   gasparMet: false,
 });
 
