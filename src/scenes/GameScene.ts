@@ -106,6 +106,8 @@ const HERO_LIFT = 22;
 /** Flyers hover this high (px) over the spot they threaten, bob a little and flap fast. */
 const HOVER = 13;
 /** Width of the hero's life bar (px). */
+/** Display scale of the pixel pickups: the chest at hero density (1 art px = 2 px, it is the prize), the rest at ART_SCALE. */
+const PICKUP_SCALE: Record<string, number> = { 'pickup.chest': 1 };
 const HERO_BAR_W = 44;
 
 /** Projectile sprites that spin as they fly, and the one that drops embers. */
@@ -365,6 +367,8 @@ export class GameScene extends Phaser.Scene {
       (img, it) => {
         const key = PICKUPS[it.type].sprite;
         if (img.texture.key !== key) img.setTexture(key);
+        const k = PICKUP_SCALE[key] ?? ART_SCALE;
+        if (img.scaleX !== k) img.setScale(k);
         // Items on the ground float a little.
         img.setPosition(it.x, it.y - 2 + Math.sin(this.world.time * 4 + it.x) * 2);
       },

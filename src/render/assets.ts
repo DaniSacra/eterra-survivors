@@ -62,6 +62,10 @@ export const ASSETS: Record<string, AssetDef> = {
   'ui.button': { kind: 'image', url: 'sprites/ui/button.png' },
   ...vfxAssets(),
   ...art(ITEM_ART, ART_RES),
+  // Pixel pickups (PixelLab, PA-04): the rare ones the player most wants to spot; they replace the code-drawn ones.
+  'pickup.chest': { kind: 'image', url: 'sprites/items/chest.png' },
+  'pickup.magnet': { kind: 'image', url: 'sprites/items/magnet.png' },
+  'pickup.bomb': { kind: 'image', url: 'sprites/items/bell.png' },
   // Pixel projectiles and pieces of effects (PixelLab, files at ART_RES); they replace the code-drawn ones of the same key.
   'proj.shields': { kind: 'image', url: 'sprites/fx/shield.png' },
   'proj.valmorWall': { kind: 'image', url: 'sprites/fx/shield.png' },

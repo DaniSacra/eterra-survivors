@@ -89,3 +89,9 @@ Redo of `valmor` (2026-11-12, Daniel found the first five tracks too ambient, lo
 | --- | --- | --- |
 | 2026-11-11 | Valmor ground redone: snow patches over frozen earth (`public/sprites/tiles/valmor.png`, 70 art px square at 2x, seamless by a dithered half-offset blend, contrast pulled to 0.78 and mean luminance set to 0.48, script in the session scratchpad). **Candidate B kept as `public/sprites/tiles/valmor-alt.png`**: dark brown earth with thin snow patches (same job, candidate 0; to try it, copy it over `valmor.png`). Rejected: a diagonal trodden trail (candidate 0 of job 57ad1093), which mirrored into a big diamond | PixelLab create_image_pro 144x144 with the old Valmor tile as outline, detail and shading style: jobs 72149f92-ffea-484f-9254-06668d450aa2 (candidates 2 and 0, used), 57ad1093-6aa2-46e8-85d4-8b8be071fd7e and 6034dd72-bbe5-41ca-8d6f-da68d7f2bc00 (first two tries, not used). 45 generations |
 | 2026-11-11 | Lamp post (`decals/lantern.png`, 26x72 art px, twice the old lantern) with a warm additive halo (`render/decals.ts`) | PixelLab create_object_pro_flash 40x80 (object f6205fb1-83c6-4219-b644-77d812f0c80d, 5 generations) |
+
+## Pixel pickups (PA-04, 2026-11-11)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-11 | Chest, magnet and bell ("bomb": Badalada) as pixel sprites in `public/sprites/items/{chest,magnet,bell}.png` (trimmed, packed at 2x; the chest is shown at scale 1, the others at ART_SCALE; they replace the code-drawn `pickup.*` of the same key). 15 generations | PixelLab create_object_pro_flash 32x32, one direction (objects 040bf62f-3a61-40f2-96fb-a76d6ad15cfa, 21c7f380-f409-410d-885c-ddc33630ac9d, 1dea2aa3-d092-4caf-8a14-4cb9351349b3) |

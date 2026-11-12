@@ -1,6 +1,5 @@
 import type Phaser from 'phaser';
 import type { World } from '../core/world';
-import { ART_SCALE } from './art/pen';
 import { UI } from './ui';
 import { MAX_ARROWS as MAX, arrowTargets, createTargets, type ArrowKind } from './edgeTargets';
 
@@ -22,13 +21,7 @@ export class EdgeArrows {
   constructor(scene: Phaser.Scene) {
     this.g = scene.add.graphics().setDepth(-5);
     for (let i = 0; i < MAX; i++)
-      this.icons.push(
-        scene.add
-          .image(0, 0, 'pickup.chest')
-          .setScale(ART_SCALE * 0.8)
-          .setDepth(-4)
-          .setVisible(false),
-      );
+      this.icons.push(scene.add.image(0, 0, 'pickup.chest').setScale(0.65).setDepth(-4).setVisible(false));
   }
 
   /**

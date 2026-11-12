@@ -3584,7 +3584,7 @@ em `ART_RES`.
 - Aceite: capturas 420x820 e 1000x680 de Valmor no início e aos 5:30 com multidão: ratos, gemas e herói acima do chão
   (teste de contraste do chão mantido); menus com o fundo novo; o Daniel escolhe o candidato.
 
-**PA-04 · Baú, ímã e bomba em pixel** · visual · P · proposto
+**PA-04 · Baú, ímã e bomba em pixel** · visual · P · ✅ feito (2026-11-11; baú em escala 1, ímã e sino em ART_SCALE; a "bomba" continua sendo o sino Badalada do jogo; comida, elixir e gelo ficam para depois; 15 gerações)
 
 - Por quê: 04-visual #7. Itens do chão são `Pen` (`render/art/items.ts:141-257`); as gemas e moedas leem bem, mas os
   raros (baú, ímã, bomba) são o que o jogador mais quer achar e é onde o estilo mais destoa.
