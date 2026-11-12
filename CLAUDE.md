@@ -99,8 +99,13 @@ https://valmor-resiste.onrender.com); `index.html` uses `%BASE_URL%` so one sour
   banked gold, shop levels, bought heroes, cleared stages. `World` takes a `RunSetup` (hero, stage, shop bonuses).
   The Loja buys in two steps (`ShopCart`: select, then `confirmPurchase`), in sections (`SHOP_SECTIONS`); items
   raise a stat, add level-up charges or, Segunda Chance, a revive (`RunBonuses.revives`, `config.revive`).
-  Bot targets per stage x Loja profile (none / half / full wins): Valmor 0–15% (death at 6–8 min) / 40–60% / 85%+,
-  Cripta 0–10% / 80–90% / 90%+ (Daniel, 2026-11-11: with half the Loja a person should win about 60%, and he could not pass 5:00 with everything bought while the bot won 94%, so the bot runs far ahead of people here; retest by hand), Estrada 0% / 0–10% / 35–55%. Tune stage `mult` and waves first, then weapons.
+  **Difficulty targets (Daniel, 2026-11-12, children found it too hard):** a casual player wins about 70% of runs
+  with no upgrades in Valmor, with a fifth of the Loja (`SIM_SHOP=20`) in the Cripta and with two fifths
+  (`SIM_SHOP=40`) in the Estrada. The bot is stronger than a child, so these are measured with
+  `SIM_HANDICAP=0.15` (−15% damage, −30 life; `SIM_VIEW=portrait`): Valmor none ~75%, Cripta 20 ~73%, Estrada 40 ~79%
+  (12 seeds x 4 heroes). The lever that moves them is `mult.damage` (contact is 97% of the damage), then `mult.hp`;
+  spawn density barely moves it. Valmor also keeps only half of the curve's climb (`soft: 0.5` in `buildWaves`).
+  The older bot targets (Valmor 0–15% none, etc.) no longer apply; `WIN_TARGETS` in `tests/lab/sim.test.ts` is stale.
 - **Noite Sem Fim**: after a victory the end screen offers "Continuar a vigília" (`world.continueVigil()`); the
   spawner then grows the stage's last full wave (`config.vigil`: HP, contact damage, batch, an elite a minute).
   The victory is banked when the boss falls; `recordVigil` adds only what the vigil brought, and each hero keeps

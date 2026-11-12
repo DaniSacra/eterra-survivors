@@ -48,16 +48,18 @@ const CURVE: [number, number, number, number, number, Partial<Record<Role, numbe
 export interface Pace {
   pace?: number;
   opening?: number;
+  /** How much of the curve's growth in enemy HP and contact damage the stage keeps (1 = all, 0.5 = half the climb). */
+  soft?: number;
 }
 
 /** The wave list of a stage: the shared curve with the stage's cast in each role. */
-export function buildWaves(roles: Roles, { pace = 1, opening = 0 }: Pace = {}): WaveSegment[] {
+export function buildWaves(roles: Roles, { pace = 1, opening = 0, soft = 1 }: Pace = {}): WaveSegment[] {
   return CURVE.map(([from, interval, batch, hpMult, damage, weights], i) => ({
     from: Math.round(from * pace),
     interval,
     batch: i < 2 ? batch + opening : batch,
-    hpMult,
-    damage,
+    hpMult: 1 + (hpMult - 1) * soft,
+    damage: 1 + (damage - 1) * soft,
     enemies: (Object.keys(weights) as Role[])
       .filter((r) => roles[r])
       .map((r) => ({ id: roles[r] as EnemyId, weight: weights[r] as number })),

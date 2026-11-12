@@ -116,7 +116,7 @@ describe('Espadas dos Paladinos (orbit)', () => {
       updateWeapons(w, 1 / 60);
       w.time += 1 / 60;
     }
-    for (const e of ring) expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(s.damage);
+    for (const e of ring) expect(e.maxHp - e.hp).toBeGreaterThanOrEqual(s.damage - 1e-6);
     const before = ring[0]!.hp;
     updateWeapons(w, 0);
     expect(ring[0]!.hp).toBe(before);

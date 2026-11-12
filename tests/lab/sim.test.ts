@@ -24,16 +24,24 @@ const stages = STAGE_IDS.filter((s) => !import.meta.env.SIM_STAGE || s === impor
  * Shop profiles: `none` (a new player), `half` (every item at half its levels, rounded down) and `full` (the
  * veteran). SIM_SHOP picks one (default none) or `all` of them.
  */
-type Profile = 'none' | 'half' | 'full';
+type Profile = string;
 const PROFILES: Profile[] = ['none', 'half', 'full'];
+// SIM_SHOP also takes a number: that percent of every item's levels (SIM_SHOP=20 is a fifth of the Loja).
 const profiles: Profile[] =
-  import.meta.env.SIM_SHOP === 'all' ? PROFILES : [(import.meta.env.SIM_SHOP as Profile) || 'none'];
+  import.meta.env.SIM_SHOP === 'all' ? PROFILES : [import.meta.env.SIM_SHOP || 'none'];
+// SIM_HANDICAP: a player weaker than the bot, as in tests/lab/newplayer.test.ts (0.15 is about a new player).
+const HANDICAP = Number(import.meta.env.SIM_HANDICAP ?? 0);
 function setupFor(profile: Profile): RunSetup {
-  if (profile === 'none') return {};
-  const level = (id: ShopId) => (profile === 'full' ? SHOP[id].maxLevel : Math.floor(SHOP[id].maxLevel / 2));
-  return {
-    bonuses: shopBonuses({ ...newSave(), shop: Object.fromEntries(SHOP_IDS.map((id) => [id, level(id)])) }),
-  };
+  const share =
+    profile === 'none' ? 0 : profile === 'full' ? 1 : profile === 'half' ? 0.5 : Number(profile) / 100;
+  const level = (id: ShopId) => Math.floor(SHOP[id].maxLevel * share);
+  const bonuses = shopBonuses({
+    ...newSave(),
+    shop: Object.fromEntries(SHOP_IDS.map((id) => [id, level(id)])),
+  });
+  bonuses.stats.might = (bonuses.stats.might ?? 0) - HANDICAP;
+  bonuses.stats.maxHp = (bonuses.stats.maxHp ?? 0) - HANDICAP * 200;
+  return { bonuses };
 }
 const veteran = profiles.includes('full');
 type Run = SimResult & { profile: Profile };
@@ -47,7 +55,7 @@ const WIN_TARGETS: Record<string, Record<Profile, [number, number]>> = {
   southRoad: { none: [0, 0], half: [0, 10], full: [35, 55] },
 };
 const targetMark = (stage: string, profile: Profile, rate: number) => {
-  const t = WIN_TARGETS[stage]?.[profile];
+  const t = WIN_TARGETS[stage]?.[profile as 'none' | 'half' | 'full'];
   if (!t) return '';
   const r = Math.round(rate * 100);
   return r >= t[0] && r <= t[1] ? ' ok' : ` OFF ${t[0]}-${t[1]}`;

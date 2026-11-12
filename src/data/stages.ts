@@ -62,16 +62,17 @@ const elites = (pace: number, ...ids: EnemyId[]) =>
  */
 export const VALMOR_PACE = 0.7;
 const VALMOR_OPENING = 1;
+const VALMOR_SOFT = 0.5;
 
 export const STAGES = {
   /** Arredores de Valmor: barns, fences and fields around the village, in the snow, taken by rats and spiders (FT-13). */
   valmor: {
     tile: 'tile',
     layout: { kind: 'obstacles', set: 'village', cell: 260, chance: 0.16, clear: 220 },
-    mult: { hp: 0.9, damage: 0.9, speed: 1, spawn: 1, gold: 1.35 },
+    mult: { hp: 0.6, damage: 0.25, speed: 1, spawn: 1, gold: 1.35 },
     waves: buildWaves(
       { basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' },
-      { pace: VALMOR_PACE, opening: VALMOR_OPENING },
+      { pace: VALMOR_PACE, opening: VALMOR_OPENING, soft: VALMOR_SOFT },
     ),
     elites: elites(VALMOR_PACE, 'witch'),
     specials: [
@@ -87,7 +88,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', set: 'crypt', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 0.82, damage: 0.46, speed: 1.0, spawn: 1.0, gold: 1.5 },
+    mult: { hp: 0.6, damage: 0.25, speed: 1.0, spawn: 1.0, gold: 1.5 },
     waves: buildWaves({
       basic: 'bones',
       fast: 'vampireBat',
@@ -111,7 +112,7 @@ export const STAGES = {
       sides: 0.05,
       scatter: { set: 'road', cell: 230, chance: 0.18, clear: 200, limitX: 160 },
     },
-    mult: { hp: 2.1, damage: 1.8, speed: 1.1, spawn: 1.0, gold: 2 },
+    mult: { hp: 1.1, damage: 0.45, speed: 1.1, spawn: 1.0, gold: 2 },
     waves: buildWaves({
       basic: 'hooded',
       fast: 'crow',
