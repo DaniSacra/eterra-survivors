@@ -1,93 +1,31 @@
 import Phaser from 'phaser';
-import { enemyTraits } from '../core/format';
 import { ENEMIES, type EnemyId } from '../data/enemies';
 import { STAGES, type StageId } from '../data/stages';
 import { ART_RES } from './art/pen';
-import { ENEMY_ANIMS, poseKey } from './enemyAnims';
+import { t } from '../i18n/pt-BR';
+import { ENEMY_ANIMS, poseKey, poseMs, showPoses, type EnemyAnim, type EnemyPose } from './enemyAnims';
 import { showScale } from './showScale';
-import { UI } from './ui';
-
-/** What an enemy shows off in the Bestiário: one of its tricks, drawn with a small effect. */
-export type ShowMove =
-  | 'swing'
-  | 'charge'
-  | 'zigzag'
-  | 'shoot'
-  | 'leap'
-  | 'burst'
-  | 'collapse'
-  | 'phase'
-  | 'rally'
-  | 'spawn'
-  | 'flee'
-  | 'cleave'
-  | 'toll'
-  | 'frost'
-  | 'web'
-  | 'dig';
-
-/** Elites and bosses show their own tricks in turn; the crowd shows the one its way of fighting implies. */
-const OWN_MOVES: Partial<Record<EnemyId, ShowMove[]>> = {
-  golem: ['leap'],
-  witch: ['shoot'],
-  gravedigger: ['dig'],
-  bellRinger: ['toll'],
-  oldWolf: ['charge', 'frost'],
-  spiderMother: ['charge', 'web', 'spawn'],
-  blackKnight: ['cleave'],
-  frostWolf: ['charge'],
-};
-
-const BY_WAY: Record<string, ShowMove> = {
-  charge: 'charge',
-  zigzag: 'zigzag',
-  phase: 'phase',
-  shoot: 'shoot',
-  leap: 'leap',
-  pack: 'charge',
-  banner: 'rally',
-  nest: 'spawn',
-  flee: 'flee',
-  reassemble: 'collapse',
-  burst: 'burst',
-};
-
-/** The moves an enemy shows, in turn (pure: tested). */
-export function showMoves(id: EnemyId): ShowMove[] {
-  const own = OWN_MOVES[id];
-  if (own) return own;
-  const way = enemyTraits(ENEMIES[id]).way;
-  return [(way && BY_WAY[way]) || 'swing'];
-}
-
-/** Effect colours, per enemy where it has one (fire, frost, venom), else a pale white. */
-const TINT: Partial<Record<EnemyId, number>> = {
-  coldSpirit: 0x9fe0ff,
-  oldWolf: 0x9fe0ff,
-  frostBoar: 0x9fe0ff,
-  frostWolf: 0x9fe0ff,
-  emberBones: 0xff8a3a,
-  witch: 0x8ae06a,
-  slime: 0x8ae06a,
-  spiderMother: 0xb070ff,
-  bellRinger: UI.goldHex,
-  blackKnight: 0xff4060,
-  warBanner: 0x7cc46a,
-  goblin: 0xd8b070,
-};
+import { UI, label } from './ui';
 
 /** Who hovers instead of walking. */
 const FLYING = new Set<EnemyId>(['bat', 'vampireBat', 'ghost', 'coldSpirit', 'crow']);
 
 /**
  * The Bestiário's stage: the enemy at a large size (in order of its real size, see `showScale`) on a strip of its own
- * stage's ground, standing in place: its walk cycle loops and, every few seconds, it winds up and shows one of its
- * tricks. Render only.
+ * stage's ground, standing in place. It plays each of its strips in turn (walk, attack, then its special poses and
+ * its death, where it has them) with a caption naming the pose; a tap or click moves on to the next one. Only the
+ * strips' own frames play: the sprite is never moved, scaled or shaken. Render only.
  */
 export class Showcase {
   private root: Phaser.GameObjects.Container;
-  private timers: Phaser.Time.TimerEvent[] = [];
-  private moveIndex = 0;
+  private timer?: Phaser.Time.TimerEvent;
+  private poses: EnemyPose[] = [];
+  private pose = 0;
+  private sprite?: Phaser.GameObjects.Sprite;
+  private caption?: Phaser.GameObjects.Text;
+  private count?: Phaser.GameObjects.Text;
+  private id?: EnemyId;
+  private calm = false;
 
   constructor(
     private scene: Phaser.Scene,
@@ -100,18 +38,13 @@ export class Showcase {
     const shape = scene.make.graphics({}, false).fillStyle(0xffffff).fillRect(x, y, w, h);
     this.root.setMask(shape.createGeometryMask());
     scene.add.rectangle(x, y, w, h).setOrigin(0).setStrokeStyle(2, UI.border).setDepth(2);
-    if (!scene.textures.exists('show.glow')) {
-      const c = scene.textures.createCanvas('show.glow', 64, 64);
-      const ctx = c?.getContext();
-      if (c && ctx) {
-        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-        grad.addColorStop(0, 'rgba(255,255,255,1)');
-        grad.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 64, 64);
-        c.refresh();
-      }
-    }
+    // Tapping the stage steps to the next pose.
+    scene.add
+      .zone(x, y, w, h)
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(3)
+      .on('pointerdown', () => this.next());
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.clear());
   }
 
@@ -134,6 +67,18 @@ export class Showcase {
     // A fog from the top fading into the ground, so the enemy stands in a pool of its own stage.
     for (let i = 0; i < 12; i++)
       add(s.add.rectangle(x, floorY + i * 6, w, 6, 0x0b0d18, 0.85 - i * 0.07).setOrigin(0));
+    if (!s.textures.exists('show.glow')) {
+      const c = s.textures.createCanvas('show.glow', 64, 64);
+      const ctx = c?.getContext();
+      if (c && ctx) {
+        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, 'rgba(255,255,255,1)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 64, 64);
+        c.refresh();
+      }
+    }
     const feet = y + h * 0.84;
     add(
       s.add
@@ -152,8 +97,7 @@ export class Showcase {
     const frameW = (anim ? anim.w : s.textures.getFrame(tex).width) / ART_RES;
     const k = showScale(frameW, frameH, w, h);
     const scale = k / ART_RES;
-    const fly = FLYING.has(id);
-    const footY = fly ? feet - h * 0.12 : feet;
+    const footY = FLYING.has(id) ? feet - h * 0.12 : feet;
     add(s.add.ellipse(x + w / 2, feet, frameW * k * 0.55, 8 + k * 2, 0x05040f, 0.55));
     const sprite = add(
       s.add
@@ -161,213 +105,56 @@ export class Showcase {
         .setOrigin(0.5, 1)
         .setScale(scale),
     );
+    this.sprite = sprite;
     if (!seen) {
       sprite.setTint(0x10121c);
       return;
     }
-    if (calm) return;
-    if (s.anims.exists(tex)) sprite.play(tex);
-    if (fly)
-      s.tweens.add({
-        targets: sprite,
-        y: sprite.y - 6 * k,
-        duration: 900,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-
-    // In place: the walk cycle loops on the spot and, every couple of seconds, the enemy winds up and shows a trick
-    // (its attack frames and a small effect), without crossing the box.
-    const moves = showMoves(id);
-    const loop = () => {
-      if (!sprite.active) return;
-      if (s.anims.exists(tex)) sprite.play(tex, true);
-      const move = moves[this.moveIndex++ % moves.length] as ShowMove;
-      this.after(this.trick(sprite, id, move, k, footY) + 900, loop);
-    };
-    this.after(700, loop);
+    this.id = id;
+    this.calm = calm;
+    this.poses = showPoses(id);
+    if (this.poses.length === 0) {
+      if (!calm && s.anims.exists(tex)) sprite.play(tex);
+      return;
+    }
+    this.caption = add(
+      label(s, x + 10, y + 8, '', 14, { bold: true, color: UI.gold, align: 'left', stroke: true }),
+    ).setOrigin(0, 0);
+    this.count = add(
+      label(s, x + w - 10, y + 9, '', 13, { color: UI.muted, align: 'left', stroke: true }),
+    ).setOrigin(1, 0);
+    this.play(0);
   }
 
-  /** Winds up (its own frames when it has them) and plays `move`; returns how long it takes, in ms. */
-  private trick(
-    sprite: Phaser.GameObjects.Sprite,
-    id: EnemyId,
-    move: ShowMove,
-    k: number,
-    footY: number,
-  ): number {
-    const s = this.scene;
+  /** Steps to the next pose (a tap), wrapping round. */
+  private next(): void {
+    if (this.poses.length > 1) this.play(this.pose + 1);
+  }
+
+  /** Puts pose `i` on the sprite and, unless calm, plays it and queues the next. */
+  private play(i: number): void {
+    const sprite = this.sprite;
+    const id = this.id;
+    if (!sprite || !id || this.poses.length === 0) return;
+    this.timer?.remove(false);
+    this.pose = i % this.poses.length;
+    const pose = this.poses[this.pose] as EnemyPose;
     const def = ENEMIES[id];
-    const anim = ENEMY_ANIMS[def.sprite];
-    const windKey = poseKey(def.sprite, 'windup');
-    // The blow of its act, else the bite or swing it makes when it reaches the hero.
-    const strikeKey = poseKey(def.sprite, anim?.frames.strike ? 'strike' : 'attack');
-    const hasWind = !!anim?.frames.windup && s.anims.exists(windKey);
-    let wind = 450;
-    if (hasWind) {
-      sprite.play({ key: windKey, repeat: 0 });
-      wind = ((anim?.frames.windup ?? 6) / (anim?.fps.windup ?? 8)) * 1000;
+    const anim = ENEMY_ANIMS[def.sprite] as EnemyAnim;
+    const key = poseKey(def.sprite, pose);
+    this.caption?.setText(t.bestiary.pose[pose]);
+    this.count?.setText(`${this.pose + 1}/${this.poses.length}`);
+    sprite.anims.stop();
+    if (this.calm) {
+      // Calm screen: nothing moves, each pose shows its middle frame until tapped.
+      sprite.setTexture(key, Math.floor(((anim.frames[pose] ?? 1) - 1) / 2));
+      return;
     }
-    this.after(wind, () => {
-      if (!sprite.active) return;
-      if ((anim?.frames.strike || anim?.frames.attack) && s.anims.exists(strikeKey))
-        sprite.play({ key: strikeKey, repeat: 0 });
-      else sprite.anims.resume();
-      this.move(sprite, id, move, k, footY);
-    });
-    return wind + 1100;
-  }
-
-  private move(
-    sprite: Phaser.GameObjects.Sprite,
-    id: EnemyId,
-    move: ShowMove,
-    k: number,
-    footY: number,
-  ): void {
-    const s = this.scene;
-    const tint = TINT[id] ?? 0xf0ecff;
-    const dir = sprite.flipX ? -1 : 1;
-    const front = sprite.x + dir * sprite.displayWidth * 0.4;
-    const mid = sprite.y - sprite.displayHeight * 0.45;
-    const reach = Math.min(this.w * 0.3, 60 * k);
-    const ring = (rx: number, ry: number, color: number, size: number, delay = 0, flat = true) => {
-      const r = this.keep(
-        s.add
-          .ellipse(rx, ry, 10, flat ? 4 : 10)
-          .setStrokeStyle(Math.max(2, k), color, 1)
-          .setFillStyle(color, 0.12),
-      );
-      r.setAlpha(0);
-      s.tweens.add({
-        targets: r,
-        width: size,
-        height: flat ? size * 0.35 : size,
-        alpha: { from: 1, to: 0 },
-        delay,
-        duration: 700,
-        ease: 'Quad.easeOut',
-        onComplete: () => r.destroy(),
-      });
-    };
-    // The sprite itself never moves, scales or shakes here (only its own frames play): a lunge is just dust behind it.
-    const dash = () => {
-      for (let i = 0; i < 3; i++) ring(sprite.x - dir * i * 10, footY, 0xd8d0c0, 18 + i * 6, i * 60);
-    };
-    switch (move) {
-      case 'swing':
-      case 'cleave': {
-        const big = move === 'cleave';
-        const g = this.keep(s.add.graphics());
-        const r = big ? reach * 1.1 : reach * 0.55;
-        g.lineStyle(big ? 6 : 3, big ? tint : 0xffffff, 0.95);
-        g.beginPath();
-        g.arc(front - dir * r * 0.3, mid, r, dir > 0 ? -1.1 : Math.PI - 1.1, dir > 0 ? 1.1 : Math.PI + 1.1);
-        g.strokePath();
-        s.tweens.add({ targets: g, alpha: 0, duration: 380, onComplete: () => g.destroy() });
-        if (!big) dash();
-        break;
-      }
-      case 'charge':
-        dash();
-        break;
-      case 'flee':
-        dash();
-        break;
-      case 'zigzag':
-        dash();
-        break;
-      case 'shoot': {
-        const p = this.keep(
-          s.add
-            .image(front, mid, 'show.glow')
-            .setDisplaySize(10 * k, 10 * k)
-            .setTint(tint),
-        );
-        const to = front + dir * Math.min(this.w * 0.55, 140 * k);
-        s.tweens.add({
-          targets: p,
-          x: to,
-          y: footY - 4,
-          duration: 520,
-          ease: 'Quad.easeIn',
-          onComplete: () => {
-            ring(p.x, footY, tint, 30 * k);
-            p.destroy();
-          },
-        });
-        break;
-      }
-      case 'leap': {
-        ring(sprite.x, footY, 0x05040f, 40 * k);
-        ring(sprite.x, footY, tint === 0xf0ecff ? 0xd8c8a0 : tint, 70 * k, 260);
-        break;
-      }
-      case 'burst':
-        ring(sprite.x, mid, tint, 60 * k, 0, false);
-        ring(sprite.x, mid, 0xffe080, 40 * k, 120, false);
-        break;
-      case 'collapse':
-        ring(sprite.x, footY, 0xd8d0c0, 40 * k);
-        break;
-      case 'phase':
-        dash();
-        break;
-      case 'rally':
-      case 'toll':
-      case 'frost':
-      case 'web':
-        for (let i = 0; i < 3; i++)
-          ring(
-            sprite.x,
-            move === 'toll' ? mid : footY,
-            move === 'web' ? 0xf0f0f0 : tint,
-            (50 + i * 30) * k,
-            i * 160,
-            move !== 'toll',
-          );
-        break;
-      case 'spawn':
-        for (let i = 0; i < 3; i++) {
-          const key = ENEMY_ANIMS['enemy.spider'] ? poseKey('enemy.spider', 'walk') : 'enemy.spider';
-          if (!s.textures.exists(key)) break;
-          const baby = this.keep(
-            s.add
-              .sprite(sprite.x, footY, key)
-              .setOrigin(0.5, 1)
-              .setScale(Math.max(1, Math.floor(k / 2)) / ART_RES),
-          );
-          if (s.anims.exists(key)) baby.play(key);
-          const to = sprite.x + (i - 1) * reach * 0.9 + dir * 20;
-          baby.setFlipX(to < sprite.x);
-          s.tweens.add({
-            targets: baby,
-            x: to,
-            y: footY + (i - 1) * 6,
-            alpha: { from: 1, to: 0 },
-            duration: 1200,
-            onComplete: () => baby.destroy(),
-          });
-        }
-        break;
-      case 'dig':
-        for (let i = 0; i < 3; i++) {
-          const hx = sprite.x + (i - 1) * reach * 0.8 + dir * 16;
-          const hole = this.keep(s.add.ellipse(hx, footY + 4, 1, 1, 0x05040f, 0.9));
-          s.tweens.add({
-            targets: hole,
-            width: 26 * k * 0.6,
-            height: 8 * k * 0.6,
-            delay: i * 140,
-            duration: 220,
-            yoyo: true,
-            hold: 500,
-            onComplete: () => hole.destroy(),
-          });
-        }
-        break;
+    if (this.scene.anims.exists(key)) {
+      const loops = pose === 'walk' || pose === 'attack';
+      sprite.play({ key, repeat: loops ? -1 : 0 });
     }
+    this.timer = this.scene.time.delayedCall(poseMs(anim, pose), () => this.play(this.pose + 1));
   }
 
   /** Transparent rows under the first frame's feet, in texture px (cached per key). */
@@ -412,16 +199,15 @@ export class Showcase {
     return o;
   }
 
-  private after(ms: number, fn: () => void): void {
-    this.timers.push(this.scene.time.delayedCall(ms, fn));
-  }
-
   private clear(): void {
-    for (const t of this.timers) t.remove(false);
-    this.timers = [];
-    for (const o of this.root.list) this.scene.tweens.killTweensOf(o);
+    this.timer?.remove(false);
+    this.timer = undefined;
+    this.sprite = undefined;
+    this.caption = undefined;
+    this.count = undefined;
+    this.id = undefined;
+    this.poses = [];
     this.root.removeAll(true);
-    this.moveIndex = 0;
   }
 }
 

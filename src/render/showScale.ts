@@ -16,6 +16,6 @@ export function showScale(frameW: number, frameH: number, boxW: number, boxH: nu
   const size = showSize(frameW, frameH);
   const t = Math.min(1, Math.max(0, (size - SIZE_MIN) / (SIZE_MAX - SIZE_MIN)));
   const height = boxH * 0.78 * (0.34 + 0.66 * t ** 0.65);
-  const fit = Math.min(height / frameH, (boxW * 0.42) / frameW);
+  const fit = Math.min(height / frameH, (boxW * 0.6) / frameW);
   return Math.max(1, Math.floor(fit * 2) / 2);
 }

@@ -251,6 +251,15 @@ export const t = {
   bestiary: {
     count: (n: number, total: number) => `${n} de ${total} encontrados`,
     unknown: '???',
+    /** Caption of each pose the showcase plays (a tap moves to the next). */
+    pose: {
+      walk: 'Andando',
+      attack: 'Atacando',
+      windup: 'Preparando',
+      strike: 'Golpe',
+      howl: 'Uivo',
+      death: 'Morrendo',
+    },
     /** Kills on a card ("x1.234"). */
     kills: (n: string) => `x${n}`,
     empty: 'Os inimigos que você encontrar nas partidas aparecem aqui.',
