@@ -795,15 +795,17 @@ function drawShock(
 ): void {
   const grow = 1 - (1 - t) * (1 - t);
   const r = s.shock * (0.2 + 0.8 * grow);
-  const fade = 1 - t;
+  const fade = (1 - t) * (s.echo ? 0.5 : 1);
   const glow = SLAM_GLOW[s.weapon];
   under.fillStyle(DUST_LIGHT, 0.12 * fade);
   disc(under, s.x, s.y, r);
+  // Quebra-Junta's element shows as one thin amber thread on the wave front (no wide halo: the skeletons inside
+  // keep their outline, PF-02).
   if (glow) {
-    top.lineStyle(12 * fade + 2, glow, 0.4 * fade);
+    top.lineStyle(2, glow, 0.7 * fade);
     ring(top, s.x, s.y, r);
   }
-  // The pixel rings of force: the outer one runs out to exactly the wave's radius.
+  // The pixel rings of force: the outer one runs out to exactly the wave's radius. The aftershock is fainter.
   const wave = VFX.shock;
   fxSprites.putFrame(
     vfxKey('shock'),
@@ -813,6 +815,7 @@ function drawShock(
     s.x,
     s.y,
     s.shock / SHOCK_RING,
+    s.echo ? 0.45 : 0.85,
   );
 }
 

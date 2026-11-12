@@ -3611,7 +3611,7 @@ em `ART_RES`.
 
 ### P5 · Efeitos visuais (dono: vfx-director)
 
-**PF-02 · Quebra-Junta mais leve** · vfx · P · proposto
+**PF-02 · Quebra-Junta mais leve** · vfx · P · ✅ feito (2026-11-12; escolhi: o halo de 12 px virou um fio âmbar de 2 px na frente da onda, para o Elo manter a cor; onda a 85% de alfa e eco a 45% (`Slash.echo`, marcado em `smash`); a pausa só começa se o mundo ainda não está parado. F4 não medido neste item)
 
 - Por quê: 06-vfx #4. Três anéis grossos (halo de 12 px de `drawShock`, `fx.ts:788-810`, mais os dois anéis do sprite,
   mais o eco igual) cobrem ~300 px a cada 0,9 s e apagam o contorno dos esqueletos; a pausa de 50 ms dispara duas vezes

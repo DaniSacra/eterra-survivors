@@ -1023,7 +1023,8 @@ export class GameScene extends Phaser.Scene {
       }
       if (s.form === 'smash' || s.form === 'shock') {
         // A heavy blow freezes the world for a beat (not with the calm screen on).
-        if (!this.calm) this.stopUntil = this.time.now + HIT_STOP_MS;
+        // One pause per frame: the blow and its wave land together (PF-02).
+        if (!this.calm && this.time.now >= this.stopUntil) this.stopUntil = this.time.now + HIT_STOP_MS;
         // Dust kicked up by the blow (no camera shake: weapons never move the screen).
         const spark = SWING_SPARK[s.weapon];
         if (!spark) continue;

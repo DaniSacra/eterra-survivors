@@ -38,6 +38,8 @@ export interface Slash extends Timed {
   shock: number;
   /** A mace blow that brought its shock wave ("pá, pá, BUM": the render whitens the head). */
   wave: boolean;
+  /** A shock wave that is a weaker aftershock of an earlier one (drawn smaller and fainter). */
+  echo: boolean;
 }
 export const createSlash = (): Slash => ({
   poolIndex: -1,
@@ -52,6 +54,7 @@ export const createSlash = (): Slash => ({
   weapon: 'blade',
   shock: 0,
   wave: false,
+  echo: false,
 });
 
 /** Something falling from the sky (lightning, fire) and hitting the ground for a moment (purely visual). */

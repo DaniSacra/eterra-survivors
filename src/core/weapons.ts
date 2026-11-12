@@ -244,7 +244,20 @@ function shockWave(
     w.afterY = y;
   }
   const r = s.waveRadius * world.player.stats.area * scale;
-  smash(world, s, w, x, y, angle, r, dmg(world, s.damage) * s.wave * scale, 'shock', s.waveKnockback);
+  smash(
+    world,
+    s,
+    w,
+    x,
+    y,
+    angle,
+    r,
+    dmg(world, s.damage) * s.wave * scale,
+    'shock',
+    s.waveKnockback,
+    false,
+    scale < 1,
+  );
 }
 
 /**
@@ -263,10 +276,12 @@ function smash(
   form: 'smash' | 'shock',
   knockback: number,
   wave = false,
+  echo = false,
 ): void {
   const slash = world.slashes.acquire();
   slash.form = form;
   slash.wave = wave;
+  slash.echo = echo;
   slash.x = x;
   slash.y = y;
   slash.angle = angle;

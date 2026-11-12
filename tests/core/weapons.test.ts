@@ -139,6 +139,8 @@ describe('Maça de Ferro (slam: a blow in front, a shock wave every few)', () =>
     expect(e.maxHp - e.hp - first).toBeCloseTo(after * def.crush);
     expect(out.maxHp - out.hp - j.damage * j.wave).toBeCloseTo(after);
     expect(w.slashes.active.filter((s) => s.form === 'shock')).toHaveLength(2);
+    // Only the aftershock is marked as an echo (the render draws it smaller and fainter).
+    expect(w.slashes.active.filter((s) => s.form === 'shock' && s.echo)).toHaveLength(1);
   });
 
   it('a stun is never renewed: an enemy held in the blow still gets to move between stuns', () => {
