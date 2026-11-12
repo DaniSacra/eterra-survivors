@@ -3265,5 +3265,5 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
   mudanças de compasso e tom), trilha de chefe e trilha do menu, em laço, geradas no PixelLab (`create_music` e
   `make_music_loop`, registradas em `docs/art/credits.md`). Player em `render/music.ts` (Phaser, fusão entre faixas,
   abaixa na pausa), mapa em `render/musics.ts`, opção Música em Opções e na pausa. Feito: valmor, crypt, southRoad,
-  boss (toca quando o chefe chega), menu (ver estado abaixo). Falta: Daniel escolher a faixa A ou B de cada fase,
+  boss (toca quando o chefe chega), menu (toca no menu). Falta: Daniel escolher a faixa A ou B de cada fase,
   nomes das faixas (provisórios), vitória e derrota (stings), evento de fim para tocá-los.

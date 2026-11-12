@@ -1,3 +1,4 @@
+import { music } from '../render/music';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { t } from '../i18n/pt-BR';
@@ -82,6 +83,7 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     // Saves from before the achievements earn the ones they already deserve.
     checkStoredAchievements();
+    music.play(this, 'menu');
     this.layers = [];
     const { width, height } = this.scale;
     // Phone lying down: the title and the party on the left, the buttons on the right.

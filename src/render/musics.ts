@@ -19,6 +19,7 @@ export const MUSIC = {
   crypt: { url: 'audio/music/crypt.mp3', vol: 0.9, loopStart: 84.079 },
   southRoad: { url: 'audio/music/southRoad.mp3', vol: 0.9, loopStart: 90.117 },
   boss: { url: 'audio/music/boss.mp3', vol: 0.9, loopStart: 73.793 },
+  menu: { url: 'audio/music/menu.mp3', vol: 0.9, loopStart: 53.267 },
 } satisfies Record<string, MusicDef>;
 
 export type MusicId = keyof typeof MUSIC;
