@@ -174,7 +174,7 @@ describe('elites', () => {
     w.step(1 / 60, still);
     w.step(1 / 60, still);
     expect(w.enemies.active.filter((e) => e.def.elite)).toHaveLength(1);
-    expect(w.events).toContainEqual({ type: 'eliteSpawned' });
+    expect(w.events).toContainEqual({ type: 'eliteSpawned', id: ELITES[0]!.id });
     for (const el of ELITES) expect((ENEMIES[el.id] as EnemyDef).elite).toBe(true);
   });
 });

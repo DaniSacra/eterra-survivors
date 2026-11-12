@@ -1,3 +1,4 @@
+import type { EnemyId } from '../data/enemies';
 import type { PickupId } from '../data/pickups';
 import type { PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
@@ -7,7 +8,7 @@ import type { UpgradeOption } from './upgrades';
 export type GameEvent =
   | { type: 'playerHit' }
   | { type: 'bossSpawned' }
-  | { type: 'eliteSpawned' }
+  | { type: 'eliteSpawned'; id: EnemyId }
   /** A thief rat showed up with its eye on the gems, and when it got away with them (FT-10). */
   | { type: 'thiefSpawned' }
   /** The mark of a thief about to appear was laid (its coins sound one second ahead). */

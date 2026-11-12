@@ -78,6 +78,8 @@ export interface MetaSave {
   lastStage?: StageId;
   /** Per hero (`heroes` is the list of heroes bought). */
   records: Partial<Record<CharacterId, HeroRecord>>;
+  /** Enemies whose first-time tip was already shown (CU-01), never shown again. */
+  tipsSeen: EnemyId[];
   /** Enemies seen at least once. */
   bestiary: Partial<Record<EnemyId, BestiaryEntry>>;
   totals: Totals;
@@ -112,6 +114,7 @@ export const newSave = (): MetaSave => ({
   cleared: [],
   elos: [],
   records: {},
+  tipsSeen: [],
   bestiary: {},
   totals: newTotals(),
   achievements: [],
@@ -246,6 +249,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
     lastStage?: unknown;
     records?: unknown;
     bestiary?: unknown;
+    tipsSeen?: unknown;
     totals?: unknown;
     achievements?: unknown;
     fresh?: unknown;
@@ -265,6 +269,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
   const records = obj(r.records);
   for (const id of CHARACTER_IDS) if (id in records) save.records[id] = sanitizeRecord(records[id]);
   save.bestiary = sanitizeBestiary(r.bestiary);
+  save.tipsSeen = known(r.tipsSeen, ENEMY_IDS);
   const totals = obj(r.totals);
   for (const k of Object.keys(save.totals) as (keyof Totals)[])
     save.totals[k] = num(totals[k], k !== 'damage' && k !== 'time');
@@ -327,6 +332,7 @@ export function serializeSave(save: MetaSave): object {
     elos: union(future.elos, known.elos),
     records: mergeUp(future.records, known.records),
     bestiary: mergeUp(future.bestiary, known.bestiary),
+    tipsSeen: union(future.tipsSeen, known.tipsSeen),
     totals: mergeUp(future.totals, known.totals),
     achievements: union(future.achievements, known.achievements),
     fresh: union(future.fresh, known.fresh),

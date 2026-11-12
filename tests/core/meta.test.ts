@@ -302,3 +302,10 @@ describe('save versions and Elos', () => {
     });
   });
 });
+
+describe('tipsSeen', () => {
+  it('starts empty, keeps only known enemies, and an old save without it migrates to empty', () => {
+    expect(sanitizeSave({ version: 2 }).tipsSeen).toEqual([]);
+    expect(sanitizeSave({ version: 2, tipsSeen: ['slime', 'nope', 7] }).tipsSeen).toEqual(['slime']);
+  });
+});

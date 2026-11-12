@@ -10,6 +10,7 @@ import {
 import { checkAchievements } from '../core/achievements';
 import type { RunSummary } from '../core/records';
 import type { CharacterId } from '../data/characters';
+import type { EnemyId } from '../data/enemies';
 import type { StageId } from '../data/stages';
 import { DEV_MODE } from './dev';
 
@@ -30,6 +31,14 @@ export function writeSave(save: MetaSave): void {
   } catch {
     // Private mode or full storage: progress just isn't kept.
   }
+}
+
+/** Remembers that an enemy's first-time tip was shown (CU-01); never again, in any run. */
+export function markTipSeen(id: EnemyId): void {
+  const save = loadSave();
+  if (save.tipsSeen.includes(id)) return;
+  save.tipsSeen.push(id);
+  writeSave(save);
 }
 
 /** Records the end of a run in the stored save (core/meta.ts `recordRun`). */

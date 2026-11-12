@@ -89,6 +89,10 @@ export class HudScene extends Phaser.Scene {
   private toastQueue: Toast[] = [];
   /** A short tip under the banner (the first Elo ready explains what an Elo is). */
   private hintBox!: Phaser.GameObjects.Container;
+  private tipBox!: Phaser.GameObjects.Container;
+  private tipBg!: Phaser.GameObjects.Rectangle;
+  private tipText!: Phaser.GameObjects.Text;
+  private tipIcon!: Phaser.GameObjects.Image;
   private hintBg!: Phaser.GameObjects.Rectangle;
   private hintText!: Phaser.GameObjects.Text;
   private toastOn = false;
@@ -175,6 +179,11 @@ export class HudScene extends Phaser.Scene {
     this.hintBg = this.add.rectangle(0, 0, 10, 10, UI.panel, 0.92).setStrokeStyle(2, UI.goldHex);
     this.hintText = label(this, 0, 0, '', 14, { color: UI.text });
     this.hintBox = this.add.container(0, 0, [this.hintBg, this.hintText]).setAlpha(0);
+    // The first-time enemy tip (CU-01): the enemy's sprite and one line, under the banner.
+    this.tipBg = this.add.rectangle(0, 0, 10, 10, UI.panel, 0.92).setStrokeStyle(2, UI.goldHex);
+    this.tipIcon = this.add.image(0, 0, 'icon.kills');
+    this.tipText = label(this, 0, 0, '', 14, { color: UI.text, align: 'left' }).setOrigin(0, 0.5);
+    this.tipBox = this.add.container(0, 0, [this.tipBg, this.tipIcon, this.tipText]).setAlpha(0);
     this.build = new BuildSlots(this);
     this.build.showEmpty = false;
     this.joystick = new Joystick(this);
@@ -333,7 +342,7 @@ export class HudScene extends Phaser.Scene {
    * choice's alone. The notice goes back to the head of the queue and shows again once the run goes on.
    */
   quiet(): void {
-    for (const o of [this.banner, this.hintBox, this.toastBox]) {
+    for (const o of [this.banner, this.hintBox, this.tipBox, this.toastBox]) {
       this.tweens.killTweensOf(o);
       o.setAlpha(0);
     }
@@ -351,6 +360,32 @@ export class HudScene extends Phaser.Scene {
     this.tweens.killTweensOf(this.hintBox);
     this.tweens.add({ targets: this.hintBox, alpha: 1, duration: 250, delay: 400 });
     this.tweens.add({ targets: this.hintBox, alpha: 0, delay: 8000, duration: 500 });
+  }
+
+  /** Whether a first-time tip may show now: no notice, hint or tip up, and the HUD is live. */
+  canTip(): boolean {
+    return this.banner.alpha === 0 && this.hintBox.alpha === 0 && this.tipBox.alpha === 0;
+  }
+
+  /** The enemy's first-time tip (CU-01): its sprite at 28 px and one line, for 4 s. Does not pause the game. */
+  tip(sprite: string, text: string): void {
+    const { width } = this.scale;
+    const iconH = 28;
+    this.tipIcon.setTexture(sprite);
+    this.tipIcon.setScale(Math.min(iconH / this.tipIcon.height, iconH / this.tipIcon.width));
+    const textW = Math.min(360, width - 56 - 60);
+    this.tipText.setText(text).setWordWrapWidth(textW);
+    const h = Math.max(iconH, this.tipText.height) + 16;
+    const w = textW > this.tipText.width ? this.tipText.width + 60 : textW + 60;
+    this.tipBg.setSize(w, h);
+    this.tipIcon.setPosition(-w / 2 + 28, 0);
+    this.tipText.setPosition(-w / 2 + 50, 0);
+    this.tipBox
+      .setPosition(width / 2, this.banner.y + Math.max(30, this.banner.height / 2 + 8) + h / 2)
+      .setAlpha(0);
+    this.tweens.killTweensOf(this.tipBox);
+    this.tweens.add({ targets: this.tipBox, alpha: 1, duration: 250 });
+    this.tweens.add({ targets: this.tipBox, alpha: 0, delay: 3700, duration: 300 });
   }
 
   /** Big centred message that fades out. Red warns; pass `good` for rewards. */

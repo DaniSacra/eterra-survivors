@@ -3204,7 +3204,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   `groundSlow` no render; `world.hurtBy` só é somado em `core/elos.ts`). Uma parte já está pronta: a barrinha de vida sob
   os pés existe, em textura (PA-01), sempre visível; fica assim.
 
-**CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · proposto
+**CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · ✅ feito (2026-11-12): `core/tips.ts` (`nextTip`, puro, com teste) acha o inimigo com verbo (reassemble, burst, dig, trail, shoot, leap, nest, flee, banner, brew) a menos de 700 px; `GameScene.checkTips` mostra `t.bestiary.tips[id]` (os textos do Bestiário, não os provisórios do item) por 4 s no `HudScene.tip` (sprite em 28 px), no máximo um a cada 20 s, nunca com chefe vivo, banner ou aviso na tela; "visto" fica em `save.tipsSeen` (campo novo, `sanitizeSave` migra para vazio, união na `serializeSave`); opção "Dicas de inimigos" (ligada por padrão, na Opções e na Pausa). Aviso de elite nomeia: "Coveiro chegou! Cuidado com as covas." (`t.eliteArrived`/`t.eliteHint` para Golem, Bruxa e Coveiro, provisórios, só jogabilidade; evento `eliteSpawned` agora leva o `id`). Elite e chefe não ganham dica (têm aviso próprio)
 
 - Por quê: 05-ui UI-01. FT-14, 15 e 16 empilharam cinco verbos numa fase; o jogador só os descobre apanhando, e o
   aviso de elite é sempre "Um inimigo poderoso se aproxima!" (`GameScene.ts:983-985`).

@@ -6,13 +6,20 @@ import { setSetting, settings } from './settings';
 import { UI, fontPx, button, label, seal } from './ui';
 
 /** The options shown as on/off buttons, in order. */
-const OPTIONS: ('muted' | 'music' | 'damageNumbers' | 'calm')[] = ['muted', 'music', 'damageNumbers', 'calm'];
+const OPTIONS: ('muted' | 'music' | 'damageNumbers' | 'calm' | 'tips')[] = [
+  'muted',
+  'music',
+  'damageNumbers',
+  'calm',
+  'tips',
+];
 
 const SHORT = {
   muted: 'soundShort',
   music: 'musicShort',
   damageNumbers: 'numbersShort',
   calm: 'calmShort',
+  tips: 'tipsShort',
 } as const;
 
 /**

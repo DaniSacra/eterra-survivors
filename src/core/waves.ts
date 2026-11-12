@@ -67,7 +67,7 @@ export class Spawner {
     if (elite && world.time >= elite.at) {
       this.nextElite++;
       this.send(world, elite.id, seg.hpMult, true);
-      world.events.push({ type: 'eliteSpawned' });
+      world.events.push({ type: 'eliteSpawned', id: elite.id });
     }
     if (!this.bossSpawned) this.specials(world, seg.hpMult);
     if (!this.bossSpawned && world.time >= (playtest.bossAt ?? stage.boss.at)) {
@@ -104,7 +104,7 @@ export class Spawner {
       this.vigilElites++;
       if (elite) {
         this.send(world, elite.id, hp, true);
-        world.events.push({ type: 'eliteSpawned' });
+        world.events.push({ type: 'eliteSpawned', id: elite.id });
       }
     }
   }

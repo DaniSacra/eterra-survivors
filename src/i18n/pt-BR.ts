@@ -151,6 +151,13 @@ export const t = {
   } satisfies Record<PickupId, string>,
 
   eliteWarning: 'Um inimigo poderoso se aproxima!',
+  /** CU-01: the elite's name and what to watch for (PROVISIONAL, gameplay only: Daniel may reword). */
+  eliteArrived: (name: string, hint: string) => `${name} chegou! ${hint}`,
+  eliteHint: {
+    golem: 'Cuidado com os saltos.',
+    witch: 'Cuidado com as poças.',
+    gravedigger: 'Cuidado com as covas.',
+  } as Partial<Record<EnemyId, string>>,
   thiefWarning: 'Um ladrão está levando suas gemas!',
   thiefEscaped: 'O ladrão fugiu.',
 
@@ -398,6 +405,7 @@ export const t = {
     damageNumbers: 'Números de dano',
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
+    tips: 'Dicas de inimigos',
     music: 'Música',
     /** The music button in Opções cycles these (PS-01). */
     musicLevel: { off: 'Desligada', low: 'Baixa', normal: 'Normal' },
@@ -406,6 +414,7 @@ export const t = {
     musicShort: 'Música',
     numbersShort: 'Números',
     calmShort: 'Calma',
+    tipsShort: 'Dicas',
     /** The seal beside each option. */
     on: 'Ligado',
     off: 'Desligado',

@@ -14,7 +14,9 @@ import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
-import { loadSave, recordRun, recordVigil } from '../render/save';
+import { loadSave, markTipSeen, recordRun, recordVigil } from '../render/save';
+import { nextTip, TIP_GAP } from '../core/tips';
+import { ENEMIES, type EnemyId } from '../data/enemies';
 import { lastChoice, type RunChoice } from './choice';
 import { World } from '../core/world';
 import { bankOnEnd, newRunSummary, summarizeRun, type RunSummary } from '../core/records';
@@ -267,6 +269,10 @@ export class GameScene extends Phaser.Scene {
   private liveSave!: MetaSave;
   private live = newRunSummary();
   private liveShown = new Set<AchievementId>();
+  /** Enemies whose first-time tip was shown (this save), the match time of the last tip, and the next check (CU-01). */
+  private tipsSeen = new Set<EnemyId>();
+  private tipAt = -TIP_GAP;
+  private nextTipCheck = 0;
   private nextCheck = 1;
   /** world.tally as of the last frame, to turn new attacks, hits, kills and gems into sounds. */
   private heard = { attacks: 0, hits: 0, gems: 0, kills: 0 };
@@ -328,6 +334,9 @@ export class GameScene extends Phaser.Scene {
     this.lastGem = -1;
     this.liveSave = loadSave();
     this.liveShown.clear();
+    this.tipsSeen = new Set(this.liveSave.tipsSeen);
+    this.tipAt = -TIP_GAP;
+    this.nextTipCheck = 0;
     this.nextCheck = 1;
     this.vigilBefore = null;
     this.vigilRecord = false;
@@ -927,6 +936,7 @@ export class GameScene extends Phaser.Scene {
     this.releaseLevelRing();
     this.frameSounds();
     this.checkAchievements();
+    this.checkTips();
   }
 
   /**
@@ -939,6 +949,23 @@ export class GameScene extends Phaser.Scene {
     this.nextCheck = Math.floor(w.time) + 1;
     const found = liveAchievements(this.liveSave, summarizeRun(w, this.live), this.liveShown);
     for (let i = 0; i < found.length; i++) this.hud.toast(found[i] as AchievementId);
+  }
+
+  /**
+   * First time (per save) an enemy with a verb is near: a short tip under the banner (CU-01). At most one every
+   * `TIP_GAP` s, never with a boss alive or a notice up, none when the option is off. Twice a second.
+   */
+  private checkTips(): void {
+    const w = this.world;
+    if (w.state !== 'playing' || w.time < this.nextTipCheck) return;
+    this.nextTipCheck = w.time + 0.5;
+    if (!settings().tips || w.boss || w.time - this.tipAt < TIP_GAP || !this.hud.canTip()) return;
+    const id = nextTip(w, this.tipsSeen);
+    if (!id) return;
+    this.tipsSeen.add(id);
+    this.tipAt = w.time;
+    markTipSeen(id);
+    this.hud.tip(ENEMIES[id].sprite, t.bestiary.tips[id] ?? '');
   }
 
   /** Sounds of frequent things, from the core's running counts (one sound per kind per frame at most). */
@@ -1589,7 +1616,10 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'eliteSpawned':
           sound.play('elite');
-          this.hud.announce(t.eliteWarning);
+          this.tipAt = w.time; // the elite's own warning comes first; tips wait
+          this.hud.announce(
+            e.id in t.eliteHint ? t.eliteArrived(t.enemies[e.id], t.eliteHint[e.id] ?? '') : t.eliteWarning,
+          );
           break;
         case 'thiefMark':
           sound.play('coins');
