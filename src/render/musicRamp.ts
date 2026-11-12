@@ -4,13 +4,7 @@
  * One step of a voice's own fade: `vol` moves linearly toward `target` over `fade` seconds. While the sound is still
  * locked (no gesture yet) nothing plays, so the fade must not run: the track enters with its full fade once unlocked.
  */
-export function rampVolume(
-  vol: number,
-  target: number,
-  dt: number,
-  fade: number,
-  unlocked: boolean,
-): number {
+export function rampVolume(vol: number, target: number, dt: number, fade: number, unlocked: boolean): number {
   if (!unlocked) return vol;
   const step = dt / fade;
   if (vol < target) return Math.min(target, vol + step);

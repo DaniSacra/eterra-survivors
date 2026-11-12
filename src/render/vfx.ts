@@ -49,4 +49,3 @@ export function vfxAssets(): Record<string, AssetDef> {
     ]),
   );
 }
-

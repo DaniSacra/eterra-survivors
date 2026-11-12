@@ -309,7 +309,8 @@ function slamHit(
 ): void {
   const crush = (WEAPONS[w.id] as WeaponDef).crush;
   const hard = crush && e.stun > 0 ? amount * crush : amount;
-  if (stuns && e.stun <= 0 && !isUntouchable(e)) e.stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
+  if (stuns && e.stun <= 0 && !isUntouchable(e))
+    e.stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
   damageEnemy(world, e, hard, kx, ky, knockback, w);
 }
 
@@ -392,9 +393,7 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   // Aimed weapons throw at the boss when it is on screen, else at the nearest enemy on screen; with nobody
   // around, where the hero faces.
   const t =
-    (WEAPONS[w.id] as WeaponDef).aim === 'nearest'
-      ? (bossOnScreen(world) ?? nearestVisible(world))
-      : null;
+    (WEAPONS[w.id] as WeaponDef).aim === 'nearest' ? (bossOnScreen(world) ?? nearestVisible(world)) : null;
   const facing = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.atan2(p.facing.y, p.facing.x);
   const count = amount(world, s.count);
   const loop = (WEAPONS[w.id] as WeaponDef).loop;
@@ -542,9 +541,8 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
     // The first bolt of each volley strikes the boss when it is on screen, otherwise the nearest enemy (the one
     // that matters); the rest fall at random.
     const t =
-      (i === 0
-        ? (bossOnScreen(world) ?? nearestVisible(world))
-        : null) ?? randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
+      (i === 0 ? (bossOnScreen(world) ?? nearestVisible(world)) : null) ??
+      randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!t) break;
     targets.push(t.uid);
     const x = t.x;
