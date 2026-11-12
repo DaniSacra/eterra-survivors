@@ -1108,7 +1108,7 @@ export function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(ICE, 0.18 + 0.3 * k);
       disc(g, m.x, m.y, r * k);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2, WARN_EDGE, 0.6 + 0.4 * k);
       continue;
     }
     g.fillStyle(ICE, 0.3);

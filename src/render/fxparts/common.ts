@@ -115,23 +115,20 @@ export function shard(
 }
 
 /**
- * Strokes the current path as a soft luminous edge in the Graphics' current line colour and alpha: a wide faint halo,
- * a narrower glow and a thin bright core, so a danger mark on the ground glows instead of being drawn with a hard line.
+ * Strokes a path as a soft luminous edge: a wide faint halo, a narrower glow and a thin bright core, so a danger mark
+ * on the ground glows instead of being drawn with a hard line. (Colour and alpha are explicit: Phaser's Graphics does
+ * not remember the colour of `lineStyle`, which is why the old dashes were always white.)
  */
-function glowStroke(g: Phaser.GameObjects.Graphics, stroke: () => void): void {
-  const color = g.defaultStrokeColor;
-  const alpha = g.defaultStrokeAlpha;
-  const width = g.defaultStrokeWidth;
+function glowStroke(g: Phaser.GameObjects.Graphics, color: number, alpha: number, stroke: () => void): void {
   g.lineStyle(12, color, alpha * 0.16);
   stroke();
   g.lineStyle(6, color, alpha * 0.34);
   stroke();
   g.lineStyle(2, color, alpha);
   stroke();
-  g.lineStyle(width, color, alpha);
 }
 
-/** A glowing arc edge (current line colour) from `a0` to `a1` around (x, y). */
+/** A glowing arc edge from `a0` to `a1` around (x, y). */
 export function glowArc(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -139,23 +136,27 @@ export function glowArc(
   r: number,
   a0: number,
   a1: number,
+  color: number,
+  alpha: number,
 ): void {
-  glowStroke(g, () => {
+  glowStroke(g, color, alpha, () => {
     g.beginPath();
     g.arc(x, y, r, a0, a1);
     g.strokePath();
   });
 }
 
-/** A glowing straight edge (current line colour). */
+/** A glowing straight edge. */
 export function glowLine(
   g: Phaser.GameObjects.Graphics,
   x0: number,
   y0: number,
   x1: number,
   y1: number,
+  color: number,
+  alpha: number,
 ): void {
-  glowStroke(g, () => {
+  glowStroke(g, color, alpha, () => {
     g.lineBetween(x0, y0, x1, y1);
   });
 }

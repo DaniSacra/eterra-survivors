@@ -70,7 +70,7 @@ export function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(0xff8a3a, 0.2 + 0.3 * bk + 0.12 * Math.sin(world.time * (10 + 30 * bk)));
       disc(g, m.x, m.y, m.radius * bk);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * bk);
-      glowArc(g, m.x, m.y, m.radius, 0, Math.PI * 2);
+      glowArc(g, m.x, m.y, m.radius, 0, Math.PI * 2, WARN_EDGE, 0.6 + 0.4 * bk);
       continue;
     }
     if (m.kind !== 'spawn') continue;
@@ -148,7 +148,7 @@ export function drawFoes(
       under.lineStyle(4, INK, 0.5);
       ring(under, e.x, e.y, e.def.dig.radius);
       under.lineStyle(2, SUMMON_EDGE, 0.5 + 0.4 * k);
-      glowArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2);
+      glowArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2, SUMMON_EDGE, 0.5 + 0.4 * k);
       // The graves, where the core will raise them (aimX is the ring's start angle), growing from the first frame.
       for (let c = 0; c < e.def.dig.count; c++) {
         const a = e.aimX + (c * Math.PI * 2) / e.def.dig.count;
@@ -167,7 +167,7 @@ export function drawFoes(
       under.fillStyle(0xa8c030, 0.08 + 0.12 * k);
       disc(under, e.x, e.y, e.def.brew.radius * (0.4 + 0.6 * k));
       under.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
-      glowArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2);
+      glowArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2, WARN_EDGE, 0.5 + 0.4 * k);
     }
     if (e.def.move === 'shoot' && e.act === BossAct.Windup) {
       const sh = e.def.shoot as NonNullable<EnemyDef['shoot']>;
@@ -432,16 +432,16 @@ export function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void 
     const vy = (ux * w) / 2;
     const ex = e.x + ux * len;
     const ey = e.y + uy * len;
-    g.fillStyle(WARN_COLOR, 0.1 + 0.1 * k);
+    g.fillStyle(WARN_COLOR, 0.16 + 0.1 * k);
     quad(g, e.x + vx, e.y + vy, ex + vx, ey + vy, ex - vx, ey - vy, e.x - vx, e.y - vy);
     const fx = e.x + ux * len * k;
     const fy = e.y + uy * len * k;
-    g.fillStyle(WARN_COLOR, 0.28);
+    g.fillStyle(WARN_COLOR, 0.4);
     quad(g, e.x + vx, e.y + vy, fx + vx, fy + vy, fx - vx, fy - vy, e.x - vx, e.y - vy);
     g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
-    glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy);
-    glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy);
-    glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy);
+    glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, WARN_EDGE, 0.5 + 0.4 * k);
+    glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, WARN_EDGE, 0.5 + 0.4 * k);
+    glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy, WARN_EDGE, 0.5 + 0.4 * k);
   }
 }
 
@@ -463,10 +463,10 @@ export function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy): void {
   disc(g, e.aimX, e.aimY, r * k);
   g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
   // The rim and two inner rings of pixel dashes, the inner ones turning the other way (a landing target).
-  glowArc(g, e.aimX, e.aimY, r, 0, TAU_FX);
+  glowArc(g, e.aimX, e.aimY, r, 0, TAU_FX, WARN_EDGE, 0.5 + 0.4 * k);
   g.lineStyle(2, WARN_EDGE, 0.3 + 0.3 * k);
-  glowArc(g, e.aimX, e.aimY, r * 0.62, 0, TAU_FX);
-  glowArc(g, e.aimX, e.aimY, r * 0.3, 0, TAU_FX);
+  glowArc(g, e.aimX, e.aimY, r * 0.62, 0, TAU_FX, WARN_EDGE, 0.3 + 0.3 * k);
+  glowArc(g, e.aimX, e.aimY, r * 0.3, 0, TAU_FX, WARN_EDGE, 0.3 + 0.3 * k);
   g.fillStyle(INK, 0.15 + 0.3 * k);
   oval(g, e.aimX, e.aimY + 2, e.def.radius * 2 * (0.4 + 0.6 * k), e.def.radius * (0.4 + 0.6 * k));
 }
@@ -508,7 +508,7 @@ export function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void 
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
       disc(g, m.x, m.y, r);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2, WARN_EDGE, 0.6 + 0.4 * k);
       if (m.kind === 'web') continue;
       // The flask in its arc.
       const fx = m.fromX + (m.x - m.fromX) * k;
@@ -589,7 +589,7 @@ export function drawSlime(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
       disc(g, m.x, m.y, r);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2, WARN_EDGE, 0.6 + 0.4 * k);
       const kx = m.fromX + (m.x - m.fromX) * k;
       const ky = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
       g.fillStyle(INK, 1);
@@ -707,7 +707,7 @@ export function drawBossWarning(
           disc(g, e.x, e.y, ab.range);
         }
         g.lineStyle(2.5, WARN_EDGE, edgeA);
-        glowArc(g, e.x, e.y, ab.range, 0, TAU_FX);
+        glowArc(g, e.x, e.y, ab.range, 0, TAU_FX, WARN_EDGE, edgeA);
         break;
       }
       const half = (ab.arc ?? 1) / 2;
@@ -725,9 +725,9 @@ export function drawBossWarning(
       g.fillStyle(WARN_COLOR, 0.32);
       band(g, e.x, e.y, 0, ab.range * k, a0, a1);
       g.lineStyle(2.5, WARN_EDGE, edgeA);
-      glowArc(g, e.x, e.y, ab.range, a0, a1);
-      glowLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range);
-      glowLine(g, e.x, e.y, e.x + Math.cos(a1) * ab.range, e.y + Math.sin(a1) * ab.range);
+      glowArc(g, e.x, e.y, ab.range, a0, a1, WARN_EDGE, edgeA);
+      glowLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range, WARN_EDGE, edgeA);
+      glowLine(g, e.x, e.y, e.x + Math.cos(a1) * ab.range, e.y + Math.sin(a1) * ab.range, WARN_EDGE, edgeA);
       break;
     }
     case 'lunge': {
@@ -763,9 +763,9 @@ export function drawBossWarning(
         g.lineBetween(bx - vx * 0.7, by - vy * 0.7, cx, cy);
       }
       g.lineStyle(2.5, WARN_EDGE, edgeA);
-      glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy);
-      glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy);
-      glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy);
+      glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, WARN_EDGE, edgeA);
+      glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, WARN_EDGE, edgeA);
+      glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy, WARN_EDGE, edgeA);
       g.fillStyle(WARN_COLOR, 0.45);
       disc(g, e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
       break;
@@ -789,7 +789,7 @@ export function drawBossWarning(
       g.lineStyle(4.5, INK, 0.45);
       ring(g, e.x, e.y, r);
       g.lineStyle(2.5, SUMMON_EDGE, edgeA);
-      glowArc(g, e.x, e.y, r, 0, Math.PI * 2);
+      glowArc(g, e.x, e.y, r, 0, Math.PI * 2, SUMMON_EDGE, edgeA);
       if (ab.kind === 'toll')
         for (let b = 0; b < 2; b++) {
           const q = (k - b * 0.45) / 0.45;
