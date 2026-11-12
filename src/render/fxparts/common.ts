@@ -19,16 +19,13 @@ export interface OrbitStyle {
 }
 
 /**
- * Enemy danger (boss attacks): coral pink with stripes and a marching red dashed edge, so it never reads as the
+ * Enemy danger (boss attacks): coral pink with stripes and a glowing red edge, so it never reads as the
  * player's own fire (orange-gold). Same hue as the UI's danger color.
  */
 export const WARN_COLOR = UI.dangerHex;
 
-/** The marching dashes on every danger edge: a strong red, never white (Daniel, 2026-11-12). */
+/** The glowing edge of every danger mark: a strong red, never white (Daniel, 2026-11-12). */
 export const WARN_EDGE = 0xe0283a;
-
-/** Length of a dash and of the gap after it on danger edges, world px. */
-export const DASH = 9;
 
 /** The ice family (white and white-lilac, never the gems' cyan): Sopro de Geada's wave and frosted screen edges. */
 export const ICE = 0xe8e2f4;
@@ -117,64 +114,50 @@ export function shard(
   g.fillStyle(0xffffff, alpha).fillTriangle(x - ux, y - uy, x - vx, y - vy, x + ux, y + uy);
 }
 
-/** Pixel size of a telegraph dash square (art px x ART_RES) and the gap its dark outline adds. */
-export const PIX = 4;
-
 /**
- * One pixel-art dash square at (x, y), snapped to the 2 px grid: a dark outline square under a light one, in the
- * Graphics' current stroke colour and alpha (so every telegraph keeps its colour). `pass` 0 draws the outline, 1
- * the light square (two passes keep the outlines from cutting into neighbours).
+ * Strokes the current path as a soft luminous edge in the Graphics' current line colour and alpha: a wide faint halo,
+ * a narrower glow and a thin bright core, so a danger mark on the ground glows instead of being drawn with a hard line.
  */
-export function pixelDash(g: Phaser.GameObjects.Graphics, x: number, y: number, pass: number): void {
-  const sx = Math.round(x / 2) * 2;
-  const sy = Math.round(y / 2) * 2;
-  if (pass === 0)
-    g.fillStyle(INK, g.defaultStrokeAlpha * 0.7).fillRect(
-      sx - PIX / 2 - 1,
-      sy - PIX / 2 - 1,
-      PIX + 2,
-      PIX + 2,
-    );
-  else g.fillStyle(g.defaultStrokeColor, g.defaultStrokeAlpha).fillRect(sx - PIX / 2, sy - PIX / 2, PIX, PIX);
+function glowStroke(g: Phaser.GameObjects.Graphics, stroke: () => void): void {
+  const color = g.defaultStrokeColor;
+  const alpha = g.defaultStrokeAlpha;
+  const width = g.defaultStrokeWidth;
+  g.lineStyle(12, color, alpha * 0.16);
+  stroke();
+  g.lineStyle(6, color, alpha * 0.34);
+  stroke();
+  g.lineStyle(2, color, alpha);
+  stroke();
+  g.lineStyle(width, color, alpha);
 }
 
-/** A dashed arc made of pixel squares (current line colour), its dashes shifted `offset` px along it. */
-export function dashedArc(
+/** A glowing arc edge (current line colour) from `a0` to `a1` around (x, y). */
+export function glowArc(
   g: Phaser.GameObjects.Graphics,
   x: number,
   y: number,
   r: number,
   a0: number,
   a1: number,
-  offset: number,
 ): void {
-  const step = PIX / r;
-  for (let pass = 0; pass < 2; pass++)
-    for (let a = a0; a < a1; a += step) {
-      // Dash on for DASH px, off for DASH px, marching with `offset`.
-      if (((((a - a0) * r - offset) % (2 * DASH)) + 2 * DASH) % (2 * DASH) >= DASH) continue;
-      pixelDash(g, x + Math.cos(a) * r, y + Math.sin(a) * r, pass);
-    }
+  glowStroke(g, () => {
+    g.beginPath();
+    g.arc(x, y, r, a0, a1);
+    g.strokePath();
+  });
 }
 
-/** A dashed line of pixel squares (current line colour), its dashes shifted `offset` px along it. */
-export function dashedLine(
+/** A glowing straight edge (current line colour). */
+export function glowLine(
   g: Phaser.GameObjects.Graphics,
   x0: number,
   y0: number,
   x1: number,
   y1: number,
-  offset: number,
 ): void {
-  const len = Math.hypot(x1 - x0, y1 - y0);
-  if (len < 1) return;
-  const ux = (x1 - x0) / len;
-  const uy = (y1 - y0) / len;
-  for (let pass = 0; pass < 2; pass++)
-    for (let d = 0; d < len; d += PIX) {
-      if ((((d - offset) % (2 * DASH)) + 2 * DASH) % (2 * DASH) >= DASH) continue;
-      pixelDash(g, x0 + ux * d, y0 + uy * d, pass);
-    }
+  glowStroke(g, () => {
+    g.lineBetween(x0, y0, x1, y1);
+  });
 }
 
 /** A cartoon sword centred on (x, y), its tip toward angle `a`, about 2.6 x `r` long. */

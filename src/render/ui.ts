@@ -62,7 +62,7 @@ export const UI = {
 };
 
 /**
- * The enemy warning vocabulary (CF-04): coral (`UI.dangerHex`, solid, dashes that speed up) hurts on touch; pale bone
+ * The enemy warning vocabulary (CF-04): coral (`UI.dangerHex`, solid, a glowing edge that brightens) hurts on touch; pale bone
  * calls the dead (graves, the bell, eggs) and harms nothing by itself; slime green slows. No violet: the floor of the
  * crypt is violet and purple is Lyra's.
  */

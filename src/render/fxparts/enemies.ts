@@ -14,15 +14,14 @@ import { arcLine, band, disc, oval, ovalRing, ring } from '../shapes';
 import { CLEAVE_STYLE, drawSwing } from './weapons';
 import {
   BURST_SCORCH,
-  DASH,
   ICE,
   type Moments,
   TAU_FX,
   WARN_COLOR,
   WARN_EDGE,
   ZONE_FILL_MAX,
-  dashedArc,
-  dashedLine,
+  glowArc,
+  glowLine,
   quad,
   shard,
 } from './common';
@@ -71,7 +70,7 @@ export function drawMarks(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(0xff8a3a, 0.2 + 0.3 * bk + 0.12 * Math.sin(world.time * (10 + 30 * bk)));
       disc(g, m.x, m.y, m.radius * bk);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * bk);
-      dashedArc(g, m.x, m.y, m.radius, 0, Math.PI * 2, (world.time * (30 + 50 * bk)) % (DASH * 2));
+      glowArc(g, m.x, m.y, m.radius, 0, Math.PI * 2);
       continue;
     }
     if (m.kind !== 'spawn') continue;
@@ -149,7 +148,7 @@ export function drawFoes(
       under.lineStyle(4, INK, 0.5);
       ring(under, e.x, e.y, e.def.dig.radius);
       under.lineStyle(2, SUMMON_EDGE, 0.5 + 0.4 * k);
-      dashedArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
+      glowArc(under, e.x, e.y, e.def.dig.radius, 0, Math.PI * 2);
       // The graves, where the core will raise them (aimX is the ring's start angle), growing from the first frame.
       for (let c = 0; c < e.def.dig.count; c++) {
         const a = e.aimX + (c * Math.PI * 2) / e.def.dig.count;
@@ -168,7 +167,7 @@ export function drawFoes(
       under.fillStyle(0xa8c030, 0.08 + 0.12 * k);
       disc(under, e.x, e.y, e.def.brew.radius * (0.4 + 0.6 * k));
       under.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
-      dashedArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2, (t * 40) % (DASH * 2));
+      glowArc(under, e.x, e.y, e.def.brew.radius, 0, Math.PI * 2);
     }
     if (e.def.move === 'shoot' && e.act === BossAct.Windup) {
       const sh = e.def.shoot as NonNullable<EnemyDef['shoot']>;
@@ -411,12 +410,11 @@ export function drawPushes(g: Phaser.GameObjects.Graphics, world: World): void {
 /** Common chargers (Encapuzado, Rato, Goblin) winding up: a coral arrow on the ground shows where they will run. */
 export function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemies.active;
-  const time = world.time;
   for (let i = 0; i < list.length; i++) {
     const e = list[i] as Enemy;
     if (e.act !== BossAct.Windup) continue;
     if (e.def.move === 'leap') {
-      drawLeapMark(g, e, time);
+      drawLeapMark(g, e);
       continue;
     }
     if (e.def.move !== 'charge') continue;
@@ -429,7 +427,7 @@ export function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void 
     const w = e.def.radius * 2;
     const len = e.def.speed * reach + e.def.radius;
     // A lane as wide as the body and as long as the dash: translucent, filling up toward its end as the dash
-    // comes, with a light dashed edge (FT-17 / AR-03).
+    // comes, with a glowing edge (FT-17 / AR-03).
     const vx = (-uy * w) / 2;
     const vy = (ux * w) / 2;
     const ex = e.x + ux * len;
@@ -441,19 +439,18 @@ export function drawCharges(g: Phaser.GameObjects.Graphics, world: World): void 
     g.fillStyle(WARN_COLOR, 0.28);
     quad(g, e.x + vx, e.y + vy, fx + vx, fy + vy, fx - vx, fy - vy, e.x - vx, e.y - vy);
     g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
-    const march = (time * (30 + 50 * k)) % (DASH * 2);
-    dashedLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, march);
-    dashedLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, march);
-    dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
+    glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy);
+    glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy);
+    glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy);
   }
 }
 
 /**
  * A leap's landing (FT-04), from the crouch until it lands: a coral circle on the marked spot filling from the
- * middle out, with the dashed edge and the leaper's shadow growing in it. (Drawn for the crouch here and for the
+ * middle out, with the glowing edge and the leaper's shadow growing in it. (Drawn for the crouch here and for the
  * flight by `drawLeaps`.)
  */
-export function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy, time: number): void {
+export function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy): void {
   const lp = e.def.leap;
   if (!lp) return;
   const total = lp.windup + lp.air;
@@ -466,10 +463,10 @@ export function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy, time: num
   disc(g, e.aimX, e.aimY, r * k);
   g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
   // The rim and two inner rings of pixel dashes, the inner ones turning the other way (a landing target).
-  dashedArc(g, e.aimX, e.aimY, r, 0, TAU_FX, (time * 40) % (DASH * 2));
+  glowArc(g, e.aimX, e.aimY, r, 0, TAU_FX);
   g.lineStyle(2, WARN_EDGE, 0.3 + 0.3 * k);
-  dashedArc(g, e.aimX, e.aimY, r * 0.62, 0, TAU_FX, (-time * 30) % (DASH * 2));
-  dashedArc(g, e.aimX, e.aimY, r * 0.3, 0, TAU_FX, (time * 20) % (DASH * 2));
+  glowArc(g, e.aimX, e.aimY, r * 0.62, 0, TAU_FX);
+  glowArc(g, e.aimX, e.aimY, r * 0.3, 0, TAU_FX);
   g.fillStyle(INK, 0.15 + 0.3 * k);
   oval(g, e.aimX, e.aimY + 2, e.def.radius * 2 * (0.4 + 0.6 * k), e.def.radius * (0.4 + 0.6 * k));
 }
@@ -479,7 +476,7 @@ export function drawLeaps(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.enemies.active;
   for (let i = 0; i < list.length; i++) {
     const e = list[i] as Enemy;
-    if (e.def.move === 'leap' && e.act === BossAct.Active) drawLeapMark(g, e, world.time);
+    if (e.def.move === 'leap' && e.act === BossAct.Active) drawLeapMark(g, e);
   }
 }
 
@@ -511,7 +508,7 @@ export function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void 
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
       disc(g, m.x, m.y, r);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (world.time * (30 + 50 * k)) % (DASH * 2));
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
       if (m.kind === 'web') continue;
       // The flask in its arc.
       const fx = m.fromX + (m.x - m.fromX) * k;
@@ -592,7 +589,7 @@ export function drawSlime(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
       disc(g, m.x, m.y, r);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (t * (30 + 50 * k)) % (DASH * 2));
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
       const kx = m.fromX + (m.x - m.fromX) * k;
       const ky = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
       g.fillStyle(INK, 1);
@@ -686,8 +683,6 @@ export function drawBossWarning(
   }
   const k = 1 - Math.max(0, e.actT) / ab.windup; // 0 -> 1 as the hit comes
   const fill = 0.1 + 0.16 * k;
-  // The dashes march along the edge, faster as the hit comes.
-  const march = (time * (30 + 50 * k)) % (DASH * 2);
   const edgeA = 0.6 + 0.4 * k;
   switch (ab.kind) {
     case 'cleave': {
@@ -712,7 +707,7 @@ export function drawBossWarning(
           disc(g, e.x, e.y, ab.range);
         }
         g.lineStyle(2.5, WARN_EDGE, edgeA);
-        dashedArc(g, e.x, e.y, ab.range, 0, TAU_FX, march);
+        glowArc(g, e.x, e.y, ab.range, 0, TAU_FX);
         break;
       }
       const half = (ab.arc ?? 1) / 2;
@@ -730,9 +725,9 @@ export function drawBossWarning(
       g.fillStyle(WARN_COLOR, 0.32);
       band(g, e.x, e.y, 0, ab.range * k, a0, a1);
       g.lineStyle(2.5, WARN_EDGE, edgeA);
-      dashedArc(g, e.x, e.y, ab.range, a0, a1, march);
-      dashedLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range, march);
-      dashedLine(g, e.x, e.y, e.x + Math.cos(a1) * ab.range, e.y + Math.sin(a1) * ab.range, march);
+      glowArc(g, e.x, e.y, ab.range, a0, a1);
+      glowLine(g, e.x, e.y, e.x + Math.cos(a0) * ab.range, e.y + Math.sin(a0) * ab.range);
+      glowLine(g, e.x, e.y, e.x + Math.cos(a1) * ab.range, e.y + Math.sin(a1) * ab.range);
       break;
     }
     case 'lunge': {
@@ -768,9 +763,9 @@ export function drawBossWarning(
         g.lineBetween(bx - vx * 0.7, by - vy * 0.7, cx, cy);
       }
       g.lineStyle(2.5, WARN_EDGE, edgeA);
-      dashedLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy, march);
-      dashedLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy, march);
-      dashedLine(g, ex + vx, ey + vy, ex - vx, ey - vy, march);
+      glowLine(g, e.x + vx, e.y + vy, ex + vx, ey + vy);
+      glowLine(g, e.x - vx, e.y - vy, ex - vx, ey - vy);
+      glowLine(g, ex + vx, ey + vy, ex - vx, ey - vy);
       g.fillStyle(WARN_COLOR, 0.45);
       disc(g, e.x + ux * len * k, e.y + uy * len * k, w * 0.35);
       break;
@@ -794,7 +789,7 @@ export function drawBossWarning(
       g.lineStyle(4.5, INK, 0.45);
       ring(g, e.x, e.y, r);
       g.lineStyle(2.5, SUMMON_EDGE, edgeA);
-      dashedArc(g, e.x, e.y, r, 0, Math.PI * 2, march);
+      glowArc(g, e.x, e.y, r, 0, Math.PI * 2);
       if (ab.kind === 'toll')
         for (let b = 0; b < 2; b++) {
           const q = (k - b * 0.45) / 0.45;

@@ -14,7 +14,6 @@ import { VFX, vfxKey } from '../vfx';
 import { AREA_HIT, HIT_SPARK, star } from '../sparks';
 import { arcLine, band, disc, oval, ovalRing, ring } from '../shapes';
 import {
-  DASH,
   HEAL_COLOR,
   HERO_COLOR,
   ICE,
@@ -23,7 +22,7 @@ import {
   WARN_COLOR,
   WARN_EDGE,
   ZONE_FILL_MAX,
-  dashedArc,
+  glowArc,
   drawSword,
   hash,
   shard,
@@ -1073,7 +1072,7 @@ export function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
       g.fillStyle(ICE, 0.18 + 0.3 * k);
       disc(g, m.x, m.y, r * k);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (world.time * (30 + 50 * k)) % (DASH * 2));
+      glowArc(g, m.x, m.y, r, 0, Math.PI * 2);
       continue;
     }
     g.fillStyle(ICE, 0.3);
