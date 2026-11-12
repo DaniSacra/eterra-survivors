@@ -58,6 +58,12 @@ const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = ELEMENT_COLOR.holy;
 /** The ring of the bolt sprite, in art px: the sprite is scaled so the ring is the hit radius. */
 const BOLT_RING = 40;
+/** The same for the fire burst sprite. */
+const BLAST_RING = 44;
+/** Frost patch radius that one crystal sprite (about 66 art px wide) suits. */
+const ICE_SPAN = 80;
+/** Burning patch radius that a flame at its own size suits. */
+const EMBER_SPAN = 70;
 /** Espada de Fogo's burning ground: the flames' light orange. */
 const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
@@ -576,36 +582,32 @@ function drawBolt(
       const y = b.y - 150 * (1 - fk);
       if (st.sword) drawSword(top, x, y - 24, Math.PI / 2 - 0.3 * (1 - fk), 16, FIRE_SWORD);
       else {
-        top.fillStyle(st.color, 0.9).fillTriangle(x - 7, y - 3, x + 3, y - 7, x - 30, y - 70);
-        top.fillStyle(st.color);
-        disc(top, x, y, 9);
-        top.fillStyle(st.core);
-        disc(top, x - 1, y - 1, 6);
-        top.fillStyle(0xffffff);
-        disc(top, x - 2, y - 2, 3);
+        // A small flame falling, flickering as it comes.
+        const fl = VFX.flame;
+        fxSprites.putFrame(
+          vfxKey('flame'),
+          Math.floor(u * 40) % fl.frames,
+          fl.anchor[0],
+          fl.anchor[1],
+          x,
+          y + 18,
+          0.8,
+        );
       }
       return;
     }
     const bk = (u - FALL) / (1 - FALL); // 0 -> 1 over the burst
-    const grow = 1 - (1 - bk) * (1 - bk);
-    g.fillStyle(st.color, 0.2 * fade);
-    disc(g, b.x, b.y, r);
-    // Flame petals opening out to the edge.
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-      const a = (i * Math.PI * 2) / n + b.x * 0.05;
-      const d = r * (0.3 + 0.4 * grow);
-      const pr = r * 0.32 * (0.6 + 0.4 * grow);
-      g.fillStyle(i % 2 ? st.color : FLAME_COLOR, 0.55 * fade);
-      disc(g, b.x + Math.cos(a) * d, b.y + Math.sin(a) * d, pr);
-    }
-    g.fillStyle(st.core, 0.6 * fade);
-    disc(g, b.x, b.y, r * 0.35 * (1 - 0.5 * bk));
-    g.lineStyle(2, 0xfff0c0, 0.8 * fade);
-    ring(g, b.x, b.y, r);
-    // A ring of light smoke rolling just past the edge.
-    g.lineStyle(4 * fade + 1, 0xf0e8d8, 0.3 * fade);
-    ring(g, b.x, b.y, r * (1 + 0.2 * bk));
+    // The burst: the pixel fireball, its ring running out to exactly the blast radius.
+    const blast = VFX.blast;
+    fxSprites.putFrame(
+      vfxKey('blast'),
+      Math.min(blast.frames - 1, Math.floor(bk * blast.frames)),
+      blast.anchor[0],
+      blast.anchor[1],
+      b.x,
+      b.y,
+      r / BLAST_RING,
+    );
     if (st.sword) drawSword(top, b.x, b.y - 24, Math.PI / 2, 16, FIRE_SWORD);
     return;
   }
@@ -1056,28 +1058,18 @@ function drawZone(
   const tk = 1 - z.tick / config.zones.tick; // 0 right at a tick
   g.fillStyle(elo ? BLIZZARD_COLOR : FROST_COLOR, 0.22 * fade * fillK);
   disc(g, z.x, z.y, r);
-  // The rim: whole while it lasts, broken into pieces as it melts away (thinner when many overlap).
-  g.lineStyle(
-    elo && !crowded ? 4 : crowded ? 3 : 2.5,
-    elo ? BLIZZARD_EDGE : 0xffffff,
-    (crowded ? 0.6 : 0.8) * fade,
-  );
-  if (z.ttl > ZONE_BREAK) ring(g, z.x, z.y, r);
-  else {
-    const gap = 0.5 * (1 - fade);
-    for (let i = 0; i < 8; i++) {
-      const a = (i * Math.PI) / 4 + z.x * 0.01;
-      arcLine(g, z.x, z.y, r, a + gap, a + Math.PI / 4 - gap);
-    }
-  }
-  if (age < ZONE_LAND * 2) {
-    // Landing: shards of ice flying out of the rim.
-    const sk = age / (ZONE_LAND * 2);
-    for (let i = 0; i < 6; i++) {
-      const a = (i * Math.PI) / 3 + z.y * 0.01;
-      const d = z.radius * (0.9 + 0.4 * sk);
-      shard(g, z.x + Math.cos(a) * d, z.y + Math.sin(a) * d, a, 6, 1 - sk);
-    }
+  // The rim: a ring of pixel blocks, thinning out as the patch melts away (thinner still when many overlap).
+  const blocks = Math.max(10, Math.round(r / 3));
+  g.fillStyle(elo ? BLIZZARD_EDGE : 0xffffff, (crowded ? 0.55 : 0.85) * fade);
+  for (let i = 0; i < blocks; i++) {
+    if (z.ttl <= ZONE_BREAK && hash(z.x, z.y, i) > fade) continue;
+    const a = (i / blocks) * Math.PI * 2;
+    g.fillRect(
+      Math.round((z.x + Math.cos(a) * r) / 2) * 2 - 1,
+      Math.round((z.y + Math.sin(a) * r) / 2) * 2 - 1,
+      3,
+      3,
+    );
   }
   if (tk < 0.5) {
     // The tick: a ring of frost from the middle to the edge.
@@ -1085,18 +1077,22 @@ function drawZone(
     g.lineStyle(3 - 2 * wk, 0xffffff, 0.7 * (1 - wk) * fade);
     ring(g, z.x, z.y, r * (0.25 + 0.75 * wk));
   }
-  // Ice crystals inside (snowflakes for Nevasca), turning slowly and pulsing on each tick.
-  const n = elo ? 6 : 3;
-  const pulse = 1 + 0.4 * Math.max(0, 1 - tk * 4);
+  // Ice crystals standing in the patch: they rise, shimmer and melt over its whole life.
+  const ice = VFX.ice;
+  const n = elo ? 5 : 3;
+  const life = age / z.duration;
   for (let i = 0; i < n; i++) {
-    const ang = (i * Math.PI * 2) / n + time * (elo ? 0.8 : 0.4) + z.x * 0.01;
-    const cx = z.x + Math.cos(ang) * r * 0.55;
-    const cy = z.y + Math.sin(ang) * r * 0.55;
-    const cr = (elo ? 6 : 4) * pulse;
-    g.lineStyle(elo ? 2 : 1.5, 0xffffff, 0.75 * fade);
-    g.lineBetween(cx - cr, cy, cx + cr, cy);
-    g.lineBetween(cx - cr * 0.5, cy - cr * 0.87, cx + cr * 0.5, cy + cr * 0.87);
-    g.lineBetween(cx - cr * 0.5, cy + cr * 0.87, cx + cr * 0.5, cy - cr * 0.87);
+    const ang = (i * Math.PI * 2) / n + z.x * 0.01;
+    const f = Math.min(ice.frames - 1, Math.floor(Math.max(0, life - i * 0.03) * ice.frames));
+    fxSprites.putFrame(
+      vfxKey('ice'),
+      f,
+      ice.anchor[0],
+      ice.anchor[1],
+      z.x + Math.cos(ang) * r * 0.55,
+      z.y + Math.sin(ang) * r * 0.4 + 8,
+      (r / ICE_SPAN) * (elo ? 1.1 : 1),
+    );
   }
   if (!elo) return;
   // Nevasca: snowflakes falling through the patch, each on its own column.
@@ -1129,17 +1125,21 @@ function drawEmbers(
   disc(g, z.x, z.y, r * 0.8);
   g.lineStyle(2, EMBER, 0.6 * fade);
   ring(g, z.x, z.y, r);
-  const n = fewFlames ? 3 : 7;
+  // Real flames standing on the patch, each at its own point of the loop.
+  const flame = VFX.flame;
+  const n = fewFlames ? 3 : 6;
   for (let i = 0; i < n; i++) {
-    const ph = (time * 1.6 + i * 0.37 + z.x * 0.001) % 1;
     const a = (i * Math.PI * 2) / n + z.y * 0.01;
-    const d = r * (0.25 + 0.55 * ((i * 0.618) % 1));
-    const fx = z.x + Math.cos(a) * d;
-    const fy = z.y + Math.sin(a) * d * 0.7 - ph * 14;
-    const fr = 5 * (1 - ph) + 1.5;
-    g.fillStyle(i % 2 ? EMBER : 0xffe070, 0.8 * (1 - ph) * fade);
-    g.fillTriangle(fx - fr, fy, fx + fr, fy, fx, fy - fr * 2.4);
-    disc(g, fx, fy, fr);
+    const d = r * (0.2 + 0.55 * ((i * 0.618) % 1));
+    fxSprites.putFrame(
+      vfxKey('flame'),
+      Math.floor(time * flame.fps + i * 3) % flame.frames,
+      flame.anchor[0],
+      flame.anchor[1],
+      z.x + Math.cos(a) * d,
+      z.y + Math.sin(a) * d * 0.7,
+      (r / EMBER_SPAN) * fade,
+    );
   }
 }
 

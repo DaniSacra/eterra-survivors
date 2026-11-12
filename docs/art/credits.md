@@ -46,3 +46,5 @@ Sem gerações novas em 2026-11-11 (revisão de tamanhos): os sprites acima só 
 | 2026-11-11 | Gosma Verde B2 (grito alto) chosen by Daniel; walk by animate_image (job c7cf7c46-0fcf-4fb0-a4e6-ae20b048743e), replaces the round blob | PixelLab |
 
 | 2026-11-12 | Animated effects (PixelLab effects workbench, `vfx_workbench`, saved in My effects as "Valmor Resiste - *"): bolt (Raio) from preset lightning_strike, tall canvas, effect id 4288c527-375a-4774-b8d1-1f602cf3c91d | packed by hand as a 2x strip in `public/sprites/fx/vfx/`, registered in `src/render/vfx.ts` |
+
+| 2026-11-12 | Animated effects (PixelLab effects workbench): blast from preset explosion (effect 97d41d6d-d8a6-4abd-b8c7-e3f712f64e01), flame from preset flame (fd808816-4f01-4459-a75a-a7089468bacd), ice from preset crystal_bloom retimed to 12 frames (d9229346-a412-4852-9c64-77534f80becc) | 2x strips in `public/sprites/fx/vfx/` |

@@ -5,7 +5,7 @@ import { ART_SCALE } from './art/pen';
  * Pixel sprites that effects place each frame (a shield orbiting the hero, a mace head coming down): `drawFx` is
  * Graphics-only, so it asks here for an image instead. A fixed pool of reused images, nothing allocated per frame.
  */
-const MAX = 48;
+const MAX = 160;
 
 class FxSprites {
   private images: Phaser.GameObjects.Image[] = [];

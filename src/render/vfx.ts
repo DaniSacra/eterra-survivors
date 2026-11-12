@@ -17,6 +17,12 @@ export interface VfxDef {
 export const VFX = {
   /** Raio: a bolt from above, a flash, a ring of force on the ground exactly as wide as the hit (ring radius 40 art px). */
   bolt: { frames: 10, w: 96, h: 240, anchor: [0.5, 0.925], fps: 16 },
+  /** Fogo and Espada de Fogo's burst: a fireball whose ring reaches 44 art px (scaled to the blast radius). */
+  blast: { frames: 9, w: 96, h: 96, anchor: [0.5, 0.5], fps: 14 },
+  /** A flame (looping, 8 frames): the falling fireball and the flames on burning ground. */
+  flame: { frames: 8, w: 48, h: 76, anchor: [0.5, 0.763], fps: 10 },
+  /** Geada and Nevasca's crystals: they rise, shimmer and melt over the patch's life (stretch the 11 frames to it). */
+  ice: { frames: 11, w: 144, h: 72, anchor: [0.5, 0.778], fps: 3 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;
