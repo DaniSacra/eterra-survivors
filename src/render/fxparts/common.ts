@@ -19,12 +19,13 @@ export interface OrbitStyle {
 }
 
 /**
- * Enemy danger (boss attacks): coral pink with stripes and a marching white dashed edge, so it never reads as the
+ * Enemy danger (boss attacks): coral pink with stripes and a marching red dashed edge, so it never reads as the
  * player's own fire (orange-gold). Same hue as the UI's danger color.
  */
 export const WARN_COLOR = UI.dangerHex;
 
-export const WARN_EDGE = 0xffffff;
+/** The marching dashes on every danger edge: a strong red, never white (Daniel, 2026-11-12). */
+export const WARN_EDGE = 0xe0283a;
 
 /** Length of a dash and of the gap after it on danger edges, world px. */
 export const DASH = 9;

@@ -706,9 +706,9 @@ export function drawBossWarning(
         const left = (1 - k) * ab.windup;
         if (left < 0.6) {
           const pulse = Math.max(0, Math.sin((left / 0.6) * Math.PI * 6)) ** 2;
-          g.lineStyle(5, 0xffffff, 0.85 * pulse);
+          g.lineStyle(5, WARN_EDGE, 0.85 * pulse);
           ring(g, e.x, e.y, ab.range);
-          g.fillStyle(0xffffff, 0.18 * pulse);
+          g.fillStyle(WARN_EDGE, 0.18 * pulse);
           disc(g, e.x, e.y, ab.range);
         }
         g.lineStyle(2.5, WARN_EDGE, edgeA);
