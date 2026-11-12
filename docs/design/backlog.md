@@ -31,16 +31,50 @@ antigos deste backlog que pedem traço cartoon seguem a nova direção.
 4. Ao fim de cada etapa, mostrar ao Daniel o que mudou, com os números do sim e do lab.
 5. Textos do jogador só em `src/i18n/pt-BR.ts`. Arte segue `.claude/agents/visual-director.md`.
 
-## Próximos 5
+## Estado atual (reavaliação de 2026-11-12, depois da virada para pixel art)
 
-Aprovado pelo Daniel em 2026-11-10: a **Etapa AR (arte nova)** vem antes das fases temáticas, para que inimigos e
-fases novos já nasçam no estilo novo. A lista anterior (FT-01 a FT-08) volta depois da AR.
+Todo item aberto foi conferido contra o código e a arte de `e1bff09` (detalhe e evidências em
+`docs/reviews/2026-11-11-2/08-reavaliacao.md`). Dos 37 itens que não estavam fechados: 7 já estavam feitos por
+outros itens, 1 foi descartado, 2 foram mesclados, 9 reescritos para a arte e o código de hoje e 18 seguem como
+estavam.
 
-1. **AR-01** Escuridão e luz (camada escura, luz do herói, luzes de cenário, efeitos que iluminam)
-2. **AR-02** Chão com variação e cenário por fase, borda do mapa caindo no preto
-3. **AR-03** Avisos de ataque como formas no chão (FT-17)
-4. **AR-04** `Pen` repintado no estilo novo (heróis, inimigos, chefes, itens)
-5. **AR-05** Prova de sprites (Aldo + 2–3 inimigos), depende da fonte dos sprites (pergunta ao Daniel)
+- **Feitos:** 228 itens com ✅ (contando os DD da tarde de 2026-11-11 e os reconhecidos nesta reavaliação).
+- **Abertos: 27**, por área: bugs 2 (NB-08, CB-04) · interface 9 (CC-06, NU-02, CU-01, CU-02, CU-03, CU-04, CU-06,
+  CU-07, CU-08) · efeitos 4 (AR-01, RF-04, A-04, CF-07) · arte 3 (AR-04, CA-02, CA-03) · equilíbrio 3, em espera
+  (NE-06, PE-01, PE-02) · sistemas e conteúdo 4 (ND-01, ND-02, CD-01, FT-18) · música 1 (MU-01) · lançamento 1 (L-01).
+- **Descartados:** seção no fim do arquivo.
+
+## Próximos 10 (sugestão do game-director, 2026-11-12; a ordem muda com o Daniel)
+
+A lista anterior (AR-01 a AR-05, aprovada em 2026-11-10) está fechada: AR-02, AR-03 e AR-05 feitos, AR-01 e AR-04
+reescritos abaixo.
+
+**Bugs**
+
+1. **NB-08** Setas da borda e aviso de conquista por cima do level-up (visto de novo em captura de 2026-11-12) e
+   conquista no meio da luta do chefe.
+2. **CB-04** "Tombou na neve" na Cripta: frase de derrota por fase (texto provisório, o Daniel confirma).
+
+**Ganhos rápidos**
+
+3. **RF-04** O último `cameras.main.flash` do jogo (Segunda Chance) vira o anel de nível em pixel.
+4. **CU-08** Desistir mostra a tela final com o que a partida rendeu (pilar 4).
+5. **CC-06** Bestiário: a grade ainda mostra a cor dos não vistos; silhueta de verdade e "De pé" nos chefes.
+
+**Beleza (arte e efeitos)**
+
+6. **AR-01** Os efeitos fortes acendem o chão (Aura, Chama, raio, Fogo, Espada de Fogo, pouso da Maça).
+7. **CA-02** Cada chefe com a luz da sua cor e o sino do Sineiro aceso.
+8. **AR-04** Os últimos desenhos em código: comida, elixir, Sopro de Geada, moeda e gemas em pixel.
+
+**Equilíbrio (em espera por decisão do Daniel: PE-01, PE-02, NE-06 e as rodadas de simulação)**
+
+9. **NE-06 → PE-01 → PE-02** Lab com multidão viva e densa, Cripta e Valmor de volta à meta, as cinco cartas fracas
+   (absorve o NE-02). Junto, as medidas pendentes do B-04 e do PB-02 (linha `LOJA`).
+
+**Conteúdo**
+
+10. **ND-01** Perigo por fase vencida: a escada do veterano (nome com o Daniel).
 
 ---
 
@@ -247,7 +281,7 @@ depois e registra em `docs/balance-baseline.md`.
 - O quê: `UI.gold`, `UI.danger` (e o que faltar) em `render/ui.ts`, trocando todos os hexadecimais soltos.
 - Aceite: `grep` não encontra cor hexadecimal de UI fora dos tokens nas cenas.
 
-**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto
+**A-02 · Herói sempre visível (e Lyra na Cripta)** · visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · ✅ feito (reavaliação 2026-11-12: pelo DD-12 e pela sombra do herói)
 
 - Por quê: plano do Daniel (o herói some na multidão do chefe) e visual-director (Lyra some na Cripta: roxo igual a
   morcegos e aranhas; chão da cripta com contraste alto, `tiles.ts`).
@@ -263,6 +297,10 @@ depois e registra em `docs/balance-baseline.md`.
   o herói, profundidade acima de todos os inimigos (já 13,1). **Sem** aumentar o herói (decisão da Revisão 2026-11-11:
   mexe na leitura do hitbox). A barra de vida sob os pés é do CU-02. Dono: visual. Tamanho P. Aceite: o mesmo de
   cima, refeito na Cripta com os sprites novos e o Sineiro.
+- Reavaliação 2026-11-12 · ✅ feito por outros itens: o halo claro atrás do herói (`heroRim`, `0xb4d0ff`, DD-12,
+  `7112ba4`), a sombra de contato sob os pés (`GameScene` "discreet contact shadow") e a multidão refeita no tamanho
+  final (o Esqueleto caiu de 108x124 para 68x76 art px, `credits.md`) resolvem o "herói achável". O contorno âmbar não
+  foi feito; só volta se o Daniel ainda perder o herói jogando (`?dev`, Cripta com o Sineiro).
 
 **A-03 · HUD legível no celular** · visual + impl · P · ✅ feito
 
@@ -298,6 +336,9 @@ depois e registra em `docs/balance-baseline.md`.
   lugar do orçamento por disparo, cobrindo todo verbo de uma vez (testado no core, sem `Rng`); (c) `maxDamageNumbers`
   24 no retrato só se (a) e (b) não bastarem. Dono: impl + vfx. Tamanho: P. Aceite novo: as capturas citadas sem
   pilha sobre o herói; teste do orçamento por quadro.
+- Reavaliação 2026-11-12 · mantido: nada mudou no core. `onEnemyDamaged` (`core/world.ts`) só cala `aura` e `orbit`
+  (a `zone` da Geada ainda mostra número) e o orçamento continua por disparo (`numberBudget` em `weapons.ts` e
+  `projectiles.ts`). Os números agora usam a fonte pixel (Jersey 15, PA-01): conferir o tamanho mínimo nas capturas.
 
 **A-05 · Gemas que contrastam com os três chãos** · visual · P · ↩ reaberto na Revisão 2026-11-08 · ✅ feito
 
@@ -482,11 +523,15 @@ depois e registra em `docs/balance-baseline.md`.
 
 ## Etapa 6: Lançamento
 
-**L-01 · Medição em celular real** · bal + impl · P
+**L-01 · Medição em celular real** · bal + impl · P · proposto
 
 - Por quê: tudo das Etapas 3 e 4 custa render; a meta é 500+ inimigos a 60 FPS no celular.
 - O quê: rodar F4 no celular do Daniel e no Chrome com CPU 4x; registrar no `docs/balance-baseline.md`.
 - Aceite: 60 FPS com 500 inimigos depois do juice e do som.
+- Reavaliação 2026-11-12 · mantido, e mais urgente: desde a última medida entraram luz e escuridão, sprites
+  animados para toda a multidão, sombras de contato, efeitos em sprite (`fxSprites`), música e fonte pixel, e vários
+  itens fecharam com "F4 não medido" (PF-01 a PF-05, PT-01). Somar: medir também o herói que anda ~30 px depois de
+  soltar o joystick (adiado para cá na Revisão 2026-11-11 (2)).
 
 **L-02 · Versão do save** · impl · P · ✅ feito
 
@@ -863,6 +908,8 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
 - Revisão 2026-11-09 (04-visual #16, 06-vfx #14): sobrou um: a Segunda Chance faz `cameras.main.flash(400, …)` de tela
   inteira (`GameScene.ts:872`). Novo O quê: reviver com o anel de nível (`levelUpPulse`) e/ou os raios do baú na cor
   do herói, sem véu; o vfx-director escolhe. Tamanho: P. Aceite: `grep cameras.main.flash src` vazio.
+- Reavaliação 2026-11-12 · mantido: o flash continua em `GameScene.ts` (evento `revived`). Hoje há peças prontas para
+  trocar: o anel dourado de nível em sprite (PF-06) e o `lighting.flash` (como na forja e na Badalada).
 
 **RF-05 · Pool de faíscas, mortes de desenho animado** · vfx + impl · M · ✅ feito
 
@@ -1249,7 +1296,7 @@ implementação abaixo; cada item é um commit.
   título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
   abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
-**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto · ampliado na Revisão 2026-11-11
+**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto · ampliado na Revisão 2026-11-11 · reescrito na reavaliação 2026-11-12 (P)
 
 - O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
   (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
@@ -1273,6 +1320,15 @@ implementação abaixo; cada item é um commit.
   "x0". Textos: `bestiary.stageHeader: (fase, vistos, total) => \`${fase} ${vistos} de ${total}\``,
 `bestiary.standing: 'De pé'`, `bestiary.how: 'Como lidar'`. Donos: ui + impl. Tamanho M. Aceite: capturas 420x820 e
   1000x680 com os grupos, nenhum não visto com cor, a ficha visível sem rolar, "Como lidar" nos inimigos da Cripta.
+- Reavaliação 2026-11-12 · reescrito: o Bestiário vivo (`aa79c14`) e o PA-05 já fizeram metade. Feito: palco com o
+  inimigo andando no chão da sua fase e silhueta escura para o não visto (`render/bestiaryShow.ts`), "Como enfrentar"
+  com uma dica por inimigo (`t.bestiary.tips`, 28 entradas), retratos de ~50 px em 420 (7 colunas), ficha acima da
+  grade sem rolar. **Falta** (captura `collection.png` de 2026-11-12 em 420x820, save zerado: os 28 retratos "?"
+  mostram cor e olhos, porque `portrait()` em `scenes/collection/bestiary.ts` ainda usa `setTint(UI.border)`): (1)
+  retrato não visto com `setTintFill` (a forma fica, cor e olhos não); (2) chefe com 0 abates mostra "De pé"
+  (`bestiary.standing`); (3) os grupos por fase ficam **opcionais**: com a ficha e o palco, a grade de 28 lê bem; só
+  fazer se o Daniel sentir falta. Dono: impl. Tamanho P. Aceite: captura com save zerado sem nenhuma cor nos "?".
+  Quando o CU-01 sair, a dica do jogo usa o mesmo `t.bestiary.tips`.
 
 **CC-07 · Aba Conquistas** · impl + ui · M · ✅ feito
 
@@ -1347,8 +1403,9 @@ cor (A-02); Rato Gigante pode entrar na Cripta (D-04). Pedido extra: Andilla mai
 
 ## Fora de escopo / ideias para depois
 
-- Música por fase (o plano pede só efeitos agora).
-- Modo infinito depois do chefe, ou dificuldade extra por fase vencida.
+- Música por fase (o plano pede só efeitos agora). ✅ virou o MU-01 (2026-11-12).
+- Modo infinito depois do chefe, ou dificuldade extra por fase vencida. ✅ o modo infinito é a Noite Sem Fim; a
+  dificuldade por fase é o ND-01.
 - Itens equipáveis guardados entre partidas, ou uma loja dentro da partida.
 - Habilidade ativa por herói (um botão), pensando no controle de um polegar. Na Revisão 2026-11-09 o game-director
   propôs antes um traço passivo por herói (ND-02), que não pede botão.
@@ -1376,7 +1433,7 @@ Da Revisão 2026-11-08 (ordem de prioridade para a próxima conversa com o Danie
 - **Joystick fixo como opção** (05-ui #13).
 - **Efeitos menores** (06-vfx): Fogos-Fátuos com rastro, sinos balançando, rastro e faísca de gema coletada,
   Tempestade escurecendo a tela.
-- **Menu e Loja usando o espaço que sobra** (04-visual #18).
+- **Menu e Loja usando o espaço que sobra** (04-visual #18). ✅ feito no PA-05 (reavaliação 2026-11-12).
 - **Tamanho do bundle** (00-checks: 1,30 MB num chunk, 357 kB gzip): medir o tempo até o menu em 4G antes de mexer.
 
 ## Rodada UI e features (2026-11-09)
@@ -1528,7 +1585,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: teste com multidão dentro e um alvo fora: as espadas avançam; no sim, investida em pelo menos 30% dos passos
   com inimigos nessa faixa; Vigília ainda na faixa do lab.
 
-**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto
+**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto · reescrito na reavaliação 2026-11-12
 
 - Por quê: 03-qa #9, 05-ui #2. O toast de conquista já iniciado e o aviso grande (`announce`: "Um inimigo poderoso se
   aproxima!", "Ganhou: X") continuam animando sobre o título, a 1ª carta, a linha da receita e o Trocar
@@ -1549,6 +1606,12 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Revisão 2026-11-11 (2) · ampliado (04-visual #12): o aviso "Mãe-Aranha chegou!" fica sobre a faixa do nome do chefe
   em 420x820 e encosta no herói em 1000x680 (`m-g-valmor-330.png`, `d-g-valmor-330.png`). Somar ao O quê: o aviso de
   chefe abaixo da barra do chefe e acima do herói, some em 1,5 s. Aceite: captura do aviso com a barra do chefe visível.
+- Reavaliação 2026-11-12 · reescrito: (c) está feito no código: o aviso grande fica em `max(30% da altura, barra do
+chefe + 48)` (`HudScene` `layout`), abaixo da barra (dura 3 s, não 1,5; fica assim). (a) e (b) seguem abertos:
+  `quiet()` só esconde aviso, dica e toast, não as setas (`EdgeArrows.update` roda todo quadro), e `nextToast` não
+  olha `world.boss` nem a vida. Captura de 2026-11-12 (420x820, Cripta, partida avançada por script): a seta coral de
+  elite aparece sobre o painel de atributos do level-up, e o toast "Conquista! Diário de Caça" sobre o título. O quê:
+  só (a) e (b) como descritos acima. Tamanho P.
 
 **NB-09 · Liberar herói com um toque, e o toque duplo já começa a partida** · impl · P · ✅ feito
 
@@ -1635,7 +1698,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 
 ### N3 · Equilíbrio
 
-**NE-02 · Tempestade medida de novo depois das rajadas** · bal + impl · P · ⏸ medido, falta calibrar o lab (2026-11-11)
+**NE-02 · Tempestade medida de novo depois das rajadas** · bal + impl · P · ⏸ medido, falta calibrar o lab (2026-11-11) · ⇢ mesclado no PE-02 (reavaliação 2026-11-12)
 
 - Por quê: 01-balance: Tempestade com ELO X **1,2x** no sim (Raio L7 813, Tempestade 854), a única Elo abaixo de
   2,5x; com a varredura de reserva (mock) a Tempestade vai de 716 para 1199 e a Espada de Fogo de 615 para 1361.
@@ -1650,6 +1713,8 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Revisão 2026-11-11 (2) (01-balance #3): Tempestade **1,4x** (793 contra 613 real) e agora também a **Espada de Fogo
   1,7x** o Fogo (600 contra 298), a segunda Elo abaixo da meta, pela mesma causa (chão em brasa e cadeia dependem de
   multidão densa). As duas são calibradas juntas no PE-02, depois do NE-06.
+- Reavaliação 2026-11-12 · mesclado: o PE-02 já cobre a Tempestade e a Espada de Fogo com a mesma causa e o mesmo
+  aceite (`ELO X` ≥ 2,5x); este item fica como histórico da medida.
 
 **NE-01 · Maça de Ferro: mais alcance, menos dano** · impl + bal · P · ✅ feito (2026-11-11: lab 91%, Teo Valmor meia Loja 54%; `docs/balance-baseline.md`)
 
@@ -1692,7 +1757,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   Daniel: diminuir as ondas enquanto o chefe vive (ex.: só o chefe e sua escolta) para a luta durar 30–45 s?
   Revertido.
 
-**NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · proposto (decisão 3 do Daniel)
+**NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · proposto (decisão 3 do Daniel) · ⏸ em espera (Daniel, equilíbrio e simulações)
 
 - Por quê: 01-balance: Escudos de Valmor e Muralha com DPS real **24** e **184**, os menores do jogo; o empurrão custa
   ~20% do DPS e compra pouca sobrevivência (Cripta Loja inteira 53 → 52 de 64 com 150 → 600). Dobrar o dano dá +3 a
@@ -1709,6 +1774,9 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   Espada de Fogo 1,7x. Somar ao O quê: a multidão viva também é **densa** (a coluna de grade 32 px do NE-02), e o sim
   imprime, para armas `aura` e `orbit`, inimigos dentro do alcance por segundo (separa o bot que foge do desenho da
   arma). É o primeiro passo do PE-02; os números das cinco armas só mudam depois dele.
+- Reavaliação 2026-11-12 · mantido, em espera: os Escudos e a Muralha mudaram de verbo desde a medida (DD-09: escudo
+  arremessado em laço que acerta na ida e na volta), então os números "24" e "184" do Por quê estão velhos; a primeira
+  coisa do item, quando o Daniel liberar, é medir de novo.
 
 ### N4 · Efeitos visuais (dono: vfx-director)
 
@@ -1819,7 +1887,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   calmo; seta assada em textura, varredura O(n) sem alocar. Base: `68ac386`.
 - Aceite: captura com baú e elite fora da tela; F4 igual; não cobre pausa nem joystick.
 
-**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · receita ✅ feita (2026-11-11: a descrição longa cede as últimas linhas, com "…"); falta a regra única do nome do Elo (decisão 2 do Daniel)
+**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · receita ✅ feita (2026-11-11: a descrição longa cede as últimas linhas, com "…"); falta a regra única do nome do Elo (decisão 2 do Daniel) · proposto (a regra do nome)
 
 - Por quê: 05-ui #4. `LevelUpScene.ts:155` destrói a linha da receita quando a descrição tem 3 linhas (a Maça de Ferro
   em 420x820 perde a dica, `p-06-levelup.png`), justamente na carta que abre uma receita. E o nome do Elo é "???" no
@@ -1830,6 +1898,8 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
   Armadura 1/3" (`recipeProgress` recebe a lista de Elos conhecidos).
 - Aceite: captura da Maça de Ferro como arma nova em 420x820 e 360x640 com a receita; a mesma regra de nome na carta,
   na Pausa, no Livro e na tela final.
+- Reavaliação 2026-11-12 · mantido: `recipeProgress` (`render/describe.ts`) ainda mostra o nome do Elo na carta e na
+  Pausa, e o Livro e o Fim mostram "???". Espera a decisão 2 do Daniel (nome secreto até a primeira forja?).
 
 **NU-03 · Pausa: build em qualquer celular, interruptores numa linha e atributos** · ui + impl · M · ✅ feito (2026-11-11: Som, Números e Calma numa linha com lâmpada; lista de uma linha por arma quando aperta; lista e botões na mesma largura; Atributos quando cabe)
 
@@ -1909,7 +1979,7 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   de manchas, pedrinhas e pontos de neve dos dois tiles. Custo por quadro zero.
 - Aceite: captura em 1000x680 sem nenhuma linha reta no chão.
 
-**NA-02 · Estrada do Sul com cara de estrada no celular** · visual · P · proposto
+**NA-02 · Estrada do Sul com cara de estrada no celular** · visual · P · proposto · ✅ feito (reavaliação 2026-11-12: pelo DD-10, DD-11 e DD-04)
 
 - Por quê: 04-visual #4. Com 480 px de mundo na vista e a estrada de 520, a floresta nunca aparece em pé, e o tile da
   estrada é quase o de Valmor (`06-start-southRoad-420x820.png`); as miniaturas da Preparação de Valmor e da Estrada são
@@ -1918,6 +1988,10 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   (~16 px, sem contorno) a `width / 2` do centro, sempre desenhado; miniaturas com lápide, pilar e pinheiros. **Sem**
   mudar `width` (rejeitado: mexe no equilíbrio de uma fase no limite da meta).
 - Aceite: capturas em 420x820 da Estrada e de Valmor que se distinguem sem inimigos; miniaturas diferentes.
+- Reavaliação 2026-11-12 · ✅ feito por outros itens: a Estrada tem tile próprio de terra (`tile.road`) e a floresta
+  de pinheiros nas laterais (`tile.forest`, DD-10, `e014c73`), troncos e rochas (DD-11, `fb4a4db`) e fogueiras; em
+  420x820 a floresta aparece dos dois lados (captura `road-start.png`, 2026-11-12). As miniaturas viraram os cartões
+  da tela Fase com o chão e o chefe de cada fase (DD-04), todos diferentes.
 
 **NA-03 · A corrente do Elo na faixa da build parece um "8"** · visual · P · ✅ feito (2026-11-11: abaixo de 14 px, dois elos — um ao longo, um deitado — na cor do elemento)
 
@@ -1927,15 +2001,9 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   diagonal; ou 4 px a mais entre as linhas quando houver Elo.
 - Aceite: recorte 4x sem nenhum algarismo.
 
-**NA-04 · Aranha Tumular e Rato Gigante na mesma cor** · visual · P · proposto
+**NA-04 · Aranha Tumular e Rato Gigante na mesma cor** · ✗ descartado (reavaliação 2026-11-12; ver "Descartados")
 
-- Por quê: 04-visual #12. Na Cripta o básico e o rápido são dois marrons do mesmo tamanho: o jogador não separa quem vai
-  alcançá-lo (pilar 5).
-- O quê: aranha quase preta (~`0x2e2a30`), pernas longas, olhos brancos maiores (r 2,4); rato como está. Fora de roxo,
-  ciano e verde.
-- Aceite: captura de multidão da Cripta com os dois distinguíveis.
-
-**NA-05 · Fogos-Fátuos e Procissão fora do ciano das gemas** · visual · P · proposto
+**NA-05 · Fogos-Fátuos e Procissão fora do ciano das gemas** · visual · P · proposto · ✅ feito (reavaliação 2026-11-12: pelo PF-04)
 
 - Por quê: 04-visual #13. `proj.wisps` (`0xe8ffff`/`0x40e0d8`) e `ELEMENT_COLOR.soul` (`0x7af0dc`) estão no ciano da
   gema; a regra do A-05 é a gema ser o único ciano saturado.
@@ -1943,6 +2011,10 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 - Aceite: folha de texturas com fogo-fátuo e gema claramente diferentes.
 - Revisão 2026-11-11 (2): sai junto com o **PF-04** (os mesmos projéteis viram sprites PixelLab; as cores daqui são a
   paleta deles). Fechar os dois no mesmo commit.
+- Reavaliação 2026-11-12 · ✅ feito no PF-04 (`7365b3b`): o fogo-fátuo virou violeta (`sprites/fx/wisp.png`) e a alma
+  da Procissão um sprite próprio com cauda. A alma e `ELEMENT_COLOR.soul` (`0x7af0dc`) ficaram ciano-pálido, de
+  propósito (a gema guarda o ciano saturado, comentário em `render/ui.ts`); se o Daniel confundir alma e gema jogando,
+  vale o `~0x9ad8c0` daqui.
 
 **NA-06 · Nenhum texto de 11 px** · visual · P · ✅ feito
 
@@ -1999,6 +2071,10 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
 - Riscos: nenhum custo por quadro (só multiplicadores na criação); tela final ganha uma linha (depende do NB-02).
 - Aceite: testes de meta (abrir, salvar, migrar); sim com `SIM_DANGER`: com a Loja inteira, Valmor perigo 1 em 60% a
   75%, perigo 3 em 15% a 30%; ouro por corrida no perigo 3 cerca de 2x o normal; F4 igual.
+- Reavaliação 2026-11-12 · mantido: continua o próximo sistema grande para o pilar 4 (a Loja acaba em ~50 corridas e
+  o veterano não tem escada). Duas mudanças de premissa: a "Preparação" virou as telas Heróis e Fase (DD-03, DD-04), então
+  o seletor de perigo vai no cartão de fase (junto com o CU-07); e a tela final já cabe (NB-02 feito). Espera o nome
+  do Daniel e o fim do PE-01 (a régua da meia Loja precisa estar certa antes de multiplicar por cima).
 
 **ND-02 · Um traço por herói que muda uma regra** · impl + bal + ui · G · proposto (regras e nomes com o Daniel)
 
@@ -2030,6 +2106,8 @@ ${piece} para ${elo}!"`, com o nome do Elo pela regra do NU-02.
   por herói no sim antes de ligar.
 - Aceite: teste por traço; sim de 16 sementes com cada herói a ±20 pontos da fase; pick rates por herói diferentes
   entre si (o traço muda a build).
+- Reavaliação 2026-11-12 · mantido: os heróis seguem diferindo só por números e arma inicial (`data/characters.ts`).
+  O traço aparece na linha "vantagem" da tela Heróis (DD-03), que já existe. Espera regras e nomes do Daniel.
 
 ---
 
@@ -2039,7 +2117,7 @@ Origem: a direção de arte mudou para fantasia escura e iluminada (pixel art to
 em `docs/design/art-references/`, padrão em `.claude/agents/visual-director.md`). Até aqui só os documentos mudaram.
 Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 a AR-05, um commit por passo.
 
-**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02) · ↩ reaberto na Revisão 2026-11-11 (luz nos efeitos) · proposto
+**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02) · ↩ reaberto na Revisão 2026-11-11 (luz nos efeitos) · proposto · reescrito na reavaliação 2026-11-12 (absorve o CF-08)
 
 - Por quê: é o que mais muda a cara do jogo e não depende de sprite.
 - O quê: uma camada de escuridão por fase (azul-noite em Valmor e na Estrada, quase preto quente na Cripta),
@@ -2065,8 +2143,19 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   luz sobre chão claro não aparece. Donos: vfx + impl. Tamanho M. Aceite: capturas 420x820 da Cripta com Aura, Tempestade
   e Espada de Fogo acendendo o chão; F4 (420x820, CPU 4x, 500 inimigos) igual antes e depois; nenhuma alocação por
   quadro.
+- Reavaliação 2026-11-12 · reescrito (a premissa mudou): os efeitos deixaram de ser "adesivos planos". DD-15 e PF-01
+  a PF-06 os refizeram em sprites de pixel com cor e brilho próprios, existe o `fxGlow` aditivo (depth 11,5, PF-01),
+  e o chão da Cripta escureceu (DD-10). Já acendem o chão: projéteis, gemas, chefe, forja, Badalada, estouro da Ossada
+  em Brasa e Dobre Fúnebre (`lighting.add`/`flash` em `GameScene`). **Falta só a luz no chão dos golpes de arma**:
+  nenhum `lighting` na Aura de Yah, Chama de Yah, Raio e Tempestade, Fogo e Espada de Fogo, Geada e no pouso da Maça e
+  do Quebra-Junta (o resto do CF-08, mesclado aqui). Novo O quê: no ponto onde o sprite já está, `lighting.add` na cor
+  do elemento ou da arma (Aura e Chama no tique, com o mesmo ritmo do anel; raio e cadeia com `flash` frio de 0,12 s;
+  Fogo e Espada na queda, brasa fraca na zona; Geada azul-lilás fraco; Maça e Quebra-Junta âmbar no pouso). Teto de 8
+  luzes de arma por quadro, modo calmo corta o alfa à metade, nada no `fxGlow` que já não exista. Dono: vfx + impl.
+  Tamanho P. Aceite: capturas 420x820 da Cripta com Aura, Tempestade, Espada de Fogo e Maça acendendo o chão; a luz
+  nunca clareia um telégrafo coral a ponto de apagá-lo; F4 igual antes e depois.
 
-**AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11) · resto ampliado na Revisão 2026-11-11 · proposto
+**AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11) · resto ampliado na Revisão 2026-11-11 · proposto · ✅ feito (reavaliação 2026-11-12: pelo DD-10, DD-11 e PA-02)
 
 - O quê: várias variantes do tile por fase escolhidas por hash da célula, detalhes (rachaduras, musgo, ossos, neve),
   objetos de cenário (cercas e lanternas em Valmor; lápides, colunas e velas na Cripta; pinheiros, pedras e placa na
@@ -2090,6 +2179,12 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   **antes** do AR-01 reaberto. Donos: visual (+ impl no a). Tamanho: a P, b M. Aceite: captura 420x820 da Cripta sem
   repetição visível de tile; herói, morcego e fantasma com valor acima do chão (teste de cinza na captura); props no
   mesmo traço dos sprites.
+- Reavaliação 2026-11-12 · ✅ feito por outros itens: (a) os quatro chãos foram regerados no PixelLab com a mistura
+  pontilhada que esconde a repetição e o contraste puxado para a média (DD-10, `e014c73`; Valmor com neve no PA-02,
+  `f5595e6`); a Cripta virou lajes escuras e gastas, não mais blocos coloridos (captura `r-crypt.png`). (b) Os props são
+  sprites PixelLab no traço dos personagens: obstáculos por fase (DD-11, `fb4a4db`) e decalques em
+  `public/sprites/decals/`. A borda irregular do mapa fica **descartada**: Valmor e a Cripta não têm borda (o mundo é
+  aberto) e a Estrada já termina na floresta.
 
 **AR-03 · Avisos de ataque como formas no chão** · vfx · P · ✅ feito (2026-11-11)
 
@@ -2099,13 +2194,24 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   comprimento real da investida (`CHARGE` × velocidade da fase), enchendo até o impacto, com borda tracejada. Os
   chefes já usavam formas (cone do Corte Brutal, faixa da Mordida Funda, anéis da Badalada).
 
-**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto
+**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto · reescrito na reavaliação 2026-11-12: "Os últimos desenhos em código" (P)
 
 - O quê: corpos mais escuros e de cores apagadas, uma cor principal por criatura, contorno escuro, olhos menores,
   mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
 - Aceite: capturas lado a lado antes/depois; bestiário e Livro de Elos coerentes com o jogo.
+- Reavaliação 2026-11-12 · reescrito: repintar o `Pen` perdeu o sentido. Heróis, inimigos, chefes, chão, decalques,
+  obstáculos, projéteis, baú, ímã e sino já são sprites PixelLab, e a arte em código dos inimigos e heróis foi apagada
+  (CT-03, `913a0ec`). O que ainda sai do `Pen` (`render/art/items.ts` e `icons.ts`, listado no topo de
+  `render/assets.ts`): **gemas** (3 tamanhos), **moeda**, **comida**, **elixir**, **Sopro de Geada** e os ícones de
+  arma e passiva (cartas, faixa da build, Loja). Novo Por quê: são justamente o que o jogador mais pega e lê (pilares
+  2 e 5); ao lado de sprites hi-bit com contorno tingido, o traço vetorial destoa. Novo O quê, em ordem: (1) os quatro
+  itens raros do chão (comida, elixir, Sopro de Geada, moeda) em `create_1_direction_object` no tamanho final, como o
+  PA-04 (cerca de 10 gerações cada); (2) as gemas em pixel **mantendo o azul-claro escolhido pelo Daniel** e o cintilar
+  do `gemMirror` (A-05: a gema é o único ciano saturado); (3) ícones, só depois, numa rodada própria com o ui-designer
+  (são dezenas e aparecem em 16 a 28 px). Dono: visual. Aceite: captura de multidão em Valmor e na Cripta com os cinco
+  itens no chão, achados de relance; gerações em `docs/art/credits.md`.
 
-**AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04 · andar dos inimigos ampliado na Revisão 2026-11-11 · proposto
+**AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04 · andar dos inimigos ampliado na Revisão 2026-11-11 · proposto · ✅ feito (reavaliação 2026-11-12)
 
 - O quê: Aldo + 2–3 inimigos em pixel art (24–32 px, escala inteira, sem suavização), carregados por `assets.ts`,
   com idle, andar, dano e morte; fixa a densidade de pixel e a paleta para o resto.
@@ -2124,6 +2230,11 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   faixas) saem no mesmo estilo do Aldo novo (referência `aldo.png`). Ordem das gerações: decisão 6 do Daniel em
   `docs/reviews/2026-11-11/07-direcao.md`. Dono: visual. Tamanho M. Aceite: captura em movimento (gif ou 4 quadros) de
   uma multidão da Cripta sem deslizar; F4 igual.
+- Reavaliação 2026-11-12 · ✅ feito: toda a multidão das três fases tem andar de 5 quadros, incluindo Ossada,
+  Esqueleto, Ossada em Brasa, Espectro (as duas formas), Espírito Gélido, Gosma e Morcego Vampiro (`ENEMY_ANIMS` em
+  `render/enemyAnims.ts`; gerações em `credits.md`), e chefes e elites têm andar, preparo, golpe e morte. Lyra, Teo e
+  Andilla andam com a arma na mão (vista oeste espelhada, `credits.md`). Sobra uma nota menor, sem item: a Lyra perde o
+  cajado nos quadros de dano e queda (PA-03).
 
 ---
 
@@ -2640,7 +2751,7 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
 - Visual: pilha de ossos com os olhos ainda acesos, que tremem e se juntam no último segundo.
 - Aceite: teste: levanta sem acerto, acerto destrói, Nevasca e Procissão só contam a morte de verdade.
 
-**FT-16 · Cripta montada** · impl + bal + visual · M · parcial (2026-11-11)
+**FT-16 · Cripta montada** · impl + bal + visual · M · parcial (2026-11-11) · ✅ feito (reavaliação 2026-11-12)
 
 - Feito: Ossada que remonta (básico), Ossada em Brasa como especial (`from` 40 s, a cada 12 s, máx. 8), `mult.hp` 1.35
   para 1.25; **Gosma Verde** de volta como perigo (`trail`: limo de 26 px que deixa lento a 0.7, máx. 6 vivas, especial
@@ -2658,6 +2769,9 @@ Habilidade pedida: **limpeza**, terminar o serviço. Proposta, não plano: depen
   as mecânicas funcionam como descrito). O que falta para fechar o FT-16 está na seção "Revisão 2026-11-11": as peças
   que não mordem (CB-01, CB-02, CE-01), a faixa da meia Loja (CE-02, 13% contra 15 a 35%) e a leitura (CF-01 a CF-05,
   CU-01).
+- Reavaliação 2026-11-12 · ✅ feito: CB-01, CB-02, CE-01, CE-02 e CF-01 a CF-06 estão fechados, e a Cripta ganhou o
+  Assombro (DD-07), o Coveiro novo (DD-06) e os obstáculos (DD-11). O que sobra tem item próprio: CU-01 (dicas na
+  primeira vez) e PE-01 (a meia Loja caiu para 63% depois do Assombro e dos obstáculos).
 
 - Elenco: Ossada (básico, remonta), Morcego Vampiro (rápido; nome do original, no lugar do morcego cinzento da fase 1),
   Esqueleto (resistente), Espectro (atravessa e some), atirador espiritual com o **Toque Gélido** (habilidade do
@@ -2701,6 +2815,10 @@ aprovada pelo Daniel em 2026-11-10; detalhes depois das respostas)
   como as outras.
 - Aceite: os mesmos das outras fases (metas de sim definidas junto com a ordem, F4 a 60 FPS, capturas 420x820),
   mais: o caminho de terra firme existe em 100% das sementes testadas.
+- Reavaliação 2026-11-12 · mantido, esperando o Daniel (perguntas 11 e 12 abaixo). Duas premissas mudaram: a Gosma
+  Verde ficou na Cripta como perigo de limo (FT-16), então "sai da Cripta para cá" é uma escolha, não um dado; e a fase
+  nasce no pipeline novo (tile PixelLab com a mistura de repetição, obstáculos em sprite, música própria do
+  music-director, cartão e história na tela Fase), o que aumenta o custo de arte e torna o item G de verdade.
 
 ### Equilíbrio de cada fase
 
@@ -2847,6 +2965,9 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   - `crypt`: "${hero} caiu na cripta. O sino ainda toca."
   - `southRoad`: "${hero} caiu na Estrada do Sul. A matilha ainda uiva."
 - Aceite: captura do fim de jogo nas três fases com a frase da fase; nenhum texto fora do `pt-BR.ts`.
+- Reavaliação 2026-11-12 · mantido: `t.end.lostText` continua único (`pt-BR.ts`, usado em `EndScene`). Nota: o chefe
+  da Cripta é o Sineiro e o da Estrada o Lobo Velho, então as frases provisórias acima seguem certas; o Daniel confirma
+  o texto.
 
 **CB-05 · `markWeb` mexe na marca errada com o pool cheio** · impl · P · ✅ feito (2026-11-11)
 
@@ -3040,13 +3161,20 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   `pileFall`, `pileRise`, `pileBreak` (estalo seco, o mais satisfatório), `emberBurst`, `dig`. Pilha com teto de vozes.
 - Aceite: cada evento soa uma vez; com 20 pilhas o teto de vozes segura; mudo respeitado.
 
-**CF-07 · Limo que espalha e seca** · vfx · P · proposto (depois do CE-01)
+**CF-07 · Limo que espalha e seca** · vfx · P · proposto (depois do CE-01) · reescrito na reavaliação 2026-11-12
 
 - Por quê: 06-vfx #8. A mancha nasce pronta (`fx.ts:1513`) e some só por alfa; o herói lento não tem desenho de
   "grudar".
 - O quê: espalha de 40 a 100% do raio em 0,2 s com respingo; encolhe com bolhas ao secar; fio de gosma no pé do herói
   enquanto `groundSlow < 1` (o ícone do HUD é do CU-02).
 - Aceite: folha de captura do ciclo da mancha; F4 igual com 6 gosmas.
+- Reavaliação 2026-11-12 · reescrito para a direção de pixel: o limo melhorou em vetor (`drawSlime` em
+  `render/fxparts/enemies.ts`: borda irregular que funde com as vizinhas, brilho molhado, bolhas que estouram), mas
+  continua nascendo pronto, sumindo só por alfa, e é dos poucos chãos de inimigo ainda desenhados em código ao lado
+  dos efeitos em sprite do DD-15. Novo O quê: o ciclo da mancha (espalhar em 0,2 s, viver, secar com bolhas) como
+  animação de pixel no `vfx_workbench`, verde-limo (a cor de "atrasa" do CF-04), dentro do `ZONE_FILL_MAX`, pelo pool
+  `fxSprites`; e um fio de gosma de 2 a 3 quadros no pé do herói enquanto `groundSlow < 1`. Aceite: o mesmo, mais
+  gerações registradas em `docs/art/credits.md`.
 
 ### C5 · Interface (dono: ui-designer)
 
@@ -3063,6 +3191,9 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   'tiros', leap: 'saltos', ground: 'marcas no chão', boss: 'o chefe' }`.
 - Aceite: capturas 420x820 e 360x640 com vida a 30% e 10%, herói no limo e tela final com a linha; teste do
   `hurtShare`; F4 igual.
+- Reavaliação 2026-11-12 · mantido: nenhuma das três partes existe (a vinheta do HUD é a da luz, fixa; nada lê
+  `groundSlow` no render; `world.hurtBy` só é somado em `core/elos.ts`). Uma parte já está pronta: a barrinha de vida sob
+  os pés existe, em textura (PA-01), sempre visível; fica assim.
 
 **CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · proposto
 
@@ -3083,6 +3214,10 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
     As dicas de Valmor e da Estrada saem do mesmo jeito, uma frase de ação por inimigo, na implementação.
 - Aceite: save novo: cada dica aparece uma vez e nunca mais; nenhuma durante a luta do chefe; save antigo migra sem
   perder nada (`sanitizeSave`); captura 420x820.
+- Reavaliação 2026-11-12 · mantido, com metade do texto pronto: as dicas já existem para os 28 inimigos em
+  `t.bestiary.tips` (Bestiário vivo, `aa79c14`), uma frase de ação cada; o item só precisa mostrá-las na partida (use
+  essas, não as provisórias acima) e nomear a elite no aviso (hoje `t.eliteWarning` é genérico). O `HudScene.hint`
+  (caixa dourada sob o aviso) já existe e serve de molde.
 
 **CU-03 · Chefe com barra própria e o nome do ataque** · ui + impl · P · proposto
 
@@ -3093,6 +3228,9 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   da habilidade corrente). Texto só muda quando a habilidade muda.
 - Aceite: captura com "Dobre Fúnebre!" sob a barra durante o aviso; barra do chefe e vida do herói de cores
   diferentes.
+- Reavaliação 2026-11-12 · mantido: a barra do chefe virou textura de pixel no PA-01 (`render/bars.ts`), mas com o
+  mesmo visual `hp` da vida do herói. O O quê fica, agora como um terceiro visual em `LOOKS` (roxo-escuro com a moldura
+  de aço/ouro) em vez de `UI.bossBar`.
 
 **CU-04 · Pausa com dano por arma** · ui + impl · P · proposto
 
@@ -3101,6 +3239,8 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - O quê: barra fina de dano e DPS em cada linha de arma (a conta sai do `EndScene` para `core/report.ts`, sem
   duplicar); em 360x640 só a barra.
 - Aceite: capturas 420x820 e 360x640; a mesma conta na Pausa e no fim.
+- Reavaliação 2026-11-12 · mantido: a tela final mostra Dano, Tempo e DPS por arma, a Pausa não (`buildList.ts` sem
+  DPS).
 
 **CU-05 · Carta de arma nova com números** · ui + impl · P · ✅ feito (2026-11-11, dentro do PU-03)
 
@@ -3110,7 +3250,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   nunca a receita (`levelUp.newStats`).
 - Aceite: captura de arma nova em 420x820 e 360x640 com números e receita.
 
-**CU-06 · Celular: nível, pips, joystick e cargas** · ui + impl · P · proposto
+**CU-06 · Celular: nível, pips, joystick e cargas** · ui + impl · P · proposto · reescrito na reavaliação 2026-11-12
 
 - Por quê: 05-ui UI-10, 03-qa B4. "Nv" de 14 px sobre a barra de XP (`HudScene.ts:94`); pips da faixa de 3 px;
   joystick com alfa 0,08/0,25 some no chão violeta (`joystick.ts:21`); R, X e B com 0 cargas não dão nenhum sinal.
@@ -3119,6 +3259,11 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: capturas 420x820 e 360x640 na Cripta; R sem carga mostra o tremor.
 - Revisão 2026-11-11 (2) (04-visual #14, #15): o desenho do joystick (anel e botão em pixel) e da barra de XP passa
   para o **PA-01**, que usa o alfa daqui (0,14 / 0,4). Ficam aqui "Nv", pips e o sinal de carga zerada.
+- Reavaliação 2026-11-12 · reescrito: o PA-01 fez o joystick em pixel com o alfa novo e pôs "Nv" no meio da barra de
+  XP, longe do botão de pausa (decisão do visual-director, captura de 2026-11-12: lê bem em 420x820). Os botões de carga
+  zerada já aparecem desabilitados (B-03). **Sobra:** (1) tecla R, X ou B sem carga (ou sem efeito) não dá sinal
+  nenhum (`useCharge` em `LevelUpScene` só retorna): um tremor curto no botão e o som surdo; (2) os pips da faixa da
+  build (`buildPanel.ts`) com pelo menos 4 px de altura no celular. Tamanho P.
 
 **CU-08 · Desistir mostra a tela final** · ui + impl · P · proposto (decidi; o Daniel pode vetar)
 
@@ -3126,8 +3271,10 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   a partida rendeu. Pilar 4: toda partida mostra o que avançou.
 - O quê: Desistir abre o Fim com o título "Partida abandonada", ouro guardado, conquistas e Elos; "Menu" a um toque.
 - Aceite: captura; o ouro mostrado é o gravado no save.
+- Reavaliação 2026-11-12 · mantido: `PauseScene.quit` ainda para o jogo e abre o Menu. Ficou mais barato: o Fim já tem
+  o atalho da Loja (PU-04) e cabe em qualquer tela (NB-02).
 
-**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · proposto
+**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · proposto · reescrito na reavaliação 2026-11-12 (P)
 
 - Por quê: 05-ui UI-09. O cartão da Preparação tem nome e frase ("Pedra azul..." num chão que agora é violeta), sem
   vitórias, melhor tempo nem perigos; as barras do HUD são retângulos planos, longe dos painéis finos dourados das
@@ -3139,6 +3286,13 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Revisão 2026-11-11 (2) (04-visual #2): a moldura das barras do HUD sai daqui e entra no **PA-01** (fonte, painéis,
   botões e barras em pixel, numa peça só). Fica aqui o cartão de fase (perigos, marcas, melhor tempo); o selo "Vencida"
   que encosta no título (03-qa B7) é do **PU-05**.
+- Reavaliação 2026-11-12 · reescrito: a Preparação não existe mais; a fase se escolhe na tela Fase (DD-04), com
+  cartões que já mostram o chão, o chefe em pé, "Chefe: …" (PA-05) e o selo "Vencida" (captura `stages.png`, 420x820).
+  **Sobra:** (1) no cartão, a melhor marca do jogador na fase (tempo, ou vigília mais longa, de `HeroRecord`) e, quando
+  houver, as marcas de perigo do ND-01; (2) dois ícones de perigo da fase (os verbos mais fortes) só se couberem sem
+  apertar a ilustração; (3) a frase da Cripta, "Pedra azul, limo e um sino…", não bate mais com o chão de lajes
+  cinza-escuras do DD-10: trocar por algo do que se vê (texto do game-director, sem lore nova; o Daniel confirma). A
+  moldura das barras saiu no PA-01. Tamanho P.
 
 ### C6 · Arte e luz (dono: visual-director)
 
@@ -3152,7 +3306,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   ganho de leitura da multidão; o monte da Cripta flutua sobre a pedra (`m-g-crypt-330.png`). Entra no 4º dos Próximos 5
   da revisão, junto com o PA-01 e o PA-02.
 
-**CA-03 · Cripta com uma cor por criatura** · visual · M · proposto
+**CA-03 · Cripta com uma cor por criatura** · visual · M · proposto · reescrito na reavaliação 2026-11-12
 
 - Por quê: 04-visual #7 e #8. Ossada, Esqueleto e Ossada em Brasa são branco-osso e leem como uma massa
   (`m-c2-2.png`); o Espectro lilás-claro tem o maior valor da tela e chama mais atenção que o perigo real.
@@ -3160,8 +3314,15 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   decisão 5); depois, se ainda faltar, regerar o Esqueleto com armadura azul-aço escura e capa vermelha maior, e a
   Ossada com crânio amarelado e olho âmbar (`create_character_state`, ~10 gerações cada).
 - Aceite: captura de multidão da Cripta em que Ossada, Esqueleto, Ossada em Brasa e Espectro se separam em cinza.
+- Reavaliação 2026-11-12 · reescrito: metade da premissa mudou. O Espectro foi refeito em duas formas (DD-07: menor,
+  ~40 px, e o Assombro negro de olhos vermelhos), então a parte "Espectro claro demais" saiu. O Esqueleto foi refeito no
+  tamanho final (68x76, `credits.md`), com escudo e capa. **Sobra:** Ossada, Esqueleto e Ossada em Brasa continuam
+  osso-claro e leem como uma massa na multidão da Cripta (captura `r-crypt.png`, 420x820, 4:22). Novo O quê: primeiro
+  só tinta (zero gerações): Ossada com o crânio levemente amarelado, Ossada em Brasa puxada para o âmbar de brasa
+  (é a que estoura, a mais perigosa de perto); só se não bastar, regerar o Esqueleto com armadura azul-aço
+  (cerca de 10 gerações). Aceite: o de cima, sem o Espectro.
 
-**CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto
+**CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto · reescrito na reavaliação 2026-11-12 (P)
 
 - Por quê: 04-visual #6, 02-code B6, 06-vfx ("ponto fraco"). O Sineiro a 1,5x (`SPRITE_SCALE`) tem pixels de 3x3 entre
   sprites de 2x2, é só um pouco maior que os Coveiros e mantém `radius: 30` com ~150 px de altura; o Bestiário não
@@ -3175,8 +3336,16 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   corpo fraco, coberta pelos ratos, e a `BOSS_LIGHT` (roxo claro) some no chão azul. Somar: luz de chefe na cor de cada
   chefe e profundidade do chefe acima da escolta, nas três fases. Aceite somado: captura de cada chefe com escolta em
   420x820 em que o chefe é a primeira coisa achada.
+- Reavaliação 2026-11-12 · reescrito: o Sineiro já é exibido em escala 1 (`SPRITE_SCALE` vazio em `render/assets.ts`,
+  o teste de densidade passa), com andar, preparo, golpe e morte (`ENEMY_ANIMS`, 95x102 art px); o Coveiro foi refeito
+  com chapéu, olhos acesos e pá (DD-06), outra silhueta; e o chefe já fica acima da escolta (profundidade 7, RF-03).
+  **Sobra:** (1) a luz do chefe é uma só para todos (`BOSS_LIGHT = 0xd8b0ff` em `GameScene`), e some no chão azul de
+  Valmor: uma cor por chefe (Mãe-Aranha magenta-venenoso, Sineiro âmbar do sino, Lobo Velho branco-gelo); (2) o sino
+  do Sineiro como acento que brilha, mais forte no aviso da Badalada e do Dobre (`lighting.add` no ponto do sino, sem
+  geração nova). O Sineiro com 102 art px de altura fica abaixo da faixa de chefe do CLAUDE.md (112 a 160): regerar
+  maior só se a captura mostrar que ele não é a primeira coisa achada. Dono: visual + vfx. Aceite: o somado acima.
 
-**CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · proposto
+**CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · proposto · ⇢ mesclado no AR-01 (reavaliação 2026-11-12)
 
 - Por quê: 06-vfx (tabela de armas). Aura de Yah: anel fino que some na multidão; Adagas e Leque de Facas: o Elo quase
   igual à base; Maça de Ferro: impacto discreto no meio do monte. (Fogos-Fátuos pequenos já estão no NA-05 e em
@@ -3188,6 +3357,8 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   **PF-03** (verbos dos Elos com desenho) e as facas para o **PF-04**. Sobra aqui só a luz âmbar da Maça no pouso. Nota
   sobre a Aura depois do `2a997ce` (anel que respira e quase some): no ponto mais fraco a borda continua visível no raio
   do dano (decisão em `docs/reviews/2026-11-11-2/07-direcao.md`, conflito 2).
+- Reavaliação 2026-11-12 · mesclado: o rebote e as facas saíram no PF-03 e no PF-04, a Aura e a Maça no DD-15, e a única
+  coisa que sobrava (luz âmbar da Maça no pouso) é exatamente o que o AR-01 reescrito pede para todas as armas.
 
 ### C7 · Direção (sistema novo)
 
@@ -3226,6 +3397,10 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Aceite: testes: a fonte nasce em chão livre na distância pedida, cura só dentro, para no `charge` e no `ttl`; sim
   (meia Loja): a parte das mortes entre 4:00 e 5:30 cai de 2/3 para menos de 1/2, a Loja inteira não passa de 85%;
   medida de tempo dentro da fonte e cura por fonte; F4 igual.
+- Reavaliação 2026-11-12 · mantido, esperando o Daniel (aprovação e o gancho de lore). Duas premissas mudaram: a meta
+  do bot na Cripta com meia Loja agora é 80 a 90% (CLAUDE.md), e a Cripta está em 63% (PE-01), então a fonte entra
+  **depois** do PE-01, e não como conserto de faixa; a seta na borda já existe (`EdgeArrows`, prioridade nova abaixo
+  do ladrão). A poça de luz sai como efeito de pixel (`vfx_workbench`), não vetor.
 
 ## Daniel 2026-11-11 tarde
 
@@ -3297,7 +3472,8 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 7 · Efeitos em sprites (pedido do Daniel, 2026-11-12)
 
-- **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G. Raio e Tempestade, Fogo e Espada de Fogo,
+- ✅ **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G (marcado na reavaliação 2026-11-12: o
+  próprio item diz "Nada falta no DD-15"; o limo da Gosma, que ficou em vetor, está no CF-07). Raio e Tempestade, Fogo e Espada de Fogo,
   zonas de Geada/Nevasca, chão em chamas, auras, golpes em arco e pancadas, trabalhados no workbench de efeitos do
   PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais), Aura de Yah, onda de choque da Maça, corte da Lâmina, giro da Fúria (2026-11-12; carmim `0xd8283c`, anel de 350 graus com cinzas e brasas, 0 gerações: oficina de efeitos). onda da Chama de Yah (2026-11-12; anel de fogo com 14 chamas na frente, até o raio exato do pulso). cadeia da Tempestade (2026-11-12; estrela violeta no pouso e linha em degraus de 2 px, cor `storm`). telégrafos (2026-11-12; escolhi não gerar sprite: todas as bordas tracejadas passam por `dashedArc`/`dashedLine`, que agora desenham quadrados de pixel de 4 px na grade de 2 px com contorno escuro, na cor do traço corrente; o salto ganhou dois anéis internos que giram ao contrário; o preenchimento listrado continua vetor, translúcido sob o limite de `ZONE_FILL_MAX`; só vi o salto do Golem, o cone e a investida do chefe não foram vistos em jogo). Nada falta no DD-15.
   - Revisão 2026-11-11 (2) (06-vfx #2): a Fúria é hoje vetor com borda `0xff4a4a`, vizinha do coral de perigo
@@ -3310,7 +3486,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 8 · Música (pedido do Daniel, 2026-11-12)
 
-- **MU-01 · Uma trilha de metal progressivo por fase** · música · G. Valmor, Cripta e Estrada do Sul (guitarras, solo,
+- **MU-01 · Uma trilha de metal progressivo por fase** · música · G · parcial (esperando o Daniel). Valmor, Cripta e Estrada do Sul (guitarras, solo,
   mudanças de compasso e tom), trilha de chefe e trilha do menu, em laço, geradas no PixelLab (`create_music` e
   `make_music_loop`, registradas em `docs/art/credits.md`). Player em `render/music.ts` (Phaser, fusão entre faixas,
   abaixa na pausa), mapa em `render/musics.ts`, opção Música em Opções e na pausa. Feito: valmor, crypt, southRoad,
@@ -3320,6 +3496,10 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
     Somar: ao abrir o Fim, a faixa em curso sai em fusão curta e toca o sting (3 a 5 s, mesmo timbre da fase); depois,
     silêncio ou a faixa do menu baixa. Na vigília a faixa da fase volta (já funciona). Nomes provisórios: os nomes das
     fases, sem lore nova (decisão 1 da `07-direcao.md`). Os defeitos do player estão no **PB-03**; o volume, no **PS-01**.
+  - Reavaliação 2026-11-12 · mantido, esperando o ouvido do Daniel: cinco faixas no mapa (`render/musics.ts`:
+    valmor, crypt, southRoad, boss, menu), só a de Valmor refeita no estilo novo (`817f81a`); o PB-03 e o PS-01 estão
+    feitos. Faltam: o veredito da Valmor de teste, refazer as outras quatro no mesmo estilo e os stings de vitória e
+    derrota (nenhum no mapa; o Fim ainda toca a faixa do chefe).
 
 ## Revisão 2026-11-11 (2)
 
@@ -3454,7 +3634,7 @@ em `ART_RES`.
 
 ### P2 · Equilíbrio
 
-**PE-01 · Cripta e Valmor de volta à meta depois do Assombro e dos obstáculos** · bal + impl · P · proposto
+**PE-01 · Cripta e Valmor de volta à meta depois do Assombro e dos obstáculos** · bal + impl · P · proposto · ⏸ em espera (Daniel, equilíbrio e simulações)
 
 - Por quê: 01-balance #6 e #7, com a leitura corrigida (conflito 1 da `07-direcao.md`). O alvo do **bot** no CLAUDE.md
   para a Cripta com meia Loja é 80 a 90% (o ~60% é o de uma pessoa); estava em 84% em `8a9a23d` e hoje está em
@@ -3469,8 +3649,11 @@ em `ART_RES`.
 - Aceite: Cripta 0 a 10% / 80 a 90% / 90%+ e Valmor 0 a 15% / 40 a 60% / 85%+ com 16 sementes; nenhum herói a mais de 20
   pontos da fase (o Teo é o caso a olhar; se só ele ficar fora, ele vai para o PE-02); tabela antes e depois em
   `docs/balance-baseline.md`; o Daniel reteste à mão a Cripta com meia Loja (`?dev`).
+- Reavaliação 2026-11-12 · mantido, em espera: desde a medida de 63% entraram a mira automática no retângulo (B-04),
+  o ouro fracionário (PB-02), o atordoamento que pula o fantasma e a pilha (PB-05) e os furos do spawner (PB-07), todos
+  com "sim pendente". Quando o Daniel liberar, a primeira rodada mede tudo isso junto antes de mexer no `mult`.
 
-**PE-02 · As cinco cartas fracas no jogo real** · bal + impl · M · proposto (depois do NE-06)
+**PE-02 · As cinco cartas fracas no jogo real** · bal + impl · M · proposto (depois do NE-06) · ⏸ em espera (Daniel, equilíbrio e simulações) · absorve o NE-02
 
 - Por quê: 01-balance #1, #2, #3, #5. No `REAL DPS` do sim: Aura de Yah **15** (17 corridas; lab 220), Espadas de Elun
   **66** (lab 228), Maça **76** (Lâmina 156, Adagas 336), Tempestade **1,4x** o Raio e Espada de Fogo **1,7x** o Fogo
@@ -3484,6 +3667,9 @@ em `ART_RES`.
 - Aceite: bandas verdes no lab novo; no sim, Aura de Yah, Espadas de Elun e Maça com DPS real de pelo menos 1/4 da
   melhor `aimed` real; Tempestade e Espada de Fogo com `ELO X` de 2,5x ou mais; picks entre 28 e 49%; Teo na Cripta a no
   máximo 20 pontos da fase; metas das fases mantidas (PE-01).
+- Reavaliação 2026-11-12 · mantido, em espera, e absorve o NE-02 (a medida da Tempestade com `chain.count` 3 e a
+  causa do lab esparso estão lá). Nota: a Aura de Yah mudou de desenho (anel que carrega entre os tiques, `7927cf9`),
+  não de números; a decisão 4 do Daniel (piso de visibilidade da borda) vale antes de mexer no raio.
 
 ### P3 · Interface (dono: ui-designer)
 
@@ -3700,3 +3886,25 @@ em `ART_RES`.
   custo de mudança do render, e as rodadas PF e DD-15 vão mexer nele inteiro.
 - O quê: separar golpes, zonas, chefes e avisos em arquivos que o `drawFx` chama, sem mudar comportamento.
 - Aceite: capturas iguais antes e depois; nenhuma alocação nova; testes verdes.
+
+---
+
+## Descartados
+
+Itens que perderam o sentido (arte, mecânica ou elenco mudaram). O ID fica, com o motivo numa linha e o texto original
+como histórico. Detalhe em `docs/reviews/2026-11-11-2/08-reavaliacao.md`.
+
+**NA-04 · Aranha Tumular e Rato Gigante na mesma cor** · visual · P · ✗ descartado (reavaliação 2026-11-12)
+
+- Motivo: o elenco da Cripta mudou (Ossada, Morcego Vampiro, Esqueleto, Espectro, Gosma, Ossada em Brasa; RL-01,
+  FT-16) e a aranha e o rato foram para Valmor como sprites PixelLab de cores e silhuetas próprias (`credits.md`): os
+  "dois marrons do mesmo tamanho" em `Pen` não existem mais. A separação da multidão da Cripta está no CA-03.
+- Texto original. Por quê: 04-visual #12. Na Cripta o básico e o rápido são dois marrons do mesmo tamanho: o jogador
+  não separa quem vai alcançá-lo (pilar 5). O quê: aranha quase preta (~`0x2e2a30`), pernas longas, olhos brancos
+  maiores (r 2,4); rato como está. Fora de roxo, ciano e verde. Aceite: captura de multidão da Cripta com os dois
+  distinguíveis.
+
+**AR-02 (parte) · Borda do mapa irregular caindo no preto** · visual · ✗ descartado (reavaliação 2026-11-12)
+
+- Motivo: Valmor e a Cripta são mundos abertos, sem borda que o jogador alcance, e a Estrada do Sul já termina na
+  floresta (DD-10). O resto do AR-02 está feito.
