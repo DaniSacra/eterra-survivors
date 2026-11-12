@@ -831,7 +831,7 @@ export const t = {
 
   characters: {
     aldo: { name: 'Aldo', role: 'Guerreiro', desc: 'Resistente. Vida e armadura a mais.' },
-    lyra: { name: 'Lyra', role: 'Maga', desc: 'Magias largas, mas pouca vida.' },
+    lyra: { name: 'Lyra', role: 'Maga', desc: 'Magias largas que miram sozinhas, mas pouca vida.' },
     teo: { name: 'Teo', role: 'Clérigo', desc: 'As feridas se fecham sozinhas.' },
     andilla: { name: 'Andilla', role: 'Ladina', desc: 'Pés ligeiros e sorte com o ouro.' },
   } satisfies Record<CharacterId, { name: string; role: string; desc: string }>,
@@ -881,7 +881,7 @@ export const t = {
     },
     staff: {
       name: 'Cajado de Lyra',
-      desc: 'Orbe que explode no primeiro inimigo à frente.',
+      desc: 'Orbe que busca sozinho o inimigo mais perto e explode nele.',
     },
     paladinSwords: { name: 'Espadas dos Paladinos', desc: 'Espadas que giram em volta de você.' },
     frost: { name: 'Geada de Valmor', desc: 'Gelo no chão que fere e atrasa os inimigos.' },

@@ -272,14 +272,14 @@ export const WEAPONS = {
     ),
   },
 
-  /** Cajado de Lyra: a fireball fired where Lyra looks, small at first and bigger with each level; it bursts on the first enemy. */
+  /** Cajado de Lyra: a fireball that flies by itself to the nearest enemy (the boss when on screen), small at first and bigger with each level; it bursts on the first enemy. Lyra's edge (2026-11-12). */
   staff: {
     kind: 'thrown',
-    category: 'aimed',
-    aim: 'facing',
+    category: 'auto',
+    aim: 'nearest',
     levels: levels<ThrownLevel>(
       {
-        damage: 39,
+        damage: 37,
         cooldown: 1.1,
         speed: 340,
         count: 1,
@@ -290,12 +290,12 @@ export const WEAPONS = {
         knockback: 60,
         blast: 34,
       },
-      { damage: 51, radius: 8 },
+      { damage: 48, radius: 8 },
       { blast: 42, radius: 9 },
       { count: 2, radius: 10 },
-      { damage: 63, cooldown: 0.9, radius: 12 },
+      { damage: 60, cooldown: 0.9, radius: 12 },
       { blast: 50, radius: 13 },
-      { damage: 82, cooldown: 0.75, radius: 15 },
+      { damage: 78, cooldown: 0.75, radius: 15 },
     ),
   },
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
@@ -618,11 +618,11 @@ export const WEAPONS = {
   /** Estrela de Lyra: the orb bursts and splits into small stars that fall around it and burst again. */
   lyraStar: {
     kind: 'thrown',
-    aim: 'facing',
+    aim: 'nearest',
     split: { count: 5, distance: 70, scale: 0.5, fall: 0.35 },
     levels: [
       {
-        damage: 33,
+        damage: 25,
         cooldown: 0.6,
         speed: 380,
         count: 3,
