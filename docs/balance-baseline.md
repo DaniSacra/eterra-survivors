@@ -1071,3 +1071,18 @@ Heróis fora de 20 pontos: Cripta half Teo 63% contra 84% da fase (21 pontos; va
 Nota: o corte de dano é grande porque o bot é bem mais forte que uma pessoa; o Daniel disse que com meia Loja uma pessoa
 deve ganhar ~60% na Cripta e que o bot está à frente. **Precisa de reteste à mão** (`?dev`, Cripta, meia Loja).
 A tabela `TARGETS` do sim agora imprime `ok` ou `OFF lo-hi` por célula.
+
+## NE-06 (2026-11-12): lab com multidão viva e "inimigos no alcance"
+
+- `tests/lab/measure.ts`: modo `live` (160 inimigos imortais `bones` andando até o herói, com empurrão, repostos no anel de
+  420 px quando encostam); `npm run lab` ganhou as colunas `live Lmax`, `live Elo` e `x base`.
+- `tests/lab/bot.ts` e `sim.test.ts`: linha `REACH` (média de inimigos dentro do alcance, por segundo, das armas `aura` e
+  `orbit` no nível máximo/Elo).
+- Leitura: o número `live` é bem maior que o do sim (blade 3053 contra 158 de DPS real), porque o fluxo constante chega
+  todo ao herói; serve para **comparar armas**, não para as bandas, que continuam no campo congelado (`bands.test.ts`).
+  Em `live`, em relação à Lâmina (3053): Maça 83%, Martelo 30%, Adagas 14%, Geada 25%, Espadas de Elun 24%, Aura de Yah 26%,
+  Escudos 37%, Fogo 26%, Tempestade 44%, Luz de Elun 10%. Elos `live` sobre a base: Fúria 3,2x, Quebra-Junta 2,5x,
+  Estrela 3,7x, Nevasca 3,2x, Chama 3,6x, Muralha 3,6x, Espada de Fogo 3,5x, Tempestade 1,6x.
+- `REACH` (meia Loja, 8 sementes): Aura de Yah 0,2 inimigos no alcance, Espadas de Elun 0,1, Chama de Yah 1,3, Vigília 0,4.
+  Ou seja, o bot mata a multidão antes de ela chegar a 90 px: a Aura e as Espadas quase nunca têm alvo (DPS real 6 e 3 com
+  meia Loja); o problema é alcance, não dano por golpe.

@@ -186,6 +186,20 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
         .filter(Boolean)
         .join(' · '),
   );
+  // Enemies inside the reach of each aura and orbit weapon at max level (mean per second): tells a bot that runs
+  // from the crowd apart from a weak design.
+  out.push(
+    'REACH    ' +
+      WEAPON_IDS.map((id) => {
+        const rs = results.flatMap((r) => (r.reach[id] && r.reach[id].seconds >= 20 ? [r.reach[id]] : []));
+        const sec = rs.reduce((a, x) => a + x.seconds, 0);
+        return sec
+          ? `${id} ${(rs.reduce((a, x) => a + x.enemySeconds, 0) / sec).toFixed(1)} (${rs.length})`
+          : '';
+      })
+        .filter(Boolean)
+        .join(' · '),
+  );
   // Each Elo against its base at max level in the same runs (goal: >= 2.5x).
   out.push(
     'ELO X    ' +

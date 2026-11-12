@@ -9,6 +9,7 @@ import { EVOLUTIONS } from '../../src/data/evolutions';
 import type { StageId } from '../../src/data/stages';
 import type { PassiveId } from '../../src/data/upgrades';
 import { WEAPONS, type WeaponId } from '../../src/data/weapons';
+import { maxLevel, weaponStats } from '../../src/core/weapons';
 
 /**
  * A scripted player for full-run balance simulations (`npm run sim`). It flees nearby enemies (1/d² weight,
@@ -48,10 +49,32 @@ export interface SimResult {
   /** Base weapons owned at the end (an Elo counts as its base). */
   owned: WeaponId[];
   maxEnemies: number;
+  /**
+   * Aura and orbit weapons: mean enemies inside their reach per second (summed over the ticks at their level) and
+   * seconds measured, to tell a bot that runs from the crowd apart from a weak design.
+   */
+  reach: Partial<Record<WeaponId, { enemySeconds: number; seconds: number }>>;
   /** Damage taken by the role of the enemy that dealt it. */
   taken: { fast: number; total: number };
   /** Damage taken by where it came from (world.hurtBy). */
   hurtBy: Record<HurtSource, number>;
+}
+
+/** Adds, for each aura or orbit weapon, the enemies now inside its reach (hero to the circle or the aura edge). */
+function sampleReach(w: World, res: SimResult): void {
+  const p = w.player;
+  for (const o of w.weapons) {
+    const def = WEAPONS[o.id];
+    if ((def.kind !== 'aura' && def.kind !== 'orbit') || o.level < maxLevel(o.id)) continue;
+    const s = weaponStats(o) as { radius: number; orbitRadius?: number };
+    const reach = (def.kind === 'orbit' ? (s.orbitRadius as number) + s.radius : s.radius) * p.stats.area;
+    let n = 0;
+    for (const e of w.enemies.active)
+      if (!e.dead && Math.hypot(e.x - p.x, e.y - p.y) <= reach + e.def.radius * 0.5) n++;
+    const r = (res.reach[o.id] ??= { enemySeconds: 0, seconds: 0 });
+    r.enemySeconds += n * DT;
+    r.seconds += DT;
+  }
 }
 
 /** Recipe passives of the weapons the hero owns. */
@@ -223,6 +246,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
     owned: [],
     maxEnemies: 0,
     taken: { fast: 0, total: 0 },
+    reach: {},
     hurtBy: { contact: 0, shot: 0, leap: 0, ground: 0, boss: 0 },
   };
   const side = seed % 2 ? 1 : -1;
@@ -259,6 +283,7 @@ export function simulate(hero: CharacterId, stage: StageId, seed: number, setup:
       else if (ev.type === 'eloForged') res.elos.push(`${ev.elo}@${Math.round(w.time)}`);
     }
     w.events.length = 0;
+    sampleReach(w, res);
     res.maxEnemies = Math.max(res.maxEnemies, w.enemies.size);
     if (w.time >= nextSnap) {
       res.snaps.push({ t: nextSnap, level: w.level, enemies: w.enemies.size, hp: Math.round(w.player.hp) });

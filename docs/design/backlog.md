@@ -1757,7 +1757,7 @@ chefe + 48)` (`HudScene` `layout`), abaixo da barra (dura 3 s, não 1,5; fica as
   Daniel: diminuir as ondas enquanto o chefe vive (ex.: só o chefe e sua escolta) para a luta durar 30–45 s?
   Revertido.
 
-**NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · proposto (decisão 3 do Daniel) · ⏸ em espera (Daniel, equilíbrio e simulações)
+**NE-06 · Lab mede armas que empurram com o empurrão** · impl + bal · M · ✅ feito (2026-11-12; coluna `live` no lab e linha `REACH` no sim; bandas seguem no campo congelado)
 
 - Por quê: 01-balance: Escudos de Valmor e Muralha com DPS real **24** e **184**, os menores do jogo; o empurrão custa
   ~20% do DPS e compra pouca sobrevivência (Cripta Loja inteira 53 → 52 de 64 com 150 → 600). Dobrar o dano dá +3 a
