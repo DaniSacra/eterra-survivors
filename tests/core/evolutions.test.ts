@@ -131,6 +131,15 @@ describe('chests', () => {
     });
   });
 
+  it('the prize is decided in the core and never by the roulette: same seed, same reward', () => {
+    const open = () => {
+      const w = quietWorld();
+      openChest(w);
+      return w.events.find((e) => e.type === 'chest');
+    };
+    expect(open()).toEqual(open());
+  });
+
   it('the level it gives can complete a recipe, and then the Elo forms', () => {
     const w = quietWorld();
     w.weapons[0]!.level = maxLevel('blade') - 1;

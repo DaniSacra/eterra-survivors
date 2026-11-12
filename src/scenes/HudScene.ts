@@ -25,6 +25,17 @@ import { fxSprites } from '../render/fxSprites';
 import { EVOLUTIONS, type Evolution } from '../data/evolutions';
 import type { WeaponId } from '../data/weapons';
 
+/** The icons a chest's roulette spins through before it settles on the prize. */
+const ROULETTE_ICONS = [
+  'icon.might',
+  'pickup.gold',
+  'icon.vigor',
+  'pickup.food',
+  'icon.haste',
+  'icon.growth',
+  'icon.armor',
+];
+
 /** One in-run notice: its text, its badge and the colour of its rim (achievements gold, Elos their element). */
 interface Toast {
   text: string;
@@ -483,6 +494,51 @@ export class HudScene extends Phaser.Scene {
         this.time.delayedCall(1700, done);
       },
     });
+  }
+
+  /**
+   * An elite's chest opens with a short roulette (PX-11 style party, PX-13): icons spin in a gold-rimmed box and settle
+   * on the prize the core already decided (`final`). 1.1 s at most; a tap on the box skips it. Purely a show.
+   */
+  chestRoulette(final: string): void {
+    const { width } = this.scale;
+    const cx = width / 2;
+    const cy = this.banner.y + 90;
+    const box = this.add
+      .rectangle(cx, cy, 84, 84, 0x05040f, 0.9)
+      .setStrokeStyle(3, UI.accent)
+      .setInteractive();
+    const icon = this.add.image(cx, cy, ROULETTE_ICONS[0] as string).setScale(ART_SCALE * 1.6);
+    const parts: Phaser.GameObjects.GameObject[] = [box, icon];
+    let step = 0;
+    let settled = false;
+    const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      spin.remove();
+      icon.setTexture(final).setScale(ART_SCALE * 2.2);
+      const ring = this.add.circle(cx, cy, 30, UI.accent, 0.6);
+      parts.push(ring);
+      this.tweens.add({ targets: ring, scale: 3, alpha: 0, duration: 400 });
+      this.tweens.add({ targets: icon, scale: ART_SCALE * 1.8, duration: 250, ease: 'Back.easeOut' });
+      this.tweens.add({
+        targets: parts,
+        alpha: 0,
+        delay: 450,
+        duration: 250,
+        onComplete: () => parts.forEach((o) => o.destroy()),
+      });
+    };
+    const spin = this.time.addEvent({
+      delay: 70,
+      repeat: 9,
+      callback: () => {
+        step++;
+        icon.setTexture(ROULETTE_ICONS[step % ROULETTE_ICONS.length] as string);
+        if (step >= 10) finish();
+      },
+    });
+    box.once('pointerdown', finish);
   }
 
   /** Debug only: 100 more enemies to measure performance. */

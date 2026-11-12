@@ -1688,6 +1688,9 @@ export class GameScene extends Phaser.Scene {
           this.moments.chest = w.time;
           this.moments.elo = false;
           this.rewardIcon.setTexture(e.reward ? describeUpgrade(e.reward).icon : 'pickup.chest');
+          // The party: a short roulette that settles on the prize the core decided, and a golden light (PX-13).
+          if (e.reward) this.hud.chestRoulette(describeUpgrade(e.reward).icon);
+          if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 500, 0xffd36a, 0.7);
           break;
         }
         case 'weaponAdded':
