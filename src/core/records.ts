@@ -12,6 +12,8 @@ export interface RunSummary {
   hero: CharacterId;
   stage: StageId;
   won: boolean;
+  /** The hero fell (quitting from the Pausa is not a defeat, CU-08). */
+  lost: boolean;
   time: number;
   level: number;
   kills: number;
@@ -39,6 +41,7 @@ export const newRunSummary = (): RunSummary => ({
   hero: 'aldo',
   stage: 'valmor',
   won: false,
+  lost: false,
   time: 0,
   level: 1,
   kills: 0,
@@ -65,6 +68,7 @@ export function summarizeRun(world: World, out: RunSummary = newRunSummary()): R
   out.stage = world.stageId;
   // The Noite Sem Fim comes after a victory: it ends with the hero falling, but the run was won.
   out.won = world.state === 'won' || world.endless;
+  out.lost = world.state === 'lost' && !world.abandoned;
   out.vigil = world.vigilTime;
   out.time = world.time;
   out.level = world.level;

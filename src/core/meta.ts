@@ -86,6 +86,8 @@ export interface MetaSave {
   /** Enemies seen at least once. */
   bestiary: Partial<Record<EnemyId, BestiaryEntry>>;
   totals: Totals;
+  /** Defeats in a row per stage that was never won; a win clears it (see `assistMight`). */
+  tries: Partial<Record<StageId, number>>;
   /** Achievements unlocked (their gold already banked). */
   achievements: AchievementId[];
   /** Unlocked but not yet seen in the Coleção (the menu button shows a dot). */
@@ -119,6 +121,7 @@ export const newSave = (): MetaSave => ({
   records: {},
   tipsSeen: [],
   lessonsSeen: [],
+  tries: {},
   bestiary: {},
   totals: newTotals(),
   achievements: [],
@@ -255,6 +258,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
     bestiary?: unknown;
     tipsSeen?: unknown;
     lessonsSeen?: unknown;
+    tries?: unknown;
     totals?: unknown;
     achievements?: unknown;
     fresh?: unknown;
@@ -276,6 +280,8 @@ export function sanitizeSave(raw: unknown): MetaSave {
   save.bestiary = sanitizeBestiary(r.bestiary);
   save.tipsSeen = known(r.tipsSeen, ENEMY_IDS);
   save.lessonsSeen = known(r.lessonsSeen, LESSON_IDS);
+  const tries = obj(r.tries);
+  for (const id of STAGE_IDS) if (id in tries) save.tries[id] = Math.max(0, Math.floor(num(tries[id], true)));
   const totals = obj(r.totals);
   for (const k of Object.keys(save.totals) as (keyof Totals)[])
     save.totals[k] = num(totals[k], k !== 'damage' && k !== 'time');
@@ -341,6 +347,7 @@ export function serializeSave(save: MetaSave): object {
     tipsSeen: union(future.tipsSeen, known.tipsSeen),
     lessonsSeen: union(future.lessonsSeen, known.lessonsSeen),
     totals: mergeUp(future.totals, known.totals),
+    tries: known.tries,
     achievements: union(future.achievements, known.achievements),
     fresh: union(future.fresh, known.fresh),
     title: known.title ?? future.title,
@@ -364,6 +371,9 @@ export interface RunRecorded {
 export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   save.gold += Math.max(0, Math.floor(run.gold));
   if (run.won) markCleared(save, run.stage);
+  // Defeats in a row on a stage never won: the next run gets a little help (`assistMight`). A win clears the count.
+  if (run.won) save.tries[run.stage] = 0;
+  else if (run.lost) save.tries[run.stage] = (save.tries[run.stage] ?? 0) + 1;
   const elos = discoverElos(save, run.elos);
 
   const rec = (save.records[run.hero] ??= newHeroRecord());
@@ -554,6 +564,12 @@ export function nextHeroGoal(save: MetaSave): { id: CharacterId; cost: number } 
     if (!best || cost < best.cost) best = { id, cost };
   }
   return best;
+}
+
+/** Extra damage (a `might` delta) for a run on `stage`: each defeat in a row adds some, while the stage was never won. */
+export function assistMight(save: MetaSave, stage: StageId): number {
+  if (save.cleared.includes(stage)) return 0;
+  return Math.min(save.tries[stage] ?? 0, config.assist.maxTries) * config.assist.mightPerTry;
 }
 
 /** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */

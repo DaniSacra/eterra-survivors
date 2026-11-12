@@ -1,5 +1,14 @@
 import { it } from 'vitest';
-import { buy, newSave, shopBonuses, shopCost, unlockHero } from '../../src/core/meta';
+import {
+  assistMight,
+  buy,
+  markCleared,
+  newSave,
+  shopBonuses,
+  shopCost,
+  unlockHero,
+} from '../../src/core/meta';
+import { config } from '../../src/data/config';
 import { CHARACTERS } from '../../src/data/characters';
 import { SHOP_IDS } from '../../src/data/shop';
 import { simulate } from './bot';
@@ -17,6 +26,9 @@ const COST = Number(import.meta.env.NP_HERO_COST ?? CHARACTERS.lyra.cost);
 /** A new player is weaker than the bot: this much less damage and life (NP_HANDICAP, 0 = the bot as it is). */
 const HANDICAP = Number(import.meta.env.NP_HANDICAP ?? 0);
 const GIFT = Number(import.meta.env.NP_WIN_GOLD ?? 0);
+// NP_ASSIST overrides the damage each defeat in a row adds (config.assist.mightPerTry); 0 turns the help off.
+if (import.meta.env.NP_ASSIST !== undefined)
+  (config.assist as { mightPerTry: number }).mightPerTry = Number(import.meta.env.NP_ASSIST);
 type Habit = 'hero' | 'shop';
 
 /** `hero` saves for the hero and buys the Loja only after; `shop` spends everything on the cheapest Loja item. */
@@ -28,12 +40,16 @@ function career(habit: Habit, id: number) {
   const times: number[] = [];
   for (let i = 1; i <= RUNS; i++) {
     const bonuses = shopBonuses(save);
-    bonuses.stats.might = (bonuses.stats.might ?? 0) - HANDICAP;
+    bonuses.stats.might = (bonuses.stats.might ?? 0) - HANDICAP + assistMight(save, 'valmor');
     bonuses.stats.maxHp = (bonuses.stats.maxHp ?? 0) - HANDICAP * 200;
     const r = simulate('aldo', 'valmor', id * 100 + i, { bonuses });
     times.push(r.time);
     golds.push(r.gold);
     save.gold += Math.floor(r.gold) + (r.won && firstWin === 0 ? GIFT : 0);
+    if (r.won) {
+      markCleared(save, 'valmor');
+      delete save.tries.valmor;
+    } else save.tries.valmor = (save.tries.valmor ?? 0) + 1;
     if (r.won && firstWin === 0) firstWin = i;
     if (!heroRun && habit === 'hero' && save.gold >= COST) {
       heroRun = i;

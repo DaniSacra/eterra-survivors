@@ -20,6 +20,8 @@ export const config = {
   /** Playtesting: every stage is open. Set to false so each stage opens by clearing the previous one. */
   unlockAllStages: false,
   maxDt: 1 / 20, // clamp long frames so nothing tunnels
+  /** Help for a player stuck on a stage never won (PX-17): each defeat in a row adds damage to the next run. */
+  assist: { mightPerTry: 0.08, maxTries: 3 },
   view: {
     /** World pixels guaranteed along the screen's shortest side; sets the camera zoom. */
     minWorldSide: 480,

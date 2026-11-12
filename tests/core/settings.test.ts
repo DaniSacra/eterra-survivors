@@ -17,6 +17,8 @@ describe('settings', () => {
       music: false,
       musicLevel: 'normal',
       tips: true,
+      stats: true,
+      statsNoticed: false,
       gasparMet: false,
     });
     expect(sanitizeSettings({ gasparMet: true }).gasparMet).toBe(true);

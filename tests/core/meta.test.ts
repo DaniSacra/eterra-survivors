@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   SAVE_VERSION,
+  assistMight,
   biggestGoal,
   heroUnlocked,
   nextHeroGoal,
@@ -11,6 +12,7 @@ import {
   discoverElos,
   lastRun,
   newSave,
+  recordRun,
   sanitizeSave,
   serializeSave,
   shopBonuses,
@@ -20,6 +22,7 @@ import {
 import { dropPickup } from '../../src/core/pickups';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
+import { newRunSummary } from '../../src/core/records';
 import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { SHOP, SHOP_IDS } from '../../src/data/shop';
 import { CHEST } from '../../src/data/pickups';
@@ -279,6 +282,30 @@ describe('save versions and Elos', () => {
     expect(biggestGoal(s)!.cost).toBe(priciest);
     for (const id of SHOP_IDS) s.shop[id] = SHOP[id].maxLevel;
     expect(biggestGoal(s)).toBeNull();
+  });
+
+  it('each defeat in a row on a stage never won adds damage, a win or quitting changes it as it should', () => {
+    const s = newSave();
+    const lost = { ...newRunSummary(), stage: 'valmor' as const, lost: true };
+    expect(assistMight(s, 'valmor')).toBe(0);
+    recordRun(s, lost);
+    recordRun(s, lost);
+    expect(assistMight(s, 'valmor')).toBeCloseTo(2 * config.assist.mightPerTry);
+    // Quitting from the Pausa is not a defeat.
+    recordRun(s, { ...lost, lost: false });
+    expect(assistMight(s, 'valmor')).toBeCloseTo(2 * config.assist.mightPerTry);
+    // The help stops growing at the cap.
+    for (let i = 0; i < 6; i++) recordRun(s, lost);
+    expect(assistMight(s, 'valmor')).toBeCloseTo(config.assist.maxTries * config.assist.mightPerTry);
+    // A win clears it, and the stage no longer gets any.
+    recordRun(s, { ...lost, lost: false, won: true });
+    expect(assistMight(s, 'valmor')).toBe(0);
+    recordRun(s, lost);
+    expect(assistMight(s, 'valmor')).toBe(0);
+    // It survives the save round trip.
+    const t2 = newSave();
+    recordRun(t2, lost);
+    expect(sanitizeSave(JSON.parse(JSON.stringify(serializeSave(t2)))).tries.valmor).toBe(1);
   });
 
   it('the first goal is the cheapest hero still locked, and none when all are owned', () => {

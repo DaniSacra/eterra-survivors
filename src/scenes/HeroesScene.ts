@@ -8,6 +8,7 @@ import type { StatKey } from '../data/config';
 import { formatStatDelta } from '../render/describe';
 import { t } from '../i18n/pt-BR';
 import { loadSave, writeSave } from '../render/save';
+import { track } from '../render/analytics';
 import { ART_SCALE } from '../render/art/pen';
 import { UI, backButton, button, disable, isShort, keyNav, label, restartOnResize } from '../render/ui';
 import { lastChoice, setChoice } from './choice';
@@ -197,7 +198,10 @@ export class HeroesScene extends Phaser.Scene {
     else {
       this.buying = null;
       const save = loadSave();
-      if (unlockHero(save, id)) writeSave(save);
+      if (unlockHero(save, id)) {
+        writeSave(save);
+        track(`hero-unlocked/${id}`);
+      }
       this.readyAt = this.game.loop.time + BUY_READY_MS;
     }
     this.scene.restart();

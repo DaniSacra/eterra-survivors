@@ -15,6 +15,10 @@ export interface Settings {
   musicLevel: MusicLevel;
   /** First-time tips for enemies with a verb (CU-01). */
   tips: boolean;
+  /** Anonymous usage counts (no personal data) are sent; Opções turns it off. */
+  stats: boolean;
+  /** The one-time notice about it was shown on the menu. */
+  statsNoticed: boolean;
   /** Gaspar already greeted the player (his line shows on the first visit to the Loja). */
   gasparMet: boolean;
 }
@@ -26,6 +30,8 @@ export const defaultSettings = (): Settings => ({
   music: false,
   musicLevel: 'normal',
   tips: true,
+  stats: true,
+  statsNoticed: false,
   gasparMet: false,
 });
 

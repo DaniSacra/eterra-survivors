@@ -11,8 +11,9 @@ import { PICKUPS } from '../data/pickups';
 import { FLYERS, HERO_FALL, HERO_HURT, SPRITE_SCALE } from '../render/assets';
 import { ENEMY_ANIMS, enemyPose, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
-import { playtest, shopBonuses, stageUnlocked } from '../core/meta';
+import { assistMight, playtest, shopBonuses, stageUnlocked } from '../core/meta';
 import { formatTime } from '../core/format';
+import { track } from '../render/analytics';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, markLessonSeen, markTipSeen, recordRun, recordVigil } from '../render/save';
@@ -302,6 +303,8 @@ export class GameScene extends Phaser.Scene {
   private bigForgeDone = false;
   /** This run beat the hero's longest one. */
   private newBest = false;
+  /** The "you get help" tip was shown (or there is no help this run). */
+  private assistShown = true;
   /** Entrance of the boss (PX-14): when it came, the camera's pull-back factor and where it was last seen. */
   private bossIntroAt = -99;
   private camPull = { k: 1 };
@@ -360,7 +363,13 @@ export class GameScene extends Phaser.Scene {
     this.nextCheck = 1;
     this.vigilBefore = null;
     this.vigilRecord = false;
-    this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
+    // A player stuck on a stage never won gets a little damage for each defeat in a row (PX-17).
+    const bonuses = shopBonuses(this.liveSave);
+    this.assistShown = assistMight(this.liveSave, this.choice.stage) <= 0;
+    bonuses.stats.might = (bonuses.stats.might ?? 0) + assistMight(this.liveSave, this.choice.stage);
+    this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses });
+    track(`start/${this.choice.stage}/${this.choice.character}`);
+    track(`run-number/${Math.min(this.liveSave.totals.runs + 1, 10)}`);
     music.play(this, STAGE_MUSIC[this.world.stageId]);
     this.banked = false;
     this.vigilBanked = false;
@@ -1008,6 +1017,13 @@ export class GameScene extends Phaser.Scene {
       const lesson = nextLesson(w, this.lessonsSeen);
       if (lesson) {
         this.lessonsSeen.add(lesson);
+    // A player who tried again gets told why the hero hits a little harder (PX-17), once the run is under way.
+    if (!this.assistShown && w.time >= 3) {
+      this.assistShown = true;
+      this.tipAt = w.time;
+      this.hud.tip('icon.might', t.assist(Math.round(assistMight(this.liveSave, w.stageId) * 100)));
+      return;
+    }
         this.tipAt = w.time;
         markLessonSeen(lesson);
         // A finger as the main pointer (phones, tablets), not just a touch screen on a laptop.
@@ -1602,6 +1618,10 @@ export class GameScene extends Phaser.Scene {
     return opens;
   }
 
+    // Anonymous counts: how runs end, and the minute a defeat happens (PX-17 calibration).
+    const how = won ? 'won' : w.abandoned ? 'abandoned' : 'lost';
+    track(`end/${how}/${w.stageId}/${w.character}`, `${Math.floor(w.time / 60)} min`);
+    if (how === 'lost') track(`death-minute/${w.stageId}/${Math.floor(w.time / 60)}`);
   /** "Continuar a vigília" (from the end screen): the run goes on; what it adds is recorded when it ends. */
   startVigil(): void {
     const w = this.world;

@@ -6,7 +6,7 @@ import { UI, button, isShort, keyNav, label, newsDot, restartOnResize, safeArea 
 import { CHARACTERS, type CharacterId } from '../data/characters';
 import { HERO_COLOR } from '../render/fx';
 import { checkStoredAchievements, loadSave } from '../render/save';
-import { settings } from '../render/settings';
+import { setSetting, settings } from '../render/settings';
 import { SCENES } from './keys';
 
 /** Source width of the three painted layers (px). */
@@ -97,6 +97,22 @@ export class MenuScene extends Phaser.Scene {
     const hintText = import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls;
 
     this.scenery(width, height);
+    // The first time: one line about the anonymous statistics and where to switch them off (shown once).
+    if (!settings().statsNoticed && import.meta.env.PROD) {
+      setSetting('statsNoticed', true);
+      const note = label(this, width / 2, safeArea().top + 14, t.menu.statsNotice, 12, {
+        color: UI.muted,
+        wrap: width - 32,
+        stroke: true,
+      }).setOrigin(0.5, 0);
+      this.tweens.add({
+        targets: note,
+        alpha: 0,
+        delay: 8000,
+        duration: 800,
+        onComplete: () => note.destroy(),
+      });
+    }
 
     const ty = height * (side ? 0.17 : 0.11);
     this.title(lx, ty, side ? wrap : width);

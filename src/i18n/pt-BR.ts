@@ -50,6 +50,9 @@ export const t = {
   subtitle: 'Crônicas de Eterra',
 
   menu: {
+    /** The one-time notice on the menu: what is counted and how to stop it. */
+    statsNotice:
+      'O jogo conta visitas e partidas de forma anônima, sem dados pessoais. Dá para desligar em Opções.',
     start: 'Começar',
     shop: 'Loja do Gaspar',
     options: 'Opções',
@@ -427,6 +430,9 @@ export const t = {
   },
 
   /** The basics a new player is told once, as a short tip in the run (`core/coach.ts`). */
+  /** Shown on a run after defeats on a stage never won: the help the hero gets (PX-17). */
+  assist: (percent: number) => `Quem tenta de novo fica mais forte: seu dano subiu ${percent}%.`,
+
   lessons: {
     move: (touch: boolean) =>
       touch ? 'Arraste o dedo na tela para andar.' : 'Ande com as setas ou W, A, S, D.',
@@ -454,6 +460,7 @@ export const t = {
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
     tips: 'Dicas do jogo',
+    stats: 'Estatísticas anônimas',
     music: 'Música',
     /** The music button in Opções cycles these (PS-01). */
     musicLevel: { off: 'Desligada', low: 'Baixa', normal: 'Normal' },

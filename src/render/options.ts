@@ -55,6 +55,9 @@ export function optionRow(
 }
 
 /** One toggle card per option (name on the left, on/off seal on the right), stacked from `y` down; for keyNav. */
+/** The Opções screen has one more switch than the pause row: the anonymous statistics. */
+const ALL_OPTIONS: ((typeof OPTIONS)[number] | 'stats')[] = [...OPTIONS, 'stats'];
+
 export function optionButtons(
   scene: Phaser.Scene,
   x: number,
@@ -64,7 +67,7 @@ export function optionButtons(
   gap = 10,
 ): Phaser.GameObjects.Rectangle[] {
   const size = Math.min(17, h * 0.38);
-  return OPTIONS.map((key, i) => {
+  return ALL_OPTIONS.map((key, i) => {
     const by = y + i * (h + gap);
     // Sound is stored as "muted": its seal shows whether the sound is on.
     const isOn = () => (key === 'muted' ? !settings().muted : settings()[key]);
