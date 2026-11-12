@@ -154,7 +154,7 @@ export class Showcase {
     const scale = k / ART_RES;
     const fly = FLYING.has(id);
     const footY = fly ? feet - h * 0.12 : feet;
-    const shadow = add(s.add.ellipse(x + w / 2, feet, frameW * k * 0.55, 8 + k * 2, 0x05040f, 0.55));
+    add(s.add.ellipse(x + w / 2, feet, frameW * k * 0.55, 8 + k * 2, 0x05040f, 0.55));
     const sprite = add(
       s.add
         .sprite(x + w / 2, footY + this.feetPad(tex) * scale, tex)
@@ -184,7 +184,7 @@ export class Showcase {
       if (!sprite.active) return;
       if (s.anims.exists(tex)) sprite.play(tex, true);
       const move = moves[this.moveIndex++ % moves.length] as ShowMove;
-      this.after(this.trick(sprite, shadow, id, move, k, footY) + 900, loop);
+      this.after(this.trick(sprite, id, move, k, footY) + 900, loop);
     };
     this.after(700, loop);
   }
@@ -192,7 +192,6 @@ export class Showcase {
   /** Winds up (its own frames when it has them) and plays `move`; returns how long it takes, in ms. */
   private trick(
     sprite: Phaser.GameObjects.Sprite,
-    shadow: Phaser.GameObjects.Ellipse,
     id: EnemyId,
     move: ShowMove,
     k: number,
@@ -209,24 +208,19 @@ export class Showcase {
     if (hasWind) {
       sprite.play({ key: windKey, repeat: 0 });
       wind = ((anim?.frames.windup ?? 6) / (anim?.fps.windup ?? 8)) * 1000;
-    } else {
-      sprite.anims.pause();
-      // A shiver, the tell that something is coming.
-      s.tweens.add({ targets: sprite, x: sprite.x + 2 * k, duration: 60, yoyo: true, repeat: 3 });
     }
     this.after(wind, () => {
       if (!sprite.active) return;
       if ((anim?.frames.strike || anim?.frames.attack) && s.anims.exists(strikeKey))
         sprite.play({ key: strikeKey, repeat: 0 });
       else sprite.anims.resume();
-      this.move(sprite, shadow, id, move, k, footY);
+      this.move(sprite, id, move, k, footY);
     });
     return wind + 1100;
   }
 
   private move(
     sprite: Phaser.GameObjects.Sprite,
-    shadow: Phaser.GameObjects.Ellipse,
     id: EnemyId,
     move: ShowMove,
     k: number,
@@ -257,19 +251,9 @@ export class Showcase {
         onComplete: () => r.destroy(),
       });
     };
-    // A lunge on the spot: a short step toward `to` and back (the enemy never leaves its place).
-    const dash = (to: number, duration: number) => {
-      const home = sprite.x;
-      const step = Phaser.Math.Clamp(to - home, -10 * k, 10 * k);
-      s.tweens.add({
-        targets: sprite,
-        x: home + step,
-        duration: Math.min(duration, 220) / 2,
-        yoyo: true,
-        ease: 'Quad.easeOut',
-        onUpdate: () => shadow.setX(sprite.x),
-      });
-      for (let i = 0; i < 3; i++) ring(home - dir * i * 10, footY, 0xd8d0c0, 18 + i * 6, i * 60);
+    // The sprite itself never moves, scales or shakes here (only its own frames play): a lunge is just dust behind it.
+    const dash = () => {
+      for (let i = 0; i < 3; i++) ring(sprite.x - dir * i * 10, footY, 0xd8d0c0, 18 + i * 6, i * 60);
     };
     switch (move) {
       case 'swing':
@@ -282,24 +266,17 @@ export class Showcase {
         g.arc(front - dir * r * 0.3, mid, r, dir > 0 ? -1.1 : Math.PI - 1.1, dir > 0 ? 1.1 : Math.PI + 1.1);
         g.strokePath();
         s.tweens.add({ targets: g, alpha: 0, duration: 380, onComplete: () => g.destroy() });
-        if (!big) dash(sprite.x + dir * 10 * k, 120);
+        if (!big) dash();
         break;
       }
       case 'charge':
-        dash(sprite.x + dir * reach * 1.4, 260);
+        dash();
         break;
       case 'flee':
-        dash(sprite.x - dir * reach * 1.6, 300);
+        dash();
         break;
       case 'zigzag':
-        s.tweens.add({
-          targets: sprite,
-          y: sprite.y - 10 * k,
-          duration: 90,
-          yoyo: true,
-          repeat: 3,
-        });
-        dash(sprite.x + dir * reach, 700);
+        dash();
         break;
       case 'shoot': {
         const p = this.keep(
@@ -323,37 +300,19 @@ export class Showcase {
         break;
       }
       case 'leap': {
-        const top = sprite.y - Math.min(this.h * 0.3, 30 * k);
         ring(sprite.x, footY, 0x05040f, 40 * k);
-        s.tweens.add({
-          targets: sprite,
-          y: top,
-          duration: 260,
-          yoyo: true,
-          ease: 'Quad.easeOut',
-          onComplete: () => ring(sprite.x, footY, tint === 0xf0ecff ? 0xd8c8a0 : tint, 70 * k),
-        });
+        ring(sprite.x, footY, tint === 0xf0ecff ? 0xd8c8a0 : tint, 70 * k, 260);
         break;
       }
       case 'burst':
-        sprite.setTintFill(tint);
-        this.after(120, () => sprite.active && sprite.clearTint());
         ring(sprite.x, mid, tint, 60 * k, 0, false);
         ring(sprite.x, mid, 0xffe080, 40 * k, 120, false);
         break;
       case 'collapse':
-        s.tweens.add({
-          targets: sprite,
-          scaleY: sprite.scaleY * 0.25,
-          duration: 200,
-          yoyo: true,
-          hold: 600,
-          ease: 'Quad.easeIn',
-        });
+        ring(sprite.x, footY, 0xd8d0c0, 40 * k);
         break;
       case 'phase':
-        s.tweens.add({ targets: sprite, alpha: 0.12, duration: 250, yoyo: true, hold: 500 });
-        dash(sprite.x + dir * reach, 750);
+        dash();
         break;
       case 'rally':
       case 'toll':
