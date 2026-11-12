@@ -999,11 +999,11 @@ Decisão 4 do Daniel. `radius` 48/48/52/52/56/56/60 → 60/60/65/65/70/70/75 e `
 20/26/26/32/32/41/53. Lab (multidão, nível máximo): 468 (94%) → 455 (91%), L1 74 → 100; Quebra-Junta 1832 (4,0x).
 Sim só com o Teo (24 sementes, nenhuma / meia / inteira):
 
-| Fase    | Antes           | Depois           | Meta               |
-| ------- | --------------- | ---------------- | ------------------ |
-| Valmor  | 13% / 50% / 88% | 8% / 54% / 100%  | 0–15 / 40–60 / 85+ |
-| Cripta  | 0% / 21% / 71%  | 0% / 21% / 67%   | 0 / 15–35 / 70–85  |
-| Estrada | 0% / 4% / 21%   | 0% / 0% / 33%    | 0 / 0–10 / 35–55   |
+| Fase    | Antes           | Depois          | Meta               |
+| ------- | --------------- | --------------- | ------------------ |
+| Valmor  | 13% / 50% / 88% | 8% / 54% / 100% | 0–15 / 40–60 / 85+ |
+| Cripta  | 0% / 21% / 71%  | 0% / 21% / 67%  | 0 / 15–35 / 70–85  |
+| Estrada | 0% / 4% / 21%   | 0% / 0% / 33%   | 0 / 0–10 / 35–55   |
 
 Sim completo depois (8 sementes, 288 corridas): Valmor 16% / 50% / 94%, Cripta 0% / 22% / 69%, Estrada 0% / 0% /
 44%; luta do chefe mediana 14 s (NE-05 continua aberto).
@@ -1024,11 +1024,11 @@ rampa de dano da onda (4,8x às 9:00, ~96 por toque). Decisão tomada sem o Dani
 
 Sim completo (8 sementes, 288 corridas), nenhuma / meia / inteira:
 
-| Fase    | Depois           | Meta               |
-| ------- | ---------------- | ------------------ |
-| Valmor  | 13% / 47% / 97%  | 0–15 / 40–60 / 85+ |
-| Cripta  | 0% / 22% / 75%   | 0 / 15–35 / 70–85  |
-| Estrada | 0% / 0% / 47%    | 0 / 0–10 / 35–55   |
+| Fase    | Depois          | Meta               |
+| ------- | --------------- | ------------------ |
+| Valmor  | 13% / 47% / 97% | 0–15 / 40–60 / 85+ |
+| Cripta  | 0% / 22% / 75%  | 0 / 15–35 / 70–85  |
+| Estrada | 0% / 0% / 47%   | 0 / 0–10 / 35–55   |
 
 Luta do chefe (Loja inteira, 12 sementes): mediana 29 s em cada fase (meia Loja 64 s).
 
@@ -1036,11 +1036,11 @@ Luta do chefe (Loja inteira, 12 sementes): mediana 29 s em cada fase (meia Loja 
 
 `SIM_SEEDS=16 SIM_SHOP=all`, Valmor depois do ajuste do `mult` (hp 0.9, damage 0.95; antes 1 e 1.05):
 
-| Perfil | Vitórias | Meta |
-| --- | --- | --- |
-| none | 3% | 0–15% |
-| half | 48% | 40–60% |
-| full | 97% | 85%+ |
+| Perfil | Vitórias | Meta   |
+| ------ | -------- | ------ |
+| none   | 3%       | 0–15%  |
+| half   | 48%      | 40–60% |
+| full   | 97%      | 85%+   |
 
 Fonte de dano em Valmor: contato 92%, chão (poças) 6%, chefe 2%. Primeiro Elo mediano em 5,7 min (half). Cripta provisória
 (Ossada, Morcego, Esqueleto, Espectro): 0% / 16% / 84%. Estrada: sem mudança. Linha `LOJA`: 55 corridas médias.
