@@ -45,7 +45,9 @@ function career(habit: Habit, id: number) {
     const r = simulate('aldo', 'valmor', id * 100 + i, { bonuses });
     times.push(r.time);
     golds.push(r.gold);
-    save.gold += Math.floor(r.gold) + (r.won && firstWin === 0 ? GIFT : 0);
+    // The very first run opens the treasure, win or lose.
+    save.gold +=
+      (i === 1 ? config.firstRunGold : 0) + Math.floor(r.gold) + (r.won && firstWin === 0 ? GIFT : 0);
     if (r.won) {
       markCleared(save, 'valmor');
       delete save.tries.valmor;

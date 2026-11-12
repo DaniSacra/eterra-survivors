@@ -5,7 +5,7 @@ import { atCap, segmentAt } from '../../src/core/waves';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
-import { STAGES, STAGE_IDS } from '../../src/data/stages';
+import { VALMOR_PACE, STAGES, STAGE_IDS } from '../../src/data/stages';
 
 const WAVES = STAGES.valmor.waves;
 
@@ -21,7 +21,10 @@ describe('stages', () => {
       }
     for (const el of s.elites) expect((ENEMIES[el.id] as EnemyDef).elite).toBe(true);
     expect((ENEMIES[s.boss.id] as EnemyDef).boss).toBe(true);
-    expect(s.boss.at).toBe(config.matchDuration);
+    // Valmor's curve is squeezed into 7 minutes (VALMOR_PACE); the other stages keep the 10-minute match.
+    expect(s.boss.at).toBe(
+      s === STAGES.valmor ? Math.round(config.matchDuration * VALMOR_PACE) : config.matchDuration,
+    );
   });
 
   it('Valmor ends with the Mãe-Aranha', () => {
@@ -44,7 +47,8 @@ describe('waves', () => {
       for (let i = 0; i < 60 * 5; i++) w.spawner.update(w, 1 / 60);
       return w.enemies.size;
     };
-    expect(count(500)).toBeGreaterThan(count(0) * 3);
+    // Before the boss: Valmor's boss comes at 7:00, after which only a trickle of escorts is sent.
+    expect(count(380)).toBeGreaterThan(count(0) * 3);
   });
 
   it('never exceeds the enemy cap', () => {

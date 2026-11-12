@@ -1,4 +1,5 @@
 import { ELO_DISCOVERY_GOLD } from '../../src/data/evolutions';
+import { config } from '../../src/data/config';
 import { describe, expect, it } from 'vitest';
 import { SAVE_VERSION, newSave, recordRun, sanitizeSave, serializeSave } from '../../src/core/meta';
 import { newRunSummary, type RunSummary } from '../../src/core/records';
@@ -192,7 +193,7 @@ describe('recordRun', () => {
     expect(out.elos).toEqual(['storm']);
     // The run's gold, plus what its achievements gave (core/achievements.ts).
     expect(out.achievements).toEqual(['rats500', 'survive5', 'eloFirst']);
-    expect(s.gold).toBe(80 + 50 + 25 + 50 + ELO_DISCOVERY_GOLD); // and the first storm Elo's discovery
+    expect(s.gold).toBe(80 + 50 + 25 + 50 + ELO_DISCOVERY_GOLD + config.firstRunGold); // and the first storm Elo's discovery, and the first-run treasure
     expect(s.cleared).toEqual([]);
     expect(s.elos).toEqual(['storm']);
     expect(s.records.lyra).toMatchObject({

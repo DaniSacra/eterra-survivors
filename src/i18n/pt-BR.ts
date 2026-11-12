@@ -502,6 +502,8 @@ export const t = {
     record: (time: string) => `Novo recorde: ${time}`,
     /** The run's gold, on the short end screen (PX-15). */
     goldEarned: (n: number) => `Ouro ganho: ${n}`,
+    /** The first run's treasure, on the end screen. */
+    treasure: (gold: number) => `Tesouro da primeira partida: +${gold} ouro!`,
     showDetails: 'Ver detalhes',
     hideDetails: 'Esconder detalhes',
     /** A lost run with no named killer: advice from where most of the damage came from. */

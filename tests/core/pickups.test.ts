@@ -96,7 +96,7 @@ describe('gold', () => {
     const w = quietWorld();
     w.player.stats.greed = 1.1;
     for (let i = 0; i < 100; i++) addGold(w, config.gold.coin);
-    expect(w.gold).toBeCloseTo(330);
+    expect(w.gold).toBeCloseTo(330 * w.stage.mult.gold);
   });
 
   it('a stage gold multiplier of 1.5 pays 450 for 100 coins', () => {

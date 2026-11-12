@@ -53,22 +53,32 @@ export interface StageDef {
 
 const ELITE_TIMES = [90, 200, 300, 390, 480, 560];
 /** Alternates the given elites over the shared schedule. */
-const elites = (...ids: EnemyId[]) =>
-  ELITE_TIMES.map((at, i) => ({ id: ids[i % ids.length] as EnemyId, at }));
+const elites = (pace: number, ...ids: EnemyId[]) =>
+  ELITE_TIMES.map((at, i) => ({ id: ids[i % ids.length] as EnemyId, at: Math.round(at * pace) }));
+
+/**
+ * Valmor is the first stage and the one phones play in short sittings: its whole curve runs in 7 minutes (the boss
+ * at 7:00) with a busier opening, so the first minute is not empty (PX-17).
+ */
+export const VALMOR_PACE = 0.7;
+const VALMOR_OPENING = 1;
 
 export const STAGES = {
   /** Arredores de Valmor: barns, fences and fields around the village, in the snow, taken by rats and spiders (FT-13). */
   valmor: {
     tile: 'tile',
     layout: { kind: 'obstacles', set: 'village', cell: 260, chance: 0.16, clear: 220 },
-    mult: { hp: 0.9, damage: 0.9, speed: 1, spawn: 1, gold: 1 },
-    waves: buildWaves({ basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' }),
-    elites: elites('witch'),
+    mult: { hp: 0.9, damage: 0.9, speed: 1, spawn: 1, gold: 1.35 },
+    waves: buildWaves(
+      { basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' },
+      { pace: VALMOR_PACE, opening: VALMOR_OPENING },
+    ),
+    elites: elites(VALMOR_PACE, 'witch'),
     specials: [
-      { id: 'spiderNest', from: 45, every: 30 },
-      { id: 'thiefRat', from: 150, every: 120 },
+      { id: 'spiderNest', from: 32, every: 21 },
+      { id: 'thiefRat', from: 105, every: 84 },
     ],
-    boss: { id: 'spiderMother', at: config.matchDuration },
+    boss: { id: 'spiderMother', at: Math.round(config.matchDuration * VALMOR_PACE) },
   },
   /**
    * Cripta da Igreja Velha: where the Sineiro rang the bell that wakes the dead. Provisional cast until FT-16 (the
@@ -85,7 +95,7 @@ export const STAGES = {
       extra: 'ghost',
       shooter: 'coldSpirit',
     }),
-    elites: elites('gravedigger'),
+    elites: elites(1, 'gravedigger'),
     specials: [
       { id: 'emberBones', from: 40, every: 12 },
       { id: 'slime', from: 70, every: 10 },
@@ -109,7 +119,7 @@ export const STAGES = {
       extra: 'frostWolf',
       shooter: 'goblin',
     }),
-    elites: elites('golem'),
+    elites: elites(1, 'golem'),
     specials: [{ id: 'warBanner', from: 120, every: 45 }],
     boss: { id: 'oldWolf', at: config.matchDuration },
   },

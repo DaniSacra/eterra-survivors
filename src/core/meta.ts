@@ -362,6 +362,8 @@ export interface RunRecorded {
   elos: WeaponId[];
   /** Achievements unlocked by this run (their gold already banked). */
   achievements: AchievementId[];
+  /** The first-run treasure banked with this run (0 on every later one). */
+  treasure: number;
 }
 
 /**
@@ -370,6 +372,9 @@ export interface RunRecorded {
  */
 export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   save.gold += Math.max(0, Math.floor(run.gold));
+  // The first run of a save, won or lost, opens a treasure.
+  const treasure = save.totals.runs === 0 ? config.firstRunGold : 0;
+  save.gold += treasure;
   if (run.won) markCleared(save, run.stage);
   // Defeats in a row on a stage never won: the next run gets a little help (`assistMight`). A win clears the count.
   if (run.won) save.tries[run.stage] = 0;
@@ -410,7 +415,7 @@ export function recordRun(save: MetaSave, run: RunSummary): RunRecorded {
   tot.damage += run.damage;
   tot.gold += Math.max(0, Math.floor(run.gold));
   tot.time += run.time;
-  return { elos, achievements: checkAchievements(save) };
+  return { elos, achievements: checkAchievements(save), treasure };
 }
 
 function recordVigilTime(rec: HeroRecord, run: RunSummary): void {
@@ -447,7 +452,7 @@ export function recordVigil(save: MetaSave, run: RunSummary, before: RunSummary)
   tot.damage += Math.max(0, run.damage - before.damage);
   tot.gold += gold;
   tot.time += Math.max(0, run.time - before.time);
-  return { elos, achievements: checkAchievements(save) };
+  return { elos, achievements: checkAchievements(save), treasure: 0 };
 }
 
 /** Marks Elos as discovered; returns the ones that were new. */

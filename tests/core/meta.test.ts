@@ -156,10 +156,11 @@ describe('gold', () => {
     w.player.stats.greed = 2;
     dropPickup(w, 'gold', w.player.x, w.player.y);
     w.step(1 / 60, still);
-    expect(w.gold).toBe(config.gold.coin * 2);
+    const k = w.stage.mult.gold;
+    expect(w.gold).toBeCloseTo(config.gold.coin * 2 * k);
     dropPickup(w, 'chest', w.player.x, w.player.y);
     w.step(1 / 60, still);
-    expect(w.gold).toBe((config.gold.coin + CHEST.gold) * 2);
+    expect(w.gold).toBeCloseTo((config.gold.coin + CHEST.gold) * 2 * k);
   });
 });
 
@@ -306,6 +307,15 @@ describe('save versions and Elos', () => {
     const t2 = newSave();
     recordRun(t2, lost);
     expect(sanitizeSave(JSON.parse(JSON.stringify(serializeSave(t2)))).tries.valmor).toBe(1);
+  });
+
+  it('the first run of a save opens a treasure, win or lose, and only that one', () => {
+    const s = newSave();
+    const lost = { ...newRunSummary(), lost: true, gold: 10 };
+    expect(recordRun(s, lost).treasure).toBe(config.firstRunGold);
+    expect(s.gold).toBe(10 + config.firstRunGold);
+    expect(recordRun(s, lost).treasure).toBe(0);
+    expect(s.gold).toBe(20 + config.firstRunGold);
   });
 
   it('the first goal is the cheapest hero still locked, and none when all are owned', () => {

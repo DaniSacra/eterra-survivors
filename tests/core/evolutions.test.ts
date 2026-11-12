@@ -120,7 +120,7 @@ describe('chests', () => {
     dropPickup(w, 'chest', w.player.x + 5, w.player.y);
     w.step(1 / 60, still);
     expect(w.pickups.size).toBe(0);
-    expect(w.gold).toBe(CHEST.gold);
+    expect(w.gold).toBeCloseTo(CHEST.gold * w.stage.mult.gold);
     expect(w.player.hp).toBeCloseTo(
       Math.min(w.player.stats.maxHp, 10 + w.player.stats.maxHp * CHEST.heal),
       0,
@@ -158,7 +158,7 @@ describe('chests', () => {
     w.weapons[0]!.level = maxLevel('blade');
     openChest(w);
     expect(w.events).toContainEqual({ type: 'chest', reward: null });
-    expect(w.gold).toBe(CHEST.gold);
+    expect(w.gold).toBeCloseTo(CHEST.gold * w.stage.mult.gold);
   });
 
   it('stay on the ground until touched', () => {

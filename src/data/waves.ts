@@ -44,12 +44,18 @@ const CURVE: [number, number, number, number, number, Partial<Record<Role, numbe
   [600, 2, 3, 12.5, 3, { basic: 1 }],
 ];
 
+/** How a stage bends the shared curve: `pace` squeezes its times (0.7 = the whole curve in 7 minutes), `opening` adds to the first batches. */
+export interface Pace {
+  pace?: number;
+  opening?: number;
+}
+
 /** The wave list of a stage: the shared curve with the stage's cast in each role. */
-export function buildWaves(roles: Roles): WaveSegment[] {
-  return CURVE.map(([from, interval, batch, hpMult, damage, weights]) => ({
-    from,
+export function buildWaves(roles: Roles, { pace = 1, opening = 0 }: Pace = {}): WaveSegment[] {
+  return CURVE.map(([from, interval, batch, hpMult, damage, weights], i) => ({
+    from: Math.round(from * pace),
     interval,
-    batch,
+    batch: i < 2 ? batch + opening : batch,
     hpMult,
     damage,
     enemies: (Object.keys(weights) as Role[])

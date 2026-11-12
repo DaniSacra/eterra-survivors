@@ -202,7 +202,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 
 ### Fase 5 · Economia da primeira hora
 
-**PX-17 [18] · Segundo herói na 2ª ou 3ª partida, Valmor vencida entre a 3ª e a 5ª** · bal + game-director · M · proposto
+**PX-17 [18] · Segundo herói na 2ª ou 3ª partida, Valmor vencida entre a 3ª e a 5ª** · bal + game-director · M · proposto · medido e em parte aplicado (2026-11-12, docs/balance-baseline.md): Valmor em 7 min com abertura mais cheia e ouro 1,35x, tesouro de 400 na primeira partida, ajuda de dano por derrota seguida; preços dos heróis ficam
 (preços com o Daniel antes de mudar)
 - O quê: perfil "novato" no sim (bot que morre perto de 6:43 sem Loja) e, a partir dele, a proposta de preço de Lyra e
   Teo, do ouro da primeira vitória e de um presente de primeira vitória. Liga: D-06, PB-02, linha `LOJA`, S-01.

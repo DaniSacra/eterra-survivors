@@ -84,7 +84,7 @@ describe('upgrades', () => {
     const w = maxedWorld();
     const gold = w.gold;
     applyUpgrade(w, { kind: 'reward', id: 'goldBag' });
-    expect(w.gold).toBe(gold + Math.round(REWARDS.goldBag.gold * w.player.stats.greed));
+    expect(w.gold).toBe(gold + Math.round(REWARDS.goldBag.gold * w.player.stats.greed * w.stage.mult.gold));
     const might = w.player.stats.might;
     applyUpgrade(w, { kind: 'reward', id: 'blessing' });
     applyUpgrade(w, { kind: 'reward', id: 'blessing' });

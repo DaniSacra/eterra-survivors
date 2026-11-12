@@ -177,7 +177,8 @@ describe('stage multipliers', () => {
   });
 
   it('spawn density: more enemies per batch on average', () => {
-    const count = (stage: 'valmor' | 'southRoad') => {
+    // Compared with the Cripta, which runs the shared 10-minute curve like the road (Valmor's is squeezed, PX-17).
+    const count = (stage: 'crypt' | 'southRoad') => {
       const w = new World(4, { stage });
       w.player.stats.maxHp = w.player.hp = 1e9;
       w.weapons.length = 0;
@@ -188,9 +189,10 @@ describe('stage multipliers', () => {
       }
       return n;
     };
-    const ratio = count('southRoad') / count('valmor');
-    expect(ratio).toBeGreaterThan(STAGES.southRoad.mult.spawn * 0.85);
-    expect(ratio).toBeLessThan(STAGES.southRoad.mult.spawn * 1.15);
+    const want = STAGES.southRoad.mult.spawn / STAGES.crypt.mult.spawn;
+    const ratio = count('southRoad') / count('crypt');
+    expect(ratio).toBeGreaterThan(want * 0.85);
+    expect(ratio).toBeLessThan(want * 1.15);
   });
 });
 

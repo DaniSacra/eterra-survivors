@@ -303,6 +303,8 @@ export class GameScene extends Phaser.Scene {
   private bigForgeDone = false;
   /** This run beat the hero's longest one. */
   private newBest = false;
+  /** The gold of the first-run treasure this run banked (0 later). */
+  private treasure = 0;
   /** The "you get help" tip was shown (or there is no help this run). */
   private assistShown = true;
   /** Entrance of the boss (PX-14): when it came, the camera's pull-back factor and where it was last seen. */
@@ -1624,6 +1626,7 @@ export class GameScene extends Phaser.Scene {
     if (how === 'lost') track(`death-minute/${w.stageId}/${Math.floor(w.time / 60)}`);
   /** "Continuar a vigília" (from the end screen): the run goes on; what it adds is recorded when it ends. */
   startVigil(): void {
+    this.treasure = recorded.treasure;
     const w = this.world;
     if (w.state !== 'won' || w.endless) return;
     this.vigilBefore = summarizeRun(w);
@@ -1693,6 +1696,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
+      treasure: this.treasure,
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
     this.hud.joystick.setEnabled(false);
     this.scene.pause();
@@ -1847,6 +1851,7 @@ export class GameScene extends Phaser.Scene {
           break;
         }
       }
+              treasure: this.treasure,
     }
     w.events.length = 0;
   }

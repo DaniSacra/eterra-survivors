@@ -169,7 +169,7 @@ describe('checkAchievements', () => {
       run({ hero: 'aldo', time: 320, kills: 1200, gold: 40, killsBy: { bones: 1200 } }),
     );
     expect(out.achievements).toEqual(['killsRun1k', 'survive5']);
-    expect(s.gold).toBe(40 + 50 + 25);
+    expect(s.gold).toBe(40 + 50 + 25 + config.firstRunGold);
     expect(s.fresh).toEqual(['killsRun1k', 'survive5']);
   });
 

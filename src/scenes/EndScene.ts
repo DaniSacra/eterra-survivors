@@ -42,9 +42,11 @@ export class EndScene extends Phaser.Scene {
     newAchievements?: AchievementId[];
     vigilRecord?: boolean;
     record?: boolean;
+    treasure?: number;
   }): void {
     this.vigilRecord = !!data.vigilRecord;
     this.record = !!data.record;
+    this.treasure = data.treasure ?? 0;
     // The numbers hide behind "Ver detalhes"; a player who opened them keeps them open.
     this.details = this.registry.get('endDetails') === true;
     this.world = data.world;
@@ -55,6 +57,8 @@ export class EndScene extends Phaser.Scene {
 
   /** The hero's longest run so far was beaten (set by the game when the run is banked). */
   private record = false;
+  /** Gold of the first-run treasure opened by this run (0: none). */
+  private treasure = 0;
   /** The table (time, kills, weapons, passives) is open. */
   private details = false;
 
@@ -167,6 +171,7 @@ export class EndScene extends Phaser.Scene {
             newAchievements: this.newAchievements,
             vigilRecord: this.vigilRecord,
             record: this.record,
+            treasure: this.treasure,
           });
         },
         this.details ? t.end.hideDetails : t.end.showDetails,
@@ -414,6 +419,8 @@ export class EndScene extends Phaser.Scene {
         true,
       );
     else for (const id of elos) line(t.end.newElo(t.weapons[id].name, ELO_DISCOVERY_GOLD), 15, UI.gold, true);
+    // The treasure of the very first run, win or lose (PX-17).
+    if (this.treasure > 0) badged(t.end.treasure(this.treasure), 16, UI.gold, 'pickup.chest', true);
     // How many of the Elos the player knows now (PX-11): a collection to fill.
     if (save.elos.length > 0 && !packed)
       line(t.end.elosKnown(save.elos.length, EVOLVED_IDS.length), 14, UI.muted);
