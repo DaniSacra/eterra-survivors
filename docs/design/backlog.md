@@ -3283,7 +3283,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Reavaliação 2026-11-12 · mantido: `PauseScene.quit` ainda para o jogo e abre o Menu. Ficou mais barato: o Fim já tem
   o atalho da Loja (PU-04) e cabe em qualquer tela (NB-02).
 
-**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · proposto · reescrito na reavaliação 2026-11-12 (P)
+**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · ✅ feito em parte (2026-11-12): cartão ganha "N vitórias · vigília mm:ss" (soma dos heróis; o tempo da vigília mais longa, pois `fastestWin` é por herói e não por fase), e a frase da Cripta virou "Lajes cinzentas, limo no chão e ossos que levantam de novo." (PROVISÓRIA, só o que se vê, o Daniel confirma). Ícones de perigo ficaram de fora (não cabem sem apertar a ilustração em 360x640; reabrir com o ND-01)
 
 - Por quê: 05-ui UI-09. O cartão da Preparação tem nome e frase ("Pedra azul..." num chão que agora é violeta), sem
   vitórias, melhor tempo nem perigos; as barras do HUD são retângulos planos, longe dos painéis finos dourados das

@@ -698,6 +698,9 @@ export const t = {
     /** The line on a closed stage's card: what opens it. */
     unlockBy: (name: string) => `Vença ${name} para abrir`,
     boss: (name: string) => `Chefe: ${name}`,
+    /** The line on a won stage's card: victories (all heroes) and the longest vigil, when there is one. */
+    marks: (wins: number, vigil: string) =>
+      `${wins} ${wins === 1 ? 'vitória' : 'vitórias'}${vigil ? ` · vigília ${vigil}` : ''}`,
   },
   select: {
     title: 'Preparação',
@@ -731,7 +734,8 @@ export const t = {
     },
     crypt: {
       name: 'Cripta da Igreja Velha',
-      desc: 'Pedra azul, limo e um sino que não devia tocar.',
+      // PROVISIONAL (CU-07): only what the player sees (grey flagstones, slime, bones that get up). Daniel to confirm.
+      desc: 'Lajes cinzentas, limo no chão e ossos que levantam de novo.',
       won: 'O Sineiro se calou. O sino não toca mais.',
     },
     southRoad: {

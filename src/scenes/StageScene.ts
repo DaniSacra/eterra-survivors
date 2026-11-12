@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
+import { formatTime } from '../core/format';
 import { stageUnlocked } from '../core/meta';
 import { ENEMIES } from '../data/enemies';
 import { STAGES, STAGE_IDS, type StageId } from '../data/stages';
@@ -57,13 +58,18 @@ export class StageScene extends Phaser.Scene {
     tall: boolean,
     on: boolean,
     open: boolean,
-    records: Record<string, { wins: Partial<Record<StageId, number>> } | undefined>,
+    records: Record<
+      string,
+      { wins: Partial<Record<StageId, number>>; vigil: Partial<Record<StageId, number>> } | undefined
+    >,
   ): Phaser.GameObjects.Rectangle {
     const s = t.stages[id];
     const card = button(this, x, y, w, h, () => this.scene.start(SCENES.story, { stage: id }));
     card.setStrokeStyle(on ? 3 : 2, on ? UI.accent : UI.border);
     if (!open) disable(card);
-    const cleared = Object.values(records).some((r) => (r?.wins[id] ?? 0) > 0);
+    const wins = Object.values(records).reduce((n, r) => n + (r?.wins[id] ?? 0), 0);
+    const vigil = Math.max(0, ...Object.values(records).map((r) => r?.vigil?.[id] ?? 0));
+    const cleared = wins > 0;
     const left = x - w / 2;
     const topY = y - h / 2;
     // The illustration: the ground and the boss standing on it.
@@ -113,6 +119,15 @@ export class StageScene extends Phaser.Scene {
         color: UI.gold,
         align: 'left',
       });
+    // The player's marks on this stage (wins, longest vigil), under the boss line when the card has the room.
+    if (cleared) {
+      const my = by + 22;
+      if (open && my + 14 < topY + h - 22)
+        label(this, tl, my, t.stageScreen.marks(wins, vigil > 0 ? formatTime(vigil) : ''), 12, {
+          color: UI.muted,
+          align: 'left',
+        });
+    }
     return card;
   }
 }
