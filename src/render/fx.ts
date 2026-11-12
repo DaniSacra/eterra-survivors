@@ -1719,10 +1719,11 @@ function drawLeapMark(g: Phaser.GameObjects.Graphics, e: Enemy, time: number): v
   g.fillStyle(WARN_COLOR, 0.3);
   disc(g, e.aimX, e.aimY, r * k);
   g.lineStyle(2, WARN_EDGE, 0.5 + 0.4 * k);
-  const n = 12;
-  const spin = time * 1.5;
-  for (let i = 0; i < n; i += 2)
-    arcLine(g, e.aimX, e.aimY, r, spin + (i / n) * TAU_FX, spin + ((i + 1) / n) * TAU_FX);
+  // The rim and two inner rings of pixel dashes, the inner ones turning the other way (a landing target).
+  dashedArc(g, e.aimX, e.aimY, r, 0, TAU_FX, (time * 40) % (DASH * 2));
+  g.lineStyle(2, WARN_EDGE, 0.3 + 0.3 * k);
+  dashedArc(g, e.aimX, e.aimY, r * 0.62, 0, TAU_FX, (-time * 30) % (DASH * 2));
+  dashedArc(g, e.aimX, e.aimY, r * 0.3, 0, TAU_FX, (time * 20) % (DASH * 2));
   g.fillStyle(INK, 0.15 + 0.3 * k);
   oval(g, e.aimX, e.aimY + 2, e.def.radius * 2 * (0.4 + 0.6 * k), e.def.radius * (0.4 + 0.6 * k));
 }
@@ -2311,7 +2312,28 @@ function drawToll(
   ring(top, e.x, e.y, r);
 }
 
-/** A dashed arc (current line style), its dashes shifted `offset` px along it. */
+/** Pixel size of a telegraph dash square (art px x ART_RES) and the gap its dark outline adds. */
+const PIX = 4;
+
+/**
+ * One pixel-art dash square at (x, y), snapped to the 2 px grid: a dark outline square under a light one, in the
+ * Graphics' current stroke colour and alpha (so every telegraph keeps its colour). `pass` 0 draws the outline, 1
+ * the light square (two passes keep the outlines from cutting into neighbours).
+ */
+function pixelDash(g: Phaser.GameObjects.Graphics, x: number, y: number, pass: number): void {
+  const sx = Math.round(x / 2) * 2;
+  const sy = Math.round(y / 2) * 2;
+  if (pass === 0)
+    g.fillStyle(INK, g.defaultStrokeAlpha * 0.7).fillRect(
+      sx - PIX / 2 - 1,
+      sy - PIX / 2 - 1,
+      PIX + 2,
+      PIX + 2,
+    );
+  else g.fillStyle(g.defaultStrokeColor, g.defaultStrokeAlpha).fillRect(sx - PIX / 2, sy - PIX / 2, PIX, PIX);
+}
+
+/** A dashed arc made of pixel squares (current line colour), its dashes shifted `offset` px along it. */
 function dashedArc(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -2321,15 +2343,16 @@ function dashedArc(
   a1: number,
   offset: number,
 ): void {
-  const da = DASH / r;
-  for (let a = a0 + offset / r - 2 * da; a < a1; a += 2 * da) {
-    const s = Math.max(a0, a);
-    const t = Math.min(a1, a + da);
-    if (t > s) arcLine(g, x, y, r, s, t);
-  }
+  const step = PIX / r;
+  for (let pass = 0; pass < 2; pass++)
+    for (let a = a0; a < a1; a += step) {
+      // Dash on for DASH px, off for DASH px, marching with `offset`.
+      if (((((a - a0) * r - offset) % (2 * DASH)) + 2 * DASH) % (2 * DASH) >= DASH) continue;
+      pixelDash(g, x + Math.cos(a) * r, y + Math.sin(a) * r, pass);
+    }
 }
 
-/** A dashed line (current line style), its dashes shifted `offset` px along it. */
+/** A dashed line of pixel squares (current line colour), its dashes shifted `offset` px along it. */
 function dashedLine(
   g: Phaser.GameObjects.Graphics,
   x0: number,
@@ -2342,11 +2365,11 @@ function dashedLine(
   if (len < 1) return;
   const ux = (x1 - x0) / len;
   const uy = (y1 - y0) / len;
-  for (let d = offset - 2 * DASH; d < len; d += 2 * DASH) {
-    const s = Math.max(0, d);
-    const t = Math.min(len, d + DASH);
-    if (t > s) g.lineBetween(x0 + ux * s, y0 + uy * s, x0 + ux * t, y0 + uy * t);
-  }
+  for (let pass = 0; pass < 2; pass++)
+    for (let d = 0; d < len; d += PIX) {
+      if ((((d - offset) % (2 * DASH)) + 2 * DASH) % (2 * DASH) >= DASH) continue;
+      pixelDash(g, x0 + ux * d, y0 + uy * d, pass);
+    }
 }
 
 /** A cartoon sword centred on (x, y), its tip toward angle `a`, about 2.6 x `r` long. */
