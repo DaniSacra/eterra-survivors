@@ -141,3 +141,13 @@ assets, inpainting, palette and style controls, animation tools). Use the platfo
    `window.game` exists in dev builds) and take screenshots at 420 x 820 and 1000 x 680. Save screenshots and
    scripts in the session scratchpad, never in the repo. Stop the server when done.
 5. Report in Portuguese (pt-BR): what changed or what is wrong, with the screenshots' paths.
+
+## Art direction update (Daniel, 2026-11-11)
+
+Daniel likes the new direction and **everything is moving to it**: hi-bit pixel art, real sprites and
+pixel-animated effects made with PixelLab (see `CLAUDE.md`, "Pixel density", and `docs/art/credits.md`). Vector or
+procedural shapes (rects, circles, glows drawn in code) are only a placeholder: when you touch a visual, propose or
+make the pixel-sprite version, keep one density (`ART_RES`), and log each generation. Before generating anything,
+read PixelLab's documentation (`search_help`, `search_knowledge`, `pixelart_workbench` / `vfx_workbench`
+`describe start`). Keep effects readable: pixel style must not mean more clutter (Aura de Yah was thinned for
+this); light and colour carry meaning (Luz de Elun is gold and white, Luz Sagrada is small doves).

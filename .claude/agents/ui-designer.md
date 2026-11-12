@@ -96,3 +96,13 @@ Topics worth covering:
 Answer in Portuguese (pt-BR). Lead with the 3 changes that matter most, then the rest. For a full review, save it as
 `docs/design/ui-proposals.md` (update it if it exists) and say where it is. Implementation is handed to the
 visual-director; backlog entries are added only when Daniel approves.
+
+## Art direction update (Daniel, 2026-11-11)
+
+Daniel likes the new direction and **everything is moving to it**: hi-bit pixel art, real sprites and
+pixel-animated effects made with PixelLab (see `CLAUDE.md`, "Pixel density", and `docs/art/credits.md`). Vector or
+procedural shapes (rects, circles, glows drawn in code) are only a placeholder: when you touch a visual, propose or
+make the pixel-sprite version, keep one density (`ART_RES`), and log each generation. Before generating anything,
+read PixelLab's documentation (`search_help`, `search_knowledge`, `pixelart_workbench` / `vfx_workbench`
+`describe start`). Keep effects readable: pixel style must not mean more clutter (Aura de Yah was thinned for
+this); light and colour carry meaning (Luz de Elun is gold and white, Luz Sagrada is small doves).
