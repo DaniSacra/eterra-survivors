@@ -275,14 +275,14 @@ export class EndScene extends Phaser.Scene {
   private portrait(cx: number, y: number, size: number, won: boolean): number {
     const id = this.world.character;
     const color = HERO_COLOR[id];
-    const feet = y + size;
+    const feet = y + size + 4;
     this.add.ellipse(cx, feet - 3, size * 0.9, size * 0.2, color, 0.4).setStrokeStyle(2, color, 0.9);
     const fallen = !won && this.world.state === 'lost';
     const hero = fallen
       ? this.add.image(cx, feet, `player.${id}.fall`, 6)
       : this.add.image(cx, feet, `player.${id}.front`);
     hero.setOrigin(0.5, 1);
-    hero.setScale(size / (fallen ? 60 : hero.height));
+    hero.setScale(size / (fallen ? 68 : hero.height));
     return feet + 6;
   }
 
@@ -464,9 +464,15 @@ export class EndScene extends Phaser.Scene {
     // The next goal: the cheapest hero still locked, and only after that the Loja.
     const hero = nextHeroGoal(save);
     if (hero && save.gold >= hero.cost) line(t.end.heroReady(t.characters[hero.id].name), 15, UI.gold, true);
-    else if (hero)
+    else if (hero) {
       line(t.end.heroGoal(save.gold, t.characters[hero.id].name, hero.cost - save.gold), 14, UI.text);
-    else {
+      // The bank as a bar toward the hero's price (PX-16): how close the next hero is.
+      const bw = Math.min(w, 260);
+      const share = Math.min(1, save.gold / hero.cost);
+      this.add.rectangle(cx, y, bw, 8, UI.borderOff).setOrigin(0.5, 0).setStrokeStyle(1, UI.border);
+      this.add.rectangle(cx - bw / 2, y, Math.max(2, bw * share), 8, UI.goldHex).setOrigin(0, 0);
+      y += 16;
+    } else {
       // A long-term goal, not a nudge to spend now: how far the most expensive thing in the Loja still is.
       const goal = biggestGoal(save);
       const missing = goal && goal.cost > save.gold ? goal.cost - save.gold : 0;

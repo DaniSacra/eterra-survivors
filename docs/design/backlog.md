@@ -196,7 +196,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
   é o próximo herói (retrato e barra) enquanto houver herói bloqueado; depois a Loja. Liga: D-02, CC-04, NU-05, CU-08 e a
   decisão "botão da Loja no fim só quando algo cabe no ouro".
 
-**PX-16 [17] · Tela de derrota: recorde, ouro, próximo herói, "Caiu por" e uma dica** · ui + impl · M · feito em parte (2026-11-12: "Novo recorde", ouro ganho, "Caiu por" e dica do inimigo do golpe final (`world.killer`, dicas do Bestiário) ou da fonte principal; o herói de pé na vitória e caído na derrota, sobre a sua luz; falta só a barra de progresso do herói)
+**PX-16 [17] · Tela de derrota: recorde, ouro, próximo herói, "Caiu por" e uma dica** · ui + impl · M · feito em parte (2026-11-12: "Novo recorde", ouro ganho, "Caiu por" e dica do inimigo do golpe final (`world.killer`, dicas do Bestiário) ou da fonte principal; o herói de pé na vitória e caído na derrota, sobre a sua luz; barra do cofre rumo ao próximo herói)
 - O quê: dica ligada ao que mais feriu (`hurtShare` do CU-02) e ao inimigo que deu o golpe final, reaproveitando as dicas
   do Bestiário já aprovadas. Liga: CU-02, CB-04, NU-05.
 
