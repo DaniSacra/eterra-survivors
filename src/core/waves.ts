@@ -3,7 +3,7 @@ import { config } from '../data/config';
 import type { WaveSegment } from '../data/waves';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import { spawnOnRing, type Enemy } from './enemies';
-import { riseAt } from './marks';
+import { pendingSpawns, riseAt } from './marks';
 import { playtest } from './meta';
 import { blockCircle, spawnPoint } from './terrain';
 import type { World } from './world';
@@ -30,6 +30,12 @@ export function clearCrowd(world: World): void {
   // Nobody about to rise, and no shot in the air, either.
   world.marks.clear();
   world.enemyShots.clear();
+}
+
+/** Whether `id` is at its def's `max`, counting the ones still waiting under a spawn mark (PB-07). */
+export function atCap(world: World, id: EnemyId): boolean {
+  const max = (ENEMIES[id] as EnemyDef).max;
+  return max !== undefined && (world.alive[id] ?? 0) + pendingSpawns(world, id) >= max;
 }
 
 /** Time-driven spawner for the world's stage: batches on an interval, elites on schedule, boss at the end. */
@@ -122,19 +128,30 @@ export class Spawner {
     const p = world.player;
     const r = (ENEMIES[id] as EnemyDef).radius;
     const start = world.rng.next() * Math.PI * 2;
+    let far = -1;
+    let farX = p.x;
+    let farY = p.y;
     for (let i = 0; i < 8; i++) {
       const a = start + (i * Math.PI) / 4;
       this.at.x = p.x + Math.cos(a) * config.thief.dist;
       this.at.y = p.y + Math.sin(a) * config.thief.dist;
       blockCircle(world, this.at, r);
-      if (Math.hypot(this.at.x - p.x, this.at.y - p.y) >= config.thief.dist * 0.75) return;
+      const d = Math.hypot(this.at.x - p.x, this.at.y - p.y);
+      if (d >= config.thief.dist * 0.75) return;
+      if (d > far) {
+        far = d;
+        farX = this.at.x;
+        farY = this.at.y;
+      }
     }
+    // Every try was pushed too near: the farthest one keeps the warning worth something.
+    this.at.x = farX;
+    this.at.y = farY;
   }
 
   /** `id`, or the segment's first (basic) enemy when `id` is already at its def's `max`. */
   private capped(world: World, id: EnemyId, seg: WaveSegment): EnemyId {
-    const max = (ENEMIES[id] as EnemyDef).max;
-    return max !== undefined && (world.alive[id] ?? 0) >= max ? (seg.enemies[0]?.id ?? id) : id;
+    return atCap(world, id) ? (seg.enemies[0]?.id ?? id) : id;
   }
 
   /** The stage's scheduled specials (`specials`): one every `every` s from `from`, each waiting under its `max`. */
@@ -146,8 +163,7 @@ export class Spawner {
       const next = this.nextSpecial[i] ?? sp.from;
       this.nextSpecial[i] = next;
       if (world.time < next) continue;
-      const max = (ENEMIES[sp.id] as EnemyDef).max;
-      if (max !== undefined && (world.alive[sp.id] ?? 0) >= max) continue;
+      if (atCap(world, sp.id)) continue;
       this.nextSpecial[i] = Math.max(next, world.time) + sp.every;
       this.send(world, sp.id, hpMult);
     }

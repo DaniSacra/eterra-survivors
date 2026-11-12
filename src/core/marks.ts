@@ -144,6 +144,17 @@ export function inView(world: World, x: number, y: number, margin = 0): boolean 
   return Math.abs(x - p.x) <= world.view.w / 2 + margin && Math.abs(y - p.y) <= world.view.h / 2 + margin;
 }
 
+/** How many enemies of type `id` are waiting under a spawn mark: they count toward the type's `max` (PB-07). */
+export function pendingSpawns(world: World, id: EnemyId): number {
+  const list = world.marks.active;
+  let n = 0;
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i] as Mark;
+    if (m.kind === 'spawn' && m.enemy === id) n++;
+  }
+  return n;
+}
+
 /**
  * An enemy rising at (x, y): straight away out of view; inside it, after a spawn mark of config.marks.spawnTime s,
  * and never closer than config.marks.spawnMinDist px to the hero (the spot is pushed out). Returns whether it

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
-import { segmentAt } from '../../src/core/waves';
+import { riseAt } from '../../src/core/marks';
+import { atCap, segmentAt } from '../../src/core/waves';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
 import { ENEMIES, type EnemyDef } from '../../src/data/enemies';
@@ -130,5 +131,16 @@ describe('test mode boss time', () => {
     n.time = config.devBossAt + 0.1;
     n.spawner.update(n, 1 / 60);
     expect(n.boss).toBeNull();
+  });
+});
+
+describe('type caps count pending spawn marks (PB-07)', () => {
+  it('with three nests marked and none alive, a fourth does not come', () => {
+    const w = new World(1);
+    const max = (ENEMIES.spiderNest as EnemyDef).max as number;
+    expect(atCap(w, 'spiderNest')).toBe(false);
+    for (let i = 0; i < max; i++) riseAt(w, 'spiderNest', 100 + i * 10, 0, 1, false, 1);
+    expect(w.alive.spiderNest ?? 0).toBe(0);
+    expect(atCap(w, 'spiderNest')).toBe(true);
   });
 });

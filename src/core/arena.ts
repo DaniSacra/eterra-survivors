@@ -1,3 +1,4 @@
+import { config } from '../data/config';
 import type { BossAbility } from '../data/enemies';
 import type { Enemy } from './enemies';
 import { addPatch, resetMark, type Mark } from './marks';
@@ -78,6 +79,7 @@ export function markIce(world: World, boss: Enemy, ab: BossAbility): void {
     }
     if (dir > 0) usedPos = off;
     else usedNeg = off;
+    if (world.marks.size >= config.marks.max) break;
     const m = resetMark(world.marks.acquire());
     m.kind = 'ice';
     m.x = (layout.kind === 'corridor' ? 0 : p.x) + quarter * (i % 2 === 0 ? side : -side);

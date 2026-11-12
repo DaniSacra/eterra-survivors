@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { closeArena, groundSlow, markIce } from '../../src/core/arena';
 import { BossAct, bossAbility } from '../../src/core/bosses';
 import { spawnEnemy } from '../../src/core/enemies';
-import type { Mark } from '../../src/core/marks';
+import { resetMark, type Mark } from '../../src/core/marks';
+import { config } from '../../src/data/config';
 import { World } from '../../src/core/world';
 import { ENEMIES, type BossAbility } from '../../src/data/enemies';
 import { STAGES } from '../../src/data/stages';
@@ -49,6 +50,14 @@ describe('the Lobo Velho arena (FT-08)', () => {
       const [a, b] = list as [Mark, Mark];
       expect(Math.abs(a.y - b.y)).toBeGreaterThanOrEqual(2 * (FROST.radius as number));
     }
+  });
+
+  it('stops at config.marks.max like every other mark', () => {
+    const { w, wolf } = onRoad();
+    for (let i = 0; i < config.marks.max; i++) resetMark(w.marks.acquire()).kind = 'tar';
+    const before = w.marks.size;
+    markIce(w, wolf, FROST);
+    expect(w.marks.size).toBe(before);
   });
 
   it('never more than its cap: the oldest melts', () => {

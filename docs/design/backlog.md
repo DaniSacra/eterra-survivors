@@ -3441,7 +3441,7 @@ em `ART_RES`.
 - Aceite: teste dentro de uma multidão: uma faca do Leque sem alvo de ricochete acerta os mesmos inimigos que acertaria
   sem a busca.
 
-**PB-07 · Pequenos furos do spawner e das marcas** · impl · P · proposto
+**PB-07 · Pequenos furos do spawner e das marcas** · impl · P · ✅ feito (2026-11-11; sem teste do `thiefPoint` cercado: o terreno de teste não consegue cercá-lo)
 
 - Por quê: 02-code B3, B4, B9. (1) Marcas de surgimento pendentes (até 160) não contam para o `max` do tipo
   (`waves.ts` `capped`/`batchSize`); Ninho, Estandarte e Ladrão (`max: 3`) podem passar do limite. (2) `thiefPoint`
