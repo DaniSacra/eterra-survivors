@@ -40,6 +40,8 @@ export class BuildSlots {
   private readonly keys: [string, string];
   private readonly mark: Phaser.GameObjects.Graphics;
   private readonly icons: Phaser.GameObjects.Image[] = [];
+  private readonly levels: Phaser.GameObjects.Text[] = [];
+  private readonly levelUsed = new Set<number>();
   private readonly glowTween: Phaser.Tweens.Tween;
   /** Empty slots show how many still fit (the level-up preview); the HUD shows only the filled ones. */
   showEmpty = true;
@@ -62,7 +64,22 @@ export class BuildSlots {
     this.mark = scene.add.graphics();
     const n = config.weapons.maxOwned + config.weapons.maxPassives;
     for (let i = 0; i < n; i++) this.icons.push(scene.add.image(0, 0, 'icon.blade').setVisible(false));
-    this.container = scene.add.container(0, 0, [this.framesTex, ...this.icons, this.glowTex, this.mark]);
+    // One small level number per slot: the 7 pips alone could not be counted at a glance (5 and 6 read alike).
+    for (let i = 0; i < n; i++)
+      this.levels.push(
+        scene.add
+          .text(0, 0, '', { fontFamily: UI.font, fontSize: '13px', fontStyle: 'bold', color: '#ffffff' })
+          .setStroke('#0b0d14', 3)
+          .setOrigin(1, 0)
+          .setVisible(false),
+      );
+    this.container = scene.add.container(0, 0, [
+      this.framesTex,
+      ...this.icons,
+      this.glowTex,
+      this.mark,
+      ...this.levels,
+    ]);
     this.container.once(Phaser.GameObjects.Events.DESTROY, () => {
       this.frames.destroy();
       this.glow.destroy();
@@ -132,7 +149,11 @@ export class BuildSlots {
         fitIcon(wi, `icon.${o.id}`, S - 2)
           .setPosition(x + S / 2, S / 2)
           .setVisible(true);
-      if (!elo) this.pips(g, x, S + 2, S, o.level, WEAPONS[o.id].levels.length);
+      if (!elo) {
+        const max = WEAPONS[o.id].levels.length;
+        this.pips(g, x, S + 2, S, o.level, max);
+        this.levelNumber(icon - 1, x + S, 0, o.level, max);
+      }
       const evo = EVOLUTIONS[o.id];
       if (evo) {
         ready = true;
@@ -156,8 +177,12 @@ export class BuildSlots {
           .setPosition(x + P / 2, py + P / 2)
           .setVisible(true);
       this.pips(g, x, py + P + 2, P, world.passives[id] ?? 0, PASSIVES[id].maxLevel);
+      this.levelNumber(icon - 1, x + P, py, world.passives[id] ?? 0, PASSIVES[id].maxLevel);
     }
     for (let i = icon; i < this.icons.length; i++) this.icons[i]?.setVisible(false);
+    for (let i = 0; i < this.levels.length; i++)
+      if (!this.levelUsed.has(i)) this.levels[i]?.setVisible(false);
+    this.levelUsed.clear();
 
     // Each formed Elo is chained to its recipe passive: a braided chain in its element's colour, glowing softly.
     this.clearBits();
@@ -291,6 +316,19 @@ export class BuildSlots {
       s,
       4,
     );
+  }
+
+  /** The level number in a slot's top-right corner (gold once at the maximum). Text is only re-set when it changes. */
+  private levelNumber(index: number, right: number, top: number, level: number, max: number): void {
+    const txt = this.levels[index];
+    if (!txt) return;
+    const value = String(level);
+    if (txt.text !== value) txt.setText(value);
+    txt
+      .setColor(level >= max ? '#ffd870' : '#ffffff')
+      .setPosition(right + 1, top - 1)
+      .setVisible(true);
+    this.levelUsed.add(index);
   }
 
   /** One pip per level under a slot; a continuous gold bar once at max. */
