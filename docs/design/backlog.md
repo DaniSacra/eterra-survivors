@@ -3252,3 +3252,9 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 - **DD-14** Código e commits em inglês; texto do jogador só em `src/i18n/pt-BR.ts`, em português, sem travessão; toda
   arte nova registrada em `docs/art/credits.md`.
+
+### Fase 7 · Efeitos em sprites (pedido do Daniel, 2026-11-12)
+
+- **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G. Raio e Tempestade, Fogo e Espada de Fogo,
+  zonas de Geada/Nevasca, chão em chamas, auras, golpes em arco e pancadas, trabalhados no workbench de efeitos do
+  PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio.

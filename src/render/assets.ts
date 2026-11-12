@@ -1,3 +1,4 @@
+import { vfxAssets } from './vfx';
 import type Phaser from 'phaser';
 import { ENEMY_ART } from './art/enemies';
 import { ENEMY_ANIMS, declaredPoses, poseKey } from './enemyAnims';
@@ -58,6 +59,7 @@ export const ASSETS: Record<string, AssetDef> = {
   'tile.crypt': { kind: 'image', url: 'sprites/tiles/crypt.png' },
   'tile.road': { kind: 'image', url: 'sprites/tiles/road.png' },
   'tile.forest': { kind: 'image', url: 'sprites/tiles/forest.png' },
+  ...vfxAssets(),
   ...art(HERO_ART, ART_RES),
   ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),

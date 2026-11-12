@@ -44,3 +44,5 @@ Sem gerações novas em 2026-11-11 (revisão de tamanhos): os sprites acima só 
 
 | 2026-11-11 | Obstacles (PixelLab `create_object_pro_flash`) | statue e2c86fb8-af77-4702-adba-613bc0651a12, bones ee874d97-6bb7-473b-bdf1-bf71990d9808, fence e630a89a-96b2-4a76-b1b0-674f61771c7b, cart 39b5f2c1-22a5-469d-905d-c246917b6172, hay b7a29fce-1b2c-4af1-aa6a-1bada48f04bf, well d0a57455-850c-4d5f-aac8-b2417c71093e, logs 45a58c7d-c25a-4d47-8cf3-e719e4e17ea6, rocks 66f0bcaf-7de9-44e1-9df5-fd6590539831, wreck ce6ec3dc-4d09-495b-93af-b8931aba3585; cropped and packed at 2x |
 | 2026-11-11 | Gosma Verde B2 (grito alto) chosen by Daniel; walk by animate_image (job c7cf7c46-0fcf-4fb0-a4e6-ae20b048743e), replaces the round blob | PixelLab |
+
+| 2026-11-12 | Animated effects (PixelLab effects workbench, `vfx_workbench`, saved in My effects as "Valmor Resiste - *"): bolt (Raio) from preset lightning_strike, tall canvas, effect id 4288c527-375a-4774-b8d1-1f602cf3c91d | packed by hand as a 2x strip in `public/sprites/fx/vfx/`, registered in `src/render/vfx.ts` |

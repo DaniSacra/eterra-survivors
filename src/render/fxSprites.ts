@@ -32,9 +32,39 @@ class FxSprites {
     if (!img) return;
     this.used++;
     if (img.texture.key !== key) img.setTexture(key);
+    else if (img.frame.name !== '__BASE') img.setFrame('__BASE');
     img
+      .setOrigin(0.5)
       .setPosition(x, y)
       .setRotation(rot)
+      .setScale(ART_SCALE * scale)
+      .setAlpha(alpha)
+      .setVisible(true);
+  }
+
+  /**
+   * Puts frame `frame` of the animated effect `key` (render/vfx.ts) so its anchor (`ox`, `oy`: fractions of the
+   * frame) sits on (x, y); `scale` 1 = the art's own size.
+   */
+  putFrame(
+    key: string,
+    frame: number,
+    ox: number,
+    oy: number,
+    x: number,
+    y: number,
+    scale = 1,
+    alpha = 1,
+  ): void {
+    const img = this.images[this.used];
+    if (!img) return;
+    this.used++;
+    if (img.texture.key !== key) img.setTexture(key, frame);
+    else img.setFrame(frame);
+    img
+      .setOrigin(ox, oy)
+      .setPosition(x, y)
+      .setRotation(0)
       .setScale(ART_SCALE * scale)
       .setAlpha(alpha)
       .setVisible(true);

@@ -15,6 +15,7 @@ import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, SUMMON_SHADE, UI } from './ui
 import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import type { EnemyShot } from '../core/enemyShots';
 import { fxSprites } from './fxSprites';
+import { VFX, vfxKey } from './vfx';
 import { star } from './sparks';
 import { arcLine, band, disc, oval, ovalRing, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
@@ -55,6 +56,8 @@ const SWEEP = 0.55;
 /** Elos get warmer, brighter versions of their base colors. */
 const AURA_COLOR = 0xffc040;
 const FLAME_COLOR = ELEMENT_COLOR.holy;
+/** The ring of the bolt sprite, in art px: the sprite is scaled so the ring is the hit radius. */
+const BOLT_RING = 40;
 /** Espada de Fogo's burning ground: the flames' light orange. */
 const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
@@ -606,37 +609,10 @@ function drawBolt(
     if (st.sword) drawSword(top, b.x, b.y - 24, Math.PI / 2, 16, FIRE_SWORD);
     return;
   }
-  // Lightning: the scorch and the cloud shadow on the ground, then the bolt and its flash on top.
-  if (st.branches) g.fillStyle(INK, 0.18 * fade).fillEllipse(b.x + 10, b.y - 4, r * 2.6, r * 1.1);
-  g.fillStyle(0x1a1424, 0.3 * fade);
-  disc(g, b.x, b.y, r);
-  g.lineStyle(2, st.color, 0.9 * fade);
-  ring(g, b.x, b.y, r);
-  const x1 = b.x + (hash(b.x, b.y, 1) - 0.5) * 30;
-  const x2 = b.x + (hash(b.x, b.y, 2) - 0.5) * 34;
-  const x3 = b.x + (hash(b.x, b.y, 3) - 0.5) * 22;
-  for (let i = 0; i < BOLT_LAYERS.length; i++) {
-    const L = BOLT_LAYERS[i] as readonly [number, number, number];
-    top.lineStyle(st.width * L[0], L[1] === -1 ? st.color : L[1], L[2] * fade);
-    top.lineBetween(b.x + 10, b.y - 270, x1, b.y - 180);
-    top.lineBetween(x1, b.y - 180, x2, b.y - 95);
-    top.lineBetween(x2, b.y - 95, x3, b.y - 40);
-    top.lineBetween(x3, b.y - 40, b.x, b.y);
-    for (let k = 0; k < st.branches; k++) {
-      // Tempestade: forks off the main bolt.
-      const fx = k ? x2 : x1;
-      const fy = k ? b.y - 95 : b.y - 180;
-      const side = hash(b.x, b.y, 5 + k) > 0.5 ? 1 : -1;
-      top.lineBetween(fx, fy, fx + side * 28, fy + 38);
-      top.lineBetween(fx + side * 28, fy + 38, fx + side * 34, fy + 70);
-    }
-  }
-  if (u < 0.25) {
-    // The flash where it lands: small, white, quick.
-    const fk = u / 0.25;
-    top.fillStyle(0xffffff, 0.9 * (1 - fk));
-    disc(top, b.x, b.y, 6 + r * 0.5 * fk);
-  }
+  // Lightning: the pixel bolt strikes from above and leaves a ring of force exactly as wide as the hit.
+  const bolt = VFX.bolt;
+  const f = Math.min(bolt.frames - 1, Math.floor(u * bolt.frames));
+  fxSprites.putFrame(vfxKey('bolt'), f, bolt.anchor[0], bolt.anchor[1], b.x, b.y, r / BOLT_RING);
 }
 
 /**
