@@ -23,6 +23,8 @@ export const SPARK = {
   ring: 5,
   /** A drop that falls: bleeding. */
   drop: 6,
+  /** A square chunk of the weapon's colour with a white pixel: what a blow breaks off (pixel standard, DD-13). */
+  chunk: 7,
 } as const;
 type SparkKind = (typeof SPARK)[keyof typeof SPARK];
 
@@ -226,6 +228,7 @@ export class Sparks {
       if (s.kind === SPARK.ember) s.vy -= 60 * dt;
       else if (s.kind === SPARK.confetti) s.vy += 140 * dt;
       else if (s.kind === SPARK.drop) s.vy += 260 * dt;
+      else if (s.kind === SPARK.chunk) s.vy += 180 * dt;
     }
   }
 
@@ -238,6 +241,15 @@ export class Sparks {
         case SPARK.star:
           star(g, s.x, s.y, s.size * (1 - 0.5 * k), s.color, a);
           break;
+        case SPARK.chunk: {
+          // Whole-pixel squares that shrink one step at a time, with a bright pixel on the top-left corner.
+          const n = Math.max(1, Math.round((s.size * (1 - 0.6 * k)) / PX));
+          g.fillStyle(s.color, a);
+          block(g, s.x, s.y, n);
+          g.fillStyle(0xffffff, a);
+          block(g, s.x - ((n - 1) * PX) / 2, s.y - ((n - 1) * PX) / 2, 1);
+          break;
+        }
         case SPARK.cross: {
           const arm = Math.max(1, Math.round((s.size * (1 - 0.4 * k)) / PX));
           plus(g, s.x, s.y, arm, s.color, a);

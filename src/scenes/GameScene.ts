@@ -129,10 +129,14 @@ const FORGE = 'proj.forgeFury';
 
 /** Sparks a swing throws when it starts: [color, size, count]. */
 const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> = {
+  blade: [0xdce8ff, 4, 3],
   fury: [0xffd870, 6, 6],
   mace: [0xd8cbb4, 4, 5],
   jointBreaker: [0xffa060, 5, 7],
 };
+
+/** Hit-stop: the world freezes this long (real ms, about three frames) when a heavy blow lands. */
+const HIT_STOP_MS = 50;
 
 /**
  * The strongest camera shake (fraction of the screen size): the ground reaches this far past the view. Phaser's
@@ -255,6 +259,8 @@ export class GameScene extends Phaser.Scene {
   private calm = false;
   /** Real time (ms) until which the Elo forge's slow motion lasts. */
   private slowUntil = 0;
+  /** Real time (ms) until which a heavy blow holds the world still. */
+  private stopUntil = 0;
   /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
   private moments = newMoments();
   private rewardIcon!: Phaser.GameObjects.Image;
@@ -760,7 +766,7 @@ export class GameScene extends Phaser.Scene {
     this.calm = settings().calm;
     this.hud.joystick.setEnabled(w.state === 'playing');
     // The Elo forge runs the world slower for a moment (real time; the sparks keep their own pace).
-    const slow = this.time.now < this.slowUntil ? FORGE_SLOW : 1;
+    const slow = this.time.now < this.stopUntil ? 0 : this.time.now < this.slowUntil ? FORGE_SLOW : 1;
     this.noteNearShot();
     w.step((delta / 1000) * slow, this.controls.read());
     this.stepDt = w.time - this.lastTime;
@@ -959,6 +965,8 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
       if (s.form === 'smash' || s.form === 'shock') {
+        // A heavy blow freezes the world for a beat (not with the calm screen on).
+        if (!this.calm) this.stopUntil = this.time.now + HIT_STOP_MS;
         // Dust kicked up by the blow (no camera shake: weapons never move the screen).
         const spark = SWING_SPARK[s.weapon];
         if (!spark) continue;
@@ -968,7 +976,7 @@ export class GameScene extends Phaser.Scene {
           const d = s.shock * (s.form === 'shock' ? 0.5 : 0.8);
           const x = s.x + Math.cos(a) * d;
           const y = s.y + Math.sin(a) * d;
-          sp.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 60, 0.4, spark[1], spark[0], SPARK.star);
+          sp.add(x, y, Math.cos(a) * 90, Math.sin(a) * 90 - 60, 0.4, spark[1], spark[0], SPARK.chunk);
         }
         continue;
       }
@@ -980,7 +988,7 @@ export class GameScene extends Phaser.Scene {
         const y = p.y + Math.sin(a) * s.range;
         // Fúria flings its sparks along the turn.
         const out = s.weapon === 'fury' ? a + Math.PI / 2 : a;
-        sp.add(x, y, Math.cos(out) * 150, Math.sin(out) * 150, 0.35, spark[1], spark[0], SPARK.star);
+        sp.add(x, y, Math.cos(out) * 150, Math.sin(out) * 150, 0.35, spark[1], spark[0], SPARK.chunk);
       }
     }
   }

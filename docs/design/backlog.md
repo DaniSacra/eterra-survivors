@@ -3244,7 +3244,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 ### Fase 6 · Efeitos
 
-- **DD-13 · Efeitos no padrão pixel** · vfx · G. Golpes em arco, zonas, raios e auras como os projéteis em pixel:
+- **DD-13 · Efeitos no padrão pixel** · vfx · G. Golpes em arco, zonas, raios e auras como os projéteis em pixel: ✅ (blocos de pixel nos golpes, brilho quadrado na Lâmina, pausa de 50 ms nos golpes pesados)
   bordas firmes, partículas em blocos em vez de discos grandes, paleta por elemento, congelamento de 2 a 4 quadros nos
   golpes fortes e luz no chão. Começa pela Lâmina de Valmor.
 

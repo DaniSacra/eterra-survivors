@@ -689,6 +689,19 @@ function drawSwing(
       cx + ux * range,
       cy + uy * range,
     );
+    // A bright square glint on the tip, in whole pixels like the rest of the art.
+    g.fillStyle(0xffffff, 1).fillRect(
+      Math.round((cx + ux * range) / 2) * 2 - 3,
+      Math.round((cy + uy * range) / 2) * 2 - 3,
+      6,
+      6,
+    );
+    g.fillStyle(st.edge, 0.9).fillRect(
+      Math.round((cx + ux * range) / 2) * 2 - 1,
+      Math.round((cy + uy * range) / 2) * 2 - 1,
+      2,
+      2,
+    );
   }
   if (st.mark === 'none' || t < SWEEP * 0.8) return;
   const mk = (t - SWEEP * 0.8) / (1 - SWEEP * 0.8);
