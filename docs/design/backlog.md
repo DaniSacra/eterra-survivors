@@ -3416,7 +3416,7 @@ em `ART_RES`.
   Música 3 vezes durante o primeiro download deixa uma voz só; primeiro toque com fusão de 1,5 s; religar na Pausa
   continua de onde parou.
 
-**PB-04 · Teclas 1, 2, 3 e Enter escolhem a carta antes da trava** · impl · P · proposto
+**PB-04 · Teclas 1, 2, 3 e Enter escolhem a carta antes da trava** · impl · P · ✅ feito (2026-11-11; sem teste de cena: não há infraestrutura)
 
 - Por quê: 03-qa B4. `LevelUpScene.ts:110-111` só arma o ponteiro depois de `ARM_DELAY` (300 ms); o teclado
   (`bindKeys`, `:231`) não espera: '1' a 100 ms da abertura escolhe a carta. Espaço (a pausa) e Enter por reflexo podem

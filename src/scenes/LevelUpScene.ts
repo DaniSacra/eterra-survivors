@@ -37,6 +37,8 @@ export class LevelUpScene extends Phaser.Scene {
 
   /** True when rebuilt after Trocar, Banir or a queued level-up: the player is already looking, no guard. */
   private again = false;
+  /** False until ARM_DELAY has passed: keys are ignored meanwhile, like the pointer. */
+  private armed = false;
 
   init(data: { world: World; banishing?: boolean; again?: boolean }): void {
     this.world = data.world;
@@ -104,11 +106,16 @@ export class LevelUpScene extends Phaser.Scene {
     // The whole screen dims; the HUD (bars, timer, build) is brought above the overlay.
     dim(this, 0.72);
     this.scene.bringToTop(SCENES.hud);
+    // Keys wait for the same delay as the pointer: a reflex key at the opening must not choose a card (PB-04).
+    this.armed = this.again;
     if (!this.again) {
       this.input.enabled = false;
       this.cameras.main.setAlpha(0);
       this.tweens.add({ targets: this.cameras.main, alpha: 1, duration: ARM_DELAY });
-      this.time.delayedCall(ARM_DELAY, () => (this.input.enabled = true));
+      this.time.delayedCall(ARM_DELAY, () => {
+        this.input.enabled = true;
+        this.armed = true;
+      });
     }
     label(
       this,
@@ -261,7 +268,7 @@ export class LevelUpScene extends Phaser.Scene {
   }
 
   private onKey(e: KeyboardEvent): void {
-    if (e.repeat) return; // a movement key still held when the overlay opened
+    if (!this.armed || e.repeat) return; // not armed yet, or a movement key still held when the overlay opened
     const n = this.cards.length;
     const k = e.key.toLowerCase();
     if (e.key >= '1' && e.key <= String(n)) this.choose(Number(e.key) - 1);
