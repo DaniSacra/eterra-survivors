@@ -88,13 +88,22 @@ export interface UpgradeText {
   stats?: string;
 }
 
-/** One recipe's progress line, levels as they would be: "Elo Fúria: arma 6/7 · Força 5/5". */
-export function recipeProgress(base: WeaponId, weaponLevel: number, passiveLevel: number): string {
+/**
+ * One recipe's progress line, levels as they would be: "Elo Fúria: arma 6/7 · Força 5/5". An Elo never forged
+ * (not in `known`) keeps its name secret: "Elo de Espada: arma 6/7 · Força 5/5" (NU-02).
+ */
+export function recipeProgress(
+  base: WeaponId,
+  weaponLevel: number,
+  passiveLevel: number,
+  known: readonly WeaponId[],
+): string {
   const evo = evolutionOf(base);
   if (!evo) return '';
   const passive = evo.evo.passive;
-  return t.elo.progress(
-    t.weapons[evo.id].name,
+  const isKnown = known.includes(evo.id);
+  return (isKnown ? t.elo.progress : t.elo.progressUnknown)(
+    t.weapons[isKnown ? evo.id : base].name,
     t.units.of(String(weaponLevel), WEAPONS[base].levels.length),
     t.passives[passive],
     t.units.of(String(passiveLevel), PASSIVES[passive].maxLevel),
@@ -124,6 +133,7 @@ export function describeUpgrade(
   opt: UpgradeOption,
   owned: readonly { id: WeaponId; level: number }[] = [],
   passives: Partial<Record<PassiveId, number>> = {},
+  known: readonly WeaponId[] = [],
 ): UpgradeText {
   switch (opt.kind) {
     case 'weapon': {
@@ -131,7 +141,7 @@ export function describeUpgrade(
       const evo = evolutionOf(opt.id);
       const max = WEAPONS[opt.id].levels.length;
       const passiveLevel = evo ? (passives[evo.evo.passive] ?? 0) : 0;
-      const recipe = recipeProgress(opt.id, opt.level, passiveLevel);
+      const recipe = recipeProgress(opt.id, opt.level, passiveLevel, known);
       const recipeIcon = evo ? `icon.${evo.evo.passive}` : '';
       const recipeMissing = !!evo && !completes(opt.id, opt.level, passiveLevel);
       const icon = `icon.${opt.id}`;
@@ -175,7 +185,7 @@ export function describeUpgrade(
         tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
         icon: `icon.${opt.id}`,
-        recipe: moved.map((o) => recipeProgress(o.id, o.level, opt.level)).join(t.levelUp.recipeSep),
+        recipe: moved.map((o) => recipeProgress(o.id, o.level, opt.level, known)).join(t.levelUp.recipeSep),
         recipeIcon: '',
         recipeMissing: !moved.some((o) => completes(o.id, o.level, opt.level)),
       };

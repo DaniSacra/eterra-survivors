@@ -8,6 +8,7 @@ import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { t } from '../i18n/pt-BR';
 import { fitIcon } from './assets';
 import { UI, label, skin } from './ui';
+import { loadSave } from './save';
 import { formatDecimal, recipeProgress } from './describe';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
@@ -43,6 +44,7 @@ export function drawBuildList(
   compact = false,
 ): number {
   // Short on room (phone lying down): the passives row goes (the HUD strip shows them anyway).
+  const known = loadSave().elos; // unforged Elos keep their name secret (NU-02)
   const withPassives = buildListHeight(world, w, true, compact) <= maxH;
   const h = buildListHeight(world, w, withPassives, compact);
   skin(
@@ -112,19 +114,22 @@ export function drawBuildList(
     if (st.kind === 'formed') {
       text = t.pause.formed;
       color = UI.gold;
-    } else if (st.kind === 'missing') text = recipeProgress(o.id, st.weapon, st.passiveLevel);
+    } else if (st.kind === 'missing') text = recipeProgress(o.id, st.weapon, st.passiveLevel, known);
     let lx = tx;
     if (evo && st.kind !== 'formed') {
       icon(tx + 7, cy + 9, `icon.${evo.evo.passive}`, 14);
       lx += 18;
     }
     const recipe = label(scene, lx, cy + 9, text, 12, { color, align: 'left' }).setOrigin(0, 0.5);
+    // A long recipe line (an unforged Elo is named by its weapon) shrinks to the row instead of spilling out of it.
+    const room = x + w - PAD - lx;
+    if (recipe.width > room) recipe.setScale(room / recipe.width);
     // The DPS only when it fits beside the recipe line (the bar always shows).
     if (report) {
       const dps = label(scene, x + w - PAD, cy + 9, t.pause.dps(formatDecimal(report.dps)), 12, {
         color: report.dps === best && best > 0 ? UI.gold : UI.muted,
       }).setOrigin(1, 0.5);
-      if (dps.x - dps.width < lx + recipe.width + 8) dps.destroy();
+      if (dps.x - dps.width < lx + recipe.displayWidth + 8) dps.destroy();
     }
     damageBar(tx, ry + ROW - 6, w - PAD * 2 - 32, 3, report);
     ry += ROW;

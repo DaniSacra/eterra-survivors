@@ -38,8 +38,8 @@ Todo item aberto foi conferido contra o código e a arte de `e1bff09` (detalhe e
 outros itens, 1 foi descartado, 2 foram mesclados, 9 reescritos para a arte e o código de hoje e 18 seguem como
 estavam.
 
-- **Feitos:** 228 itens com ✅ (contando os DD da tarde de 2026-11-11 e os reconhecidos nesta reavaliação).
-- **Abertos: 26**, por área: bugs 2 (NB-08, CB-04) · interface 9 (CC-06, NU-02, CU-01, CU-02, CU-03, CU-04, CU-06,
+- **Feitos:** 229 itens com ✅ (contando os DD da tarde de 2026-11-11 e os reconhecidos nesta reavaliação).
+- **Abertos: 25**, por área: bugs 2 (NB-08, CB-04) · interface 8 (CC-06, CU-01, CU-02, CU-03, CU-04, CU-06,
   CU-07, CU-08) · efeitos 4 (AR-01, RF-04, A-04, CF-07) · arte 3 (AR-04, CA-02, CA-03) · equilíbrio 3, em espera
   (NE-06, PE-01, PE-02) · sistemas e conteúdo 4 (ND-01, ND-02, CD-01, FT-18) · música 1 (MU-01) · lançamento 1 (L-01).
 - **Descartados:** seção no fim do arquivo.
@@ -1897,7 +1897,7 @@ chefe + 48)` (`HudScene` `layout`), abaixo da barra (dura 3 s, não 1,5; fica as
   calmo; seta assada em textura, varredura O(n) sem alocar. Base: `68ac386`.
 - Aceite: captura com baú e elite fora da tela; F4 igual; não cobre pausa nem joystick.
 
-**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · receita ✅ feita (2026-11-11: a descrição longa cede as últimas linhas, com "…"); falta a regra única do nome do Elo (decisão 2 do Daniel) · proposto (a regra do nome)
+**NU-02 · A receita nunca sai da carta; nome do Elo com uma regra só** · ui + impl · P · receita ✅ feita (2026-11-11: a descrição longa cede as últimas linhas, com "…"); regra do nome ✅ feita (2026-11-12, decisão do Daniel: nome do Elo secreto até a primeira forja em todas as telas, passiva sempre visível)
 
 - Por quê: 05-ui #4. `LevelUpScene.ts:155` destrói a linha da receita quando a descrição tem 3 linhas (a Maça de Ferro
   em 420x820 perde a dica, `p-06-levelup.png`), justamente na carta que abre uma receita. E o nome do Elo é "???" no
@@ -1908,8 +1908,9 @@ chefe + 48)` (`HudScene` `layout`), abaixo da barra (dura 3 s, não 1,5; fica as
   Armadura 1/3" (`recipeProgress` recebe a lista de Elos conhecidos).
 - Aceite: captura da Maça de Ferro como arma nova em 420x820 e 360x640 com a receita; a mesma regra de nome na carta,
   na Pausa, no Livro e na tela final.
-- Reavaliação 2026-11-12 · mantido: `recipeProgress` (`render/describe.ts`) ainda mostra o nome do Elo na carta e na
-  Pausa, e o Livro e o Fim mostram "???". Espera a decisão 2 do Daniel (nome secreto até a primeira forja?).
+- Reavaliação 2026-11-12 · ✅ feito: `recipeProgress` (`render/describe.ts`) recebe os Elos conhecidos (`save.elos`) e,
+  sem forja, mostra `t.elo.progressUnknown` ("Elo de Maça de Ferro: arma 3/7 · Cota de Malha 1/3") na carta e na Pausa;
+  o Livro e o Fim já escondiam o nome; o aviso de forja e a linha "Elo descoberto" mostram o nome real.
 
 **NU-03 · Pausa: build em qualquer celular, interruptores numa linha e atributos** · ui + impl · M · ✅ feito (2026-11-11: Som, Números e Calma numa linha com lâmpada; lista de uma linha por arma quando aperta; lista e botões na mesma largura; Atributos quando cabe)
 

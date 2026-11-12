@@ -120,6 +120,9 @@ export const t = {
     /** A recipe's progress, after the choice on a level-up card and live on the pause screen. */
     progress: (elo: string, weapon: string, passive: string, passiveLevel: string) =>
       `Elo ${elo}: arma ${weapon}${' · '}${passive} ${passiveLevel}`,
+    /** Same, while the Elo has never been forged: its name stays secret, the passive is shown. */
+    progressUnknown: (baseWeapon: string, weapon: string, passive: string, passiveLevel: string) =>
+      `Elo de ${baseWeapon}: arma ${weapon}${' · '}${passive} ${passiveLevel}`,
     /** One line per Elo (the Livro de Elos; written for the Survivors, no new lore facts). */
     lines: {
       fury: 'A Lâmina de Valmor não escolhe mais um lado: corta tudo em volta.',
