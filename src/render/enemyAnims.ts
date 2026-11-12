@@ -53,13 +53,13 @@ export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.warBanner': anim(48, 80, [5], 5),
   // Cripta crowd (older art, kept at its own scale in SPRITE_SCALE): the walk added in 2026-11.
   'enemy.bones': anim(44, 61, [5]),
-  'enemy.skeleton': anim(68, 76, [5]),
+  'enemy.skeleton': anim(68, 76, [6]),
   'enemy.emberBones': anim(35, 63, [5]),
   'enemy.ghost': anim(40, 44, [5], 6),
   'enemy.ghostDark': anim(40, 44, [5], 10),
   'enemy.coldSpirit': anim(50, 59, [5], 6),
   'enemy.slime': anim(56, 48, [5], 6),
-  'enemy.vampireBat': anim(32, 32, [5], 12),
+  'enemy.vampireBat': anim(40, 40, [6], 12),
 };
 
 /** How far through a thrower's or digger's windup the throw or the blow begins. */

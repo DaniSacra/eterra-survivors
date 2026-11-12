@@ -144,3 +144,12 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 - `public/sprites/fx/staffOrb.png`: Cajado de Lyra fireball (small at level 1, scaled up by hit radius).
 - `public/sprites/fx/wisp.png`: Fogos-Fátuos green flame shot.
 - `public/icon-*.png`, favicon: Aldo's front sprite on a snowy night with lantern light.
+
+## 2026-11-12: Esqueleto de perfil e Morcego Vampiro refeitos (PixelLab)
+
+| Arquivo                                                        | O quê                                                                                                                                        | Como                                                                                                                                               |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public/sprites/enemies/skeleton.png`, `skeleton-walk.png`     | Esqueleto de armadura em perfil, andando para a direita (o anterior era de frente e parecia deslizar de lado); 68 x 76 px de arte, 6 quadros | `create_image_pro` 68 x 76 (15 gerações, 9 candidatas, estilo: Ossada reduzida a 1x), candidata 1; `animate_image` de 6 quadros (1 geração)        |
+| `public/sprites/enemies/vampireBat.png`, `vampireBat-walk.png` | Morcego vermelho maior (40 x 40 px de arte), asas abertas, olhos acesos, 6 quadros de bater asas                                             | `create_image_pro` 40 x 40 (15 gerações, 36 candidatas, estilo: Rato de Cova reduzido a 1x), candidata 0; `animate_image` de 6 quadros (1 geração) |
+
+Quadros ampliados 2x sem suavização e juntados em tira por script.
