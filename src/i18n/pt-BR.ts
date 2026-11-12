@@ -3,7 +3,7 @@ import type { ElementId } from '../data/evolutions';
 import type { AchievementGroup, AchievementId } from '../data/achievements';
 import type { CharacterId } from '../data/characters';
 import type { HurtSource } from '../core/enemyShots';
-import type { EnemyId } from '../data/enemies';
+import type { BossAbility, EnemyId } from '../data/enemies';
 import type { StageId } from '../data/stages';
 import type { PickupId } from '../data/pickups';
 import type { ChargeKey, ShopId } from '../data/shop';
@@ -18,6 +18,14 @@ const int = (n: number): string => String(Math.floor(n)).replace(/\B(?=(\d{3})+(
 type AchievementText = { name: string; desc: string | ((goal: string) => string) };
 
 /** Every player-facing string lives here. Code never hardcodes UI text. */
+/** A boss's named moves by ability kind (the HUD names the one it is winding up, CU-03; the Bestiário lists them). */
+const BOSS_MOVES: Partial<Record<EnemyId, Partial<Record<BossAbility['kind'], string>>>> = {
+  oldWolf: { lunge: 'Mordida Funda', frost: 'Uivo da Geada' },
+  spiderMother: { lunge: 'Ferroada', web: 'Teia', eggs: 'Ovos' },
+  bellRinger: { toll: 'Badalada', cleave: 'Dobre Fúnebre' },
+  blackKnight: { cleave: 'Corte Brutal' },
+};
+
 export const t = {
   /** Separator between items on one line. */
   sep: ' · ',
@@ -60,6 +68,9 @@ export const t = {
     hp: (hp: number, max: number) => `${hp}/${max}`,
     /** Segunda Chance left, next to its icon. */
     revives: (n: number) => `${n}`,
+    /** The boss move being wound up, under its bar (CU-03). */
+    ability: (name: string) => `${name}!`,
+    bossMove: BOSS_MOVES,
   },
 
   levelUp: {
@@ -303,11 +314,9 @@ export const t = {
       warBanner: 'Os goblins fizeram um acordo com os Nekaren: a Aliança Negra.',
     } as Partial<Record<EnemyId, string>>,
     /** A boss with several abilities lists them by name (the same kind can have another name in another boss). */
-    bossAbilities: {
-      oldWolf: ['Mordida Funda', 'Uivo da Geada'],
-      spiderMother: ['Ferroada', 'Teia', 'Ovos'],
-      bellRinger: ['Badalada', 'Dobre Fúnebre'],
-    } as Partial<Record<EnemyId, string[]>>,
+    bossAbilities: Object.fromEntries(
+      Object.entries(BOSS_MOVES).map(([id, moves]) => [id, Object.values(moves)]),
+    ) as Partial<Record<EnemyId, string[]>>,
     /** A line about each enemy: from the original where it has one, else written for the Survivors (docs/design/conquistas.md). */
     quote: (line: string) => `"${line}"`,
     /** A line someone says: "..." (Seu Joaquim). */

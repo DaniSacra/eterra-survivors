@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { BossAct, bossAbility } from '../core/bosses';
+import type { Enemy } from '../core/enemies';
 import { formatTime } from '../core/format';
 import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
@@ -41,6 +43,8 @@ const PAUSE = 44;
 const PAUSE_ARM_MS = 300;
 /** Notices wait while life is under this share of the maximum (NB-08). */
 const TOAST_MIN_HP = 0.3;
+/** Seconds a boss move's name stays under its bar. */
+const MOVE_SHOW = 1.2;
 
 /** Screen-space overlay (no camera zoom): bars, counters, joystick and the F3 debug panel. */
 export class HudScene extends Phaser.Scene {
@@ -56,6 +60,10 @@ export class HudScene extends Phaser.Scene {
   private kills!: Phaser.GameObjects.Text;
   private gold!: Phaser.GameObjects.Text;
   private bossName!: Phaser.GameObjects.Text;
+  /** The boss move being wound up, under its bar: shown for `MOVE_SHOW` s from the windup's start (CU-03). */
+  private bossMove!: Phaser.GameObjects.Text;
+  private moveUntil = 0;
+  private moveIdx = -1;
   private debug!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
   private pauseBtn!: Phaser.GameObjects.Rectangle;
@@ -129,7 +137,7 @@ export class HudScene extends Phaser.Scene {
     this.bars = this.add.graphics();
     this.xpBar = new PixelBar(this, 'xp');
     this.hpBar = new PixelBar(this, 'hp');
-    this.bossBar = new PixelBar(this, 'hp').setVisible(false);
+    this.bossBar = new PixelBar(this, 'boss').setVisible(false);
     this.timer = label(this, 0, 0, '', 24, { bold: true, stroke: true });
     // The level sits in the middle of the XP bar, clear of the pause button; gold and kills share one line, each after its icon.
     this.level = label(this, 0, 0, '', 10, { bold: true, color: UI.gold, stroke: true });
@@ -148,6 +156,7 @@ export class HudScene extends Phaser.Scene {
       color: UI.danger,
       stroke: true,
     }).setVisible(false);
+    this.bossMove = label(this, 0, 0, '', 15, { bold: true, color: UI.gold, stroke: true }).setVisible(false);
     this.debug = this.add
       .text(PAD, 0, '', {
         fontFamily: 'monospace',
@@ -238,6 +247,7 @@ export class HudScene extends Phaser.Scene {
     this.bottom = Math.max(stripY + this.build.height, this.countersBottom);
     this.bossY = this.bottom + 26;
     this.bossName.setPosition(width / 2, this.bossY - 13);
+    this.bossMove.setPosition(width / 2, this.bossY + 28);
     const bw = Math.min(420, width - PAD * 4);
     this.bossBar.place((width - bw) / 2, this.bossY, bw, 16);
     this.banner.setPosition(width / 2, Math.max(height * 0.3, this.bossY + 48));
@@ -362,6 +372,26 @@ export class HudScene extends Phaser.Scene {
     this.tweens.add({ targets: this.hintBox, alpha: 0, delay: 8000, duration: 500 });
   }
 
+  /**
+   * CU-03: when the boss starts winding a move up, its name sits under the bar for `MOVE_SHOW` s. The text only changes
+   * when the move does (setText re-renders a texture).
+   */
+  private updateBossMove(w: World, boss: Enemy | null): void {
+    if (!boss || boss.act !== BossAct.Windup) {
+      if (this.bossMove.visible && (!boss || w.time >= this.moveUntil)) this.bossMove.setVisible(false);
+      if (!boss || boss.act === BossAct.Idle) this.moveIdx = -1;
+      return;
+    }
+    const ab = bossAbility(boss);
+    const name = ab && t.hud.bossMove[boss.type]?.[ab.kind];
+    if (name && this.moveIdx !== boss.abilityIdx) {
+      this.moveIdx = boss.abilityIdx;
+      this.moveUntil = w.time + MOVE_SHOW;
+      this.bossMove.setText(t.hud.ability(name)).setVisible(true);
+    }
+    if (w.time >= this.moveUntil) this.bossMove.setVisible(false);
+  }
+
   /** Whether a first-time tip may show now: no notice, hint or tip up, and the HUD is live. */
   canTip(): boolean {
     return this.banner.alpha === 0 && this.hintBox.alpha === 0 && this.tipBox.alpha === 0;
@@ -427,6 +457,7 @@ export class HudScene extends Phaser.Scene {
     this.bossName.setVisible(!!boss);
     this.bossBar.setVisible(!!boss);
     if (boss) this.bossBar.set(Math.max(0, boss.hp) / boss.maxHp);
+    this.updateBossMove(w, boss);
 
     if (w.buildRev !== this.shownRev) {
       this.shownRev = w.buildRev;

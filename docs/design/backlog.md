@@ -3170,13 +3170,19 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   `pileFall`, `pileRise`, `pileBreak` (estalo seco, o mais satisfatório), `emberBurst`, `dig`. Pilha com teto de vozes.
 - Aceite: cada evento soa uma vez; com 20 pilhas o teto de vozes segura; mudo respeitado.
 
-**CF-07 · Limo que espalha e seca** · vfx · P · proposto (depois do CE-01) · reescrito na reavaliação 2026-11-12
+**CF-07 · Limo que espalha e seca** · vfx · P · ✅ feito 2026-11-12
 
 - Por quê: 06-vfx #8. A mancha nasce pronta (`fx.ts:1513`) e some só por alfa; o herói lento não tem desenho de
   "grudar".
 - O quê: espalha de 40 a 100% do raio em 0,2 s com respingo; encolhe com bolhas ao secar; fio de gosma no pé do herói
   enquanto `groundSlow < 1` (o ícone do HUD é do CU-02).
 - Aceite: folha de captura do ciclo da mancha; F4 igual com 6 gosmas.
+- Feito (2026-11-12): a mancha é a animação `vfx/slime.png` (16 quadros de 80x80 art px, oficina de efeitos, 0 gerações): espalha em 4 quadros
+  em 0,2 s (de 40% a 100%, com respingo), vive num laço de 6 quadros (brilho molhado e bolhas) e seca nos últimos 1,2 s (encolhe e fica
+  fosca). Escala `raio / 33`, então a borda é o raio exato da lentidão. Escolhi uma pista de chão própria em `fxSprites`
+  (`putGroundFrame`, 64 imagens, abaixo de inimigos e herói, decoração: cheia, recusa), porque a pista comum fica acima dos inimigos e
+  uma poça chata esconderia a multidão. O aviso do frasco no ar segue vetor. O fio: enquanto o herói está numa poça, três fios de gosma
+  esticam e estouram dos pés (sutis; o ícone do HUD é do CU-02). O modo calmo não muda nada (não há flash). Não medi F4 com 6 gosmas.
 - Reavaliação 2026-11-12 · reescrito para a direção de pixel: o limo melhorou em vetor (`drawSlime` em
   `render/fxparts/enemies.ts`: borda irregular que funde com as vizinhas, brilho molhado, bolhas que estouram), mas
   continua nascendo pronto, sumindo só por alfa, e é dos poucos chãos de inimigo ainda desenhados em código ao lado
@@ -3228,7 +3234,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   essas, não as provisórias acima) e nomear a elite no aviso (hoje `t.eliteWarning` é genérico). O `HudScene.hint`
   (caixa dourada sob o aviso) já existe e serve de molde.
 
-**CU-03 · Chefe com barra própria e o nome do ataque** · ui + impl · P · proposto
+**CU-03 · Chefe com barra própria e o nome do ataque** · ui + impl · P · ✅ feito (2026-11-12): terceiro visual `boss` em `render/bars.ts` (violeta-escuro, moldura dourada fina); `HudScene.updateBossMove` mostra "Dobre Fúnebre!" sob a barra por 1,2 s quando o golpe começa a carregar (o texto só muda quando o golpe muda); nomes por tipo de habilidade em `BOSS_MOVES` (`t.hud.bossMove`, a mesma fonte do `bossAbilities` do Bestiário, que ganhou o Corte Brutal do Cavaleiro Negro, já existente em `t.bestiary.ways`); teste garante nome para toda habilidade de chefe. Sem nome novo
 
 - Por quê: 05-ui UI-07. A barra do chefe usa o vermelho da vida do herói e nenhum rótulo diz o que vem ("Badalada" e
   "Dobre Fúnebre" só existem no Bestiário).

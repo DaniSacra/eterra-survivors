@@ -6,10 +6,23 @@ import { ART_RES } from './art/pen';
  * (no `Graphics` redraw per frame). A bar is two 9-slices: the frame, stretched to the bar's size, and the fill, whose
  * width is the only thing that changes (`set`).
  */
-type Look = 'hp' | 'xp';
+type Look = 'hp' | 'xp' | 'boss';
 
-const LOOKS: Record<Look, { track: string; hi: string; mid: string; lo: string; shine: string }> = {
+const LOOKS: Record<
+  Look,
+  { track: string; hi: string; mid: string; lo: string; shine: string; rim?: string; rimHi?: string }
+> = {
   hp: { track: '#2a0e16', hi: '#ff8a96', mid: '#d83a4a', lo: '#8a1f30', shine: '#ffd0d6' },
+  // The boss bar (CU-03): dark violet with a thin gold rim, apart from the hero's coral life and the cyan XP.
+  boss: {
+    track: '#16101e',
+    hi: '#d6b0ff',
+    mid: '#8a46d0',
+    lo: '#4a2088',
+    shine: '#f4e4ff',
+    rim: '#b8902c',
+    rimHi: '#f0d070',
+  },
   xp: { track: '#0e1c2c', hi: '#d4f8ff', mid: '#7ae6ff', lo: '#3a8fb0', shine: '#ffffff' },
 };
 const OUT = '#0b0d14';
@@ -56,8 +69,8 @@ export function ensureBarTextures(scene: Phaser.Scene): void {
         g.fillRect(x, y, w, h);
       };
       r(0, 0, 8, 8, OUT);
-      r(1, 1, 6, 6, STEEL);
-      r(1, 1, 6, 1, STEEL_HI);
+      r(1, 1, 6, 6, c.rim ?? STEEL);
+      r(1, 1, 6, 1, c.rimHi ?? STEEL_HI);
       r(2, 2, 4, 4, c.track);
       r(2, 2, 4, 1, '#000000');
       g.clearRect(0, 0, 1, 1);
