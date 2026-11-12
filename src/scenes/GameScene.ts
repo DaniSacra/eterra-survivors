@@ -1620,7 +1620,15 @@ export class GameScene extends Phaser.Scene {
       const e = w.events[iE] as (typeof w.events)[number];
       switch (e.type) {
         case 'levelUp':
-          sound.play('levelUp');
+          // The very first level-up of the player's life is a small party (PX-12): own sound, light on the hero.
+          if (!this.lessonsSeen.has('level')) {
+            this.lessonsSeen.add('level');
+            markLessonSeen('level');
+            this.registry.set('firstLevelUp', true);
+            sound.play('levelUpFirst');
+            if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 700, 0xffe08a, 0.8);
+            this.sparks.burst(w.player.x, w.player.y, 18, 220, 8, 0xffd36a, SPARK.flake, 0.8, true);
+          } else sound.play('levelUp');
           this.levelUpPulse();
           // With level-ups queued, the open LevelUp scene refreshes itself for the next one.
           if (!this.scene.isActive(SCENES.levelUp)) this.scene.launch(SCENES.levelUp, { world: w });

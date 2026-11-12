@@ -45,6 +45,16 @@ export const SOUNDS = {
     vol: 0.11,
     notes: [0, 4, 7, 12],
   },
+  /** The first level-up of a player's life: a longer, brighter rise than the usual one (PX-12). */
+  levelUpFirst: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 523,
+    to: 523,
+    dur: 0.09,
+    vol: 0.13,
+    notes: [0, 4, 7, 12, 16, 19, 24],
+  },
   chest: {
     kind: 'synth',
     wave: 'triangle',

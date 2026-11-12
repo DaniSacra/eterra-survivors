@@ -5,10 +5,10 @@ import type { World } from './world';
  * The basics a new player is told once, in this order of priority (shown as short tips, never blocking). `charges`
  * is not picked by `nextLesson`: the level-up screen teaches Trocar, Pular and Banir on the second run (PX-09).
  */
-export const LESSON_IDS = ['move', 'auto', 'gems', 'life', 'elite', 'boss', 'charges'] as const;
+export const LESSON_IDS = ['move', 'auto', 'gems', 'life', 'elite', 'boss', 'charges', 'level'] as const;
 export type LessonId = (typeof LESSON_IDS)[number];
-/** The lessons `nextLesson` can pick (`charges` is taught by its own screen). */
-export type CoachLesson = Exclude<LessonId, 'charges'>;
+/** The lessons `nextLesson` can pick (`charges` and `level`, the first level-up's party, belong to their own screens). */
+export type CoachLesson = Exclude<LessonId, 'charges' | 'level'>;
 
 /** Seconds between two lessons, and how long into the run each one may start. */
 export const LESSON_GAP = 7;

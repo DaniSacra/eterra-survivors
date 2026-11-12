@@ -137,18 +137,32 @@ export class LevelUpScene extends Phaser.Scene {
         this.armed = true;
       });
     }
-    label(
-      this,
-      besideStrip || panel === 'right' ? cx : width / 2,
-      side ? top - 28 : top - 40,
-      t.levelUp.title,
-      side ? 26 : 30,
-      {
-        bold: true,
-        color: UI.gold,
-        stroke: true,
-      },
-    );
+    const titleX = besideStrip || panel === 'right' ? cx : width / 2;
+    const titleY = side ? top - 28 : top - 40;
+    const title = label(this, titleX, titleY, t.levelUp.title, side ? 26 : 30, {
+      bold: true,
+      color: UI.gold,
+      stroke: true,
+    });
+    // The first level-up of a player's life: the title swells and gold sparks fly out of it (PX-12).
+    if (this.registry.get('firstLevelUp') === true && !this.again) {
+      this.registry.set('firstLevelUp', false);
+      title.setScale(1.7);
+      this.tweens.add({ targets: title, scale: 1, duration: 500, ease: 'Back.easeOut' });
+      for (let i = 0; i < 14; i++) {
+        const a = (i / 14) * Math.PI * 2;
+        const star = this.add.circle(titleX, titleY, 3, 0xffd36a);
+        this.tweens.add({
+          targets: star,
+          x: titleX + Math.cos(a) * 140,
+          y: titleY + Math.sin(a) * 50,
+          alpha: 0,
+          duration: 700,
+          ease: 'Quad.easeOut',
+          onComplete: () => star.destroy(),
+        });
+      }
+    }
     const owned = w.weapons;
     const known = save.elos;
     this.cards = opts.map((opt, i) => {
