@@ -185,6 +185,8 @@ export const TINT = {
 };
 /** Damage numbers: normal and strong hits. */
 export const DAMAGE_TEXT = { color: '#ffffff', strong: '#ffd870', stroke: '#1a1424' };
+/** Segments of Tempestade's jump line. */
+const CHAIN_SEGS = 5;
 /** Lightning layers: width factor, color (-1 = the bolt's color), alpha. Preallocated. */
 const BOLT_LAYERS: readonly [number, number, number][] = [
   [1.6, INK, 0.9],
@@ -564,17 +566,41 @@ function drawBolt(
   const fade = 1 - u;
   const r = b.radius;
   if (b.link) {
-    // Tempestade's jump: a zigzag from enemy to enemy (outline, colour, white core) and a spark where it lands.
-    const mx = (b.fromX + b.x) / 2 + (hash(b.x, b.y, 7) - 0.5) * 30;
-    const my = (b.fromY + b.y) / 2 + (hash(b.x, b.y, 8) - 0.5) * 30;
-    for (let i = 0; i < BOLT_LAYERS.length; i++) {
-      const L = BOLT_LAYERS[i] as readonly [number, number, number];
-      top.lineStyle(st.width * 0.6 * L[0], L[1] === -1 ? st.color : L[1], L[2] * fade);
-      top.lineBetween(b.fromX, b.fromY, mx, my);
-      top.lineBetween(mx, my, b.x, b.y);
+    // Tempestade's jump: a violet zigzag from enemy to enemy in whole 2 px steps (cold halo, outline, colour, white
+    // core), its shape re-rolled a few times over its life like a live arc, and a star of lightning where it lands.
+    const dx = b.x - b.fromX;
+    const dy = b.y - b.fromY;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len;
+    const ny = dx / len;
+    const roll = Math.floor(u * 6);
+    let px = b.fromX;
+    let py = b.fromY;
+    for (let seg = 1; seg <= CHAIN_SEGS; seg++) {
+      const f = seg / CHAIN_SEGS;
+      const off = seg === CHAIN_SEGS ? 0 : (hash(b.x + seg, b.y, 7 + roll) - 0.5) * Math.min(26, len * 0.35);
+      const qx = Math.round((b.fromX + dx * f + nx * off) / 2) * 2;
+      const qy = Math.round((b.fromY + dy * f + ny * off) / 2) * 2;
+      top.lineStyle(st.width * 1.5, st.color, 0.18 * fade);
+      top.lineBetween(px, py, qx, qy);
+      for (let i = 0; i < BOLT_LAYERS.length; i++) {
+        const L = BOLT_LAYERS[i] as readonly [number, number, number];
+        top.lineStyle(st.width * 0.85 * L[0], L[1] === -1 ? st.color : L[1], L[2] * fade);
+        top.lineBetween(px, py, qx, qy);
+      }
+      px = qx;
+      py = qy;
     }
-    top.fillStyle(0xffffff, 0.9 * fade);
-    disc(top, b.x, b.y, 4 + 4 * fade);
+    const hit = VFX.chainHit;
+    fxSprites.putFrame(
+      vfxKey('chainHit'),
+      Math.min(hit.frames - 1, Math.floor(u * hit.frames)),
+      hit.anchor[0],
+      hit.anchor[1],
+      b.x,
+      b.y,
+      0.8,
+    );
     return;
   }
   if (st.burst) {

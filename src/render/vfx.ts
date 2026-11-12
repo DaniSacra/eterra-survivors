@@ -33,6 +33,8 @@ export const VFX = {
   furySpin: { frames: 7, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
   /** Chama de Yah's wave: a ring of holy fire running out to 90 art px (scaled to the pulse radius), flame tongues riding it. */
   pulse: { frames: 8, w: 224, h: 224, anchor: [0.5, 0.5], fps: 14 },
+  /** Tempestade's jump landing: a violet star of lightning with a ring (38 art px) and sparks; 6 frames (the 9th-frame tail is blank). */
+  chainHit: { frames: 6, w: 96, h: 96, anchor: [0.5, 0.5], fps: 16 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;
