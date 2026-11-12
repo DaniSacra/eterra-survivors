@@ -135,7 +135,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
   Valmor (Rato de Cova, morcego cinza, Rato Gigante, aranha, Rato Ladrão), gerado uma vez (no sprite ou ao carregar),
   nunca por efeito por quadro. Chão de neve fica (decisão de 12/11). Liga: A-02, A-05, CC-06 (Bestiário usa o mesmo).
 
-**PX-03 [4] · Herói por cima de chefe e elites; chefe translúcido em cima do herói** · visual + impl · P · proposto
+**PX-03 [4] · Herói por cima de chefe e elites; chefe translúcido em cima do herói** · visual + impl · P · feito (2026-11-12: o herói já é desenhado acima de chefe e elites, profundidade 13,1 contra 7 e 6, conferido com a Mãe-Aranha em cima do Aldo; como o chefe nunca o cobre, a translucidez não é necessária)
 - O quê: profundidade do herói acima de chefe e elites; quando o retângulo do chefe cobre o herói, a parte de cima do
   chefe (recorte do mesmo quadro) fica com alfa ~0,6. Só um chefe por vez: custo de uma checagem por quadro, sem
   alocar. Liga: A-02 (herói sempre visível).
