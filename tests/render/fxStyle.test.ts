@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ZONE_FILL_MAX } from '../../src/render/fx';
-import fxSource from '../../src/render/fx.ts?raw';
+// Every file of the effects (fx.ts and its families in fxparts/) as one source text.
+const fxFiles = import.meta.glob(['../../src/render/fx.ts', '../../src/render/fxparts/*.ts'], {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+const fxSource = Object.values(fxFiles).join('\n');
 import assetsSource from '../../src/render/assets.ts?raw';
 
 describe('effects keep the pixel look', () => {

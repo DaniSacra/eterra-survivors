@@ -3694,7 +3694,7 @@ em `ART_RES`.
 - O quê: nome do cache com a versão do build e `activate` apagando os outros; só guardar 200; `.catch` no `put`.
 - Aceite: no navegador, depois de dois deploys simulados, um cache só; jogo abre offline.
 
-**PT-03 · `fx.ts` por família** · impl · M · proposto (depois do DD-15)
+**PT-03 · `fx.ts` por família** · impl · M · ✅ feito (2026-11-12; `render/fx.ts` ficou com o `drawFx`, `Moments`, as constantes públicas e os reexports (516 linhas); `fxparts/common.ts` (cores de aviso, traços de pixel, `Moments`), `fxparts/weapons.ts` (golpes, raios, auras, zonas, brilho, verbos) e `fxparts/enemies.ts` (inimigos, avisos, chefes, marcas); a divisão foi feita por script e provada igual: o fluxo de chamadas de desenho (Graphics e `fxSprites`) de 12 quadros de uma cena com todas as armas e 84 inimigos tem o mesmo hash antes e depois; o teste `fxStyle` lê todos os arquivos. `weapons.ts` ainda tem ~1100 linhas, dá para separar zonas e auras depois)
 
 - Por quê: 02-code B10. `render/fx.ts` tem 2313 linhas (arma, Elo, chefe, aviso, marca, zona); é o arquivo de maior
   custo de mudança do render, e as rodadas PF e DD-15 vão mexer nele inteiro.
