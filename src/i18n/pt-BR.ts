@@ -491,6 +491,20 @@ export const t = {
     } satisfies Record<HurtSource, string>,
     won: 'Vitória!',
     lost: 'Fim de jogo',
+    /** The hero's longest run was beaten (PX-16). */
+    record: (time: string) => `Novo recorde: ${time}`,
+    /** The run's gold, on the short end screen (PX-15). */
+    goldEarned: (n: number) => `Ouro ganho: ${n}`,
+    showDetails: 'Ver detalhes',
+    hideDetails: 'Esconder detalhes',
+    /** A lost run with no named killer: advice from where most of the damage came from. */
+    hurtTip: {
+      contact: 'Não deixe o bando te cercar: ande sempre, em curva.',
+      shot: 'Tiros vêm em linha reta: ande de lado, não para trás.',
+      leap: 'Saia do círculo no chão antes que o inimigo caia.',
+      ground: 'Saia da marca brilhante no chão antes que ela termine de encher.',
+      boss: 'O chefe avisa antes de bater: saia do anel ou da linha.',
+    } satisfies Record<HurtSource, string>,
     /** PROVISIONAL (CB-04): neutral lines that name no event, person or place from the story; Daniel rewrites. */
     lostByStage: {
       valmor: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,

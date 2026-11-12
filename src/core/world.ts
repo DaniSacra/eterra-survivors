@@ -126,6 +126,8 @@ export class World {
   /** How many of each enemy type are alive (the spawner keeps each under its def's `max`). */
   readonly alive: Partial<Record<EnemyId, number>> = {};
   /** Damage the hero took this run, by where it came from (the sim's "DANO POR FONTE"). */
+  /** The enemy type that landed the blow that killed the hero (null: a shot, a mark on the ground or nothing yet). */
+  killer: EnemyId | null = null;
   readonly hurtBy: Record<HurtSource, number> = { contact: 0, shot: 0, leap: 0, ground: 0, boss: 0 };
   /** Seconds left of Sopro de Geada (enemies frozen). */
   freeze = 0;

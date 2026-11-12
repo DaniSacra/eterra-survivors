@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
+import { hurtHero } from '../../src/core/elos';
 import { dropPickup } from '../../src/core/pickups';
 import {
   applyUpgrade,
@@ -237,5 +238,18 @@ describe('weaponAdded event', () => {
     w.events.length = 0;
     applyUpgrade(w, { kind: 'weapon', id: 'frost', level: 2 });
     expect(w.events.some((e) => e.type === 'weaponAdded')).toBe(false);
+  });
+});
+
+describe('killer', () => {
+  it('remembers the enemy type that struck the fatal blow, and only that blow', () => {
+    const w = quietWorld();
+    const e = spawnEnemy(w, 'spider', w.player.x + 5, w.player.y);
+    hurtHero(w, e, 1);
+    expect(w.killer).toBeNull();
+    w.player.iframes = 0;
+    w.player.hp = 1;
+    hurtHero(w, e, 50);
+    expect(w.killer).toBe('spider');
   });
 });

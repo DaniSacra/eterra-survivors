@@ -298,6 +298,8 @@ export class GameScene extends Phaser.Scene {
   private moments = newMoments();
   /** True once this run has forged an Elo: only the first one of a life gets the big moment. */
   private bigForgeDone = false;
+  /** This run beat the hero's longest one. */
+  private newBest = false;
   /** A level was gained and its ring waits for the choice to close. */
   private levelRingPending = false;
   private rewardIcon!: Phaser.GameObjects.Image;
@@ -1541,6 +1543,9 @@ export class GameScene extends Phaser.Scene {
     const won = w.state === 'won';
     const next = STAGE_IDS[STAGE_IDS.indexOf(w.stageId) + 1];
     const opens = won && next !== undefined && !stageUnlocked(loadSave(), next) ? next : null;
+    // A new longest run for this hero (not the very first one): shown on the end screen (PX-16).
+    const before = loadSave().records[w.character]?.bestTime ?? 0;
+    this.newBest = before > 0 && w.time > before;
     const recorded = recordRun(summarizeRun(w));
     this.newElos = recorded.elos;
     this.newAchievements = recorded.achievements;
@@ -1612,6 +1617,7 @@ export class GameScene extends Phaser.Scene {
       newElos: this.newElos,
       newAchievements: this.newAchievements,
       vigilRecord: this.vigilRecord,
+      record: this.newBest,
     });
   }
 
@@ -1752,6 +1758,7 @@ export class GameScene extends Phaser.Scene {
               newElos: this.newElos,
               newAchievements: this.newAchievements,
               vigilRecord: this.vigilRecord,
+              record: this.newBest,
             }),
           );
           break;

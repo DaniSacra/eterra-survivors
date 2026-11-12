@@ -2,6 +2,7 @@ import { ELO_DISCOVERY_GOLD, EVOLVED_IDS } from '../data/evolutions';
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
 import { almostElo, hurtShare, passiveReport, reportExtent, weaponReport } from '../core/report';
+import type { HurtSource } from '../core/enemyShots';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
@@ -40,13 +41,22 @@ export class EndScene extends Phaser.Scene {
     newElos?: WeaponId[];
     newAchievements?: AchievementId[];
     vigilRecord?: boolean;
+    record?: boolean;
   }): void {
     this.vigilRecord = !!data.vigilRecord;
+    this.record = !!data.record;
+    // The numbers hide behind "Ver detalhes"; a player who opened them keeps them open.
+    this.details = this.registry.get('endDetails') === true;
     this.world = data.world;
     this.unlocked = data.unlocked ?? null;
     this.newElos = data.newElos ?? [];
     this.newAchievements = data.newAchievements ?? [];
   }
+
+  /** The hero's longest run so far was beaten (set by the game when the run is banked). */
+  private record = false;
+  /** The table (time, kills, weapons, passives) is open. */
+  private details = false;
 
   create(): void {
     // Above the HUD, which the level-up and pause overlays bring to the top.
@@ -80,7 +90,7 @@ export class EndScene extends Phaser.Scene {
     // A Noite Sem Fim comes after a victory: its end reads as one too.
     const won = w.state === 'won' || w.endless;
     // Lying down: two columns (the story and notes on the left, the weapons on the right).
-    const wide = isShort(this) ? width >= 600 : width >= 700 && level >= 2;
+    const wide = this.details && (isShort(this) ? width >= 600 : width >= 700 && level >= 2);
     const pw = wide ? Math.min(940, width - 16) : Math.min(600, width - 16);
     const left = cx - pw / 2 + 14;
     const small = pw < 460;
@@ -97,11 +107,14 @@ export class EndScene extends Phaser.Scene {
     const colW = wide ? (pw - 42) / 2 : pw - 28;
     const rightX = wide ? left + colW + 14 : left;
     let y = this.header(left, 14, colW, won, small || wide || level >= 2);
-    y = this.summary(left, y, colW, colW < 440 ? 2 : 4);
     let yr = wide ? 14 : y;
-    yr = this.weapons(rightX, yr, colW, level >= 2);
-    if (!wide) y = yr;
-    y = this.passives(left, y, colW);
+    if (this.details) {
+      y = this.summary(left, y, colW, colW < 440 ? 2 : 4);
+      yr = wide ? 14 : y;
+      yr = this.weapons(rightX, yr, colW, level >= 2);
+      if (!wide) y = yr;
+      y = this.passives(left, y, colW);
+    } else y = this.goldLine(left + colW / 2, y, place);
     y = this.notes(left + colW / 2, y + 2, colW, level);
     y = Math.max(y, wide ? yr : 0);
     const contentEnd = this.children.list.length;
@@ -136,6 +149,29 @@ export class EndScene extends Phaser.Scene {
       by += 54;
       buttons.push(button(this, cx, by, pw - 28, 46, shop[1], shop[0]));
     }
+    // The numbers (time, kills, weapons, passives) open and close here.
+    by += 54;
+    buttons.push(
+      button(
+        this,
+        cx,
+        by,
+        pw - 28,
+        40,
+        () => {
+          this.registry.set('endDetails', !this.details);
+          this.scene.restart({
+            world: this.world,
+            unlocked: this.unlocked,
+            newElos: this.newElos,
+            newAchievements: this.newAchievements,
+            vigilRecord: this.vigilRecord,
+            record: this.record,
+          });
+        },
+        this.details ? t.end.hideDetails : t.end.showDetails,
+      ),
+    );
     const total = by + 37;
     panel.setSize(pw, total);
     if (!place) return total;
@@ -195,6 +231,21 @@ export class EndScene extends Phaser.Scene {
       }).setOrigin(0.5, 0);
       y += line.height + 6;
     }
+    if (this.record && !vigil && !world.abandoned) {
+      label(this, cx, y, t.end.record(formatTime(world.time)), 15, { bold: true, color: UI.gold }).setOrigin(
+        0.5,
+        0,
+      );
+      y += 22;
+    }
+    // And one piece of advice for the next run, from the enemy that struck the last blow, else from the main source.
+    if (shares.length > 0) {
+      const tip =
+        (world.killer && t.bestiary.tips[world.killer]) ||
+        t.end.hurtTip[(shares[0] as { source: HurtSource }).source];
+      const line = label(this, cx, y, tip, 14, { color: UI.text, wrap: w }).setOrigin(0.5, 0);
+      y += line.height + 6;
+    }
     if (vigil && this.vigilRecord) {
       label(this, cx, y, t.end.vigilRecord, 15, { bold: true, color: UI.gold }).setOrigin(0.5, 0);
       y += 22;
@@ -211,6 +262,26 @@ export class EndScene extends Phaser.Scene {
       y += 19;
     }
     return y + 28;
+  }
+
+  /** The run's gold in one line, counting up (PX-15). Returns the next y. */
+  private goldLine(cx: number, y: number, animate: boolean): number {
+    const gold = Math.floor(this.world.gold);
+    const line = label(this, cx, y, t.end.goldEarned(gold), 20, { bold: true, color: UI.gold }).setOrigin(
+      0.5,
+      0,
+    );
+    if (animate && gold > 0) {
+      const count = { n: 0 };
+      line.setText(t.end.goldEarned(0));
+      this.tweens.add({
+        targets: count,
+        n: gold,
+        duration: 900,
+        onUpdate: () => line.setText(t.end.goldEarned(Math.floor(count.n))),
+      });
+    }
+    return y + 36;
   }
 
   /** Time, kills, level and gold: `per` cells a row. */

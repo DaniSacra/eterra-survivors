@@ -121,6 +121,7 @@ export function hurtHero(
   const before = p.hp;
   const hit = hurtPlayer(p, amount);
   world.hurtBy[source] += before - p.hp;
+  if (hit && p.hp <= 0 && attacker) world.killer = attacker.type;
   return hit;
 }
 

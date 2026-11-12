@@ -174,29 +174,29 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 **PX-10 [11] · Arma nova anunciada e primeiro golpe em destaque** · ui + vfx · P · feito (2026-11-12: evento `weaponAdded`, faixa "Nova arma: <nome>" e luz suave no herói; o destaque do golpe é só essa luz)
 - O quê: aviso no topo "Nova arma: <nome>" e o primeiro golpe com um destaque leve na cor da arma, sem tremer a tela.
 
-**PX-11 [12] · Primeiro Elo da vida como evento; "Você descobriu N de 13 Elos"** · vfx + ui + impl · M · proposto
+**PX-11 [12] · Primeiro Elo da vida como evento; "Você descobriu N de 13 Elos"** · vfx + ui + impl · M · feito (2026-11-12: `HudScene.firstForge`, câmera lenta de 2 s só no primeiro Elo da vida; "Você descobriu N de 13 Elos" na tela final)
 - O quê: só no primeiro Elo da vida o `forgeMoment` cresce (tela escurece, os dois ícones se fundem, o nome aparece,
   ~1,5 s, toque pula); os seguintes ficam como hoje. No Fim, "Você descobriu N de 13 Elos". Liga: NB-05, D-03, D-02.
 
 ### Fase 4 · Momentos de conquista
 
-**PX-12 [13] · Primeiro "Subiu de nível!" com luz no herói e som próprio** · vfx + impl · P · proposto. Liga: RF-04.
+**PX-12 [13] · Primeiro "Subiu de nível!" com luz no herói e som próprio** · vfx + impl · P · feito (2026-11-12: lição `level`, som `levelUpFirst`, título que incha com faíscas, luz no herói). Liga: RF-04.
 
-**PX-13 [14] · Baú de elite com festa** · vfx + ui + impl · M · proposto
+**PX-13 [14] · Baú de elite com festa** · vfx + ui + impl · M · feito (2026-11-12: roleta de ~0,7 s no HUD que para no prêmio do core, luz dourada; toque na caixa pula; teste de mesma semente, mesmo prêmio)
 - O quê: luz, roleta curta dos prêmios (≤ 1,2 s, toque pula) e som; o prêmio é decidido no core (`CHEST`), a festa só
   mostra (teste no core). Liga: NB-05, RF-04.
 
-**PX-14 [15] · Entrada e morte da Mãe-Aranha** · vfx + impl · M · proposto
+**PX-14 [15] · Entrada e morte da Mãe-Aranha** · vfx + impl · M · pendente (resto da Fase 4)
 - O quê: câmera se afasta só no desenho (a vista do core não muda, para não mexer em nascimento e mira), o bando recua
   (`clearCrowd`, já existe), ela desce de uma teia com o nome grande; morte com câmera lenta curta, queda e chuva de
   gemas e moedas (os valores do core não mudam). Liga: FT-12, CU-03, NE-05.
 
-**PX-15 [16] · Tela de Vitória em ordem, com o próximo herói como meta** · ui + impl · M · proposto
+**PX-15 [16] · Tela de Vitória em ordem, com o próximo herói como meta** · ui + impl · M · feito em parte (2026-11-12: tela curta com título, ouro contando, nova fase, conquistas e meta do próximo herói em texto; números atrás de "Ver detalhes", lembrado na sessão; faltam retrato e barra do herói)
 - O quê: "Vitória!" com o herói; ouro contando; cartão "Nova fase: <fase>"; conquistas; números em "Ver detalhes". A meta
   é o próximo herói (retrato e barra) enquanto houver herói bloqueado; depois a Loja. Liga: D-02, CC-04, NU-05, CU-08 e a
   decisão "botão da Loja no fim só quando algo cabe no ouro".
 
-**PX-16 [17] · Tela de derrota: recorde, ouro, próximo herói, "Caiu por" e uma dica** · ui + impl · M · proposto
+**PX-16 [17] · Tela de derrota: recorde, ouro, próximo herói, "Caiu por" e uma dica** · ui + impl · M · feito em parte (2026-11-12: "Novo recorde", ouro ganho, "Caiu por" e dica do inimigo do golpe final (`world.killer`, dicas do Bestiário) ou da fonte principal; falta a barra do herói)
 - O quê: dica ligada ao que mais feriu (`hurtShare` do CU-02) e ao inimigo que deu o golpe final, reaproveitando as dicas
   do Bestiário já aprovadas. Liga: CU-02, CB-04, NU-05.
 
@@ -225,7 +225,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 **PX-21 · "Jogue partidas para ganhar ouro"** · ui · P · feito em Heróis (2026-11-12: a linha aparece sob o título enquanto o cofre não paga o herói mais barato; falta o Menu com 0 de ouro, junto de PX-19). A tela final agora mostra primeiro a meta do próximo herói ("faltam 480 para liberar Lyra") e só depois a Loja
 - O quê: sob a barra do herói bloqueado (PX-05) e no Menu com 0 de ouro, uma linha que diz de onde vem o ouro.
 
-**PX-22 · Meta curta na primeira partida** · ui + impl · P · proposto (achado 5)
+**PX-22 · Meta curta na primeira partida** · ui + impl · P · feito (2026-11-12: lições `elite` e `boss` no coach)
 - O quê: duas lições a mais no `core/coach.ts`: quando a primeira elite aparece ("Derrube a <elite>: ela deixa um
   baú") e por volta de 2:00 ("Aguente até 10:00: a <chefe> vem"). Uma vez só cada, com a opção Dicas.
 
