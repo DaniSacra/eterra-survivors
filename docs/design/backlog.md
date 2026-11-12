@@ -96,6 +96,141 @@ reescritos abaixo.
 
 ---
 
+## Primeira experiência (Daniel 2026-11-12)
+
+Pedido do Daniel: o jogador novo, de Aldo em Valmor, no celular. game-director decide, ui-designer faz as telas,
+visual-director a arte, vfx-director os efeitos, balance-tester mede. Textos com lore esperam a aprovação do Daniel.
+Um commit por passo (testes, lint, typecheck e build verdes), push ao fim de cada fase, capturas em 390x844 e 1000x680
+a cada fase. O número entre colchetes é o item do Daniel. "Achado" é o que o Claude viu jogando como novato em
+2026-11-12 (save limpo, 420x820, Valmor com Aldo):
+
+- **Achado 1:** a carta de nível é a tela mais pesada ("Nova arma · Automática", "Elo de ...: arma 1/7 · Atração 0/5",
+  Trocar/Pular/Banir sem explicação, tabela de atributos cheia de traços). Cobrem: PX-07, PX-08, PX-09; falta: PX-20.
+- **Achado 2:** ninguém diz como ganhar ouro ("Liberar: 800 ouro" com 0 de ouro). Cobrem em parte: PX-05, PX-19;
+  falta: PX-21.
+- **Achado 3:** a meta "liberar o próximo herói" some no Fim. Cobrem: PX-15, PX-16.
+- **Achado 4:** o Elo fica invisível até virar jargão na carta. Cobrem: PX-08, PX-11.
+- **Achado 5:** a primeira partida não tem meta curta, e o novato morre por volta de 6:43 sem saber o que mudar.
+  Cobre em parte: PX-16 (dica depois da morte); falta: PX-22 (meta durante a partida).
+- **Achado 6:** a primeira dica mostrava teclas no celular. ✅ feito (2026-11-12, ON-01).
+
+Ordem recomendada pelo game-director (o Daniel decide): Fase 1 → Fase 2 (com PX-15 e PX-16 puxados para cá na parte
+"próximo herói") → Fase 3 → Fase 4 → Fase 6. A medição da Fase 5 começa em paralelo já na Fase 1 (balance-tester);
+a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser gerada em paralelo pelo visual-director.
+
+### Fase 1 · Celular
+
+**PX-01 [2] · Zoom de ~400 px de mundo no celular em pé** · impl + bal · P · proposto
+- O quê: `fitCamera` usa um lado mínimo próprio para retrato (altura > largura), por exemplo `config.view.portraitWorldSide`
+  (testar 380, 400, 420); deitado e PC seguem com `minWorldSide` 480 (1000x680 fica igual). Em 390x844: zoom ~0,98, Aldo
+  com ~39 px em vez de ~30.
+- Medir: o sim usa `setView(480, 800)` (`tests/lab/bot.ts`); rodar também com a vista do retrato novo (400x866). O raio de
+  nascimento quase não muda (a vista fica mais estreita e mais alta), mas a mira que só vê a tela (`nearestVisible`,
+  B-04, `randomEnemyNear`) alcança menos dos lados: conferir o DPS das armas de mira e do Raio/Geada no sim.
+- Liga: A-04 (escala dos números), B-04, FT da Estrada (a estrada de 320 cabe em 400 com ~40 px de mata de cada lado),
+  L-01. Aceite: valor escolhido e sim de Valmor antes e depois no retrato sem mudar vitórias mais de 5 pontos.
+
+**PX-02 [3] · Contorno escuro de 1 px nos inimigos comuns de Valmor** · visual · P · proposto
+- O quê: contorno de 1 px de arte (2 px de textura, `ART_RES`) escuro e tingido nos quadros dos inimigos comuns de
+  Valmor (Rato de Cova, morcego cinza, Rato Gigante, aranha, Rato Ladrão), gerado uma vez (no sprite ou ao carregar),
+  nunca por efeito por quadro. Chão de neve fica (decisão de 12/11). Liga: A-02, A-05, CC-06 (Bestiário usa o mesmo).
+
+**PX-03 [4] · Herói por cima de chefe e elites; chefe translúcido em cima do herói** · visual + impl · P · proposto
+- O quê: profundidade do herói acima de chefe e elites; quando o retângulo do chefe cobre o herói, a parte de cima do
+  chefe (recorte do mesmo quadro) fica com alfa ~0,6. Só um chefe por vez: custo de uma checagem por quadro, sem
+  alocar. Liga: A-02 (herói sempre visível).
+
+### Fase 2 · Caminho até a primeira partida
+
+**PX-04 [5] · Primeira vez: Começar vai direto à história de Valmor** · ui + impl · cortado
+- Decisão do Daniel (2026-11-12): não pular a tela de Heróis; ver os outros heróis e fases dá ao jogador novo o
+  objetivo de longo prazo. Fluxo mantido (Começar, Heróis, Fase) com Aldo já escolhido e Partir em destaque; o peso
+  passa para PX-05 (silhuetas com cadeado e barra de ouro) e PX-21 (como ganhar ouro). A história de Valmor aparece
+  na tela da Fase.
+
+**PX-05 [6] · Herói bloqueado com cadeado e barra de ouro** · ui + visual · P · proposto
+- O quê: o mesmo cadeado das fases e a barra "320 de 800" no lugar de "Liberar: 800 ouro". Liga: D-06, NB-09, NU-10.
+
+**PX-06 [7] · História de Valmor reescrita para a fase de ratos, aranhas e Mãe-Aranha** · game-director · P · proposto
+(lore: texto com o Daniel antes de qualquer código)
+- O quê: substitui `stageStory.valmor` (aprovado em 2026-11-11, fala de covas e mortos, que hoje são da Cripta). A
+  Mãe-Aranha e a "praga" são invenção deste jogo (FT-12, FT-13), não do cânone: perguntar ao Daniel se entram na história.
+
+### Fase 3 · Entender as armas
+
+**PX-07 [8] · Uma frase do que cada arma, passiva e Elo faz** · game-director + ui + impl · M · proposto (frases com o Daniel)
+- O quê: 13 armas, 10 passivas, 13 Elos = 36 frases curtas em `pt-BR.ts`; na carta, a frase vem antes dos números, que
+  ficam menores. A frase do Elo só aparece depois da forja (NU-02). Liga: NU-04, CU-05, NU-07.
+
+**PX-08 [9] · Receita de Elo em imagem** · ui + visual · M · proposto
+- O quê: ícone da arma e da passiva, cada um com barrinha de nível, e um "?" dourado no lugar do Elo (nome secreto até a
+  forja, NU-02); etiqueta "Combina com a sua <arma>" quando a opção avança uma receita. A mesma peça na Pausa
+  (`eloStatus`, CU-04), para uma leitura só. Substitui a linha "Elo de ...: arma 1/7 · Atração 0/5".
+
+**PX-09 [10] · Trocar, Pular e Banir só a partir da segunda partida** · ui + impl · P · proposto
+- O quê: na primeira partida os três botões não aparecem (as cargas não se perdem); na primeira carta da segunda
+  partida, uma linha curta explica os três, uma vez só (`lessonsSeen`, ON-01). Liga: NB-11, CU-06.
+
+**PX-10 [11] · Arma nova anunciada e primeiro golpe em destaque** · ui + vfx · P · proposto
+- O quê: aviso no topo "Nova arma: <nome>" e o primeiro golpe com um destaque leve na cor da arma, sem tremer a tela.
+
+**PX-11 [12] · Primeiro Elo da vida como evento; "Você descobriu N de 13 Elos"** · vfx + ui + impl · M · proposto
+- O quê: só no primeiro Elo da vida o `forgeMoment` cresce (tela escurece, os dois ícones se fundem, o nome aparece,
+  ~1,5 s, toque pula); os seguintes ficam como hoje. No Fim, "Você descobriu N de 13 Elos". Liga: NB-05, D-03, D-02.
+
+### Fase 4 · Momentos de conquista
+
+**PX-12 [13] · Primeiro "Subiu de nível!" com luz no herói e som próprio** · vfx + impl · P · proposto. Liga: RF-04.
+
+**PX-13 [14] · Baú de elite com festa** · vfx + ui + impl · M · proposto
+- O quê: luz, roleta curta dos prêmios (≤ 1,2 s, toque pula) e som; o prêmio é decidido no core (`CHEST`), a festa só
+  mostra (teste no core). Liga: NB-05, RF-04.
+
+**PX-14 [15] · Entrada e morte da Mãe-Aranha** · vfx + impl · M · proposto
+- O quê: câmera se afasta só no desenho (a vista do core não muda, para não mexer em nascimento e mira), o bando recua
+  (`clearCrowd`, já existe), ela desce de uma teia com o nome grande; morte com câmera lenta curta, queda e chuva de
+  gemas e moedas (os valores do core não mudam). Liga: FT-12, CU-03, NE-05.
+
+**PX-15 [16] · Tela de Vitória em ordem, com o próximo herói como meta** · ui + impl · M · proposto
+- O quê: "Vitória!" com o herói; ouro contando; cartão "Nova fase: <fase>"; conquistas; números em "Ver detalhes". A meta
+  é o próximo herói (retrato e barra) enquanto houver herói bloqueado; depois a Loja. Liga: D-02, CC-04, NU-05, CU-08 e a
+  decisão "botão da Loja no fim só quando algo cabe no ouro".
+
+**PX-16 [17] · Tela de derrota: recorde, ouro, próximo herói, "Caiu por" e uma dica** · ui + impl · M · proposto
+- O quê: dica ligada ao que mais feriu (`hurtShare` do CU-02) e ao inimigo que deu o golpe final, reaproveitando as dicas
+  do Bestiário já aprovadas. Liga: CU-02, CB-04, NU-05.
+
+### Fase 5 · Economia da primeira hora
+
+**PX-17 [18] · Segundo herói na 2ª ou 3ª partida, Valmor vencida entre a 3ª e a 5ª** · bal + game-director · M · proposto
+(preços com o Daniel antes de mudar)
+- O quê: perfil "novato" no sim (bot que morre perto de 6:43 sem Loja) e, a partir dele, a proposta de preço de Lyra e
+  Teo, do ouro da primeira vitória e de um presente de primeira vitória. Liga: D-06, PB-02, linha `LOJA`, S-01.
+
+### Fase 6 · Tela inicial
+
+**PX-18 [19] · Novo cartaz do Menu** · visual · M · proposto
+- O quê: PixelLab, mesmo estilo; Aldo na frente, horda de ratos e aranhas na neve, gemas azuis, Mãe-Aranha no telhado da
+  igreja; saem Cavaleiro Negro, fantasma, bruxa cortada e Golem; outros heróis ficam, os bloqueados como silhueta com
+  cadeado. Registrar em `docs/art/credits.md`. Liga: A-13, PA-05.
+
+**PX-19 [20] · Linha curta sob o título e ouro visível no Menu** · ui · P · proposto (linha com o Daniel)
+
+### Itens que a lista do Daniel não cobre (propostos pelo game-director)
+
+**PX-20 · Carta de nível enxuta na primeira partida** · ui + impl · P · proposto (achado 1)
+- O quê: tabela de atributos só com as linhas que mudam (sem traços); a etiqueta de categoria em palavra simples ou fora
+  da primeira partida; a primeira carta da vida com uma linha "Escolha uma: arma nova ou melhoria" (ON-01).
+
+**PX-21 · "Jogue partidas para ganhar ouro"** · ui · P · proposto (achado 2)
+- O quê: sob a barra do herói bloqueado (PX-05) e no Menu com 0 de ouro, uma linha que diz de onde vem o ouro.
+
+**PX-22 · Meta curta na primeira partida** · ui + impl · P · proposto (achado 5)
+- O quê: duas lições a mais no `core/coach.ts`: quando a primeira elite aparece ("Derrube a <elite>: ela deixa um
+  baú") e por volta de 2:00 ("Aguente até 10:00: a <chefe> vem"). Uma vez só cada, com a opção Dicas.
+
+---
+
 ## Etapa 0: Simulador (medir antes de mexer)
 
 **S-01 · Simulador de partidas completas** · impl · M · ✅ feito
