@@ -1120,3 +1120,21 @@ Pendente: as Espadas de Elun e a Aura continuam sem atingir 1/4 do DPS real da m
 (Daniel): um verbo que traga a multidão (puxão) ou alcance muito maior nas Espadas. Tempestade e Espada de Fogo estão no teto da faixa `auto`
 do lab, então só sobem mais com a base mais fraca ou com a banda `auto` revista. Reteste à mão: Cripta e Valmor com meia Loja; Aura
 de Yah no nível máximo (raio 150, dano por tique menor).
+
+## PE-02, segunda rodada (2026-11-12): alcance das Espadas de Elun
+
+Decisão tomada sem o Daniel (para ele rever): como o problema é alcance e não dano por golpe, as Espadas de Elun ganham raio de
+órbita maior nos níveis altos: N5 88 → 96, N7 130 (antes 88) com dano N7 14 → 10,5, para o lab continuar dentro da banda `area`
+(53%, banda 40–55%). Testei duas alternativas e descartei: empurrão menor (20) e puxão para dentro (-120), ambos pioraram o DPS real
+(35 e 22 contra 47).
+
+| Medida (16–24 sementes)            | Antes     | Depois    |
+| ---------------------------------- | --------- | --------- |
+| `REACH` das Espadas (inimigos/s)   | 0,1 a 0,2 | 0,5 a 1,0 |
+| DPS real das Espadas, nível máximo | 15 a 25   | 35 a 47   |
+
+Tabela de metas: tudo `ok`, exceto Cripta sem Loja em 11% (meta 0–10%, dentro do ruído de ±8 pontos). `ELO X` de Tempestade 2,2x e
+Espada de Fogo 2,2x seguem abaixo de 2,5x (no teto da banda `auto`).
+
+**Segue pendente:** as Espadas ainda ficam longe de 1/4 do DPS real da melhor arma `aimed` (~136). Com o bot, o alcance dobrou mas
+a multidão que chega perto continua pequena; só um verbo novo (decisão de desenho do Daniel) ou a banda `area` revista resolve.

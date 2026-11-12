@@ -3685,7 +3685,7 @@ em `ART_RES`.
   o ouro fracionário (PB-02), o atordoamento que pula o fantasma e a pilha (PB-05) e os furos do spawner (PB-07), todos
   com "sim pendente". Quando o Daniel liberar, a primeira rodada mede tudo isso junto antes de mexer no `mult`.
 
-**PE-02 · As cinco cartas fracas no jogo real** · bal + impl · M · ✅ feito em parte (2026-11-12; Aura 15 → 56, Maça ok, Tempestade 2,2x e Espada de Fogo 2,2x, Espadas de Elun sem ganho: ver `docs/balance-baseline.md`) · absorve o NE-02
+**PE-02 · As cinco cartas fracas no jogo real** · bal + impl · M · ✅ feito em parte (2026-11-12; Aura 15 → 56, Maça ok, Tempestade 2,2x e Espada de Fogo 2,2x, Espadas de Elun: alcance maior em 2026-11-12, REACH 0,1 → 1,0 e DPS real 15–25 → 35–47, ainda abaixo de 1/4 da melhor aimed; falta decisão de desenho do Daniel: ver `docs/balance-baseline.md`) · absorve o NE-02
 
 - Por quê: 01-balance #1, #2, #3, #5. No `REAL DPS` do sim: Aura de Yah **15** (17 corridas; lab 220), Espadas de Elun
   **66** (lab 228), Maça **76** (Lâmina 156, Adagas 336), Tempestade **1,4x** o Raio e Espada de Fogo **1,7x** o Fogo

@@ -301,9 +301,9 @@ export const WEAPONS = {
       { count: 2 },
       { damage: 10.7 },
       { count: 3, spin: 5.8 },
-      { orbitRadius: 88, radius: 12 },
+      { orbitRadius: 96, radius: 12 },
       { count: 4 },
-      { damage: 14, spin: 6.6 },
+      { damage: 10.5, spin: 6.6, orbitRadius: 130 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
