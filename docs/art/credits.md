@@ -50,3 +50,5 @@ Sem gerações novas em 2026-11-11 (revisão de tamanhos): os sprites acima só 
 | 2026-11-12 | Animated effects (PixelLab effects workbench): blast from preset explosion (effect 97d41d6d-d8a6-4abd-b8c7-e3f712f64e01), flame from preset flame (fd808816-4f01-4459-a75a-a7089468bacd), ice from preset crystal_bloom retimed to 12 frames (d9229346-a412-4852-9c64-77534f80becc) | 2x strips in `public/sprites/fx/vfx/` |
 
 | 2026-11-12 | Animated effect: aura (Aura de Yah ring of light and runes) from preset ground_sigil, recoloured gold and stripped of the pentagram, effect id ffa2b1fe-916d-4abf-a85b-0c8430df81cf | 2x strip in `public/sprites/fx/vfx/` |
+
+| 2026-11-12 | Animated effect: shock (mace shock wave rings) from preset shockwave, circular, bone palette, effect id ebcc1aa2-5b44-4697-96c0-b908b4786d95 | 2x strip in `public/sprites/fx/vfx/` |

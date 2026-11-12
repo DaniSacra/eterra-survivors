@@ -66,6 +66,8 @@ const ICE_SPAN = 80;
 const EMBER_SPAN = 70;
 /** The aura ring sprite's outer ring, art px from the centre. */
 const AURA_RING = 57;
+/** The shock wave sprite's outer ring, art px from the centre. */
+const SHOCK_RING = 50;
 /** Espada de Fogo's burning ground: the flames' light orange. */
 const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
@@ -137,7 +139,6 @@ const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
 };
 /** Mace blows: the dust, the dent where the head lands, pebbles, and the Elo's glow. */
 const DUST_LIGHT = 0xe8dcc8;
-const DUST_DARK = 0x6a5a48;
 const DENT = 0x3a2a24;
 const SLAM_GLOW: Partial<Record<WeaponId, number>> = { jointBreaker: ELEMENT_COLOR.earth };
 /** The burning sword of Espada de Fogo, drawn with the orbit swords' shape. */
@@ -781,15 +782,17 @@ function drawShock(
     top.lineStyle(12 * fade + 2, glow, 0.4 * fade);
     ring(top, s.x, s.y, r);
   }
-  top.lineStyle(8 * fade + 2, DUST_LIGHT, 0.75 * fade);
-  ring(top, s.x, s.y, r);
-  top.lineStyle(2, 0xffffff, 0.85 * fade);
-  ring(top, s.x, s.y, r * 0.94);
-  top.fillStyle(DUST_DARK, 0.8 * fade);
-  for (let i = 0; i < 10; i++) {
-    const a = (i * Math.PI) / 5 + s.x * 0.01;
-    disc(top, s.x + Math.cos(a) * r, s.y + Math.sin(a) * r, 2.5);
-  }
+  // The pixel rings of force: the outer one runs out to exactly the wave's radius.
+  const wave = VFX.shock;
+  fxSprites.putFrame(
+    vfxKey('shock'),
+    Math.min(wave.frames - 1, Math.floor(t * wave.frames)),
+    wave.anchor[0],
+    wave.anchor[1],
+    s.x,
+    s.y,
+    s.shock / SHOCK_RING,
+  );
 }
 
 /** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
@@ -804,7 +807,7 @@ function drawWaveCount(g: Phaser.GameObjects.Graphics, world: World, lit: number
   const p = world.player;
   for (let i = 0; i < n; i++) {
     const x = p.x + (i - (n - 1) / 2) * 12;
-    const y = p.y + 38;
+    const y = p.y + 44;
     g.fillStyle(INK, 0.6);
     disc(g, x, y, 4.5);
     g.fillStyle(i < lit ? ELEMENT_COLOR.earth : 0x4a3a28, i < lit ? 1 : 0.8);

@@ -3257,4 +3257,4 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 - **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G. Raio e Tempestade, Fogo e Espada de Fogo,
   zonas de Geada/Nevasca, chão em chamas, auras, golpes em arco e pancadas, trabalhados no workbench de efeitos do
-  PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais).
+  PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais), Aura de Yah, onda de choque da Maça.

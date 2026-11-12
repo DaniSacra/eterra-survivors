@@ -25,6 +25,8 @@ export const VFX = {
   ice: { frames: 11, w: 144, h: 72, anchor: [0.5, 0.778], fps: 3 },
   /** Aura de Yah's ring of light and turning runes (looping); its outer ring is 57 art px from the centre. */
   aura: { frames: 12, w: 128, h: 128, anchor: [0.5, 0.5], fps: 12 },
+  /** The mace's shock wave: two dusty rings running out; the big one reaches 50 art px (scaled to the wave radius). */
+  shock: { frames: 7, w: 112, h: 112, anchor: [0.5, 0.5], fps: 14 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;
