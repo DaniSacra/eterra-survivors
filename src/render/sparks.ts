@@ -48,7 +48,7 @@ const BUDGET = 24;
 /** The spark a weapon's hit makes: [kind, color]. Weapons not listed make a white star. */
 export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> = {
   yahAura: [SPARK.cross, 0xffd870],
-  elunLight: [SPARK.cross, 0xb8f0a0],
+  elunLight: [SPARK.cross, 0xfff0b0],
   holyLight: [SPARK.cross, 0xfff6c0],
   wisps: [SPARK.cross, 0x9af0e8],
   soulProcession: [SPARK.cross, 0xc0d8ff],

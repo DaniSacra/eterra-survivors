@@ -292,7 +292,6 @@ export function drawFx(
         world,
         st.radius * p.stats.area,
         1 - w.timer / (st.cooldown * p.stats.cooldown),
-        w.level,
         isElo(w.id),
         // Chama de Yah heats up towards its wave: 0 just after one, 1 on the tick before the next.
         pulse ? (w.swings % pulse.every) / (pulse.every - 1) : 0,
@@ -487,7 +486,7 @@ interface Trail {
   star: boolean;
 }
 const TRAIL: Partial<Record<WeaponId, Trail>> = {
-  elunLight: { color: 0xb8e070, core: 0xfff6c0, width: 5, len: 0.06, dots: false, star: false },
+  elunLight: { color: 0xf0d070, core: 0xfff6d0, width: 5, len: 0.06, dots: false, star: false },
   holyLight: { color: ELEMENT_COLOR.holy, core: 0xffffff, width: 6, len: 0.07, dots: false, star: true },
   daggers: { color: HERO_COLOR.andilla, core: 0xffffff, width: 3, len: 0.05, dots: false, star: false },
   fan: { color: ELEMENT_COLOR.shadow, core: 0xe0ffe8, width: 3, len: 0.05, dots: false, star: false },
@@ -815,13 +814,6 @@ function drawShock(
   );
 }
 
-/** Soft-light layers of an aura's core: [radius factor, alpha]. Preallocated. */
-const AURA_CORE: readonly [number, number][] = [
-  [1, 0.05],
-  [0.6, 0.1],
-  [0.35, 0.18],
-];
-
 /** `lit` of `n` amber pips under the hero: the blows already struck towards the mace's next shock wave. */
 function drawWaveCount(g: Phaser.GameObjects.Graphics, world: World, lit: number, n: number): void {
   const p = world.player;
@@ -995,7 +987,6 @@ function drawAura(
   world: World,
   r: number,
   k: number,
-  level: number,
   elo: boolean,
   heat = 0,
   pulseR = 0,
@@ -1012,14 +1003,11 @@ function drawAura(
     g.fillStyle(c, 0.06);
     disc(g, p.x, p.y, r);
   }
-  for (let i = elo ? 1 : 0; i < AURA_CORE.length; i++) {
-    const L = AURA_CORE[i] as readonly [number, number];
-    g.fillStyle(elo && i === 2 ? 0xfff0c0 : c, L[1]);
-    disc(g, p.x, p.y, r * L[0]);
-  }
+  // One soft glow at the heart (the wide pools it used to have cluttered the field).
+  g.fillStyle(elo ? 0xfff0c0 : c, 0.12);
+  disc(g, p.x, p.y, r * 0.3);
   // The rim flares on the tick and rests between ticks.
   const flare = Math.max(0, 1 - k * 3);
-  // ...and the Chama's rim glows hotter and thicker as its wave comes near.
   // The pixel ring of light, turning, out at the exact edge of the aura.
   const halo = VFX.aura;
   fxSprites.putFrame(
@@ -1030,7 +1018,7 @@ function drawAura(
     p.x,
     p.y,
     r / AURA_RING,
-    0.6 + 0.4 * flare + 0.3 * heat,
+    0.45 + 0.35 * flare + 0.3 * heat,
   );
   if (elo) {
     g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
@@ -1044,7 +1032,7 @@ function drawAura(
     ring(top, p.x, p.y, wr);
   }
   // Motes of light (embers for the Chama) drifting up inside the radius, more with each level.
-  const motes = elo ? 10 : 4 + Math.ceil(level / 2);
+  const motes = elo ? 5 : 2;
   for (let i = 0; i < motes; i++) {
     const ph = (t * (elo ? 0.9 : 0.5) + i * 0.37) % 1;
     const a = i * 2.4 + Math.floor(t * (elo ? 0.9 : 0.5) + i * 0.37) * 1.3;

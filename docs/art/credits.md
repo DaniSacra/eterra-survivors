@@ -54,3 +54,4 @@ Sem gerações novas em 2026-11-11 (revisão de tamanhos): os sprites acima só 
 | 2026-11-12 | Animated effect: shock (mace shock wave rings) from preset shockwave, circular, bone palette, effect id ebcc1aa2-5b44-4697-96c0-b908b4786d95 | 2x strip in `public/sprites/fx/vfx/` |
 
 | 2026-11-12 | Animated effect: slash (Lâmina de Valmor's cut) from preset slash_arc, enlarged to a 224 px canvas and set to a 145 degree crescent, effect id 7d76a2b2-1e37-4054-8f0f-c517c215a2d0 | 2x strip in `public/sprites/fx/vfx/` |
+- 2026-11-11: Luz Sagrada dove projectile (`public/sprites/fx/holyDove.png`): PixelLab `create_image_pro`, job 4f1f6c0d, candidate 0 (10 generations). Luz de Elun orb recoloured to a gold/white ramp (local script, no generation). Aura de Yah ring replaced by a lighter version (effect ffa2b1fe).

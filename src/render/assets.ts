@@ -70,7 +70,7 @@ export const ASSETS: Record<string, AssetDef> = {
   'proj.forgeFury': { kind: 'image', url: 'sprites/fx/forgeHammer.png' },
   'proj.daggers': { kind: 'image', url: 'sprites/fx/dagger.png' },
   'proj.staff': { kind: 'image', url: 'sprites/fx/staffOrb.png' },
-  'proj.holyLight': { kind: 'image', url: 'sprites/fx/holyOrb.png' },
+  'proj.holyLight': { kind: 'image', url: 'sprites/fx/holyDove.png' },
   'proj.elunLight': { kind: 'image', url: 'sprites/fx/elunOrb.png' },
   'proj.starlet': { kind: 'image', url: 'sprites/fx/starlet.png' },
   'proj.lyraStar': { kind: 'image', url: 'sprites/fx/lyraStar.png' },
