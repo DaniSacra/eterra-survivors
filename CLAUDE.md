@@ -19,7 +19,8 @@ player-facing text with lore, and never invent lore: ask Daniel. Genre mechanics
 game's content.
 
 Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deployed to GitHub Pages by
-`.github/workflows/deploy.yml` (Vite `base` is `/eterra-survivors/`).
+`.github/workflows/deploy.yml` (Vite `base` is `/eterra-survivors/`) and to Render as a static site (`render.yaml`, `BASE_PATH=/`,
+https://valmor-resiste.onrender.com); `index.html` uses `%BASE_URL%` so one source builds for both.
 
 ## Commands
 
