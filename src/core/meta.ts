@@ -514,6 +514,14 @@ export function shopShortfall(save: MetaSave, id: ShopId): number | null {
   return cost === null ? null : Math.max(0, cost - save.gold);
 }
 
+/** True when the banked gold pays the next level of at least one Loja item (the end screen's shortcut, PU-04). */
+export function canBuyAny(save: MetaSave): boolean {
+  return SHOP_IDS.some((id) => {
+    const cost = shopCost(save, id);
+    return cost !== null && save.gold >= cost;
+  });
+}
+
 /** The most expensive next level in the Loja (a long-term goal for the end screen), null when all is bought. */
 export function biggestGoal(save: MetaSave): { id: ShopId; cost: number } | null {
   let best: { id: ShopId; cost: number } | null = null;

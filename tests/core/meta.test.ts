@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SAVE_VERSION,
   biggestGoal,
+  canBuyAny,
   buy,
   confirmPurchase,
   shopShortfall,
@@ -92,6 +93,20 @@ describe('shop', () => {
     ).toEqual({ ...newSave(), gold: 12, shop: { maxHp: SHOP.maxHp.maxLevel }, heroes: ['lyra'] });
     // Saves from before heroes and stages still load.
     expect(sanitizeSave({ gold: 5, shop: {} })).toEqual({ ...newSave(), gold: 5 });
+  });
+});
+
+describe('canBuyAny', () => {
+  it('is true only when the gold pays the next level of some item', () => {
+    const save = newSave();
+    const cheapest = Math.min(...SHOP_IDS.map((id) => SHOP[id].baseCost));
+    save.gold = cheapest - 1;
+    expect(canBuyAny(save)).toBe(false);
+    save.gold = cheapest;
+    expect(canBuyAny(save)).toBe(true);
+    for (const id of SHOP_IDS) save.shop[id] = SHOP[id].maxLevel;
+    save.gold = 1_000_000;
+    expect(canBuyAny(save)).toBe(false); // all bought
   });
 });
 

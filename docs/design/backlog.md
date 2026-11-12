@@ -3500,7 +3500,7 @@ em `ART_RES`.
 - Aceite: teste que mede `rótulo.width + 12 <= bw` para os quatro rótulos em 328 px; capturas 360x640, 420x820,
   740x360 e 1000x680; toque no botão da Pausa volta ao jogo; toque duplo rápido não abre e fecha.
 
-**PU-04 · Fim com atalho para a Loja** · ui + impl · P · proposto
+**PU-04 · Fim com atalho para a Loja** · ui + impl · P · ✅ feito (2026-11-11; decidi: o botão fica em linha própria abaixo de Jogar de novo e Menu, ou na mesma linha quando a tela é larga; vindo do Fim, o botão Voltar da Loja vira "Jogar de novo" e Esc ainda vai ao Menu)
 
 - Por quê: 05-ui UI-F. O fim já diz "No cofre: 340 ouro" e "Faltam 2.160 para Segunda Bainha", mas gastar custa Menu,
   Loja e Começar. Pilar 4: fechar "ganhei, comprei, jogo de novo" no mesmo fôlego.

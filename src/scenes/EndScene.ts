@@ -5,7 +5,7 @@ import { almostElo, passiveReport, weaponReport } from '../core/report';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
-import { biggestGoal } from '../core/meta';
+import { biggestGoal, canBuyAny } from '../core/meta';
 import { closestAchievement } from '../core/achievements';
 import type { AchievementId } from '../data/achievements';
 import { loadSave } from '../render/save';
@@ -108,6 +108,9 @@ export class EndScene extends Phaser.Scene {
     if (next) actions.push([t.end.next, () => this.play(next)]);
     if (w.state === 'won' && !w.endless) actions.push([t.end.continueVigil, () => this.vigil()]);
     actions.push([t.end.again, () => this.play(w.stageId)], [t.end.menu, () => this.toMenu()]);
+    // The Loja shortcut (PU-04) only shows when the cofre pays something; the focus stays on the first action.
+    const save0 = loadSave();
+    const shop: [string, () => void] | null = canBuyAny(save0) ? [t.end.shop(save0.gold), () => this.toShop()] : null;
     const buttons: Phaser.GameObjects.Rectangle[] = [];
     let by = y + 30;
     const top = by;
@@ -118,10 +121,15 @@ export class EndScene extends Phaser.Scene {
       buttons.push(button(this, cx, by, pw - 28, 46, action0, label0));
       by += 54;
     }
+    if (shop && oneRow) actions.push(shop);
     const bw = (pw - 28 - 8 * (actions.length - 1)) / actions.length;
     actions.forEach(([text, action], i) =>
       buttons.push(button(this, left + bw / 2 + i * (bw + 8), by, bw, 46, action, text)),
     );
+    if (shop && !oneRow) {
+      by += 54;
+      buttons.push(button(this, cx, by, pw - 28, 46, shop[1], shop[0]));
+    }
     const total = by + 37;
     panel.setSize(pw, total);
     if (!place) return total;
@@ -353,6 +361,13 @@ export class EndScene extends Phaser.Scene {
   private vigil(): void {
     (this.scene.get(SCENES.game) as GameScene).startVigil();
     this.scene.stop();
+  }
+
+  /** The Loja, which offers "Jogar de novo" with this hero and stage when left. */
+  private toShop(): void {
+    const again = { character: this.world.character, stage: this.world.stageId };
+    this.scene.stop(SCENES.game);
+    this.scene.start(SCENES.shop, { again });
   }
 
   private toMenu(): void {

@@ -31,6 +31,7 @@ import {
   type KeyNav,
 } from '../render/ui';
 import { SCENES } from './keys';
+import { setChoice, type RunChoice } from './choice';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
 const BADGE = 28;
@@ -104,9 +105,12 @@ export class ShopScene extends Phaser.Scene {
   private ready = false;
   /** First visit: Gaspar's bubble says hello instead of talking about the item. */
   private greet = false;
+  /** Set when the end screen sent the player here: leaving the Loja then starts another run (PU-04). */
+  private again: RunChoice | null = null;
 
-  init(data: { focus?: ShopId }): void {
+  init(data: { focus?: ShopId; again?: RunChoice }): void {
     this.cart = { selected: data.focus ?? null };
+    this.again = data.again ?? null;
   }
 
   create(): void {
@@ -209,7 +213,7 @@ export class ShopScene extends Phaser.Scene {
       });
       y += Math.ceil(SHOP_SECTIONS[key].length / cols) * (cardH + GAP);
     }
-    cards.push(backButton(this, t.shop.back, () => this.back()));
+    cards.push(backButton(this, this.again ? t.end.again : t.shop.back, () => this.back()));
     const tabs = cards.length - ids.length - 1;
     const start = Math.max(0, ids.indexOf(this.cart.selected as ShopId));
     this.nav = keyNav(this, cards, 0, tabs + start, (i) => {
@@ -219,7 +223,7 @@ export class ShopScene extends Phaser.Scene {
     this.select(ids[start] as ShopId);
 
     bindKeys(this, (kb) => {
-      kb.once('keydown-ESC', () => this.back());
+      kb.once('keydown-ESC', () => this.scene.start(SCENES.menu));
       // With section tabs, Q/E switch them (as the Coleção's).
       if (!fits)
         kb.on('keydown', (e: KeyboardEvent) => {
@@ -549,7 +553,7 @@ export class ShopScene extends Phaser.Scene {
   private devSave(save: MetaSave): void {
     this.ready = false;
     writeSave(save);
-    this.scene.restart({ focus: this.cart.selected });
+    this.scene.restart({ focus: this.cart.selected, again: this.again });
   }
 
   private confirm(): void {
@@ -557,10 +561,12 @@ export class ShopScene extends Phaser.Scene {
     if (!this.ready || !confirmPurchase(save, this.cart)) return;
     this.ready = false; // the restart is queued: a second press this frame still lands here
     writeSave(save);
-    this.scene.restart({ focus: this.cart.selected });
+    this.scene.restart({ focus: this.cart.selected, again: this.again });
   }
 
   private back(): void {
-    this.scene.start(SCENES.menu);
+    if (!this.again) return void this.scene.start(SCENES.menu);
+    setChoice(this.registry, this.again);
+    this.scene.start(SCENES.game, this.again);
   }
 }

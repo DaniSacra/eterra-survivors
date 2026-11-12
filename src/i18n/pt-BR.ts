@@ -420,6 +420,8 @@ export const t = {
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
     newElo: (name: string, gold: number) => `Elo descoberto: ${name}! +${gold} de ouro. Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,
+    /** Shortcut to the Loja, only when the banked gold buys something. */
+    shop: (gold: number) => `Loja (${int(gold)} de ouro)`,
     /** Packed notes, when the end screen runs out of room. */
     elosFound: (names: string, gold: number) => `Elos descobertos: ${names}! +${gold} de ouro`,
     achievementsFound: (n: number) => `${n} conquistas novas! Veja na Coleção.`,
