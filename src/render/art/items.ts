@@ -1,7 +1,6 @@
-import { INK } from './pen';
 import type { ArtDef } from './types';
 
-/** Projectiles (drawn pointing right, rotated to their heading), gems and things on the ground. */
+/** Projectiles still drawn from code (most have a PixelLab sprite in assets.ts). Pickups and gems are PNGs now. */
 
 const glowOrb = (core: number, halo: number, r: number): ArtDef => ({
   w: r * 4,
@@ -62,30 +61,6 @@ const starlet = (r: number): ArtDef => ({
   },
 });
 
-/**
- * XP gems: the only saturated, twinkling cyan on screen (the ice family is white and white-lilac, never this), a
- * light blue that stands out on the dark ground of every stage; size and twinkle tell the value.
- */
-const GEM_BODY = 0x3ed4ff;
-const GEM_LIGHT = 0xd4f8ff;
-const gem = (s: number): ArtDef => ({
-  w: Math.round(12 * s),
-  h: Math.round(14 * s),
-  draw(p) {
-    const body = GEM_BODY;
-    const light = GEM_LIGHT;
-    p.g.save();
-    p.g.scaleCanvas(s, s);
-    p.fill(light, 0.22).fillCircle(6, 7, 6.5); // soft glow
-    p.outline = 1.5;
-    p.poly([6, 1, 11, 6, 6, 13, 1, 6], body);
-    p.ink();
-    p.fill(light, 0.9).fillTriangle(6, 2, 9.5, 6, 6, 6);
-    p.fill(0xffffff, 0.8).fillCircle(4.5, 5, 1);
-    p.g.restore();
-  },
-});
-
 export const ITEM_ART: Record<string, ArtDef> = {
   // ---- Projectiles ----
   'proj.elunLight': glowOrb(0xfff6c0, 0xa8e060, 4), // Teo's green-gold
@@ -96,121 +71,4 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.starlet': starlet(6),
   'proj.hammer': hammer(0xc4cede, false),
   'proj.forgeFury': hammer(0xffa040, true),
-
-  // ---- XP gems ----
-  'gem.small': gem(0.9),
-  'gem.medium': gem(1.25),
-  'gem.large': gem(1.6),
-
-  // ---- On the ground ----
-  'pickup.chest': {
-    w: 28,
-    h: 26,
-    draw(p) {
-      p.shadow(14, 23.5, 24, 5);
-      p.rrect(3, 11, 22, 12, 2, 0x9a6232);
-      p.rrect(2, 5, 24, 8, 4, 0xb07c58);
-      p.ink();
-      p.fill(0xe8b840).fillRect(3, 11, 22, 2.2).fillRect(6, 5.5, 2.2, 17).fillRect(20, 5.5, 2.2, 17);
-      p.fill(0xf0d860).fillRoundedRect(11.5, 10, 5, 6, 1.5);
-      p.fill(INK).fillCircle(14, 13, 0.9);
-      p.shine(8, 7, 6, 2, 0.4);
-    },
-  },
-  'pickup.gold': {
-    w: 16,
-    h: 16,
-    draw(p) {
-      p.outline = 1.5;
-      p.circle(8, 8, 6, 0xe8b840);
-      p.ink();
-      p.fill(0xc89c38).fillCircle(8.6, 8.6, 3.8);
-      p.fill(0xf0d860).fillCircle(7.6, 7.6, 3.6);
-      p.fill(0xffffff, 0.85).fillCircle(5.8, 5.6, 1.3);
-    },
-  },
-  'pickup.food': {
-    w: 26,
-    h: 18,
-    draw(p) {
-      p.shadow(13, 15.5, 22, 4);
-      p.ellipse(13, 9, 22, 12, 0xd8a478);
-      p.ink();
-      p.fill(0xb07c58).fillEllipse(13, 11, 20, 7);
-      p.fill(0xf4cca0).fillEllipse(11, 6.5, 14, 4);
-      p.line(8, 5, 10, 9, 1.2, 0x9a6232)
-        .line(13, 4.5, 15, 8.5, 1.2, 0x9a6232)
-        .line(18, 5, 20, 9, 1.2, 0x9a6232);
-    },
-  },
-  'pickup.magnet': {
-    // Pedra-Ímã: a horseshoe magnet (red with silver tips), the shape everyone reads as "pull".
-    w: 24,
-    h: 26,
-    draw(p) {
-      p.shadow(12, 23.5, 16, 4);
-      p.poly([3, 4, 9, 4, 9, 13, 12, 16, 15, 13, 15, 4, 21, 4, 21, 14, 12, 22, 3, 14], 0xd84a4a);
-      p.rrect(3, 2, 6, 5, 1, 0xd8e0ec).rrect(15, 2, 6, 5, 1, 0xd8e0ec);
-      p.ink();
-      p.fill(0xffffff, 0.45).fillRect(4.5, 8, 2, 5);
-      p.fill(0xffffff).fillCircle(6, 0.5, 1.2).fillCircle(18, 0.5, 1.2);
-    },
-  },
-  'pickup.bomb': {
-    w: 24,
-    h: 26,
-    draw(p) {
-      p.shadow(12, 23.5, 18, 4);
-      // Badalada: the ring of a toll, a bright burst behind a small bell (unlike the Sinos de Bronze).
-      const burst: { x: number; y: number }[] = [];
-      for (let k = 0; k < 16; k++) {
-        const a = (k * Math.PI) / 8;
-        const r = k % 2 ? 6 : 12;
-        burst.push({ x: 12 + Math.cos(a) * r, y: 12 + Math.sin(a) * r });
-      }
-      p.fill(0xff8a4a, 0.85).fillPoints(burst, true);
-      p.poly([4, 21, 6, 8, 12, 3, 18, 8, 20, 21], 0xc89c38); // the bell
-      p.rrect(2, 19, 20, 4, 2, 0x8a5418);
-      p.circle(12, 23, 2.5, 0x8a5418); // clapper
-      p.ink();
-      p.fill(0xf0d860, 0.8).fillEllipse(10, 10, 4, 8);
-      p.fill(0xfff6c0).fillRect(10.8, 1.5, 2.4, 3);
-    },
-  },
-  /** Elixir (provisional name): an amber flask with a golden glow, a reward and not a danger (FT-11). */
-  'pickup.elixir': {
-    w: 24,
-    h: 26,
-    draw(p) {
-      p.fill(0xffd070, 0.3).fillCircle(12, 15, 11);
-      p.rrect(9.5, 2, 5, 6, 1.5, 0xb09070); // neck
-      p.rrect(8.5, 1, 7, 3, 1.5, 0x7a5a3a); // cork
-      p.ellipse(12, 16, 17, 15, 0xe8a030); // flask
-      p.ink();
-      p.fill(0xffe090).fillEllipse(12, 18, 12, 7);
-      p.shine(8, 12, 6, 3, 0.7);
-      p.glow(14, 15, 1.2, 0xfff4c0);
-    },
-  },
-  'pickup.freeze': {
-    w: 24,
-    h: 24,
-    draw(p) {
-      p.fill(0xd8d2f0, 0.3).fillCircle(12, 12, 11); // white-lilac: the ice family
-      for (let k = 0; k < 3; k++) {
-        const a = (k * Math.PI) / 3;
-        const dx = Math.cos(a) * 9;
-        const dy = Math.sin(a) * 9;
-        p.line(12 - dx, 12 - dy, 12 + dx, 12 + dy, 5, INK).line(
-          12 - dx,
-          12 - dy,
-          12 + dx,
-          12 + dy,
-          2.2,
-          0xe8eff8,
-        );
-      }
-      p.fill(0xffffff).fillCircle(12, 12, 2.6);
-    },
-  },
 };

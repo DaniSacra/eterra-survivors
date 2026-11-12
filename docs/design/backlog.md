@@ -39,7 +39,7 @@ outros itens, 1 foi descartado, 2 foram mesclados, 9 reescritos para a arte e o 
 estavam.
 
 - **Feitos:** 228 itens com ✅ (contando os DD da tarde de 2026-11-11 e os reconhecidos nesta reavaliação).
-- **Abertos: 27**, por área: bugs 2 (NB-08, CB-04) · interface 9 (CC-06, NU-02, CU-01, CU-02, CU-03, CU-04, CU-06,
+- **Abertos: 26**, por área: bugs 2 (NB-08, CB-04) · interface 9 (CC-06, NU-02, CU-01, CU-02, CU-03, CU-04, CU-06,
   CU-07, CU-08) · efeitos 4 (AR-01, RF-04, A-04, CF-07) · arte 3 (AR-04, CA-02, CA-03) · equilíbrio 3, em espera
   (NE-06, PE-01, PE-02) · sistemas e conteúdo 4 (ND-01, ND-02, CD-01, FT-18) · música 1 (MU-01) · lançamento 1 (L-01).
 - **Descartados:** seção no fim do arquivo.
@@ -2202,7 +2202,7 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   comprimento real da investida (`CHARGE` × velocidade da fase), enchendo até o impacto, com borda tracejada. Os
   chefes já usavam formas (cone do Corte Brutal, faixa da Mordida Funda, anéis da Badalada).
 
-**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto · reescrito na reavaliação 2026-11-12: "Os últimos desenhos em código" (P)
+**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto · reescrito na reavaliação 2026-11-12: "Os últimos desenhos em código" ✅ feito (2026-11-12) em duas partes: itens e gemas; ícones ficam para rodada própria (AR-04b)
 
 - O quê: corpos mais escuros e de cores apagadas, uma cor principal por criatura, contorno escuro, olhos menores,
   mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
@@ -2218,6 +2218,7 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   do `gemMirror` (A-05: a gema é o único ciano saturado); (3) ícones, só depois, numa rodada própria com o ui-designer
   (são dezenas e aparecem em 16 a 28 px). Dono: visual. Aceite: captura de multidão em Valmor e na Cripta com os cinco
   itens no chão, achados de relance; gerações em `docs/art/credits.md`.
+- Feito 2026-11-12: comida, elixir, Sopro de Geada, moeda e as três gemas viraram sprites PixelLab (`public/sprites/items/`, `create_object_pro_flash`, 35 gerações, em `credits.md`). Gema no azul-claro do Daniel, ainda o único ciano da tela; o cintilar do `gemMirror` ficou. A moeda do HUD passou a escala inteira (`ART_SCALE`). A arte em código morta (baú, ímã, sino, gemas, moeda...) saiu de `render/art/items.ts`. Capturas de multidão nas três fases (420x820 e 1000x680) com os cinco itens no chão. **Sobra (AR-04b):** os ícones de arma e passiva (`render/art/icons.ts`), numa rodada própria com o ui-designer.
 
 **AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04 · andar dos inimigos ampliado na Revisão 2026-11-11 · proposto · ✅ feito (reavaliação 2026-11-12)
 
@@ -3330,7 +3331,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   (é a que estoura, a mais perigosa de perto); só se não bastar, regerar o Esqueleto com armadura azul-aço
   (cerca de 10 gerações). Aceite: o de cima, sem o Espectro.
 
-**CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto · reescrito na reavaliação 2026-11-12 (P)
+**CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto · reescrito na reavaliação 2026-11-12 ✅ feito (2026-11-12)
 
 - Por quê: 04-visual #6, 02-code B6, 06-vfx ("ponto fraco"). O Sineiro a 1,5x (`SPRITE_SCALE`) tem pixels de 3x3 entre
   sprites de 2x2, é só um pouco maior que os Coveiros e mantém `radius: 30` com ~150 px de altura; o Bestiário não
@@ -3352,6 +3353,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   do Sineiro como acento que brilha, mais forte no aviso da Badalada e do Dobre (`lighting.add` no ponto do sino, sem
   geração nova). O Sineiro com 102 art px de altura fica abaixo da faixa de chefe do CLAUDE.md (112 a 160): regerar
   maior só se a captura mostrar que ele não é a primeira coisa achada. Dono: visual + vfx. Aceite: o somado acima.
+- Feito 2026-11-12: `BOSS_LIGHTS` em `GameScene` (Mãe-Aranha magenta `0xff58c8`, Sineiro âmbar `0xffb040`, Lobo Velho branco-gelo `0xeaf6ff`; o Cavaleiro Negro segue no violeta). O sino do Sineiro tem luz própria (âmbar, acompanha o lado para onde ele vira) e pulsa mais forte no preparo da Badalada e do Dobre (sem pulso com a tela calma). Sem geração nova e sem mexer no `radius` nem na mordida; o Sineiro segue com 102 art px (abaixo da faixa de chefe), regerar só se o Daniel não o achar de relance.
 
 **CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · ✅ feito dentro do AR-01 (2026-11-12) · ⇢ mesclado no AR-01 (reavaliação 2026-11-12)
 

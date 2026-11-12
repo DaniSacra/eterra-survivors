@@ -9,7 +9,7 @@ import type { ArtDef } from './art/types';
 
 /**
  * The single asset map. Every visual is referenced by key. Heroes, enemies, decals, obstacles, projectiles and tiles
- * are PNGs (PixelLab, files in /public); only items and icons are still drawn from code (render/art, `Pen`). To swap
+ * are PNGs (PixelLab, files in /public); only the weapon/passive icons and a few projectiles are still drawn from code (render/art, `Pen`). To swap
  * one, change its entry to `{ kind: 'image', url: 'sprites/foo.png' }`, drawn at ART_RES times its world size.
  */
 export type AssetDef =
@@ -73,6 +73,14 @@ export const ASSETS: Record<string, AssetDef> = {
   'pickup.chest': { kind: 'image', url: 'sprites/items/chest.png' },
   'pickup.magnet': { kind: 'image', url: 'sprites/items/magnet.png' },
   'pickup.bomb': { kind: 'image', url: 'sprites/items/bell.png' },
+  // AR-04: the rest of the ground items and the XP gems (light blue, the only cyan on screen) as pixel sprites too.
+  'pickup.gold': { kind: 'image', url: 'sprites/items/gold.png' },
+  'pickup.food': { kind: 'image', url: 'sprites/items/food.png' },
+  'pickup.elixir': { kind: 'image', url: 'sprites/items/elixir.png' },
+  'pickup.freeze': { kind: 'image', url: 'sprites/items/freeze.png' },
+  'gem.small': { kind: 'image', url: 'sprites/items/gem-small.png' },
+  'gem.medium': { kind: 'image', url: 'sprites/items/gem-medium.png' },
+  'gem.large': { kind: 'image', url: 'sprites/items/gem-large.png' },
   // Pixel projectiles and pieces of effects (PixelLab, files at ART_RES); they replace the code-drawn ones of the same key.
   'proj.shields': { kind: 'image', url: 'sprites/fx/shield.png' },
   'proj.valmorWall': { kind: 'image', url: 'sprites/fx/shield.png' },

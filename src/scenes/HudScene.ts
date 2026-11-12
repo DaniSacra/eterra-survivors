@@ -127,7 +127,7 @@ export class HudScene extends Phaser.Scene {
     this.level = label(this, 0, 0, '', 10, { bold: true, color: UI.gold, stroke: true });
     this.kills = label(this, 0, 0, '', 15, { bold: true, stroke: true }).setOrigin(1, 0.5);
     this.gold = label(this, 0, 0, '', 15, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
-    this.coinIcon = this.add.image(0, 0, 'pickup.gold').setScale(ART_SCALE * 1.25);
+    this.coinIcon = this.add.image(0, 0, 'pickup.gold').setScale(ART_SCALE);
     this.skullIcon = this.add.image(0, 0, 'icon.kills').setScale(ART_SCALE * 1.1);
     this.reviveIcon = this.add.image(0, 0, 'icon.revive').setDisplaySize(24, 24).setVisible(false);
     this.revives = label(this, 0, 0, '', 15, { bold: true, color: UI.danger, stroke: true })
