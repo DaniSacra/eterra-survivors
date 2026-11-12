@@ -3487,7 +3487,7 @@ em `ART_RES`.
 
 ### P3 · Interface (dono: ui-designer)
 
-**PU-01 · Pausa: interruptores sem colisão e botão que vira "continuar"** · ui + impl · P · proposto
+**PU-01 · Pausa: interruptores sem colisão e botão que vira "continuar"** · ui + impl · P · ✅ feito (2026-11-11; o teste de largura do rótulo não existe: medir texto exige canvas, a redução de fonte é no laço e foi conferida nas capturas em 360x640 e 1000x680)
 
 - Por quê: 05-ui UI-A e UI-B, 03-qa B1 e B5. O rótulo dos quatro interruptores fica sob a lâmpada em todo tamanho
   ("Números" vira "Número" em 1000x680; `render/options.ts:41-43`), veio com o quarto botão (Música). E o botão de

@@ -15,7 +15,7 @@ const SHORT = {
 } as const;
 
 /**
- * The options side by side in one row of `w` (the pause screen, NU-03): a short name and a lamp, lit when on.
+ * The options side by side in one row of `w` (the pause screen, NU-03): a short name and a bar on the bottom edge, green when on.
  * Buttons left to right, for keyNav.
  */
 export function optionRow(
@@ -31,15 +31,16 @@ export function optionRow(
   return OPTIONS.map((key, i) => {
     const bx = x - w / 2 + bw / 2 + i * (bw + gap);
     const isOn = () => (key === 'muted' ? !settings().muted : settings()[key]);
-    const paint = () =>
-      lamp.setFillStyle(isOn() ? UI.ok : UI.panelOff).setStrokeStyle(2, isOn() ? UI.ok : UI.borderOff);
+    const paint = () => bar.setFillStyle(isOn() ? UI.ok : UI.panelOff);
     const b = button(scene, bx, y, bw, h, () => {
       setSetting(key, !settings()[key]);
       music.sync(scene);
       paint();
     });
-    label(scene, bx - 6, y, t.options[SHORT[key]], size, { bold: true });
-    const lamp = scene.add.circle(bx + bw / 2 - 12, y, 5);
+    // The name is centred; the state is a 3 px bar on the bottom edge (green on), so the text width never matters.
+    const text = label(scene, bx, y - 2, t.options[SHORT[key]], size, { bold: true });
+    for (let s = size; text.width + 12 > bw && s > 9; s--) text.setFontSize(s - 1);
+    const bar = scene.add.rectangle(bx, y + h / 2 - 3, bw - 4, 3, UI.panelOff);
     paint();
     return b;
   });

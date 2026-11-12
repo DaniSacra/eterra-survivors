@@ -35,6 +35,9 @@ const HP_H = 16;
 /** Pause button side: a full touch target. */
 const PAUSE = 44;
 
+/** Taps on the pause button this soon after the Pausa opened are ignored (a double tap must not open and close it). */
+const PAUSE_ARM_MS = 300;
+
 /** Screen-space overlay (no camera zoom): bars, counters, joystick and the F3 debug panel. */
 export class HudScene extends Phaser.Scene {
   joystick!: Joystick;
@@ -49,6 +52,9 @@ export class HudScene extends Phaser.Scene {
   private banner!: Phaser.GameObjects.Text;
   private pauseBtn!: Phaser.GameObjects.Rectangle;
   private pauseIcon!: Phaser.GameObjects.Graphics;
+  /** The "continue" triangle shown in place of the pause bars while the Pausa is open (PU-01). */
+  private playIcon!: Phaser.GameObjects.Graphics;
+  private pausedAt = 0;
   private hpText!: Phaser.GameObjects.Text;
   private coinIcon!: Phaser.GameObjects.Image;
   private skullIcon!: Phaser.GameObjects.Image;
@@ -134,13 +140,18 @@ export class HudScene extends Phaser.Scene {
       .setVisible(false);
     this.banner = label(this, 0, 0, '', 24, { bold: true, color: UI.danger, stroke: true }).setAlpha(0);
     const game = this.scene.get(SCENES.game) as GameScene;
-    this.pauseBtn = button(this, 0, 0, PAUSE, PAUSE, () => game.pauseGame()).setAlpha(0.8);
+    this.pauseBtn = button(this, 0, 0, PAUSE, PAUSE, () => this.pressPause(game)).setAlpha(0.8);
     // The pause sign, drawn (two bars), centered on its own origin so layout() only moves it.
     this.pauseIcon = this.add
       .graphics()
       .fillStyle(UI.textHex, 1)
       .fillRect(-7, -8, 5, 16)
       .fillRect(2, -8, 5, 16);
+    this.playIcon = this.add
+      .graphics()
+      .fillStyle(UI.textHex, 1)
+      .fillTriangle(-6, -9, -6, 9, 8, 0)
+      .setVisible(false);
     // The achievement notice, built once: a small gold-rimmed strip with a trophy, under the timer.
     this.toastBg = this.add.rectangle(0, 0, 10, 34, UI.panel, 0.92).setStrokeStyle(2, UI.accent);
     this.toastText = label(this, 12, 0, '', 14, { bold: true, color: UI.gold }).setOrigin(0, 0.5);
@@ -180,6 +191,7 @@ export class HudScene extends Phaser.Scene {
     const py = top + 8 + PAUSE / 2;
     this.pauseBtn.setPosition(right - PAUSE / 2, py);
     this.pauseIcon.setPosition(right - PAUSE / 2, py);
+    this.playIcon.setPosition(right - PAUSE / 2, py);
     this.counterY = py + PAUSE / 2 + 14;
     this.placeCounters();
     // The build strip under the life bar; roomy screens get bigger slots (a new size means a redraw).
@@ -271,6 +283,21 @@ export class HudScene extends Phaser.Scene {
         this.toastNow = null;
       },
     });
+  }
+
+  /** The pause button: opens the Pausa, or, with it open, goes back to the run (taps in its first 300 ms are ignored). */
+  private pressPause(game: GameScene): void {
+    if (!this.scene.isActive(SCENES.pause)) return game.pauseGame();
+    if (performance.now() - this.pausedAt < PAUSE_ARM_MS) return;
+    this.scene.resume(SCENES.game);
+    this.scene.stop(SCENES.pause);
+  }
+
+  /** The Pausa opened or closed: the button shows "continue" (a triangle) while it is open. */
+  setPaused(on: boolean): void {
+    if (on) this.pausedAt = performance.now();
+    this.pauseIcon.setVisible(!on);
+    this.playIcon.setVisible(on);
   }
 
   /**

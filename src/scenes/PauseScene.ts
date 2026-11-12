@@ -39,6 +39,8 @@ export class PauseScene extends Phaser.Scene {
     this.scene.bringToTop(SCENES.hud);
     const hud = this.scene.get(SCENES.hud) as HudScene;
     hud.quiet();
+    hud.setPaused(true);
+    this.events.once('shutdown', () => hud.setPaused(false));
     const world = (this.scene.get(SCENES.game) as GameScene).world;
     const titleSize = 32;
     if (isShort(this) && width >= 600) {
