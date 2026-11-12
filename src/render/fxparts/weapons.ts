@@ -926,7 +926,7 @@ export function drawAura(
 
 /**
  * A patch of frost (Geada; Nevasca when it comes from the Elo). It lands with a ring opening out and shards flying;
- * every damage tick a ring of frost runs from the middle to the edge and the crystals pulse; at the end its rim
+ * every damage tick a ring of frost runs from the middle to the edge over the cracked, glinting ice; at the end its rim
  * breaks into pieces. Nevasca adds falling snowflakes.
  */
 export function drawZone(
@@ -963,25 +963,34 @@ export function drawZone(
     g.lineStyle(3 - 2 * wk, 0xffffff, 0.7 * (1 - wk) * fade);
     ring(g, z.x, z.y, r * (0.25 + 0.75 * wk));
   }
-  // Ice crystals standing in the patch: they rise, shimmer and melt over its whole life.
-  const ice = VFX.ice;
-  const n = elo ? 5 : 3;
-  const life = age / z.duration;
-  for (let i = 0; i < n; i++) {
-    const ang = (i * Math.PI * 2) / n + z.x * 0.01;
-    const f = Math.min(ice.frames - 1, Math.floor(Math.max(0, life - i * 0.03) * ice.frames));
-    fxSprites.putFrame(
-      vfxKey('ice'),
-      f,
-      ice.anchor[0],
-      ice.anchor[1],
-      z.x + Math.cos(ang) * r * 0.55,
-      z.y + Math.sin(ang) * r * 0.4 + 8,
-      (r / ICE_SPAN) * (elo ? 1.1 : 1),
-      1,
-      0,
-      true,
-    );
+  // Frozen ground: a paler sheet in the middle, cracks running out from it and specks of frost glinting on it. Nothing
+  // stands up from the ground (the crystals read as obstacles), and the cracks grow with the landing.
+  g.fillStyle(0xe8f4ff, 0.1 * fade * fillK);
+  disc(g, z.x, z.y, r * 0.7);
+  const cracks = elo ? 8 : 6;
+  g.lineStyle(1.5, 0xffffff, 0.55 * fade);
+  for (let i = 0; i < cracks; i++) {
+    const a0 = (i / cracks) * Math.PI * 2 + hash(z.x, z.y, i) * 0.6;
+    const reach = r * (0.55 + 0.4 * hash(z.y, z.x, i)) * land;
+    // A crack is two bent segments, so it reads as splintered ice rather than a spoke.
+    const bend = (hash(z.x, i, 3) - 0.5) * 0.7;
+    const mx = z.x + Math.cos(a0) * reach * 0.5;
+    const my = z.y + Math.sin(a0) * reach * 0.5;
+    g.lineBetween(z.x, z.y, mx, my);
+    g.lineBetween(mx, my, z.x + Math.cos(a0 + bend) * reach, z.y + Math.sin(a0 + bend) * reach);
+  }
+  const specks = elo ? 8 : 5;
+  for (let i = 0; i < specks; i++) {
+    const a1 = hash(z.x, z.y, i + 20) * Math.PI * 2;
+    const d = r * 0.85 * Math.sqrt(hash(z.y, z.x, i + 40));
+    const glint = Math.max(0, Math.sin(time * 3 + i * 1.7));
+    if (glint < 0.4) continue;
+    const sx = Math.round((z.x + Math.cos(a1) * d) / 2) * 2;
+    const sy = Math.round((z.y + Math.sin(a1) * d) / 2) * 2;
+    g.fillStyle(0xffffff, 0.85 * glint * fade);
+    g.fillRect(sx - 1, sy - 1, 2, 2);
+    g.fillRect(sx - 3, sy, 6, 1);
+    g.fillRect(sx, sy - 3, 1, 6);
   }
   if (!elo) return;
   // Nevasca: snowflakes falling through the patch, each on its own column.
