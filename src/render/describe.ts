@@ -45,6 +45,33 @@ export function formatStatValue(stat: StatKey, value: number, base: number): str
   return num(value);
 }
 
+/**
+ * What a level-up card shows in brackets after a passive's change (PU-03, UI-E). Absolute stats (speed, armor,
+ * max life, pickup radius, regen) show the real "from → to" even at the base value; percent and amount stats show
+ * only the total after, and nothing while there was none yet. Null: no brackets.
+ */
+export function formatCardTotal(stat: StatKey, from: number, to: number, base: number): string | null {
+  if (PERCENT_STATS.includes(stat) || stat === 'amount') {
+    if (Math.abs(from - base) < 1e-6) return null;
+    return t.levelUp.totalAfter(formatStatValue(stat, to, base));
+  }
+  const show = (v: number) => (stat === 'regen' ? t.units.perSecond(num(v)) : num(v));
+  return t.levelUp.previewBase(show(from), show(to));
+}
+
+/** A new weapon's level 1 numbers for its card ("Dano 6 · Recarga 1,8s · Alcance 90", CU-05); '' when none. */
+export function weaponStartLine(id: WeaponId): string {
+  const level = WEAPONS[id].levels[0] as unknown as Record<string, number> | undefined;
+  if (!level) return '';
+  // Reach: a projectile's `radius` is its size, so it only counts for the kinds that act around a point.
+  const areaKind = WEAPONS[id].kind === 'aura' || WEAPONS[id].kind === 'zone';
+  const range = ['range', areaKind ? 'radius' : '', 'orbitRadius'].find((k) => k && level[k] !== undefined);
+  return ['damage', 'cooldown', range]
+    .filter((k): k is string => !!k && level[k] !== undefined)
+    .map((k) => `${t.weaponStats[k]} ${weaponValue(k, level[k] as number)}`)
+    .join(t.sep);
+}
+
 export interface UpgradeText {
   title: string;
   tag: string;
@@ -57,6 +84,8 @@ export interface UpgradeText {
   recipeIcon: string;
   /** The recipe is still incomplete after this choice (it reads muted); false when this choice forges the Elo. */
   recipeMissing: boolean;
+  /** A new weapon's level 1 numbers; shown before its flavour text (numbers first, flavour only with room). */
+  stats?: string;
 }
 
 /** One recipe's progress line, levels as they would be: "Elo Fúria: arma 6/7 · Força 5/5". */
@@ -112,6 +141,7 @@ export function describeUpgrade(
           // How it fights: aimed (walk to aim it), automatic or around the hero (NU-07).
           tag: t.levelUp.newWeaponOf(t.levelUp.category[weaponCategory(opt.id)]),
           desc: w.desc,
+          stats: weaponStartLine(opt.id),
           icon,
           recipe,
           recipeIcon,

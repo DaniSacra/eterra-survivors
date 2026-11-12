@@ -91,6 +91,10 @@ export const t = {
     /** A stat still at its base value. */
     untouched: '-',
     preview: (from: string, to: string) => `${from} → ${to}`,
+    /** The same on a card, with the real current value (never the sheet's "-"). */
+    previewBase: (from: string, to: string) => `${from} → ${to}`,
+    /** A percent stat's total after the choice, on a card. */
+    totalAfter: (total: string) => `total ${total}`,
     /** A passive's change with the total it leads to, on cards without the stat panel. */
     withTotal: (change: string, total: string) => `${change} (${total})`,
   },

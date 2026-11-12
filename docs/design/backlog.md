@@ -3102,7 +3102,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   duplicar); em 360x640 só a barra.
 - Aceite: capturas 420x820 e 360x640; a mesma conta na Pausa e no fim.
 
-**CU-05 · Carta de arma nova com números** · ui + impl · P · proposto
+**CU-05 · Carta de arma nova com números** · ui + impl · P · ✅ feito (2026-11-11, dentro do PU-03)
 
 - Por quê: 05-ui UI-08. Arma nova só tem texto de sabor (`lvl-420x820.png`), a melhoria já mostra o delta: o jogador
   compra no escuro (pilar 2).
@@ -3510,7 +3510,7 @@ em `ART_RES`.
   `end.shop: (ouro: string) => \`Loja (${ouro} de ouro)\``.
 - Aceite: teste do `canBuyAny`; capturas 360x640 e 420x820 com o botão; sem ouro suficiente, o botão não aparece.
 
-**PU-03 · Carta de level-up com o número real e sem sobreposição deitado** · ui + impl · P · proposto (junto com o CU-05)
+**PU-03 · Carta de level-up com o número real e sem sobreposição deitado** · ui + impl · P · ✅ feito (2026-11-11, junto com o CU-05; decidi: deitado a carta curta (< 74 px) compacta fontes e espaços em vez de esconder a descrição, porque nela está o número; percentual mostra "(total +20%)"; arma nova mostra Dano, Recarga e Alcance do nível 1 antes do sabor, e o sabor sai primeiro quando falta espaço)
 
 - Por quê: 05-ui UI-D e UI-E. Sem o painel (360x640 e deitado) a carta usa o "-" da ficha como base: "Velocidade +15
   (- → 165)", "Dano +10% (- → +10%)" (`describe.ts:40`, `LevelUpScene.ts:135-143`). Deitado (740x360) a descrição de uma

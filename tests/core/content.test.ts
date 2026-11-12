@@ -15,6 +15,8 @@ import {
   formatDecimal,
   formatStatDelta,
   formatStatValue,
+  formatCardTotal,
+  weaponStartLine,
 } from '../../src/render/describe';
 import { t } from '../../src/i18n/pt-BR';
 
@@ -110,6 +112,21 @@ describe('upgrade descriptions', () => {
     const from = formatStatValue('might', 1.1, 1);
     const to = formatStatValue('might', 1.1 + 0.1, 1);
     expect(t.levelUp.preview(from, to)).toBe('+10% → +20%');
+  });
+
+  it('cards show the real current value for absolute stats and only the total for percent stats (PU-03)', () => {
+    expect(formatCardTotal('moveSpeed', 150, 165, 150)).toBe('150 → 165');
+    expect(formatCardTotal('armor', 0, 1, 0)).toBe('0 → 1');
+    expect(formatCardTotal('maxHp', 160, 180, 160)).toBe('160 → 180');
+    expect(formatCardTotal('regen', 0, 0.3, 0)).toBe('0/s → 0,3/s');
+    expect(formatCardTotal('might', 1, 1.1, 1)).toBeNull(); // nothing yet: no brackets
+    expect(formatCardTotal('might', 1.1, 1.2, 1)).toBe('total +20%');
+    expect(formatCardTotal('amount', 0, 1, 0)).toBeNull();
+  });
+
+  it('a new weapon card carries its level 1 numbers (CU-05)', () => {
+    expect(weaponStartLine('blade')).toMatch(/^Dano \d+ · Recarga [\d,]+s/);
+    expect(weaponStartLine('holyLight')).not.toContain('Raio'); // a projectile's radius is its size
   });
 
   it('cards show the recipe progress after the choice, and whether it forges the Elo', () => {

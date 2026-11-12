@@ -5,7 +5,7 @@ import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
-import { describeUpgrade, formatStatValue } from '../render/describe';
+import { describeUpgrade, formatCardTotal } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
 import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
 import type { HudScene } from './HudScene';
@@ -142,13 +142,11 @@ export class LevelUpScene extends Phaser.Scene {
       // Without the stat panel, a passive's card carries the total itself: "Vida máxima +20 (180 → 200)" (NU-04).
       const pv = panel ? null : statPreview(w, opt);
       if (pv) {
-        const base = config.player.stats[pv.stat];
-        const total = t.levelUp.preview(
-          formatStatValue(pv.stat, pv.from, base),
-          formatStatValue(pv.stat, pv.to, base),
-        );
-        d.desc = t.levelUp.withTotal(d.desc, total);
+        const total = formatCardTotal(pv.stat, pv.from, pv.to, config.player.stats[pv.stat]);
+        if (total) d.desc = t.levelUp.withTotal(d.desc, total);
       }
+      // A short card (phone lying down) packs title, numbers and recipe closer, so the numbers stay.
+      const tight = cardH < 74;
       const x0 = cx - cardW / 2;
       this.add.image(x0 + 32, y, d.icon).setScale(ART_SCALE * 1.6);
       const left = x0 + 62;
@@ -156,43 +154,50 @@ export class LevelUpScene extends Phaser.Scene {
       const title = label(
         this,
         left,
-        y - cardH / 2 + 9,
+        y - cardH / 2 + (tight ? 5 : 9),
         touch ? d.title : t.levelUp.numbered(i + 1, d.title),
-        18,
+        tight ? 16 : 18,
         {
           bold: true,
           align: 'left',
         },
       );
-      const tag = label(this, x0 + cardW - 12, y - cardH / 2 + 19, d.tag, 13, { color: UI.gold }).setOrigin(
+      const tag = label(this, x0 + cardW - 12, y - cardH / 2 + (tight ? 14 : 19), d.tag, 13, { color: UI.gold }).setOrigin(
         1,
         0.5,
       );
       // A long name next to a long tag (narrow phones): the name shrinks until they no longer touch.
-      for (let size = 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
+      for (let size = tight ? 15 : 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
         title.setFontSize(size);
-      const desc = label(this, left, y - cardH / 2 + 33, d.desc, 14, {
+      // Numbers first (a new weapon's level 1 line), the flavour only when there is room.
+      const desc = label(this, left, y - cardH / 2 + (tight ? 24 : 33), d.stats ? `${d.stats}\n${d.desc}` : d.desc, tight ? 13 : 14, {
         color: UI.muted,
         align: 'left',
         wrap: textW,
       });
+      // The card's text ends here: above the recipe when there is one, else near the bottom edge.
+      let limit = y + cardH / 2 - 4;
       if (d.recipe) {
-        const ry = y + cardH / 2 - 7;
+        const ry = y + cardH / 2 - (tight ? 4 : 7);
         // The recipe's passive as a mini icon, then its state ("você tem", "falta" or "Elo pronto").
         const rx = d.recipeIcon ? left + 18 : left;
-        const recipe = label(this, rx, ry, d.recipe, 12, {
+        const recipe = label(this, rx, ry, d.recipe, tight ? 11 : 12, {
           color: d.recipeMissing ? UI.muted : UI.gold,
           align: 'left',
           wrap: left + textW - rx,
         }).setOrigin(0, 1);
-        // The recipe always stays (it is what opens an Elo, NU-02): a long description gives up its last lines.
-        let lines = desc.getWrappedText();
-        while (ry - recipe.height < desc.y + desc.height + 3 && lines.length > 1) {
-          lines = lines.slice(0, -1);
-          desc.setText(`${lines.join('\n').replace(/[\s.,;:]+$/, '')}…`);
-        }
+        limit = ry - recipe.height - 3;
         if (d.recipeIcon) this.add.image(left + 7, ry - 8, d.recipeIcon).setScale((ART_SCALE * 16) / 28);
       }
+      // The recipe always stays (it is what opens an Elo, NU-02). A new weapon gives up its flavour first, then a long
+      // description its last lines; a single line that still overlaps goes (the title and tag say the rest).
+      if (d.stats && desc.y + desc.height > limit) desc.setText(d.stats);
+      let lines = desc.getWrappedText();
+      while (desc.y + desc.height > limit && lines.length > 1) {
+        lines = lines.slice(0, -1);
+        desc.setText(`${lines.join('\n').replace(/[\s.,;:]+$/, '')}…`);
+      }
+      if (desc.y + desc.height > limit) desc.setVisible(false);
       return card;
     });
 
