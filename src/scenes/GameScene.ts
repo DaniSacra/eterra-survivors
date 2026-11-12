@@ -138,6 +138,8 @@ const PROJECTILE_TINT: Record<string, number> = Object.fromEntries(
 );
 /** The Elo forge's slow motion: how long (real ms) and how slow. */
 const FORGE_SLOW_MS = 500;
+/** The first Elo of a life slows the run this long, under the HUD's fusion (PX-11). */
+const FIRST_FORGE_SLOW_MS = 2000;
 const FORGE_SLOW = 0.25;
 const FORGE = 'proj.forgeFury';
 /** Luz Sagrada's doves and the pixel Elo shots keep their own colours instead of the element tint. */
@@ -294,6 +296,8 @@ export class GameScene extends Phaser.Scene {
   private stopUntil = 0;
   /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
   private moments = newMoments();
+  /** True once this run has forged an Elo: only the first one of a life gets the big moment. */
+  private bigForgeDone = false;
   /** A level was gained and its ring waits for the choice to close. */
   private levelRingPending = false;
   private rewardIcon!: Phaser.GameObjects.Image;
@@ -394,6 +398,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.moments = newMoments();
+    this.bigForgeDone = false;
     this.levelRingPending = false;
     this.sparks = new Sparks();
     this.lastTime = 0;
@@ -1455,7 +1460,11 @@ export class GameScene extends Phaser.Scene {
     const w = this.world;
     const p = w.player;
     const color = ELEMENT_COLOR[(EVOLUTIONS[elo] as Evolution).element];
-    this.slowUntil = this.time.now + FORGE_SLOW_MS;
+    // The first Elo of a player's life is an event of its own (PX-11): longer slow motion and a screen that darkens.
+    const first = !this.bigForgeDone && loadSave().elos.length === 0;
+    this.bigForgeDone = true;
+    this.slowUntil = this.time.now + (first ? FIRST_FORGE_SLOW_MS : FORGE_SLOW_MS);
+    if (first) this.hud.firstForge(elo);
     sound.play('forge');
     this.moments.chest = w.time;
     this.moments.elo = true;

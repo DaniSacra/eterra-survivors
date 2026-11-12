@@ -124,6 +124,9 @@ export const t = {
   elo: {
     /** An Elo's line on its page, in quotes. */
     quote: (line: string) => `“${line}”`,
+    /** The first Elo of a player's life: the big moment (PX-11). */
+    firstForge: (elo: string) => `Elo forjado: ${elo}!`,
+    firstForgeSub: 'Duas forças viraram uma só. Cada Elo é uma receita secreta.',
     /** The in-run notice when an Elo forms. */
     forged: (elo: string, weapon: string, passive: string) => `Elo forjado: ${elo} · ${weapon} + ${passive}`,
     /** A recipe's progress, after the choice on a level-up card and live on the pause screen. */
@@ -502,6 +505,8 @@ export const t = {
     banked: (gold: number) => `No cofre: ${gold} ouro`,
     /** Shortcut to the Loja, only when the banked gold buys something. */
     shop: (gold: number) => `Loja (${int(gold)} de ouro)`,
+    /** The collection line: how many Elos the player has found. */
+    elosKnown: (n: number, total: number) => `Você descobriu ${n} de ${total} Elos`,
     /** Packed notes, when the end screen runs out of room. */
     elosFound: (names: string, gold: number) => `Elos descobertos: ${names}! +${gold} de ouro`,
     achievementsFound: (n: number) => `${n} conquistas novas! Veja na Coleção.`,

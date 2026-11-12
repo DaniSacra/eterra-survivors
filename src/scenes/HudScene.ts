@@ -428,6 +428,63 @@ export class HudScene extends Phaser.Scene {
     this.tweens.add({ targets: this.banner, alpha: 0, delay: 2200, duration: 800 });
   }
 
+  /**
+   * The first Elo of a player's life as an event (PX-11): the screen darkens, the weapon and the passive fly together,
+   * burst into the Elo and its name shows. About 2 s; a tap skips it. The run goes on in slow motion beneath.
+   */
+  firstForge(elo: WeaponId): void {
+    const evo = EVOLUTIONS[elo] as Evolution;
+    const { width, height } = this.scale;
+    const cx = width / 2;
+    const cy = height * 0.4;
+    const color = ELEMENT_COLOR[evo.element];
+    const parts: Phaser.GameObjects.GameObject[] = [];
+    const veil = this.add.rectangle(cx, height / 2, width, height, 0x05040f, 0).setInteractive();
+    parts.push(veil);
+    this.tweens.add({ targets: veil, fillAlpha: 0.7, duration: 300 });
+    const done = (): void => {
+      this.tweens.add({
+        targets: parts,
+        alpha: 0,
+        duration: 250,
+        onComplete: () => parts.forEach((o) => o.destroy()),
+      });
+    };
+    veil.once('pointerdown', done);
+    const scale = ART_SCALE * 2;
+    const weapon = this.add.image(cx - 130, cy, `icon.${evo.from}`).setScale(scale);
+    const passive = this.add.image(cx + 130, cy, `icon.${evo.passive}`).setScale(scale);
+    parts.push(weapon, passive);
+    this.tweens.add({ targets: weapon, x: cx, duration: 700, ease: 'Cubic.easeIn' });
+    this.tweens.add({
+      targets: passive,
+      x: cx,
+      duration: 700,
+      ease: 'Cubic.easeIn',
+      onComplete: () => {
+        weapon.destroy();
+        passive.destroy();
+        const flash = this.add.circle(cx, cy, 20, color, 0.9);
+        const star = this.add.image(cx, cy, `icon.${elo}`).setScale(scale * 0.4);
+        const name = label(this, cx, cy + 70, t.elo.firstForge(t.weapons[elo].name), 24, {
+          bold: true,
+          color: UI.gold,
+          stroke: true,
+          wrap: width - 40,
+        }).setAlpha(0);
+        const sub = label(this, cx, cy + 110, t.elo.firstForgeSub, 15, {
+          color: UI.text,
+          wrap: width - 40,
+        }).setAlpha(0);
+        parts.push(flash, star, name, sub);
+        this.tweens.add({ targets: flash, scale: 9, alpha: 0, duration: 500 });
+        this.tweens.add({ targets: star, scale: scale * 1.5, duration: 450, ease: 'Back.easeOut' });
+        this.tweens.add({ targets: [name, sub], alpha: 1, duration: 300, delay: 250 });
+        this.time.delayedCall(1700, done);
+      },
+    });
+  }
+
   /** Debug only: 100 more enemies to measure performance. */
   private stress(): void {
     const seg = segmentAt(this.world.time, this.world.stage.waves);

@@ -1,4 +1,4 @@
-import { ELO_DISCOVERY_GOLD } from '../data/evolutions';
+import { ELO_DISCOVERY_GOLD, EVOLVED_IDS } from '../data/evolutions';
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
 import { almostElo, hurtShare, passiveReport, reportExtent, weaponReport } from '../core/report';
@@ -343,6 +343,9 @@ export class EndScene extends Phaser.Scene {
         true,
       );
     else for (const id of elos) line(t.end.newElo(t.weapons[id].name, ELO_DISCOVERY_GOLD), 15, UI.gold, true);
+    // How many of the Elos the player knows now (PX-11): a collection to fill.
+    if (save.elos.length > 0 && !packed)
+      line(t.end.elosKnown(save.elos.length, EVOLVED_IDS.length), 14, UI.muted);
     // Achievements: up to three new ones; with none, the one closest to done (the next "one more run").
     const fresh = this.newAchievements;
     if (packed && fresh.length > 1)
