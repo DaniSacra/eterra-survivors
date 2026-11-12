@@ -10,6 +10,7 @@ import {
 } from '../core/meta';
 import { SHOP, SHOP_IDS, SHOP_SECTIONS, type ShopId, type ShopSection } from '../data/shop';
 import { t } from '../i18n/pt-BR';
+import { homeBackdrop } from '../render/backdrop';
 import { ART_SCALE } from '../render/art/pen';
 import { STAT_ICON } from '../render/buildPanel';
 import { formatStatDelta } from '../render/describe';
@@ -126,6 +127,7 @@ export class ShopScene extends Phaser.Scene {
     const cx = width / 2;
     const save = (this.save = loadSave());
     this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
+    homeBackdrop(this, 0.6);
     const short = isShort(this);
     // Gaspar greets the player on the first visit only (the scene rebuilds after each purchase).
     // Test mode greets once a session and never spends the real player's first greeting.
@@ -583,7 +585,7 @@ export class ShopScene extends Phaser.Scene {
     const pad = 12;
     const bw = (w - pad * 3) / 2;
     const add = (bx: number, by: number, text: string, act: () => void, off = false) => {
-      const b = button(this, bx + bw / 2, by, bw, 36, act, text);
+      const b = button(this, bx + bw / 2, by, bw, 32, act, text);
       const txt = b.getData('label') as Phaser.GameObjects.Text;
       // The signs read big; the long labels shrink to fit narrow panels.
       if (text.length === 1) txt.setFontSize(fontPx(24));
@@ -591,15 +593,15 @@ export class ShopScene extends Phaser.Scene {
       d.push(b, txt);
       if (off) disable(b);
     };
-    const low = y + h - pad - 18;
-    const high = low - 48;
+    const low = y + h - pad - 16;
+    const high = low - 38;
     add(x + pad, high, t.dev.down, () => this.devStep(-1), level === 0);
     add(x + pad * 2 + bw, high, t.dev.up, () => this.devStep(1), level === SHOP[id].maxLevel);
     add(x + pad, low, t.dev.allZero, () => this.devAll(false));
     add(x + pad * 2 + bw, low, t.dev.allMax, () => this.devAll(true));
     // The key hint only where it clears the "Agora" row (PU-02): no overlap, whatever the height.
-    if (high - 32 - 8 >= rowsEnd)
-      d.push(label(this, x + w / 2, high - 32, t.dev.hint, 12, { color: UI.muted }));
+    if (high - 28 - 8 >= rowsEnd)
+      d.push(label(this, x + w / 2, high - 28, t.dev.hint, 12, { color: UI.muted }));
   }
 
   private devStep(by: number): void {

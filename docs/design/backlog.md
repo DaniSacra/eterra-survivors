@@ -3601,7 +3601,7 @@ em `ART_RES`.
   gerações no total, registradas.
 - Aceite: captura do herói ferido e da queda nos quatro heróis; o Fim abre em menos de 1 s depois da morte.
 
-**PA-05 · Telas de menu sem buracos** · visual · P · proposto
+**PA-05 · Telas de menu sem buracos** · visual · P · ✅ feito (poster da história maior com chefe em escala inteira, herói ao lado de Partir, linha "Chefe" nos cartões de fase, cenário da vila em Opções e Loja, brilho do Bestiário mais claro, linha dev da Loja sem sobreposição)
 
 - Por quê: 04-visual #9. História com ~300 px vazios entre o texto e Partir; Fase com ~80 px sobrando; Opções como
   quatro caixas sobre o fundo repetido; Bestiário não visto como silhueta preta num palco sem luz.

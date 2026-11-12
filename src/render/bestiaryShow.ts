@@ -139,8 +139,8 @@ export class Showcase {
       s.add
         .image(x + w / 2, feet, 'show.glow')
         .setDisplaySize(w * 0.9, h * 0.5)
-        .setTint(seen ? 0xffe0a0 : 0x404860)
-        .setAlpha(0.22),
+        .setTint(seen ? 0xffe0a0 : 0x8090c0)
+        .setAlpha(seen ? 0.22 : 0.32),
     );
 
     // The enemy at a whole number of art pixels per art pixel: as large as the box allows.

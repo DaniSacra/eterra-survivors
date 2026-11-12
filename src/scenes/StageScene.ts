@@ -32,7 +32,7 @@ export class StageScene extends Phaser.Scene {
     const top = short ? 44 : 64;
     const bottom = short ? height - 8 : height - 70;
     const cardW = (wrapW - gap * (cols - 1)) / cols;
-    const cardH = cols === 3 ? bottom - top : Math.min(200, Math.floor((bottom - top - gap * 2) / 3));
+    const cardH = cols === 3 ? bottom - top : Math.min(250, Math.floor((bottom - top - gap * 2) / 3));
     const buttons: Phaser.GameObjects.Rectangle[] = [];
     STAGE_IDS.forEach((id, i) => {
       const x = cx - wrapW / 2 + (i % cols) * (cardW + gap) + cardW / 2;
@@ -84,7 +84,7 @@ export class StageScene extends Phaser.Scene {
     const tl = tall ? left + 10 : left + 12 + iw;
     const tw = w - (tl - left) - 10;
     const ty = tall ? topY + ih + 14 : topY + 12;
-    label(this, tl, ty, s.name, 17, {
+    const nameLabel = label(this, tl, ty, s.name, 17, {
       bold: true,
       align: 'left',
       color: open ? UI.text : UI.textOff,
@@ -93,10 +93,10 @@ export class StageScene extends Phaser.Scene {
     // The seal sits at the card's bottom corner: at the top it ran into the name (PU-05).
     if (cleared) seal(this, x + w / 2 - 10, topY + h - 16, t.select.cleared);
     const prev = STAGE_IDS[STAGE_IDS.indexOf(id) - 1];
-    label(
+    const desc = label(
       this,
       tl,
-      ty + 26,
+      ty + Math.max(26, nameLabel.height + 6),
       open ? s.desc : t.stageScreen.unlockBy(prev ? t.stages[prev].name : s.name),
       12,
       {
@@ -105,6 +105,14 @@ export class StageScene extends Phaser.Scene {
         wrap: tw,
       },
     );
+    // The boss under the text (the story screen says it too), when the card has the room: no dead space (PA-05).
+    const by = desc.y + desc.height + 10;
+    if (open && by + 16 < topY + h - 22)
+      label(this, tl, by, t.stageScreen.boss(t.enemies[STAGES[id].boss.id]), 13, {
+        bold: true,
+        color: UI.gold,
+        align: 'left',
+      });
     return card;
   }
 }
