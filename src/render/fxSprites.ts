@@ -9,16 +9,27 @@ const MAX = 160;
 /** Slots only damage pieces may take: decoration (zone flames, crystals) stops before them (PB-01). */
 const RESERVE = 48;
 
+/** Flat things lying on the ground (slime): a lane of their own under the enemies, hard-capped. */
+const MAX_GROUND = 64;
+
 class FxSprites {
   private images: Phaser.GameObjects.Image[] = [];
+  private ground: Phaser.GameObjects.Image[] = [];
   private used = 0;
+  private usedGround = 0;
   /** Pieces refused this frame because the pool was full (shown on the F3 panel in dev builds). */
   overflow = 0;
 
   /** Creates the pool in the scene (call again on every scene start). */
   init(scene: Phaser.Scene): void {
     this.images = [];
+    this.ground = [];
     this.used = 0;
+    this.usedGround = 0;
+    for (let i = 0; i < MAX_GROUND; i++)
+      this.ground.push(
+        scene.add.image(0, 0, 'fx.shield').setDepth(3.9).setScale(ART_SCALE).setVisible(false),
+      );
     for (let i = 0; i < MAX; i++)
       this.images.push(
         scene.add.image(0, 0, 'fx.shield').setDepth(11.5).setScale(ART_SCALE).setVisible(false),
@@ -28,6 +39,7 @@ class FxSprites {
   /** Starts a frame: every image is free again. */
   begin(): void {
     this.used = 0;
+    this.usedGround = 0;
     this.overflow = 0;
   }
 
@@ -88,10 +100,39 @@ class FxSprites {
       .setVisible(true);
   }
 
+  /** Like `putFrame`, on the ground lane: drawn under the enemies and the hero (decoration, refused when full). */
+  putGroundFrame(
+    key: string,
+    frame: number,
+    ox: number,
+    oy: number,
+    x: number,
+    y: number,
+    scale = 1,
+    alpha = 1,
+  ): void {
+    const img = this.ground[this.usedGround];
+    if (!img) {
+      this.overflow++;
+      return;
+    }
+    this.usedGround++;
+    if (img.texture.key !== key) img.setTexture(key, frame);
+    else img.setFrame(frame);
+    img
+      .setOrigin(ox, oy)
+      .setPosition(x, y)
+      .setScale(ART_SCALE * scale)
+      .setAlpha(alpha)
+      .setVisible(true);
+  }
+
   /** Ends the frame: images not placed this frame are hidden. */
   end(): void {
     for (let i = this.used; i < this.images.length; i++)
       (this.images[i] as Phaser.GameObjects.Image).setVisible(false);
+    for (let i = this.usedGround; i < this.ground.length; i++)
+      (this.ground[i] as Phaser.GameObjects.Image).setVisible(false);
   }
 }
 

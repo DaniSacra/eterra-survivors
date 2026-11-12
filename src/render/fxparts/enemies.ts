@@ -8,6 +8,8 @@ import { SUMMON_COLOR, SUMMON_EDGE, SUMMON_SHADE } from '../ui';
 import { ENEMIES, type EnemyDef, type EnemyId } from '../../data/enemies';
 import type { EnemyShot } from '../../core/enemyShots';
 import { star } from '../sparks';
+import { fxSprites } from '../fxSprites';
+import { VFX, vfxKey } from '../vfx';
 import { arcLine, band, disc, oval, ovalRing, ring } from '../shapes';
 import { CLEAVE_STYLE, drawSwing } from './weapons';
 import {
@@ -490,6 +492,8 @@ export const WEB = 0xe4e4ec;
 
 export const SLIME = 0x3ab070;
 
+export const SLIME_RIM = 0x1b5238;
+
 /**
  * Patches an enemy leaves on the ground (poison, tar). In flight a potion arcs from the thrower to the marked spot
  * (the danger colour filling, the edge marching); landed, poison bubbles and tar shines, the exact size of the effect.
@@ -551,119 +555,82 @@ export function drawPatches(g: Phaser.GameObjects.Graphics, world: World): void 
   }
 }
 
-export const SLIME_N = 16;
-
-export const BLOB_X = new Float32Array(SLIME_N);
-
-export const BLOB_Y = new Float32Array(SLIME_N);
-
-export const SLIME_RIM = 0x1b5238;
-
-export const SLIME_BODY = 0x35a56a;
-
-export const SLIME_WET = 0xb8ffd8;
-
-/** A fan-filled organic blob: its edge wobbles between 0.82 and 1.0 of `r` (never past the true radius). */
-export function blob(
-  g: Phaser.GameObjects.Graphics,
-  x: number,
-  y: number,
-  r: number,
-  seed: number,
-  time: number,
-): void {
-  for (let i = 0; i < SLIME_N; i++) {
-    const a = (i / SLIME_N) * Math.PI * 2;
-    const w = 0.91 + 0.06 * Math.sin(seed * 1.3 + i * 2.1) + 0.03 * Math.sin(seed + i * 3.7 + time * 1.2);
-    BLOB_X[i] = x + Math.cos(a) * r * w;
-    BLOB_Y[i] = y + Math.sin(a) * r * w * 0.92;
-  }
-  for (let i = 0; i < SLIME_N; i++) {
-    const j = (i + 1) % SLIME_N;
-    g.fillTriangle(x, y, BLOB_X[i] as number, BLOB_Y[i] as number, BLOB_X[j] as number, BLOB_Y[j] as number);
-  }
-}
+/** Frames of the slime effect (render/vfx.ts): spreading, living (a loop) and drying out. */
+const SLIME_SPREAD = 0.2;
+const SLIME_SPREAD_FRAMES = 4;
+const SLIME_LIVE_FIRST = 4;
+const SLIME_LIVE_FRAMES = 6;
+const SLIME_DRY_FIRST = 10;
+const SLIME_DRY_FRAMES = 6;
+/** The last seconds of a patch's life it spends drying and shrinking. */
+const SLIME_DRY = 1.2;
+/** The picture's puddle is about this wide in art px: scaled so its edge is the exact slow radius. */
+const SLIME_ART_RADIUS = 33;
+/** Where the hero's feet are below their position, for the sticky strands. */
+const SLIME_FEET = 14;
+const STRANDS = 3;
 
 /**
- * Slime on the ground (the Gosma's slow): one clinging puddle with an irregular edge that fuses with its neighbours.
- * Three passes over all patches (rims, then bodies, then shine) so overlaps do not pile up transparency: wet gloss,
- * bubbles that swell and pop with a few droplets, all inside the exact slow radius.
+ * Slime on the ground (the Gosma's slow), a pixel animation per patch: it spreads from 40% to the full radius in 0.2 s
+ * with a splash, lives with a wet gloss and bubbles, then shrinks and goes matte as it dries over its last seconds.
+ * Drawn on the ground lane under the enemies and capped (the decoration lane). While the hero stands in one, strands
+ * of slime stretch from their feet back along their trail (the slow, made visible).
  */
 export function drawSlime(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
   const t = world.time;
-  for (let pass = 0; pass < 3; pass++) {
-    for (let i = 0; i < list.length; i++) {
-      const m = list[i] as (typeof list)[number];
-      if (m.kind !== 'slime') continue;
-      const r = m.radius;
-      if (m.ttl > 0) {
-        // The flask is still in the air: the warning (pass 0 only).
-        if (pass > 0) continue;
-        const k = 1 - m.ttl / m.total;
-        g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
-        disc(g, m.x, m.y, r);
-        g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
-        dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (t * (30 + 50 * k)) % (DASH * 2));
-        const fx = m.fromX + (m.x - m.fromX) * k;
-        const fy = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
-        g.fillStyle(INK, 1);
-        disc(g, fx, fy, 6.5);
-        g.fillStyle(SLIME, 1);
-        disc(g, fx, fy, 4.5);
-        continue;
-      }
-      const fade = Math.min(1, m.life / 0.6);
-      const seed = m.x * 0.013 + m.y * 0.021;
-      if (pass === 0) {
-        g.fillStyle(SLIME_RIM, 0.92 * fade);
-        blob(g, m.x, m.y, r, seed, t);
-        // Lobes that bulge out and fuse with neighbours.
-        for (let b = 0; b < 3; b++) {
-          const a = seed * 7 + b * 2.1;
-          disc(g, m.x + Math.cos(a) * r * 0.78, m.y + Math.sin(a) * r * 0.72, r * 0.2);
-        }
-      } else if (pass === 1) {
-        g.fillStyle(SLIME_BODY, 0.95 * fade);
-        blob(g, m.x, m.y, r * 0.88, seed + 1, t);
-        g.fillStyle(0x2a8a58, 0.8 * fade);
-        blob(g, m.x + r * 0.08, m.y + r * 0.1, r * 0.55, seed + 2, t);
-      } else {
-        // Wet gloss: a pale crescent and two glints.
-        g.fillStyle(SLIME_WET, 0.35 * fade);
-        oval(g, m.x - r * 0.28, m.y - r * 0.32, r * 0.34, r * 0.12);
-        g.fillStyle(0xffffff, 0.6 * fade);
-        disc(g, m.x - r * 0.42, m.y - r * 0.34, 1.6);
-        disc(g, m.x + r * 0.3, m.y + r * 0.18, 1.2);
-        // Bubbles that swell and pop, each with a few droplets.
-        for (let b = 0; b < 3; b++) {
-          const ph = (t * 0.55 + b * 0.33 + seed) % 1;
-          const a = b * 2.4 + Math.floor(t * 0.55 + b * 0.33 + seed) * 1.7;
-          const d = r * (0.2 + 0.45 * ((b * 0.37 + Math.floor(t * 0.55 + seed)) % 1));
-          const bx = m.x + Math.cos(a) * d;
-          const by = m.y + Math.sin(a) * d * 0.8;
-          if (ph < 0.8) {
-            const br = 1.5 + 4 * (ph / 0.8);
-            g.fillStyle(SLIME_WET, 0.45 * fade);
-            disc(g, bx, by, br);
-            g.lineStyle(1, 0xffffff, 0.7 * fade);
-            ring(g, bx, by, br);
-            g.fillStyle(0xffffff, 0.8 * fade);
-            disc(g, bx - br * 0.35, by - br * 0.35, br * 0.25);
-          } else {
-            // The pop: a ring and droplets flung out.
-            const pk = (ph - 0.8) / 0.2;
-            g.lineStyle(1.5, SLIME_WET, 0.8 * (1 - pk) * fade);
-            ring(g, bx, by, 5.5 + 5 * pk);
-            g.fillStyle(SLIME_WET, 0.8 * (1 - pk) * fade);
-            for (let q = 0; q < 4; q++) {
-              const qa = q * 1.57 + b;
-              disc(g, bx + Math.cos(qa) * (4 + 7 * pk), by + Math.sin(qa) * (3 + 5 * pk) - 4 * pk, 1.4);
-            }
-          }
-        }
-      }
+  const p = world.player;
+  const fx = VFX.slime;
+  let stuck = false;
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i] as (typeof list)[number];
+    if (m.kind !== 'slime') continue;
+    const r = m.radius;
+    if (m.ttl > 0) {
+      // The flask is still in the air: the warning.
+      const k = 1 - m.ttl / m.total;
+      g.fillStyle(WARN_COLOR, 0.1 + 0.2 * k);
+      disc(g, m.x, m.y, r);
+      g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
+      dashedArc(g, m.x, m.y, r, 0, Math.PI * 2, (t * (30 + 50 * k)) % (DASH * 2));
+      const kx = m.fromX + (m.x - m.fromX) * k;
+      const ky = m.fromY + (m.y - m.fromY) * k - Math.sin(Math.PI * k) * 70;
+      g.fillStyle(INK, 1);
+      disc(g, kx, ky, 6.5);
+      g.fillStyle(SLIME, 1);
+      disc(g, kx, ky, 4.5);
+      continue;
     }
+    const age = t - m.born - m.total;
+    let f: number;
+    if (age < SLIME_SPREAD) f = Math.floor((Math.max(0, age) / SLIME_SPREAD) * SLIME_SPREAD_FRAMES);
+    else if (m.life < SLIME_DRY)
+      f =
+        SLIME_DRY_FIRST +
+        Math.min(SLIME_DRY_FRAMES - 1, Math.floor((1 - m.life / SLIME_DRY) * SLIME_DRY_FRAMES));
+    else f = SLIME_LIVE_FIRST + (Math.floor((age - SLIME_SPREAD) * fx.fps * 0.7) % SLIME_LIVE_FRAMES);
+    fxSprites.putGroundFrame(vfxKey('slime'), f, fx.anchor[0], fx.anchor[1], m.x, m.y, r / SLIME_ART_RADIUS);
+    if (m.life > 0 && (p.x - m.x) ** 2 + (p.y - m.y) ** 2 < r * r) stuck = true;
+  }
+  if (!stuck) return;
+  // Strands: slime threads from the feet back along the way the hero came, stretching and snapping in turn.
+  const fy = p.y + SLIME_FEET;
+  const bx = -p.facing.x;
+  const by = -p.facing.y * 0.6;
+  for (let s = 0; s < STRANDS; s++) {
+    const ph = (t * 1.6 + s / STRANDS) % 1;
+    const reach = 10 + 24 * ph;
+    const sx = p.x + (s - 1) * 4;
+    const sy = fy - 2;
+    const ex = sx + bx * reach * 0.7 + (s - 1) * reach * 1.1;
+    const ey = sy + by * reach * 0.4 + reach * 0.2;
+    const a = ph < 0.8 ? 0.9 : 0.9 * (1 - (ph - 0.8) / 0.2);
+    g.lineStyle(4, SLIME_RIM, a);
+    g.lineBetween(sx, sy, ex, ey);
+    g.lineStyle(2, 0x6fd69a, a);
+    g.lineBetween(sx, sy, ex, ey);
+    g.fillStyle(0xb8ffd8, a);
+    g.fillRect(Math.round(ex / 2) * 2 - 2, Math.round(ey / 2) * 2 - 2, 4, 4);
   }
 }
 

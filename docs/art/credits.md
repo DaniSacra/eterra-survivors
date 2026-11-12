@@ -127,3 +127,4 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 | Data | O que | Fonte |
 | --- | --- | --- |
 | 2026-11-12 | Ossada repainted in place to a warm, dimmer bone (`enemies/bones.png`, `bones-walk.png`, `bonePile.png`): every low-saturation pixel multiplied by (0.86, 0.80, 0.67), eyes untouched. No generation | local pixel edit |
+| 2026-11-12 | Gosma slime puddle (`vfx/slime.png`, 16 frames of 80x80 art px, 12 fps, CF-07): own recipe (blob shape, gloss, droplets, bubbles) spreading 0.2 s, living, drying; effect id ed472dbe-080a-4be8-ab04-61760afc17d4. No generations charged | PixelLab vfx_workbench |

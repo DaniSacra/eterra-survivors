@@ -37,6 +37,8 @@ export const VFX = {
   chainHit: { frames: 6, w: 96, h: 96, anchor: [0.5, 0.5], fps: 16 },
   /** The death puff of common enemies: a pale cartoon dust cloud with a few gold stars (about 28 art px wide), 6 frames. */
   dust: { frames: 6, w: 64, h: 64, anchor: [0.5, 0.56], fps: 14 },
+  /** Gosma's slime: spreads (4 frames over 0.2 s), lives (a 6-frame loop) and dries (6 frames); the puddle is 66 art px wide. */
+  slime: { frames: 16, w: 80, h: 80, anchor: [0.5, 0.5], fps: 12 },
   /** The ring of gold light after a level-up, 70 art px at its widest, with rising motes. */
   levelRing: { frames: 8, w: 224, h: 224, anchor: [0.5, 0.5], fps: 14 },
 } as const satisfies Record<string, VfxDef>;
