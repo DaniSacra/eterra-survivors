@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { ENEMIES } from '../../src/data/enemies';
+import { CHARACTERS } from '../../src/data/characters';
 import { ASSETS } from '../../src/render/assets';
 import { ENEMY_ANIMS, declaredPoses } from '../../src/render/enemyAnims';
 
@@ -11,6 +13,12 @@ describe('asset files', () => {
   it('every image and sheet in the asset map has its file in public/ (no 404 at load)', () => {
     for (const [key, def] of Object.entries(ASSETS))
       if (def.kind !== 'art') expect(files.has(def.url), `${key} -> ${def.url}`).toBe(true);
+  });
+
+  it('every enemy and hero texture is a PNG (no code-drawn enemy or hero art is left)', () => {
+    for (const e of Object.values(ENEMIES)) expect(ASSETS[e.sprite]?.kind, e.sprite).toBe('image');
+    for (const id of Object.keys(CHARACTERS))
+      expect(ASSETS[`player.${id}`]?.kind, `player.${id}`).toBe('image');
   });
 
   it('only the poses an enemy declares are loaded', () => {

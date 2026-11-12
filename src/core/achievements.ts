@@ -153,8 +153,8 @@ const NONE: readonly AchievementId[] = Object.freeze([]);
 
 /**
  * The in-run notice: achievements the live run has just met that are not in the save and not in `shown` (which
- * this adds them to). Changes nothing else; the real unlock happens when the run is recorded. Allocates only
- * when something is found.
+ * this adds them to). Changes nothing else; the real unlock happens when the run is recorded. Allocates a little
+ * (the scene calls it once a second, not per frame).
  */
 export function liveAchievements(
   save: MetaSave,

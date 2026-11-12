@@ -3,7 +3,7 @@ import type { AssetDef } from './assets';
 /**
  * Animated pixel effects (made with the PixelLab effects workbench, packed as a horizontal strip at 2 texture px
  * per art px in public/sprites/fx/vfx/). `anchor` is where the effect's origin sits in a frame (fractions); an effect
- * plays once over `frames` frames at `fps` (see `vfxFrame`). Logged in docs/art/credits.md.
+ * plays once over `frames` frames at `fps`. Logged in docs/art/credits.md.
  */
 export interface VfxDef {
   frames: number;
@@ -50,9 +50,3 @@ export function vfxAssets(): Record<string, AssetDef> {
   );
 }
 
-/** The frame of an effect `age` seconds after it started (the last one holds), or -1 once it is over. */
-export function vfxFrame(id: VfxId, age: number, length = age): number {
-  const d: VfxDef = VFX[id];
-  const f = Math.floor((age / length) * d.frames);
-  return f >= d.frames ? -1 : Math.max(0, f);
-}

@@ -11,8 +11,6 @@ import type { World } from './world';
  * `ttl` runs out, then slowing the hero to `slow` until the fight ends (core/arena.ts, FT-08).
  */
 export type MarkKind = 'spawn' | 'ice' | 'poison' | 'tar' | 'web' | 'slime' | 'burst';
-/** The marks that are patches of ground the hero can stand in. */
-export const isPatch = (k: MarkKind): boolean => k !== 'spawn' && k !== 'burst';
 
 export interface Mark extends Poolable {
   kind: MarkKind;

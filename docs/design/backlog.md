@@ -2919,7 +2919,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   ciclo estrito Badalada/Dobre; `bestiaryOrder(seen)` e `bossSummons`.
 - Aceite: os testes existem e passam; nenhum muda comportamento.
 
-**CT-03 · Arte em código morta dos inimigos com PNG** · impl · P · proposto (decidi remover; o Daniel pode vetar)
+**CT-03 · Arte em código morta dos inimigos com PNG** · impl · P · ✅ feito (2026-11-11; `previousStage` fica de fora: não é código morto)
 
 - Por quê: 02-code B5. `render/art/enemies.ts` ainda desenha Ossada, Esqueleto, Ossada em Brasa, pilha, Espectro,
   Espírito Gélido, Gosma, Morcego Vampiro, Coveiro e Sineiro para texturas que `assets.ts:43-54` sobrescreve; o

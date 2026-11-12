@@ -41,7 +41,6 @@ export const t = {
   subtitle: 'Crônicas de Eterra',
 
   menu: {
-    intro: 'A geada chegou cedo a Valmor. Os mortos se levantaram. Alguém precisa resistir até o amanhecer.',
     start: 'Começar',
     shop: 'Loja do Gaspar',
     options: 'Opções',
@@ -64,7 +63,6 @@ export const t = {
 
   levelUp: {
     title: 'Subiu de nível!',
-    newWeapon: 'Nova arma',
     newWeaponOf: (category: string) => `Nova arma · ${category}`,
     /** How a weapon fights, on its new-weapon card. */
     category: { aimed: 'Mira', auto: 'Automática', area: 'Em volta' },
@@ -543,7 +541,6 @@ export const t = {
 
   shop: {
     title: 'Loja do Gaspar',
-    intro: 'O ferreiro de Valmor troca ouro por preparo. As compras valem para todas as partidas.',
     /** Gaspar's line on the first visit. */
     greeting: 'Gaspar, o ferreiro de Valmor. Aço simples, mas é o melhor da rua.',
     gold: (n: number) => `Ouro: ${n}`,

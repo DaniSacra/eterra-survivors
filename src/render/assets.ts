@@ -1,8 +1,6 @@
 import { vfxAssets } from './vfx';
 import type Phaser from 'phaser';
-import { ENEMY_ART } from './art/enemies';
 import { ENEMY_ANIMS, declaredPoses, poseKey } from './enemyAnims';
-import { HERO_ART } from './art/heroes';
 import { ICON_ART } from './art/icons';
 import { OBSTACLE_FILES } from '../data/obstacles';
 import { ITEM_ART } from './art/items';
@@ -10,9 +8,9 @@ import { ART_RES, Pen } from './art/pen';
 import type { ArtDef } from './art/types';
 
 /**
- * The single asset map. Every visual is referenced by key; today they are drawn from code in the cartoon
- * vector style (render/art). To use real art, change an entry to `{ kind: 'image', url: 'sprites/foo.png' }`
- * (files in /public), drawn at ART_RES times its world size like the generated ones.
+ * The single asset map. Every visual is referenced by key. Heroes, enemies, decals, obstacles, projectiles and tiles
+ * are PNGs (PixelLab, files in /public); only items and icons are still drawn from code (render/art, `Pen`). To swap
+ * one, change its entry to `{ kind: 'image', url: 'sprites/foo.png' }`, drawn at ART_RES times its world size.
  */
 export type AssetDef =
   /** `res`: texture pixels per world pixel (sprites ART_RES for sharpness; tiles 1). */
@@ -60,8 +58,6 @@ export const ASSETS: Record<string, AssetDef> = {
   'tile.road': { kind: 'image', url: 'sprites/tiles/road.png' },
   'tile.forest': { kind: 'image', url: 'sprites/tiles/forest.png' },
   ...vfxAssets(),
-  ...art(HERO_ART, ART_RES),
-  ...art(ENEMY_ART, ART_RES),
   ...art(ITEM_ART, ART_RES),
   // Pixel projectiles and pieces of effects (PixelLab, files at ART_RES); they replace the code-drawn ones of the same key.
   'proj.shields': { kind: 'image', url: 'sprites/fx/shield.png' },
@@ -114,7 +110,7 @@ function props(folder: 'decals' | 'obstacles', names: string[]): Record<string, 
   );
 }
 
-/** Menus size heroes for the code-drawn chibi's texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
+/** Menus size heroes for a texture (38 + 2 x PAD world px tall): a pixel hero shrinks to it. */
 const MENU_HERO_H = (38 + PAD * 2) * ART_RES;
 
 /** Scale factor that shows hero `key` at the size the menus were laid out for. */

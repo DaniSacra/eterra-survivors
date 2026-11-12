@@ -61,7 +61,6 @@ export const UI = {
 export const SUMMON_COLOR = 0xe6dcc0;
 export const SUMMON_SHADE = 0xa89c80;
 export const SUMMON_EDGE = 0xfff6dc;
-export const SLIME_WARN = 0x8fd04a;
 
 export function label(
   scene: Phaser.Scene,
