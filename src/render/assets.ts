@@ -120,6 +120,7 @@ export const ASSETS: Record<string, AssetDef> = {
   'fx.shield': { kind: 'image', url: 'sprites/fx/shield.png' },
   'fx.sword': { kind: 'image', url: 'sprites/fx/sword.png' },
   'fx.maceHead': { kind: 'image', url: 'sprites/fx/maceHead.png' },
+  'fx.iceShard': { kind: 'image', url: 'sprites/fx/iceShard.png' },
   // Ground decals and the Cripta's obstacles: PixelLab pixel art (files already at ART_RES), see decals.ts / obstacles.ts.
   ...props('decals', DECALS),
   ...props('obstacles', [...OBSTACLE_FILES]),

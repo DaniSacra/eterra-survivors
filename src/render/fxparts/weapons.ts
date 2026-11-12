@@ -1102,9 +1102,14 @@ export function drawWard(g: Phaser.GameObjects.Graphics, world: World): void {
   if (tw > 0.05) star(g, p.x + wr * 0.6, p.y - wr * 0.8, 3 + 5 * tw, 0xffffff, tw);
 }
 
+/** The last seconds of an ice mark's warning in which its shards fall, and how high above it they start (px). */
+const ICE_FALL = 0.4;
+const ICE_HEIGHT = 300;
+
 /**
  * The Lobo Velho's ice (FT-08), on the ground: while it forms, the danger colour filling from the centre with a
- * marching edge; formed, a frosted white-lilac patch with cracks and a faint cold rim, the exact size of the slow.
+ * marching edge and shards of ice falling onto it; formed, a frosted white-lilac patch with cracks and a faint cold
+ * rim, the exact size of the slow.
  */
 export function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
   const list = world.marks.active;
@@ -1120,6 +1125,19 @@ export function drawIce(g: Phaser.GameObjects.Graphics, world: World): void {
       disc(g, m.x, m.y, r * k);
       g.lineStyle(2.5, WARN_EDGE, 0.6 + 0.4 * k);
       glowArc(g, m.x, m.y, r, 0, Math.PI * 2, WARN_EDGE, 0.6 + 0.4 * k);
+      // The howl's ice comes down: shards fall from above onto the mark in the last moments of the warning.
+      if (m.ttl < ICE_FALL) {
+        const u = 1 - m.ttl / ICE_FALL; // 0 -> 1, accelerating
+        const drop = (1 - u * u) * ICE_HEIGHT;
+        for (let s = 0; s < 3; s++) {
+          const sx = m.x + (s - 1) * r * 0.45;
+          // The tip of the art sits 32 px under its centre at this scale: it touches the ground as `drop` reaches 0.
+          const sy = m.y - drop - 32 + Math.abs(s - 1) * 10;
+          g.lineStyle(2, 0xffffff, 0.35 * u);
+          g.lineBetween(sx, sy - 40, sx, sy - 120);
+          fxSprites.put('fx.iceShard', sx, sy, 0, 2, 0.6 + 0.4 * u);
+        }
+      }
       continue;
     }
     g.fillStyle(ICE, 0.3);

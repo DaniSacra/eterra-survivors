@@ -37,10 +37,18 @@ describe('asset files', () => {
     expect(declaredPoses(ENEMY_ANIMS['enemy.spiderEgg'] as never)).toEqual(['walk', 'windup']);
     expect(declaredPoses(ENEMY_ANIMS['enemy.golem'] as never)).toEqual([
       'walk',
+      'attack',
       'windup',
       'strike',
       'death',
+    ]);
+    expect(declaredPoses(ENEMY_ANIMS['enemy.oldWolf'] as never)).toEqual([
+      'walk',
       'attack',
+      'windup',
+      'strike',
+      'howl',
+      'death',
     ]);
   });
 });

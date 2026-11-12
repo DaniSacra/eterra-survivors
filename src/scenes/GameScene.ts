@@ -546,9 +546,11 @@ export class GameScene extends Phaser.Scene {
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
         // Slowed enemies take heavy, slow steps.
+        // Bosses with strips only play their frames: no wobble on top.
         const a =
-          (w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) *
-          (anim ? 0.5 : 1);
+          (w.freeze > 0 || (anim && e.def.boss)
+            ? 0
+            : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) * (anim ? 0.5 : 1);
         // A walker's step hops once per stride of its strip (two footfalls a cycle), so the body falls and rises
         // with the legs instead of rocking sideways.
         let step = 0;
@@ -577,8 +579,14 @@ export class GameScene extends Phaser.Scene {
         }
         // A leaper in the air rises in an arc over its landing mark (FT-04).
         const lp = e.def.leap;
+        // A pouncing boss rises along the arc of its strip's leap (its `arc`, over the dash).
+        const dash = e.act === BossAct.Active ? bossAbility(e) : undefined;
         const lift =
-          lp && e.act === BossAct.Active ? Math.sin(Math.PI * (1 - e.actT / lp.air)) * (lp.radius + 20) : 0;
+          lp && e.act === BossAct.Active
+            ? Math.sin(Math.PI * (1 - e.actT / lp.air)) * (lp.radius + 20)
+            : anim?.arc && posed?.pose === 'strike' && dash?.kind === 'lunge' && dash.dash
+              ? Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - e.actT / dash.dash))) * anim.arc
+              : 0;
         // A pile about to stand up trembles; the one that just stood straightens up with a vertical stretch.
         const shake = e.pile > 0 && e.pile < PILE_SHAKE ? Math.sin(w.time * 60 + e.uid) * 1.5 : 0;
         const rise = img.uid === e.uid && img.rose !== undefined ? 1 - (w.time - img.rose) / RISE_SQUASH : 0;
@@ -615,8 +623,7 @@ export class GameScene extends Phaser.Scene {
             ART_SCALE * sy * (SPRITE_SCALE[sprite] ?? 1),
           )
           .setFlipX(w.player.x < e.x)
-          // A boss winding up shakes (rings the bell, raises the sword).
-          .setRotation(this.windupSway(e));
+          .setRotation(0);
         this.thiefLook(img, e);
         if (this.stepDt > 0) {
           if (e.flash === HIT_FLASH) {
@@ -1395,15 +1402,6 @@ export class GameScene extends Phaser.Scene {
     }
     const pulse = this.calm ? 1 : 1 + 0.15 * Math.sin(this.world.time * 8);
     this.lighting.add(e.x, e.y - 4, 95 * pulse, GEM_GLOW, 0.9, 0.35);
-  }
-
-  /** The bell swings twice on a Badalada; any other boss winding up shakes. */
-  private windupSway(e: Enemy): number {
-    if (e.act !== BossAct.Windup) return 0;
-    const ab = bossAbility(e);
-    if (!ab) return 0;
-    if (ab.kind === 'toll') return Math.sin((1 - Math.max(0, e.actT) / ab.windup) * Math.PI * 4) * 0.22;
-    return Math.sin(this.world.time * 18) * 0.18;
   }
 
   /** Remembers the enemy shot nearest the hero before the step (a shot that lands is gone after it). */

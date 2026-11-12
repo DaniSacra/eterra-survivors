@@ -202,3 +202,22 @@ Spend: 15 (`create_image_pro` 144x160, 4 candidates, candidate 3 kept; style ima
 | `-attack` (6, claws and bite)                  | job ee09319d, 6 frames                      |
 
 Frame 0 (the input) kept only in walk and windup; 2x without smoothing, joined into strips by a script. One try per strip.
+
+## 2026-11-12: Lobo Velho redrawn as an old four-legged wolf (replaces the werewolf above)
+
+Daniel did not like the werewolf: the boss is now a huge scarred, grizzled old wolf (side view, four legs, grey and white matted fur, frost-rimed, torn ear, scars, one clouded eye, a broken iron collar with a chain link, ice crystals on the spine). Frame 192 x 128 art px (figure about 166 x 109), radius 36 to 42. Visual only: no lore text.
+
+Spend: 10 (`create_image_pro` 192x128, 1 candidate, style image: Lobo da Geada at 1x; job d69ddfc6) + 7 x 3 (`animate_image`, 192x128; one extra try for the crouch) + 1 (`create_image_pixflux` 32x48, the falling ice shard, job e41f3163) = 32 generations.
+
+| Strips (`public/sprites/enemies/oldWolf*.png`) | Source (frame 0, the input, dropped) |
+| --- | --- |
+| `oldWolf` (still) | job d69ddfc6 |
+| `-walk` (8) | job e98d5848 |
+| `-windup` (6, deep crouch before the pounce) | job 78a1ca67 (first try 3473682e, a shallow crouch, not used) |
+| `-strike` (8, the pounce: spring, air, landing, synced to the dash) | job 0b9014fd |
+| `-howl` (8, head back, Uivo da Geada) | job 5e9b8c52 |
+| `-attack` (6, bite and claws) | job c5d7664c |
+| `-death` (8, collapses) | job ab0400f9 |
+| `public/sprites/fx/iceShard.png` (falls on the Uivo da Geada marks) | job e41f3163, 2x |
+
+Frames 2x without smoothing, joined into strips by a script.

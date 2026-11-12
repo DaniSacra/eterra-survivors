@@ -125,3 +125,25 @@ describe('enemy state animations', () => {
     expect(puff?.flip).toBe(true);
   });
 });
+
+describe('Lobo Velho animation', () => {
+  const wolfAnim = ENEMY_ANIMS['enemy.oldWolf'] as EnemyAnim;
+
+  it('crouches then pounces along the dash, and howls through the whole frost windup', () => {
+    const w = bareWorld();
+    const wolf = spawnEnemy(w, 'oldWolf', 500, 0);
+    const bite = ENEMIES.oldWolf.abilities?.[0] as { windup: number; dash: number };
+    wolf.abilityIdx = 0;
+    wolf.act = BossAct.Windup;
+    wolf.actT = bite.windup / 2;
+    expect(enemyPose(wolf, wolfAnim).pose).toBe('windup');
+    wolf.act = BossAct.Active;
+    wolf.actT = bite.dash * 0.75;
+    expect(enemyPose(wolf, wolfAnim).pose).toBe('strike');
+    expect(enemyPose(wolf, wolfAnim).k).toBeCloseTo(0.25);
+    wolf.abilityIdx = 2;
+    wolf.act = BossAct.Windup;
+    wolf.actT = 0.6;
+    expect(enemyPose(wolf, wolfAnim).pose).toBe('howl');
+  });
+});

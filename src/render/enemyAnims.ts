@@ -2,13 +2,15 @@ import { BossAct, bossAbility } from '../core/bosses';
 import { CHARGE, isFaded } from '../core/behaviours';
 import type { Enemy } from '../core/enemies';
 import { config } from '../data/config';
+import { ENEMIES, type EnemyId } from '../data/enemies';
 
 /**
  * What a pixel enemy is doing, for the frames it shows (death is played apart, by the corpse the render leaves).
  * `attack` is the bite or swing of an enemy that has reached the hero (a loop while it stays in reach); `strike` is
- * the blow of a special act (a boss's ability, a leap landing, a throw).
+ * the blow of a special act (a boss's ability, a leap landing, a throw); `howl` is a boss's frost call (head back,
+ * the whole windup of that ability).
  */
-export type EnemyPose = 'walk' | 'windup' | 'strike' | 'death' | 'attack';
+export type EnemyPose = 'walk' | 'windup' | 'strike' | 'death' | 'attack' | 'howl';
 
 /** Frames per pose and speed, for an enemy whose sheets are `<sprite>.<pose>` (PixelLab, one strip per pose). */
 export interface EnemyAnim {
@@ -21,6 +23,8 @@ export interface EnemyAnim {
   fps: Record<EnemyPose, number>;
   /** Hop height in art px of a walker's step, synced to the walk strip (0: the strip carries the whole motion). */
   bob: number;
+  /** Peak height in art px of a lunge's arc (a pounce leaves the ground), 0 or left out: it slides along it. */
+  arc?: number;
 }
 
 /**
@@ -44,7 +48,7 @@ const anim = (
     ...(frames[3] ? { death: frames[3] } : {}),
     ...(frames[4] ? { attack: frames[4] } : {}),
   },
-  fps: { walk: walkFps, windup: 8, strike: 12, death: 8, attack: attackFps },
+  fps: { walk: walkFps, windup: 8, strike: 12, death: 8, attack: attackFps, howl: 8 },
   bob,
 });
 
@@ -52,7 +56,12 @@ const anim = (
 export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7, 6]),
   'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9, 6]),
-  'enemy.oldWolf': anim(144, 160, [7, 9, 6, 8, 6]),
+  // A four-legged wolf (side view): crouch (windup), pounce (strike, follows the dash and arcs), howl (frost call).
+  'enemy.oldWolf': {
+    ...anim(192, 128, [8, 6, 8, 8, 6], 10, 0, 12),
+    frames: { walk: 8, windup: 6, strike: 8, death: 8, attack: 6, howl: 8 },
+    arc: 26,
+  },
   'enemy.golem': anim(96, 112, [7, 9, 5, 9, 8]),
   'enemy.witch': anim(96, 112, [7, 5, 5, 7, 6]),
   'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7, 6]),
@@ -97,7 +106,9 @@ export const poseKey = (sprite: string, pose: EnemyPose): string => `${sprite}.$
 
 /** The poses an enemy has strips for: its walk, plus the others only when it declares them. */
 export function declaredPoses(a: EnemyAnim): EnemyPose[] {
-  return (['walk', 'windup', 'strike', 'death', 'attack'] as const).filter((p) => a.frames[p] !== undefined);
+  return (['walk', 'attack', 'windup', 'strike', 'howl', 'death'] as const).filter(
+    (p) => a.frames[p] !== undefined,
+  );
 }
 
 /**
@@ -122,13 +133,18 @@ export function enemyPose(
       bossAbility(e)?.windup ??
       0;
     const k = total > 0 ? Math.min(1, Math.max(0, 1 - e.actT / total)) : 0;
+    // The frost call is one long howl, head back (the ice falls as it ends).
+    if (a.frames.howl && bossAbility(e)?.kind === 'frost') return { pose: 'howl', k };
     // A thrower or a digger has no strike phase of its own: the last of its windup is the throw or the blow.
     if ((def.shoot || def.dig) && a.frames.strike && k >= SWING_AT)
       return { pose: 'strike', k: (k - SWING_AT) / (1 - SWING_AT) };
     return { pose: 'windup', k: def.shoot || def.dig ? k / SWING_AT : k };
   }
-  if (a.frames.strike && e.act === BossAct.Active && (def.boss || def.leap))
-    return { pose: 'strike', k: def.leap ? Math.min(1, Math.max(0, 1 - e.actT / def.leap.air)) : -1 };
+  if (a.frames.strike && e.act === BossAct.Active && (def.boss || def.leap)) {
+    // The strike follows the leap's air time, or a lunge's dash (the pounce lands as the dash ends).
+    const span = def.leap?.air ?? (bossAbility(e)?.kind === 'lunge' ? bossAbility(e)?.dash : undefined);
+    return { pose: 'strike', k: span ? Math.min(1, Math.max(0, 1 - e.actT / span)) : -1 };
+  }
   // A charger's dash: the strike strip follows the dash time.
   if (a.frames.strike && e.act === BossAct.Active && def.move === 'charge')
     return { pose: 'strike', k: Math.min(1, Math.max(0, 1 - e.actT / (def.charge ?? CHARGE).dash)) };
@@ -153,4 +169,22 @@ export function poseFrame(a: EnemyAnim, pose: EnemyPose, k: number, seconds: num
   if (k >= 0) return Math.min(n - 1, Math.floor(k * n));
   const f = Math.floor(seconds * a.fps[pose]);
   return pose === 'walk' || pose === 'attack' ? f % n : Math.min(n - 1, f);
+}
+
+/** Longest a pose stays up before the next one (ms): loops play a couple of seconds, the others play once and hold. */
+const POSE_MS = 2400;
+
+/** The poses of an enemy's strips, in the order the Bestiário shows them (pure: tested); a still enemy has none. */
+export function showPoses(id: EnemyId): EnemyPose[] {
+  const anim = ENEMY_ANIMS[ENEMIES[id].sprite];
+  return anim ? declaredPoses(anim) : [];
+}
+
+/** How long `pose` stays on the stage, in ms: whole loops for walk and attack, else its frames once plus a hold. */
+export function poseMs(a: EnemyAnim, pose: EnemyPose): number {
+  const n = a.frames[pose] ?? a.frames.walk;
+  const once = (n / a.fps[pose]) * 1000;
+  return pose === 'walk' || pose === 'attack'
+    ? Math.max(POSE_MS, Math.ceil(POSE_MS / once) * once)
+    : Math.max(POSE_MS - 200, once + 900);
 }
