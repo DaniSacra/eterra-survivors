@@ -31,6 +31,8 @@ export const VFX = {
   slash: { frames: 6, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
   /** Fúria's spin: a full ring of crimson blades turning once, ash and embers behind it; edge 92 art px from the centre. */
   furySpin: { frames: 7, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
+  /** Chama de Yah's wave: a ring of holy fire running out to 90 art px (scaled to the pulse radius), flame tongues riding it. */
+  pulse: { frames: 8, w: 224, h: 224, anchor: [0.5, 0.5], fps: 14 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;

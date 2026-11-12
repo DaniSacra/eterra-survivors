@@ -77,6 +77,8 @@ const EMBER_SPAN = 70;
 const AURA_RING = 57;
 /** The shock wave sprite's outer ring, art px from the centre. */
 const SHOCK_RING = 50;
+/** The pulse sprite's outer ring, art px from the centre. */
+const PULSE_RING = 90;
 /** The slash sprite's edge, art px from the centre. */
 const SLASH_REACH = 92;
 /** Espada de Fogo's burning ground: the flames' light orange. */
@@ -452,15 +454,23 @@ export function drawFx(
       continue;
     }
     if (s.form === 'pulse') {
-      // Chama de Yah's wave: a ring of holy fire running out to its edge, leaving a glow behind.
+      // Chama de Yah's wave: the pixel ring of holy fire runs out to exactly the pulse radius, with a faint glow
+      // on the ground behind it.
       const k = 1 - s.ttl / config.effects.pulseTtl;
       const grow = 1 - (1 - k) * (1 - k);
-      ground.fillStyle(ELEMENT_COLOR.holy, 0.18 * (1 - k));
+      ground.fillStyle(ELEMENT_COLOR.holy, 0.1 * (1 - k));
       disc(ground, p.x, p.y, s.shock * grow);
-      top.lineStyle(8 * (1 - k) + 2, ELEMENT_COLOR.holy, 0.85 * (1 - k));
-      ring(top, p.x, p.y, s.shock * grow);
-      top.lineStyle(2, 0xffffff, 0.9 * (1 - k));
-      ring(top, p.x, p.y, s.shock * grow * 0.96);
+      const wv = VFX.pulse;
+      fxSprites.putFrame(
+        vfxKey('pulse'),
+        Math.min(wv.frames - 1, Math.floor(k * wv.frames)),
+        wv.anchor[0],
+        wv.anchor[1],
+        p.x,
+        p.y,
+        s.shock / PULSE_RING,
+        0.9,
+      );
       continue;
     }
     const t = 1 - s.ttl / config.effects.slashTtl;
