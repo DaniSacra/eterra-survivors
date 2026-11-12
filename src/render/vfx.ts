@@ -29,6 +29,8 @@ export const VFX = {
   shock: { frames: 7, w: 112, h: 112, anchor: [0.5, 0.5], fps: 14 },
   /** The hero blade's cut: a crescent of 145 degrees pointing right, 92 art px from the centre (rotate and scale to the swing). */
   slash: { frames: 6, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
+  /** Fúria's spin: a full ring of crimson blades turning once, ash and embers behind it; edge 92 art px from the centre. */
+  furySpin: { frames: 7, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;

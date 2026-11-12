@@ -101,3 +101,9 @@ Redo of `valmor` (2026-11-12, Daniel found the first five tracks too ambient, lo
 | Data | O que | Fonte |
 | --- | --- | --- |
 | 2026-11-11 | `public/sprites/{aldo,lyra,teo,andilla}-hurt.png` (6 frames, stagger) and `-fall.png` (7 frames, falling back and lying), aligned to the idle strips by feet and body centre in the 64x80 frame, west view mirrored (the weapon stays visible, as for the walk), 2x without smoothing. Lyra's staff is missing in her hurt and fall frames (the template redraws her without it). 8 generations | PixelLab animate_character, template `taking-punch` and `falling-back-death`, west only, 1 generation each: Aldo hi-bit 6bfaee60, Lyra hi-bit 2fc9e1c3, Teo hi-bit v2 27f446d4, Andilla hi-bit 7022a715 |
+
+## Effects round 2026-11-12 (PF / DD-15)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-12 | Fúria's spin (`public/sprites/fx/vfx/furySpin.png`, 7 frames of 224x224 art px, 16 fps): the Lâmina cut (effect 7d76a2b2) turned into a full 350 degree ring in deep crimson (`ELEMENT_COLOR.fury` now 0xd8283c) with ash and ember particles. VFX workbench, no generations charged. Effect id 98f17773-0133-4ea9-9211-9fda55843ea7 | PixelLab vfx_workbench, packed by `vfxpack.mjs` |

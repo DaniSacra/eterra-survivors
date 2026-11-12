@@ -6,7 +6,7 @@ import type { ElementId } from '../data/evolutions';
  * shared; none is the XP gems' saturated cyan.
  */
 export const ELEMENT_COLOR: Record<ElementId, number> = {
-  fury: 0xff4a4a, // red
+  fury: 0xd8283c, // deep crimson (never the coral of enemy danger 0xff8090, nor the Fogo orange)
   fire: 0xff8c2a, // orange
   forge: 0xc0703c, // copper
   shadow: 0x2ed47a, // emerald

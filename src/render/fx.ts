@@ -37,13 +37,20 @@ interface SwingStyle {
   band: number;
   fillAlpha: number;
   mark: 'none' | 'shock' | 'crack';
-  /** Drawn as the pixel crescent sprite (render/vfx.ts) instead of code. */
-  sprite?: boolean;
+  /** Drawn as this pixel sprite (render/vfx.ts) instead of code: the crescent cut, or Fúria's full spin. */
+  sprite?: 'slash' | 'furySpin';
 }
 const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fillAlpha: 0.4, mark: 'none' };
 const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
-  blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none', sprite: true },
-  fury: { fill: 0xffe4dc, edge: ELEMENT_COLOR.fury, band: 0.62, fillAlpha: 0.45, mark: 'none' },
+  blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none', sprite: 'slash' },
+  fury: {
+    fill: 0xffe4dc,
+    edge: ELEMENT_COLOR.fury,
+    band: 0.62,
+    fillAlpha: 0.45,
+    mark: 'none',
+    sprite: 'furySpin',
+  },
 };
 /** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
 const CLEAVE_STYLE: SwingStyle = {
@@ -643,9 +650,9 @@ function drawSwing(
 ): void {
   if (st.sprite) {
     // The pixel crescent: centred on the swing, scaled so its edge is the weapon's reach.
-    const cut = VFX.slash;
+    const cut = VFX[st.sprite];
     fxSprites.putFrame(
-      vfxKey('slash'),
+      vfxKey(st.sprite),
       Math.max(0, Math.min(cut.frames - 1, Math.floor(t * cut.frames))),
       cut.anchor[0],
       cut.anchor[1],
@@ -653,7 +660,8 @@ function drawSwing(
       cy,
       range / SLASH_REACH,
       1,
-      (a0 + a1) / 2,
+      // The spin is a whole ring: nothing to turn.
+      st.sprite === 'furySpin' ? 0 : (a0 + a1) / 2,
     );
     return;
   }

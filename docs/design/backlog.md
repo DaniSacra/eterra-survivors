@@ -3299,7 +3299,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 
 - **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G. Raio e Tempestade, Fogo e Espada de Fogo,
   zonas de Geada/Nevasca, chão em chamas, auras, golpes em arco e pancadas, trabalhados no workbench de efeitos do
-  PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais), Aura de Yah, onda de choque da Maça, corte da Lâmina. Falta: Fúria (giro), cadeia da Tempestade, onda da Chama, acertos.
+  PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais), Aura de Yah, onda de choque da Maça, corte da Lâmina, giro da Fúria (2026-11-12; carmim `0xd8283c`, anel de 350 graus com cinzas e brasas, 0 gerações: oficina de efeitos). Falta: cadeia da Tempestade, onda da Chama, telégrafos de chefe.
   - Revisão 2026-11-11 (2) (06-vfx #2): a Fúria é hoje vetor com borda `0xff4a4a`, vizinha do coral de perigo
     `0xff8090`, e a onda é uma bola vermelha de `Pen`. Decisão de cor (conflito 3 da `07-direcao.md`): **carmim profundo
     com núcleo branco-quente**, ponto de partida `ELEMENT_COLOR.fury = 0xd8283c`, nunca o `~0xff6a3a` do relatório
