@@ -222,7 +222,10 @@ function steer(w: World, side: number): void {
 
 export function simulate(hero: CharacterId, stage: StageId, seed: number, setup: RunSetup = {}): SimResult {
   const w = new World(seed, { ...setup, character: hero, stage });
-  w.setView(480, 800);
+  // SIM_VIEW=portrait runs with the upright-phone view (390x844 at the portrait zoom) instead of 480x800.
+  if (import.meta.env.SIM_VIEW === 'portrait')
+    w.setView(390 / (390 / config.view.portraitWorldSide), 844 / (390 / config.view.portraitWorldSide));
+  else w.setView(480, 800);
   const fastId = w.stage.waves.find((s) => s.enemies.length >= 2)?.enemies[1]?.id;
   const res: SimResult = {
     hero,

@@ -805,7 +805,8 @@ export class GameScene extends Phaser.Scene {
   /** Zoom so the shortest screen side always shows `minWorldSide` world pixels (portrait-friendly). */
   private fitCamera(): void {
     const { width, height } = this.scale;
-    const zoom = clamp(Math.min(width, height) / config.view.minWorldSide, 0.5, 4);
+    const side = height > width ? config.view.portraitWorldSide : config.view.minWorldSide;
+    const zoom = clamp(Math.min(width, height) / side, 0.5, 4);
     this.cameras.main.setZoom(zoom);
     this.viewMargin = Math.ceil(MAX_SHAKE * Math.max(width, height) * zoom) + 4;
     this.numberScale = Math.max(NUMBER_WORLD, NUMBER_SCREEN / zoom) / NUMBER_FONT;

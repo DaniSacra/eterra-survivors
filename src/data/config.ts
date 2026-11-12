@@ -23,6 +23,8 @@ export const config = {
   view: {
     /** World pixels guaranteed along the screen's shortest side; sets the camera zoom. */
     minWorldSide: 480,
+    /** Same, for a phone held upright (height > width): the hero reads bigger on a narrow screen. */
+    portraitWorldSide: 420,
   },
   player: {
     radius: 12,
