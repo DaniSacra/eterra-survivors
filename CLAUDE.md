@@ -3,9 +3,13 @@
 Survivors-like spin-off of **Crônicas de Eterra** (repo `danisacra/cronicas-de-eterra`). Playable heroes are the
 original party: **Aldo** (default), Lyra, Teo and Andilla. Valmor is a village in the frozen south of Imladrin
 (not a character); Aldo was born in Hyarmeth and comes back to Valmor for work (and for Clara). Stages follow the
-original story: Arredores de Valmor, the graveyard (Ossadas, grey bats, Ratos de Cova; boss **Cavaleiro Negro** at
-10:00), Cripta da Igreja Velha (Rato Gigante, Gosma Verde; boss O Sineiro, whose bell wakes the dead), Estrada do
-Sul (Lobos da Geada, Corvos; boss Lobo Velho); clearing one unlocks the next. Enemies come from the original cast.
+original story. Stages today (`data/stages.ts`): Arredores de Valmor (snowy fields and barns; Ratos de Cova, grey
+bats, Ratos Gigantes and spiders, witch elite, spider nests and the Rato Ladrão; boss **Mãe-Aranha** at 10:00),
+Cripta da Igreja Velha (Ossadas, vampire bats, Esqueletos, Fantasmas; Gosma Verde as a hazard, Ossadas em Brasa,
+Coveiro elite; boss O Sineiro, whose bell wakes the dead) and Estrada do Sul (Encapuzados, Corvos, Javalis da Geada,
+Lobos da Geada, Goblins; Golem elite, war banner; boss Lobo Velho); clearing one unlocks the next. The **Cavaleiro
+Negro** exists as an enemy (sprite, bestiary, menu art) but no stage sends him yet (where he returns is Daniel's
+call). Enemies come from the original cast.
 Weapon evolutions are called **Elos**; in the original an Elo is something else (two heroes combining skills in
 the same round, e.g. Espada de Fogo = Aldo + Lyra), so the name is borrowed, not the mechanic.
 World, story and characters of Eterra belong to Daniel. **The lore lives only in the local original repo**,
