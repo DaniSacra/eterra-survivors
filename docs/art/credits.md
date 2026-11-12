@@ -153,3 +153,5 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 | `public/sprites/enemies/vampireBat.png`, `vampireBat-walk.png` | Morcego vermelho maior (40 x 40 px de arte), asas abertas, olhos acesos, 6 quadros de bater asas                                             | `create_image_pro` 40 x 40 (15 gerações, 36 candidatas, estilo: Rato de Cova reduzido a 1x), candidata 0; `animate_image` de 6 quadros (1 geração) |
 
 Quadros ampliados 2x sem suavização e juntados em tira por script.
+
+- 2026-11-12 · PX-02: dark outline (1 art px, colour 14,12,26) added by script to the walk and still PNGs of graveRat, bat, rat, spider and thiefRat in `public/sprites/enemies/`, so Valmor's crowd separates from the snow. No PixelLab credits used.

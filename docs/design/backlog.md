@@ -120,7 +120,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 
 ### Fase 1 · Celular
 
-**PX-01 [2] · Zoom de ~400 px de mundo no celular em pé** · impl + bal · P · proposto
+**PX-01 [2] · Zoom de ~400 px de mundo no celular em pé** · impl + bal · P · feito (2026-11-12: 420; 400 levou Valmor sem Loja de 0% para 21%, 420 ficou em 8% e Meia/Cheia iguais; `SIM_VIEW=portrait` roda o sim nessa vista)
 - O quê: `fitCamera` usa um lado mínimo próprio para retrato (altura > largura), por exemplo `config.view.portraitWorldSide`
   (testar 380, 400, 420); deitado e PC seguem com `minWorldSide` 480 (1000x680 fica igual). Em 390x844: zoom ~0,98, Aldo
   com ~39 px em vez de ~30.
@@ -130,7 +130,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 - Liga: A-04 (escala dos números), B-04, FT da Estrada (a estrada de 320 cabe em 400 com ~40 px de mata de cada lado),
   L-01. Aceite: valor escolhido e sim de Valmor antes e depois no retrato sem mudar vitórias mais de 5 pontos.
 
-**PX-02 [3] · Contorno escuro de 1 px nos inimigos comuns de Valmor** · visual · P · proposto
+**PX-02 [3] · Contorno escuro de 1 px nos inimigos comuns de Valmor** · visual · P · feito (2026-11-12: contorno 2 px de textura nos PNGs de graveRat, bat, rat, spider e thiefRat; script em arquivo temporário, ver docs/art/credits.md)
 - O quê: contorno de 1 px de arte (2 px de textura, `ART_RES`) escuro e tingido nos quadros dos inimigos comuns de
   Valmor (Rato de Cova, morcego cinza, Rato Gigante, aranha, Rato Ladrão), gerado uma vez (no sprite ou ao carregar),
   nunca por efeito por quadro. Chão de neve fica (decisão de 12/11). Liga: A-02, A-05, CC-06 (Bestiário usa o mesmo).
