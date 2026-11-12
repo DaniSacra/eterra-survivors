@@ -128,3 +128,9 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 | --- | --- | --- |
 | 2026-11-12 | Ossada repainted in place to a warm, dimmer bone (`enemies/bones.png`, `bones-walk.png`, `bonePile.png`): every low-saturation pixel multiplied by (0.86, 0.80, 0.67), eyes untouched. No generation | local pixel edit |
 | 2026-11-12 | Gosma slime puddle (`vfx/slime.png`, 16 frames of 80x80 art px, 12 fps, CF-07): own recipe (blob shape, gloss, droplets, bubbles) spreading 0.2 s, living, drying; effect id ed472dbe-080a-4be8-ab04-61760afc17d4. No generations charged | PixelLab vfx_workbench |
+
+## Weapon, Elo and passive icons (AR-04b, 2026-11-12)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-12 | 41 icons as round medallions in `public/sprites/icons/<id>.png` (32x32 art px centred in 40x40, packed at 2x, no smoothing): 13 weapons, 13 Elos, 10 passives, greed, reroll, skip, revive, anvil. One sheet of 64 candidates, each with its own description (23 repeats of the hardest symbols, the best taken) | PixelLab create_1_direction_object 32x32 with item_descriptions (object 965ca074-ced7-4b3e-8480-8158d73726fa, 10 generations) |

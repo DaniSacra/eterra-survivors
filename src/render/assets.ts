@@ -9,7 +9,7 @@ import type { ArtDef } from './art/types';
 
 /**
  * The single asset map. Every visual is referenced by key. Heroes, enemies, decals, obstacles, projectiles and tiles
- * are PNGs (PixelLab, files in /public); only the weapon/passive icons and a few projectiles are still drawn from code (render/art, `Pen`). To swap
+ * are PNGs (PixelLab, files in /public); only a few small icons (lock, trophy, skull, slow, Gaspar) are still drawn from code (render/art, `Pen`). To swap
  * one, change its entry to `{ kind: 'image', url: 'sprites/foo.png' }`, drawn at ART_RES times its world size.
  */
 export type AssetDef =
@@ -37,6 +37,26 @@ export const HERO_FALL = { frames: 7, seconds: 0.6 };
 
 /** PixelLab canvas sizes of the heroes (art px; files are at ART_RES). */
 const FRAME_HIBIT = { w: 64, h: 80 };
+
+const PIXEL_ICONS = [
+  ...['blade', 'elunLight', 'yahAura', 'daggers', 'paladinSwords', 'frost', 'lightning', 'staff', 'hammer'],
+  ...[
+    'wisps',
+    'shields',
+    'mace',
+    'fire',
+    'fury',
+    'holyLight',
+    'yahFlame',
+    'fan',
+    'vigil',
+    'blizzard',
+    'storm',
+  ],
+  ...['forgeFury', 'soulProcession', 'valmorWall', 'jointBreaker', 'fireSword', 'lyraStar', 'vigor'],
+  ...['swiftness', 'might', 'haste', 'reach', 'attraction', 'recovery', 'armor', 'amount', 'growth', 'greed'],
+  ...['reroll', 'skip', 'revive', 'anvil'],
+];
 
 const DECALS = [
   'grave',
@@ -104,6 +124,7 @@ export const ASSETS: Record<string, AssetDef> = {
   ...props('decals', DECALS),
   ...props('obstacles', [...OBSTACLE_FILES]),
   ...art(ICON_ART, ART_RES),
+  ...pixelIcons(),
   ...pixelEnemies([
     'bones',
     'skeleton',
@@ -128,6 +149,16 @@ export const ASSETS: Record<string, AssetDef> = {
   ...pixelHero('teo', FRAME_HIBIT, 8, 4),
   ...pixelHero('andilla', FRAME_HIBIT, 8, 4),
 };
+
+/**
+ * Weapon, Elo, passive and Loja icons (PixelLab medallions, AR-04b): 32 x 32 art px centred in the 40 x 40 box the
+ * code-drawn badges had, at ART_RES, so every call site keeps its scale. Files `sprites/icons/<id>.png`.
+ */
+function pixelIcons(): Record<string, AssetDef> {
+  return Object.fromEntries(
+    PIXEL_ICONS.map((id) => [`icon.${id}`, { kind: 'image', url: `sprites/icons/${id}.png` } as AssetDef]),
+  );
+}
 
 /** Pixel props by folder: key `decal.<name>` / `obstacle.<name>`, file `sprites/<folder>/<name>.png`. */
 function props(folder: 'decals' | 'obstacles', names: string[]): Record<string, AssetDef> {

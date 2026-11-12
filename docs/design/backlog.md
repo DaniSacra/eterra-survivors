@@ -2202,7 +2202,7 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   comprimento real da investida (`CHARGE` × velocidade da fase), enchendo até o impacto, com borda tracejada. Os
   chefes já usavam formas (cone do Corte Brutal, faixa da Mordida Funda, anéis da Badalada).
 
-**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto · reescrito na reavaliação 2026-11-12: "Os últimos desenhos em código" ✅ feito (2026-11-12) em duas partes: itens e gemas; ícones ficam para rodada própria (AR-04b)
+**AR-04 · `Pen` repintado no estilo novo** · visual · M · proposto · reescrito na reavaliação 2026-11-12: "Os últimos desenhos em código" ✅ feito (2026-11-12) em duas partes: itens e gemas; ícones feitos no AR-04b (2026-11-12)
 
 - O quê: corpos mais escuros e de cores apagadas, uma cor principal por criatura, contorno escuro, olhos menores,
   mortos-vivos com olhos que brilham; heróis e itens no mesmo traço. Provisório até os sprites (AR-05).
@@ -2218,7 +2218,9 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   do `gemMirror` (A-05: a gema é o único ciano saturado); (3) ícones, só depois, numa rodada própria com o ui-designer
   (são dezenas e aparecem em 16 a 28 px). Dono: visual. Aceite: captura de multidão em Valmor e na Cripta com os cinco
   itens no chão, achados de relance; gerações em `docs/art/credits.md`.
-- Feito 2026-11-12: comida, elixir, Sopro de Geada, moeda e as três gemas viraram sprites PixelLab (`public/sprites/items/`, `create_object_pro_flash`, 35 gerações, em `credits.md`). Gema no azul-claro do Daniel, ainda o único ciano da tela; o cintilar do `gemMirror` ficou. A moeda do HUD passou a escala inteira (`ART_SCALE`). A arte em código morta (baú, ímã, sino, gemas, moeda...) saiu de `render/art/items.ts`. Capturas de multidão nas três fases (420x820 e 1000x680) com os cinco itens no chão. **Sobra (AR-04b):** os ícones de arma e passiva (`render/art/icons.ts`), numa rodada própria com o ui-designer.
+- Feito 2026-11-12: comida, elixir, Sopro de Geada, moeda e as três gemas viraram sprites PixelLab (`public/sprites/items/`, `create_object_pro_flash`, 35 gerações, em `credits.md`). Gema no azul-claro do Daniel, ainda o único ciano da tela; o cintilar do `gemMirror` ficou. A moeda do HUD passou a escala inteira (`ART_SCALE`). A arte em código morta (baú, ímã, sino, gemas, moeda...) saiu de `render/art/items.ts`. Capturas de multidão nas três fases (420x820 e 1000x680) com os cinco itens no chão. **Sobrava (AR-04b, ✅ feito 2026-11-12, ver abaixo):** os ícones de arma e passiva (`render/art/icons.ts`), numa rodada própria com o ui-designer.
+
+- Feito 2026-11-12 (AR-04b): os 41 ícones de arma, Elo, passiva e Loja (Trocar, Pular, Segunda Chance, bigorna) viraram medalhões PixelLab de 32x32 px de arte (`public/sprites/icons/`), numa só chamada de `create_1_direction_object` com `item_descriptions` (64 quadros por 10 gerações, 23 repetidos como segunda chance). Escolha: arma = disco azul-ardósia com aro dourado, Elo = disco roxo com aro dourado brilhante, passiva = disco da cor do símbolo com aro cinza-claro (a mesma regra dos medalhões em código). Centrados na caixa de 40x40 que o badge de código tinha, então nenhum ponto de uso mudou de escala (os ícones aparecem uns 14% maiores que antes). Ficaram em código só cadeado, troféu, caveira, lodo e o rosto do Gaspar. Capturas: cartas de nível, faixa da build, pausa em 420x820 e 1000x680.
 
 **AR-05 · Prova de sprites** · visual + impl · M · heróis ✅ feitos; inimigos no AR-04 · andar dos inimigos ampliado na Revisão 2026-11-11 · proposto · ✅ feito (reavaliação 2026-11-12)
 
