@@ -3389,7 +3389,7 @@ em `ART_RES`.
 - Aceite: com as cinco armas acima por 30 s, espada e corte sempre visíveis (folha de captura) e o pool abaixo do teto;
   F4 igual ou melhor; na Cripta, brasa do herói e brasa da Ossada em Brasa distinguíveis (captura).
 
-**PB-02 · Ouro arredondado moeda a moeda** · impl + bal · P · proposto
+**PB-02 · Ouro arredondado moeda a moeda** · impl + bal · P · ✅ feito (2026-11-11; re-medida do `LOJA` pendente: o sim não foi rodado)
 
 - Por quê: 02-code M1. `core/pickups.ts:58` arredonda `amount * greed * stage.mult.gold` a cada moeda
   (`config.gold.coin = 3`): Ganância nível 1 (1,1) rende 3, ou seja nada; níveis 2 a 4 rendem todos 4 (+33%); nível 5

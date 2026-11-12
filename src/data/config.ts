@@ -127,7 +127,7 @@ export const config = {
   charges: { reroll: 1, skip: 1, banish: 0 },
   /** Segunda Chance: the life the hero gets up with (a fraction of max), and the seconds nothing can hurt them. */
   revive: { hp: 0.5, iframes: 2 },
-  /** Gold for giving up a level-up's choice (Pular). */
+  /** Gold for giving up a level-up's choice (Pular). Fixed on purpose: greed and the stage do not scale it (decision 6). */
   skipGold: 15,
   zones: {
     /** Seconds between damage ticks of a frost patch. */

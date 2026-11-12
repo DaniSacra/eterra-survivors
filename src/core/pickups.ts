@@ -53,9 +53,9 @@ export function dropLoot(
   if (loot.pickup) dropPickup(world, loot.pickup, x, y);
 }
 
-/** Gold collected in the run, scaled by greed. */
+/** Gold collected in the run, scaled by greed. Kept fractional; rounded once, when the run banks (`recordRun`). */
 export function addGold(world: World, amount: number): void {
-  world.gold += Math.round(amount * world.player.stats.greed * world.stage.mult.gold);
+  world.gold += amount * world.player.stats.greed * world.stage.mult.gold;
 }
 
 /** What each pickup does when collected. */

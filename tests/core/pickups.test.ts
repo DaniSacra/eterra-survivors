@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
-import { dropPickup, maybeDropRandom } from '../../src/core/pickups';
+import { addGold, dropPickup, maybeDropRandom } from '../../src/core/pickups';
 import { hurtPlayer } from '../../src/core/player';
 import { dropGem, xpToNext } from '../../src/core/xp';
 import { config } from '../../src/data/config';
@@ -88,5 +88,23 @@ describe('new passive stats', () => {
     dropGem(w, w.player.x, w.player.y, xpToNext(1) / 2);
     w.step(1 / 60, still);
     expect(w.level).toBe(2);
+  });
+});
+
+describe('gold', () => {
+  it('100 coins with greed 1.1 pay 330, not rounded coin by coin', () => {
+    const w = quietWorld();
+    w.player.stats.greed = 1.1;
+    for (let i = 0; i < 100; i++) addGold(w, config.gold.coin);
+    expect(w.gold).toBeCloseTo(330);
+  });
+
+  it('a stage gold multiplier of 1.5 pays 450 for 100 coins', () => {
+    const w = quietWorld();
+    const before = w.stage.mult.gold;
+    w.stage.mult.gold = 1.5;
+    for (let i = 0; i < 100; i++) addGold(w, config.gold.coin);
+    w.stage.mult.gold = before;
+    expect(w.gold).toBeCloseTo(450);
   });
 });

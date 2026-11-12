@@ -186,7 +186,7 @@ export class EndScene extends Phaser.Scene {
       [t.end.time, formatTime(world.time)],
       [t.end.kills, String(world.kills)],
       [t.end.level, String(world.level)],
-      [t.end.gold, String(world.gold)],
+      [t.end.gold, String(Math.floor(world.gold))],
     ];
     const cellW = w / per;
     stats.forEach(([k, v], i) => {
