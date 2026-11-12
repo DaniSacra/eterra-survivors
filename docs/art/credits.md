@@ -185,3 +185,20 @@ Spend: 7 animate_image (golem 2, others 1 each: 8 generations) + 8 edit_image_pr
 
 Not used: boar `animate_image` dash (6dc805fb-class, 60d842ba, no change), rat animate_image (559c5b9b, tiny), hooded animate_image (bb7a4f90, subtle), bone pile rise (f9a0e61d, only the eyes changed; keyframe e4c7937e on a 32x32 pad shows a skeleton rising but is not wired).
 - 2026-11-12: Aura de Yah gets its own ring again, `public/sprites/fx/vfx/auraRunes.png`: the original two-ring version with a different rune at every tip (effect ffa2b1fe, first version from commit f71d619, restored from git, no new generation). The lighter single ring (`aura.png`) stays for Chama de Yah.
+
+## 2026-11-12: Lobo Velho redrawn as a towering werewolf (boss of Estrada do Sul)
+
+Daniel found the wolf too small; the boss is now a hulking man-turned-wolf standing on two legs (144 x 160 art px frame, about 127 px of figure, radius 30 to 36). Visual only: no lore text was written (the werewolf idea is Daniel's intention, not yet canon).
+
+Spend: 15 (`create_image_pro` 144x160, 4 candidates, candidate 3 kept; style image: Cavaleiro Negro at 1x for outline, detail and shading; reference: the old Lobo Velho for fur and frost; job e1e45310) + 5 x 3 (`animate_image`, 144x160) = 30 generations.
+
+| Strips (`public/sprites/enemies/oldWolf*.png`) | Source                                      |
+| ---------------------------------------------- | ------------------------------------------- |
+| `oldWolf` (still)                              | candidate 3 of job e1e45310                 |
+| `-walk` (7 frames, still included)             | job 2b9d6353, 6 frames                      |
+| `-windup` (9, rears back and howls)            | job 52307f2c, 8 frames                      |
+| `-strike` (6, lunge and swipe)                 | job 902519bf, 6 frames                      |
+| `-death` (8, collapses)                        | job e4b272c6, 8 frames                      |
+| `-attack` (6, claws and bite)                  | job ee09319d, 6 frames                      |
+
+Frame 0 (the input) kept only in walk and windup; 2x without smoothing, joined into strips by a script. One try per strip.

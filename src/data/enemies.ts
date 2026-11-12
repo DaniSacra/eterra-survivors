@@ -488,7 +488,7 @@ export const ENEMIES = {
   },
   oldWolf: {
     sprite: 'enemy.oldWolf',
-    radius: 30,
+    radius: 36,
     hp: 63000,
     speed: 115,
     damage: 12,

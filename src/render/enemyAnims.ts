@@ -52,7 +52,7 @@ const anim = (
 export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7, 6]),
   'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9, 6]),
-  'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7, 6]),
+  'enemy.oldWolf': anim(144, 160, [7, 9, 6, 8, 6]),
   'enemy.golem': anim(96, 112, [7, 9, 5, 9, 8]),
   'enemy.witch': anim(96, 112, [7, 5, 5, 7, 6]),
   'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7, 6]),
