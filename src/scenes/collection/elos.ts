@@ -35,9 +35,14 @@ export function drawElos(a: TabArea): TabContent {
     label(scene, cx, top + 8, `${count}${t.sep}${rule}`, 12, { color: UI.muted, wrap: a.w });
     top += 20;
   } else {
-    label(scene, cx, top + 10, count, 14, { color: UI.muted });
-    label(scene, cx, top + 30, rule, 12, { color: UI.muted, wrap: a.w });
-    top += 46;
+    // The rule can take two lines on a narrow phone: it is placed from the count's bottom and the cards start under
+    // its real height (PU-05).
+    const head = label(scene, cx, top + 2, count, 14, { color: UI.muted }).setOrigin(0.5, 0);
+    const text = label(scene, cx, top + 4 + head.height, rule, 12, { color: UI.muted, wrap: a.w }).setOrigin(
+      0.5,
+      0,
+    );
+    top += 4 + head.height + text.height + 6;
   }
 
   const gap = 8;

@@ -3535,7 +3535,7 @@ em `ART_RES`.
 - Aceite: capturas 360x640, 420x820 e 1000x680, normal e `?dev`: os sete itens inteiros e tocáveis, nenhum texto
   sobreposto; `keyNav` passa pelos sete.
 
-**PU-05 · Textos que se encostam: selo "Vencida", Livro de Elos e painel de build** · ui + impl · P · proposto
+**PU-05 · Textos que se encostam: selo "Vencida", Livro de Elos e painel de build** · ui + impl · P · ✅ feito (2026-11-11; decidi: selo no canto de baixo do cartão; introdução do Livro posicionada pela altura real do texto; o painel de build em 1000x680 e 1000x600 numa partida real cabe inteiro ("Ouro" visível), o corte do relatório era da sobreposição forçada, então não mexi)
 
 - Por quê: 03-qa B7 e B8, 04-visual #11. O selo "Vencida" encosta em "Arredores de Valmor" em 420x820
   (`420-rstages2.png`); a introdução do Livro de Elos ("13 de 13 Elos descobertos" e a ajuda em duas linhas,

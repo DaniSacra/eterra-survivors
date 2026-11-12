@@ -90,7 +90,8 @@ export class StageScene extends Phaser.Scene {
       color: open ? UI.text : UI.textOff,
       wrap: tw,
     });
-    if (cleared) seal(this, x + w / 2 - 10, topY + 16, t.select.cleared);
+    // The seal sits at the card's bottom corner: at the top it ran into the name (PU-05).
+    if (cleared) seal(this, x + w / 2 - 10, topY + h - 16, t.select.cleared);
     const prev = STAGE_IDS[STAGE_IDS.indexOf(id) - 1];
     label(
       this,
