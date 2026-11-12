@@ -94,6 +94,11 @@ const DUST = 0xc8bca8;
 const HERO_HALO = 0xdfe8ff;
 /** Distance from the hero's centre to their feet (world px), where the contact shadow sits. */
 const HERO_FEET = 36;
+/**
+ * The hero is drawn this much higher than their position, which is where every weapon starts from: so shots,
+ * swings and orbits leave from the chest and hands, not from the head.
+ */
+const HERO_LIFT = 14;
 /** Flyers hover this high (px) over the spot they threaten, bob a little and flap fast. */
 const HOVER = 13;
 /** Width of the hero's life bar (px). */
@@ -794,7 +799,7 @@ export class GameScene extends Phaser.Scene {
     const step = w.player.moving && !anims ? Math.abs(Math.sin(w.time * 12)) : 0;
     const sx = ART_SCALE * (1 + step * 0.05);
     const sy = ART_SCALE * (1 - step * 0.05);
-    this.playerSprite.setPosition(w.player.x, w.player.y - step * 2.5).setScale(sx, sy);
+    this.playerSprite.setPosition(w.player.x, w.player.y - HERO_LIFT - step * 2.5).setScale(sx, sy);
     // Hurt (invulnerable): the hero blinks instead of fading into the crowd.
     this.playerSprite.setAlpha(w.player.iframes > 0 && Math.sin(w.time * 40) > 0 ? 0.55 : 1);
     if (w.player.facing.x !== 0) this.playerSprite.setFlipX(w.player.facing.x < 0);
@@ -811,12 +816,12 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < 4; i++)
       this.shadows
         .fillStyle(HERO_HALO, 0.045)
-        .fillEllipse(w.player.x, w.player.y - 6, 96 - i * 15, 112 - i * 17);
-    this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET, 26, 8);
+        .fillEllipse(w.player.x, w.player.y - 6 - HERO_LIFT, 96 - i * 15, 112 - i * 17);
+    this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET - HERO_LIFT, 26, 8);
     // Life under the feet: wide, framed in dark, always over the crowd; blinks coral when low.
     const hpK = Math.max(0, w.player.hp / w.player.stats.maxHp);
     const bx = w.player.x - HERO_BAR_W / 2;
-    const by = w.player.y + HERO_FEET + 8;
+    const by = w.player.y + HERO_FEET - HERO_LIFT + 8;
     const bar = this.heroBar.clear();
     bar.fillStyle(0x0a0810, 0.9).fillRoundedRect(bx - 2, by - 2, HERO_BAR_W + 4, 10, 3);
     bar.fillStyle(0x3a1018, 1).fillRect(bx, by, HERO_BAR_W, 6);
