@@ -155,3 +155,16 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 Quadros ampliados 2x sem suavização e juntados em tira por script.
 
 - 2026-11-12 · PX-02: dark outline (1 art px, colour 14,12,26) added by script to the walk and still PNGs of graveRat, bat, rat, spider and thiefRat in `public/sprites/enemies/`, so Valmor's crowd separates from the snow. No PixelLab credits used.
+
+## 2026-11-12: enemy attack, walk and special strips (crowd animation round)
+
+All made with PixelLab `animate_image` (6 generated frames of the 1x still, 1 generation each, 39 in total; frame 0 is the input and is dropped, frames 1 to 6 are kept, 2x without smoothing, joined into a strip by a script). One try per strip, each checked frame by frame; the outline and colours come from the input still.
+
+| Strips (`public/sprites/enemies/`)                                                                                                                                                             | Notes                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `attack`: rat, graveRat, bat, spider, bones, skeleton, emberBones, ghost, ghostDark, slime, hooded, frostWolf, frostBoar, crow, goblin, coldSpirit                                             | the bite or swing shown while the enemy touches the hero (`enemyPose` `near`)              |
+| new `walk`: rat, graveRat, spider, emberBones, hooded, warBanner (eye pulse)                                                                                                                   | 6 frames each; the old walks barely moved (spider was a blob, hooded and rat nearly still) |
+| `windup` and `strike`: coldSpirit (gather, cast), goblin (throw), crow (crouch, dive), frostBoar `windup` (paws the ground)                                                                    | follow the core timers                                                                     |
+| Not used: thiefRat attack (harmless, damage 0), rat windup and dash, spiderEgg and spiderNest hatch, bones walk, slime walk, hooded windup, vampireBat attack (two tries, wings barely change) | too little change, or the sprite changed shape between frames                              |
+
+Jobs: 340c8887, f4ab3663, d3aa62ca, c1d4535e, 1f78245c, 6dc805fb, c0b8e7cf, 9b24054c, fbe4309e, fa791901, 2cdb5e66, 0c8b7de3, f4467f37, 6d008207, d2c1986c, d0bc11b5, 1e543d60, ddba0b00, 52af544b, b62c38e6, e1c84865, daf5266b, 502656ea, d2edf742, 42ce9aca, a98f820d, 2bd3cc62, 6c9fb616, 3e7128db, ca9ec1b6, 4f39cd51, 255e3a31, 73930447, b6877e69, cf175a5f, d6bb0f53, 8d7098b4, 9d2fe7cc, 2c7c1537 (animate_image).

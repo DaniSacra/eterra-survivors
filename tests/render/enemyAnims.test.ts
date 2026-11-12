@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { BossAct } from '../../src/core/bosses';
 import { spawnEnemy } from '../../src/core/enemies';
+import { config } from '../../src/data/config';
 import { ENEMIES } from '../../src/data/enemies';
-import { ENEMY_ANIMS, enemyPose, poseFrame, type EnemyAnim } from '../../src/render/enemyAnims';
+import { ENEMY_ANIMS, enemyPose, inReach, poseFrame, type EnemyAnim } from '../../src/render/enemyAnims';
 import { bareWorld } from '../core/helpers';
 
 const ANIM = ENEMY_ANIMS['enemy.blackKnight'] as EnemyAnim;
@@ -57,6 +58,53 @@ describe('enemy state animations', () => {
       expect(poseFrame(a, 'death', -1, 99)).toBe((a.frames.death ?? a.frames.walk) - 1);
       expect(poseFrame(a, 'strike', -1, 0)).toBe(0);
     }
+  });
+
+  it('shows the attack loop only while a damaging crowd enemy touches the hero and does nothing special', () => {
+    const w = bareWorld();
+    const rat = spawnEnemy(w, 'rat', 100, 0);
+    const a = ENEMY_ANIMS['enemy.rat'] as EnemyAnim;
+    expect(enemyPose(rat, a, false)).toEqual({ pose: 'walk', k: -1 });
+    expect(enemyPose(rat, a, true)).toEqual({ pose: 'attack', k: -1 });
+    // A crouching charger, a stunned one and a harmless one do not bite.
+    rat.act = BossAct.Windup;
+    expect(enemyPose(rat, a, true).pose).toBe('walk');
+    rat.act = BossAct.Idle;
+    rat.stun = 1;
+    expect(enemyPose(rat, a, true).pose).toBe('walk');
+    const egg = spawnEnemy(w, 'spiderEgg', 100, 0);
+    expect(enemyPose(egg, ENEMY_ANIMS['enemy.spiderEgg'] as EnemyAnim, true).pose).toBe('walk');
+    // An enemy without an attack strip keeps walking.
+    expect(enemyPose(rat, { ...a, frames: { walk: 5 } }, true).pose).toBe('walk');
+  });
+
+  it('loops the attack strip and finds reach from the contact range plus a margin', () => {
+    const a = ENEMY_ANIMS['enemy.rat'] as EnemyAnim;
+    const n = a.frames.attack as number;
+    expect(poseFrame(a, 'attack', -1, 0)).toBe(0);
+    expect(poseFrame(a, 'attack', -1, 100 / a.fps.attack + 0.001)).toBeLessThan(n);
+    const w = bareWorld();
+    const rat = spawnEnemy(w, 'rat', 0, 0);
+    const touch = rat.def.radius + config.player.radius;
+    expect(inReach(rat, touch, 0)).toBe(true);
+    expect(inReach(rat, touch + 3, 0)).toBe(true);
+    expect(inReach(rat, touch + 30, 0)).toBe(false);
+  });
+
+  it('the goblin throws from its windup and the crow dives by its air time', () => {
+    const w = bareWorld();
+    const goblin = spawnEnemy(w, 'goblin', 100, 0);
+    goblin.act = BossAct.Windup;
+    goblin.actT = ENEMIES.goblin.shoot.windup * 0.1;
+    expect(enemyPose(goblin, ENEMY_ANIMS['enemy.goblin'] as EnemyAnim).pose).toBe('strike');
+    goblin.actT = ENEMIES.goblin.shoot.windup * 0.9;
+    expect(enemyPose(goblin, ENEMY_ANIMS['enemy.goblin'] as EnemyAnim).pose).toBe('windup');
+    const crow = spawnEnemy(w, 'crow', 100, 0);
+    crow.act = BossAct.Active;
+    crow.actT = ENEMIES.crow.leap.air * 0.5;
+    const p = enemyPose(crow, ENEMY_ANIMS['enemy.crow'] as EnemyAnim, true);
+    expect(p.pose).toBe('strike');
+    expect(p.k).toBeCloseTo(0.5);
   });
 
   it('leaves a death puff that names what died (for the corpse animation)', () => {

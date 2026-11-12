@@ -202,7 +202,8 @@ export class Showcase {
     const def = ENEMIES[id];
     const anim = ENEMY_ANIMS[def.sprite];
     const windKey = poseKey(def.sprite, 'windup');
-    const strikeKey = poseKey(def.sprite, 'strike');
+    // The blow of its act, else the bite or swing it makes when it reaches the hero.
+    const strikeKey = poseKey(def.sprite, anim?.frames.strike ? 'strike' : 'attack');
     const hasWind = !!anim?.frames.windup && s.anims.exists(windKey);
     let wind = 450;
     if (hasWind) {
@@ -215,7 +216,8 @@ export class Showcase {
     }
     this.after(wind, () => {
       if (!sprite.active) return;
-      if (anim?.frames.strike && s.anims.exists(strikeKey)) sprite.play({ key: strikeKey, repeat: 0 });
+      if ((anim?.frames.strike || anim?.frames.attack) && s.anims.exists(strikeKey))
+        sprite.play({ key: strikeKey, repeat: 0 });
       else sprite.anims.resume();
       this.move(sprite, shadow, id, move, k, footY);
     });

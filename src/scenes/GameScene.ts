@@ -9,7 +9,7 @@ import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
 import { FLYERS, HERO_FALL, HERO_HURT, SPRITE_SCALE } from '../render/assets';
-import { ENEMY_ANIMS, enemyPose, poseFrame, poseKey } from '../render/enemyAnims';
+import { ENEMY_ANIMS, enemyPose, inReach, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
 import { assistMight, playtest, shopBonuses, stageUnlocked } from '../core/meta';
 import { formatTime } from '../core/format';
@@ -62,7 +62,7 @@ import { Lighting, mixColor } from '../render/lighting';
 import { Mirror } from '../render/mirror';
 import { PixelBar } from '../render/bars';
 import { ensureShadowTexture, SHADOW } from '../render/shadow';
-import { ART_SCALE } from '../render/art/pen';
+import { ART_RES, ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
@@ -522,7 +522,7 @@ export class GameScene extends Phaser.Scene {
         // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
         const spr = spriteOf(e);
         const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[spr];
-        const posed = anim ? enemyPose(e, anim) : null;
+        const posed = anim ? enemyPose(e, anim, inReach(e, w.player.x, w.player.y)) : null;
         const key =
           anim && posed
             ? poseKey(spr, posed.pose)
@@ -534,19 +534,15 @@ export class GameScene extends Phaser.Scene {
           // Bosses over their escort and elites over the crowd, so they always show whole.
           img.setDepth(e.def.boss ? 7 : e.def.elite ? 6 : 5);
         }
+        // Seconds in the pose (each enemy out of phase): the strip frame and the step's hop both follow it.
+        let poseSec = 0;
         if (anim && posed) {
           if (img.pose !== posed.pose) {
             img.pose = posed.pose;
             img.poseT0 = w.time;
           }
-          img.setFrame(
-            poseFrame(
-              anim,
-              posed.pose,
-              posed.k,
-              w.freeze > 0 ? 0 : w.time - (img.poseT0 ?? w.time) + e.uid * 0.13,
-            ),
-          );
+          poseSec = w.freeze > 0 ? 0 : w.time - (img.poseT0 ?? w.time) + e.uid * 0.13;
+          img.setFrame(poseFrame(anim, posed.pose, posed.k, poseSec));
         }
         // Cartoon life: squash and stretch while walking (each enemy out of phase), face the player,
         // squash when hit. Frozen enemies stand still.
@@ -554,6 +550,15 @@ export class GameScene extends Phaser.Scene {
         const a =
           (w.freeze > 0 ? 0 : Math.sin(w.time * (e.slow > 0 ? 4 : 9) + e.uid * 1.7) * 0.06) *
           (anim ? 0.5 : 1);
+        // A walker's step hops once per stride of its strip (two footfalls a cycle), so the body falls and rises
+        // with the legs instead of rocking sideways.
+        let step = 0;
+        if (anim && posed && posed.pose === 'walk' && anim.bob > 0 && w.freeze <= 0 && e.def.move !== 'still')
+          step =
+            Math.abs(Math.sin((Math.PI * poseSec * anim.fps.walk) / anim.frames.walk)) *
+            anim.bob *
+            ART_RES *
+            (e.slow > 0 ? 0.6 : 1);
         // 1 -> 0 after a hit. Bosses are hit all the time: a small squash only, and no white flash (they would
         // stay a white silhouette, like the hurt hero used to be red).
         const hit = (e.flash / HIT_FLASH) * (e.def.boss ? 0.3 : 1);
@@ -605,7 +610,7 @@ export class GameScene extends Phaser.Scene {
             .lineStyle(2, 0xe8e2d0, 0.75)
             .lineBetween(e.x, e.y - intro - 30, e.x, e.y - intro - 800);
         img
-          .setPosition(e.x + shake, e.y - lift - hover - intro)
+          .setPosition(e.x + shake, e.y - lift - hover - intro - step)
           .setScale(
             ART_SCALE * sx * (SPRITE_SCALE[sprite] ?? 1),
             ART_SCALE * sy * (SPRITE_SCALE[sprite] ?? 1),
@@ -1014,11 +1019,6 @@ export class GameScene extends Phaser.Scene {
     if (w.state !== 'playing' || w.time < this.nextTipCheck) return;
     this.nextTipCheck = w.time + 0.5;
     if (!settings().tips || w.boss || !this.hud.canTip()) return;
-    // The basics first (move, weapons attack alone, gems, life), a short while apart.
-    if (w.time - this.tipAt >= LESSON_GAP) {
-      const lesson = nextLesson(w, this.lessonsSeen);
-      if (lesson) {
-        this.lessonsSeen.add(lesson);
     // A player who tried again gets told why the hero hits a little harder (PX-17), once the run is under way.
     if (!this.assistShown && w.time >= 3) {
       this.assistShown = true;
@@ -1026,6 +1026,11 @@ export class GameScene extends Phaser.Scene {
       this.hud.tip('icon.might', t.assist(Math.round(assistMight(this.liveSave, w.stageId) * 100)));
       return;
     }
+    // The basics first (move, weapons attack alone, gems, life), a short while apart.
+    if (w.time - this.tipAt >= LESSON_GAP) {
+      const lesson = nextLesson(w, this.lessonsSeen);
+      if (lesson) {
+        this.lessonsSeen.add(lesson);
         this.tipAt = w.time;
         markLessonSeen(lesson);
         // A finger as the main pointer (phones, tablets), not just a touch screen on a laptop.
@@ -1615,18 +1620,18 @@ export class GameScene extends Phaser.Scene {
     const before = loadSave().records[w.character]?.bestTime ?? 0;
     this.newBest = before > 0 && w.time > before;
     const recorded = recordRun(summarizeRun(w));
-    this.newElos = recorded.elos;
-    this.newAchievements = recorded.achievements;
-    return opens;
-  }
-
     // Anonymous counts: how runs end, and the minute a defeat happens (PX-17 calibration).
     const how = won ? 'won' : w.abandoned ? 'abandoned' : 'lost';
     track(`end/${how}/${w.stageId}/${w.character}`, `${Math.floor(w.time / 60)} min`);
     if (how === 'lost') track(`death-minute/${w.stageId}/${Math.floor(w.time / 60)}`);
+    this.newElos = recorded.elos;
+    this.newAchievements = recorded.achievements;
+    this.treasure = recorded.treasure;
+    return opens;
+  }
+
   /** "Continuar a vigília" (from the end screen): the run goes on; what it adds is recorded when it ends. */
   startVigil(): void {
-    this.treasure = recorded.treasure;
     const w = this.world;
     if (w.state !== 'won' || w.endless) return;
     this.vigilBefore = summarizeRun(w);
@@ -1691,12 +1696,12 @@ export class GameScene extends Phaser.Scene {
       newAchievements: this.newAchievements,
       vigilRecord: this.vigilRecord,
       record: this.newBest,
+      treasure: this.treasure,
     });
   }
 
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
-      treasure: this.treasure,
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
     this.hud.joystick.setEnabled(false);
     this.scene.pause();
@@ -1846,12 +1851,12 @@ export class GameScene extends Phaser.Scene {
               newAchievements: this.newAchievements,
               vigilRecord: this.vigilRecord,
               record: this.newBest,
+              treasure: this.treasure,
             }),
           );
           break;
         }
       }
-              treasure: this.treasure,
     }
     w.events.length = 0;
   }
