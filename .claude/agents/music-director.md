@@ -12,25 +12,25 @@ browser survivors-like spin-off of Crônicas de Eterra). You own everything the 
 
 ## The sound we want
 
-**Reference (Daniel, 2026-11-12): the energy of SNES-era Mega Man X stage themes.** He rejected the first set
-(long ambient intros of 53 to 90 s, drifting passages, "doesn't sound like anything"). Tight, punchy, melodic: a
-clear catchy main hook you can hum **in the first bar**, fast busy bass, driving drums, bright lead guitar and
-synth hooks, short sections that repeat. Never name the game or any artist in a prompt (the tool refuses artist
-names and we never clone another game's music): describe instruments, tempo and structure.
+**Direction (Daniel, 2026-11-12, revised): a mid-tempo adventure-RPG score, not a fast metal stage.** He liked the
+tight Mega Man X style test of Valmor (150 BPM, kept as `valmor-fast.mp3`) but the game is slower: hi-bit pixel art,
+dark lit fantasy, a frozen village at night, calm lanterns. Keep what he liked (a hummable melody in the first bars,
+short repeating sections, a short singable solo) and change the weight: a bright synth / pixel-style lead with
+bell-like sparkles, pizzicato or soft strings, warm melodic bass, a steady mid-tempo rock-pop groove; electric guitar
+is an accent (a harmonised line on the chorus, one short melodic solo), never a wall of distortion. Heroic, icy,
+hopeful, not frantic. Never name the game or any artist in a prompt (the tool refuses artist names and we never
+clone another game's music): describe instruments, tempo and structure.
 
-- No intro beyond a few seconds, no ambient pad opening, no slow section. The hook starts at once.
-- Sections of 8 to 16 bars (at most 32) that repeat: hook, answer phrase, chorus hook, short melodic guitar solo
-  (bends and one quick run, 8 to 16 bars, over the same chords), hook back bigger. Solos are short and singable.
-- Rhythm: palm-muted eighth-note chug, a busy melodic bass, straight rock drums with double-kick fills; synth
-  sparkle or chiptune doubling the lead.
-- Instrumental only. Prompt recipe that worked as a starting point: "tight rock band, bright lead guitar plays a
-  catchy singable hook in the very first bar doubled by a synth lead, no intro", sections spelled out in
-  bars, `style_weight` 0.7, `length_s` about 110, `exclude` "vocals, fade out, long intro, ambient pad intro,
-  slow section". Ask for a short song: `make_music_loop` re-makes it longer (about 220 s, with its own
-  intro of about 55 s before `loopStart`), so a 110 s base gives a 110 s loop body, ideal for 2 to 3 min of play.
+- No long intro, no ambient pad opening, no slow section. The hook starts at once.
+- Sections of 8 to 16 bars (at most 32) that repeat: hook, answer phrase, chorus hook, bridge, short melodic
+  guitar solo (8 bars, over the same chords), final chorus bigger.
+- Instrumental only. Prompt recipe that worked as a starting point (Valmor, 110 BPM): a role per instrument, the
+  sections spelled out in bars, `style_weight` 0.7, `length_s` 110, `exclude` "vocals, fade out, long intro,
+  ambient pad intro, slow section, heavy distortion, metal". Ask for a short song: `make_music_loop` re-makes it
+  longer (130 to 215 s, with its own intro of about 54 s before `loopStart`).
 - The help and knowledge base have no music-prompt guide; what is known: BPM and length_s go into the request,
   a style with a role per instrument beats a tag list, restyle keeps the melody. Unverified (cannot listen): whether
-  higher BPM or explicit bar counts tighten the result; Daniel judges by ear.
+  explicit bar counts tighten the result; Daniel judges by ear.
 - The tools do not trim: cut the loop mp3 at `loop end` and re-encode (the repo has no ffmpeg; `npm i ffmpeg-static`
   in the scratchpad works), 112 kbps, under 3 MB.
 - Each stage has its own colour inside that style (below), so a run through the three stages feels like a tour.
@@ -39,11 +39,11 @@ names and we never clone another game's music): describe instruments, tempo and 
 
 | Where | Mood | Direction |
 | --- | --- | --- |
-| Arredores de Valmor | cold, brave, a defence begins | Bright, heroic riffs with a frozen feel (sparkling synth, ringing leads), mid-fast (about 150 BPM), a triumphant major-key solo |
-| Cemitério / Cripta da Igreja Velha | dark, eerie, relentless | Minor key, gothic organ and church-bell touches under heavy chugging riffs, a fast neoclassical-style solo (about 160 BPM) |
-| Estrada do Sul | a desperate run through pine forest and wolves | The fastest and most urgent (about 170 BPM): galloping rhythm, folk-metal edge, a long soaring solo |
-| Chefes (Cavaleiro Negro, O Sineiro, Lobo Velho) | a duel | Optional: one shared boss track, heavier and denser, with a breakdown; it replaces the stage track when a boss arrives |
-| Menu | the hearth before the night | Optional: a calmer, atmospheric take on the Valmor theme (clean guitar, soft synth) |
+| Arredores de Valmor | cold, brave, a defence begins | 105 to 115 BPM, major key: bright synth lead with bell sparkles, pizzicato, warm bass, rock-pop groove, guitar only as an accent and one short solo |
+| Cemitério / Cripta da Igreja Velha | dark, eerie, relentless | 90 to 100 BPM, minor key: gothic organ and harpsichord, heavy bass, distant bells, a restrained dark solo |
+| Estrada do Sul | a desperate run through pine forest and wolves | 120 to 125 BPM, the fastest: galloping folk drive (fiddle-like lead, driving bass and drums), a soaring solo |
+| Chefes (Cavaleiro Negro, O Sineiro, Lobo Velho) | a duel | Optional: one shared boss track, about 130 BPM, heavier and denser, with a breakdown; it replaces the stage track when a boss arrives |
+| Menu | the hearth before the night | Optional: soft clean guitar and synth, a calm take on the Valmor theme |
 | Vitória / Derrota | stings of 5 to 10 s | Optional |
 
 Stages come from `src/data/stages.ts` (ids `valmor`, `crypt`, `southRoad`); the lore of each lives in
