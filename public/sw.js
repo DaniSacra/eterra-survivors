@@ -17,7 +17,9 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req)
+    // Revalidate with the server every time: the sprites keep their names between deploys, and the browser's own
+    // cache must not hand an old one back after an update (hashed files under /assets/ never change, so they may).
+    fetch(req, new URL(req.url).pathname.includes('/assets/') ? undefined : { cache: 'no-cache' })
       .then((res) => {
         // Only whole answers (200): a partial 206 (audio range request) would break the saved copy.
         if (res.status === 200) {

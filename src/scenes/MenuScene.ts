@@ -1,6 +1,7 @@
 import { music } from '../render/music';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
+import { applyPendingUpdate, justUpdated } from '../render/updates';
 import { t } from '../i18n/pt-BR';
 import { UI, button, isShort, keyNav, label, newsDot, restartOnResize, safeArea } from '../render/ui';
 import { CHARACTERS, type CharacterId } from '../data/characters';
@@ -97,10 +98,27 @@ export class MenuScene extends Phaser.Scene {
     const hintText = import.meta.env.DEV ? `${controls}\n${t.menu.debugHint}` : controls;
 
     this.scenery(width, height);
+    // A newer version found during a run is applied now; one just applied is announced for a few seconds.
+    applyPendingUpdate();
+    if (justUpdated()) {
+      const note = label(this, width / 2, safeArea().top + 14, t.menu.updated, 14, {
+        bold: true,
+        color: UI.gold,
+        wrap: width - 32,
+        stroke: true,
+      }).setOrigin(0.5, 0);
+      this.tweens.add({
+        targets: note,
+        alpha: 0,
+        delay: 4000,
+        duration: 800,
+        onComplete: () => note.destroy(),
+      });
+    }
     // The first time: one line about the anonymous statistics and where to switch them off (shown once).
     if (!settings().statsNoticed && import.meta.env.PROD) {
       setSetting('statsNoticed', true);
-      const note = label(this, width / 2, safeArea().top + 14, t.menu.statsNotice, 12, {
+      const note = label(this, width / 2, safeArea().top + 44, t.menu.statsNotice, 12, {
         color: UI.muted,
         wrap: width - 32,
         stroke: true,

@@ -51,6 +51,8 @@ export const t = {
 
   boot: { loading: (pct: number) => `Carregando… ${pct}%` },
   menu: {
+    /** Shown for a few seconds after the page reloaded itself into a newer version. */
+    updated: 'Jogo atualizado: você está na versão mais nova!',
     /** The one-time notice on the menu: what is counted and how to stop it. */
     statsNotice:
       'O jogo conta visitas e partidas de forma anônima, sem dados pessoais. Dá para desligar em Opções.',

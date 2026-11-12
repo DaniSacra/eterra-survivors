@@ -16,6 +16,7 @@ import { sound } from './render/sound';
 import { DEV_MODE } from './render/dev';
 import { initAnalytics } from './render/analytics';
 import { initDiagnostics } from './render/diagnostics';
+import { watchUpdates } from './render/updates';
 import { playtest } from './core/meta';
 import { config } from './data/config';
 
@@ -59,6 +60,7 @@ function start(): void {
   sound.init();
   initAnalytics();
   initDiagnostics(game);
+  watchUpdates(() => game.scene.isActive('game'));
 
   // Dev-only handle for browser automation and console debugging.
   if (import.meta.env.DEV || DEV_MODE) (window as unknown as { game: Phaser.Game }).game = game;
