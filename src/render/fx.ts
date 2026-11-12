@@ -185,6 +185,8 @@ export const TINT = {
 };
 /** Damage numbers: normal and strong hits. */
 export const DAMAGE_TEXT = { color: '#ffffff', strong: '#ffd870', stroke: '#1a1424' };
+/** Pixel dust clouds drawn at once in a mass death. */
+const DUST_SHOWN = 28;
 /** Segments of Tempestade's jump line. */
 const CHAIN_SEGS = 5;
 /** Lightning layers: width factor, color (-1 = the bolt's color), alpha. Preallocated. */
@@ -408,6 +410,7 @@ export function drawFx(
     if (tr) drawTrail(g, pr, tr, world.time);
     if (pr.source) drawVerb(g, pr, WEAPONS[pr.source.id] as WeaponDef, world.time);
   }
+  let dust = 0;
   for (let iF = 0; iF < world.puffs.active.length; iF++) {
     const f = world.puffs.active[iF] as (typeof world.puffs.active)[number];
     const k = f.ttl / config.effects.puffTtl; // 1 -> 0
@@ -416,6 +419,28 @@ export function drawFx(
       // own send-off from the sparks.)
       if (f.r >= BOSS_PUFF) continue;
       const r = f.r;
+      if (r < ELITE_PUFF) {
+        // The common death: a pixel dust cloud with a few gold stars (PF-05). Decoration, so it gives way first
+        // when the sprite pool is full, and at most DUST_SHOWN a frame in a mass death.
+        if (dust < DUST_SHOWN) {
+          dust++;
+          const d = VFX.dust;
+          fxSprites.putFrame(
+            vfxKey('dust'),
+            Math.min(d.frames - 1, Math.floor((1 - k) * d.frames)),
+            d.anchor[0],
+            d.anchor[1],
+            f.x,
+            f.y,
+            Math.max(0.7, r / 12),
+            1,
+            0,
+            true,
+          );
+        }
+        continue;
+      }
+      // Elites keep the big cartoon poof: a white pop, then three little clouds puffing out and shrinking.
       if (k > 0.7) {
         g.fillStyle(0xffffff, (k - 0.7) * 2);
         disc(g, f.x, f.y, r * (1.1 - k * 0.4));

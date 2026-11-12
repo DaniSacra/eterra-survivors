@@ -3650,7 +3650,7 @@ em `ART_RES`.
   quadros de brilho, nas cores do NA-05 (fora do ciano das gemas). 4 gerações, registradas.
 - Aceite: folha de texturas com fogo-fátuo, alma e gema claramente diferentes; capturas na Cripta.
 
-**PF-05 · Fumaça de morte em pixel** · vfx · P · proposto
+**PF-05 · Fumaça de morte em pixel** · vfx · P · ✅ feito (2026-11-12; escolhi: nuvem de poeira de 6 quadros com estrelinhas douradas para a morte comum (`r` abaixo de `ELITE_PUFF`), no máximo 28 por quadro, na faixa de decoração do `fxSprites` (cede primeiro); elite mantém o desenho vetorial; sem disco branco na morte em massa; F4 não medido neste item, vi só 24 mortes injetadas)
 
 - Por quê: 06-vfx #8. `fx.ts:400-421`: pop branco e três discos vetoriais por morte, sobre tudo, ao lado de corpos já
   animados em pixel; em morte em massa são 6 discos por morte.
