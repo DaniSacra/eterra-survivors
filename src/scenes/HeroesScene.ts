@@ -56,7 +56,14 @@ export class HeroesScene extends Phaser.Scene {
 
     selectBackdrop(this);
     label(this, cx, short ? 22 : 30, t.heroes.title, short ? 22 : 26, { bold: true, color: UI.gold });
-    if (!short) label(this, cx, 58, t.heroes.pick, 14, { color: UI.muted });
+    const cheapest = Math.min(
+      ...CHARACTER_IDS.filter((id) => !heroUnlocked(save, id)).map((id) => CHARACTERS[id].cost),
+    );
+    const needGold = Number.isFinite(cheapest) && save.gold < cheapest;
+    if (!short)
+      label(this, cx, 58, needGold ? t.heroes.earnGold : t.heroes.pick, 14, {
+        color: needGold ? UI.gold : UI.muted,
+      });
     label(this, short ? cx + wrapW / 2 : cx, short ? 22 : 80, t.select.gold(save.gold), 15, {
       bold: true,
       color: UI.gold,
@@ -159,12 +166,21 @@ export class HeroesScene extends Phaser.Scene {
         },
       ).setOrigin(0, 0.5);
     } else {
-      const ask = this.buying === id ? t.select.confirmUnlock(def.cost) : t.select.unlock(def.cost);
-      label(this, tx, topY + h - 20, ask, 14, {
-        bold: true,
-        color: poor ? UI.textOff : UI.gold,
-        align: 'left',
-      }).setOrigin(0, 0.5);
+      // The padlock over the hero (the stage cards' one) and a gold bar: how far the vault is from the price.
+      this.add.image(sx, topY + h * 0.66, 'icon.lock').setScale(ART_SCALE * 1.4);
+      const ask =
+        this.buying === id
+          ? t.select.confirmUnlock(def.cost)
+          : poor
+            ? t.select.progress(save.gold, def.cost)
+            : t.select.unlock(def.cost);
+      const by = topY + h - 18;
+      const fill = Math.min(1, save.gold / def.cost);
+      this.add.rectangle(tx, by, tw, 18, 0x05040f, 0.8).setOrigin(0, 0.5).setStrokeStyle(2, UI.border);
+      this.add
+        .rectangle(tx + 2, by, Math.max(0, (tw - 4) * fill), 14, poor ? 0x8a6a1c : UI.accent)
+        .setOrigin(0, 0.5);
+      label(this, tx + tw / 2, by, ask, 13, { bold: true, color: poor ? UI.text : UI.gold });
     }
     return bg;
   }

@@ -5,7 +5,7 @@ import { almostElo, hurtShare, passiveReport, reportExtent, weaponReport } from 
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
-import { biggestGoal, canBuyAny } from '../core/meta';
+import { biggestGoal, nextHeroGoal, canBuyAny } from '../core/meta';
 import { closestAchievement } from '../core/achievements';
 import type { AchievementId } from '../data/achievements';
 import { loadSave } from '../render/save';
@@ -363,14 +363,21 @@ export class EndScene extends Phaser.Scene {
         UI.text,
         'icon.lock',
       );
-    // A long-term goal, not a nudge to spend now: how far the most expensive thing in the Loja still is.
-    const goal = biggestGoal(save);
-    const missing = goal && goal.cost > save.gold ? goal.cost - save.gold : 0;
-    if (packed && goal && missing > 0)
-      line(t.end.bankedGoal(save.gold, t.shop.items[goal.id], missing), 14, UI.text);
+    // The next goal: the cheapest hero still locked, and only after that the Loja.
+    const hero = nextHeroGoal(save);
+    if (hero && save.gold >= hero.cost) line(t.end.heroReady(t.characters[hero.id].name), 15, UI.gold, true);
+    else if (hero)
+      line(t.end.heroGoal(save.gold, t.characters[hero.id].name, hero.cost - save.gold), 14, UI.text);
     else {
-      line(t.end.banked(save.gold), 14, UI.text);
-      if (goal && missing > 0) line(t.end.toBuy(t.shop.items[goal.id], missing), 14, UI.muted);
+      // A long-term goal, not a nudge to spend now: how far the most expensive thing in the Loja still is.
+      const goal = biggestGoal(save);
+      const missing = goal && goal.cost > save.gold ? goal.cost - save.gold : 0;
+      if (packed && goal && missing > 0)
+        line(t.end.bankedGoal(save.gold, t.shop.items[goal.id], missing), 14, UI.text);
+      else {
+        line(t.end.banked(save.gold), 14, UI.text);
+        if (goal && missing > 0) line(t.end.toBuy(t.shop.items[goal.id], missing), 14, UI.muted);
+      }
     }
     return y;
   }

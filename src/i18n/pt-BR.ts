@@ -489,6 +489,10 @@ export const t = {
       `No cofre: ${gold} ouro · faltam ${int(missing)} para ${name}`,
     /** The long-term goal: the most expensive thing left in the Loja. */
     toBuy: (name: string, missing: number) => `Faltam ${int(missing)} para ${name}`,
+    /** The first goal while a hero is locked: the cheapest one (the Loja comes after). */
+    heroGoal: (gold: number, hero: string, missing: number) =>
+      `No cofre: ${int(gold)} ouro · faltam ${int(missing)} para liberar ${hero}`,
+    heroReady: (hero: string) => `Já dá para liberar ${hero}! Veja em Heróis.`,
     run: (stage: string, hero: string) => `${stage} · ${hero}`,
     weapon: 'Arma',
     weaponLevel: 'Nv',
@@ -720,6 +724,8 @@ export const t = {
   heroes: {
     title: 'Heróis',
     pick: 'Escolha quem vai defender Valmor',
+    /** Shown instead of the line above while a locked hero costs more than the vault holds. */
+    earnGold: 'Jogue partidas para ganhar ouro',
     advantage: 'Vantagem',
     record: (wins: number, best: string) =>
       wins > 0 ? `Vitórias: ${wins} · Melhor: ${best}` : `Sem vitórias · Melhor: ${best}`,
@@ -754,6 +760,8 @@ export const t = {
     back: 'Voltar',
     gold: (n: number) => `Ouro: ${n}`,
     unlock: (n: number) => `Liberar: ${n} ouro`,
+    /** A locked hero's bar: the gold banked of the price. */
+    progress: (have: number, cost: number) => `${have} de ${cost} ouro`,
     /** The second step of buying a hero. */
     confirmUnlock: (n: number) => `Confirmar: ${n} ouro`,
     locked: 'Vença a fase anterior',

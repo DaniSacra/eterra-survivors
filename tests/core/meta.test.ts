@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   SAVE_VERSION,
   biggestGoal,
+  heroUnlocked,
+  nextHeroGoal,
   canBuyAny,
   buy,
   confirmPurchase,
@@ -18,7 +20,7 @@ import {
 import { dropPickup } from '../../src/core/pickups';
 import { World } from '../../src/core/world';
 import { config } from '../../src/data/config';
-import { CHARACTERS } from '../../src/data/characters';
+import { CHARACTERS, CHARACTER_IDS } from '../../src/data/characters';
 import { SHOP, SHOP_IDS } from '../../src/data/shop';
 import { CHEST } from '../../src/data/pickups';
 import { quietWorld, still } from './helpers';
@@ -277,6 +279,16 @@ describe('save versions and Elos', () => {
     expect(biggestGoal(s)!.cost).toBe(priciest);
     for (const id of SHOP_IDS) s.shop[id] = SHOP[id].maxLevel;
     expect(biggestGoal(s)).toBeNull();
+  });
+
+  it('the first goal is the cheapest hero still locked, and none when all are owned', () => {
+    const s = newSave();
+    const cheapest = Math.min(
+      ...CHARACTER_IDS.filter((id) => !heroUnlocked(s, id)).map((id) => CHARACTERS[id].cost),
+    );
+    expect(nextHeroGoal(s)!.cost).toBe(cheapest);
+    for (const id of CHARACTER_IDS) if (!s.heroes.includes(id)) s.heroes.push(id);
+    expect(nextHeroGoal(s)).toBeNull();
   });
 
   it('remembers the last hero and stage only while they can still be played', () => {

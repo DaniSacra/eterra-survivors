@@ -545,6 +545,17 @@ export function biggestGoal(save: MetaSave): { id: ShopId; cost: number } | null
   return best;
 }
 
+/** The cheapest hero still locked (the first goal on the end screen, before the Loja), null when all are owned. */
+export function nextHeroGoal(save: MetaSave): { id: CharacterId; cost: number } | null {
+  let best: { id: CharacterId; cost: number } | null = null;
+  for (const id of CHARACTER_IDS) {
+    if (heroUnlocked(save, id)) continue;
+    const cost = CHARACTERS[id].cost;
+    if (!best || cost < best.cost) best = { id, cost };
+  }
+  return best;
+}
+
 /** The starting stat deltas and per-run charges the shop gives (and achievements, if `achievementCharges`). */
 export function shopBonuses(save: MetaSave): RunBonuses {
   const out: RunBonuses = { stats: {}, charges: { ...config.charges }, revives: 0 };

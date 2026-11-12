@@ -148,7 +148,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
   passa para PX-05 (silhuetas com cadeado e barra de ouro) e PX-21 (como ganhar ouro). A história de Valmor aparece
   na tela da Fase.
 
-**PX-05 [6] · Herói bloqueado com cadeado e barra de ouro** · ui + visual · P · proposto
+**PX-05 [6] · Herói bloqueado com cadeado e barra de ouro** · ui + visual · P · feito (2026-11-12: cadeado sobre o herói e barra "320 de 800 ouro" em Heróis)
 - O quê: o mesmo cadeado das fases e a barra "320 de 800" no lugar de "Liberar: 800 ouro". Liga: D-06, NB-09, NU-10.
 
 **PX-06 [7] · História de Valmor reescrita para a fase de ratos, aranhas e Mãe-Aranha** · game-director · P · proposto
@@ -222,7 +222,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 - O quê: tabela de atributos só com as linhas que mudam (sem traços); a etiqueta de categoria em palavra simples ou fora
   da primeira partida; a primeira carta da vida com uma linha "Escolha uma: arma nova ou melhoria" (ON-01).
 
-**PX-21 · "Jogue partidas para ganhar ouro"** · ui · P · proposto (achado 2)
+**PX-21 · "Jogue partidas para ganhar ouro"** · ui · P · feito em Heróis (2026-11-12: a linha aparece sob o título enquanto o cofre não paga o herói mais barato; falta o Menu com 0 de ouro, junto de PX-19). A tela final agora mostra primeiro a meta do próximo herói ("faltam 480 para liberar Lyra") e só depois a Loja
 - O quê: sob a barra do herói bloqueado (PX-05) e no Menu com 0 de ouro, uma linha que diz de onde vem o ouro.
 
 **PX-22 · Meta curta na primeira partida** · ui + impl · P · proposto (achado 5)
