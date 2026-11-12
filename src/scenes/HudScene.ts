@@ -541,6 +541,26 @@ export class HudScene extends Phaser.Scene {
     box.once('pointerdown', finish);
   }
 
+  /** A boss's name, huge, for the entrance (PX-14); fades after ~2.4 s. */
+  bossTitle(name: string): void {
+    const { width, height } = this.scale;
+    const text = label(this, width / 2, height * 0.37, name, 44, {
+      bold: true,
+      color: UI.danger,
+      stroke: true,
+      wrap: width - 30,
+    }).setAlpha(0);
+    text.setScale(1.6);
+    this.tweens.add({ targets: text, alpha: 1, scale: 1, duration: 450, ease: 'Cubic.easeOut' });
+    this.tweens.add({
+      targets: text,
+      alpha: 0,
+      delay: 2000,
+      duration: 500,
+      onComplete: () => text.destroy(),
+    });
+  }
+
   /** Debug only: 100 more enemies to measure performance. */
   private stress(): void {
     const seg = segmentAt(this.world.time, this.world.stage.waves);

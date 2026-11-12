@@ -138,6 +138,8 @@ const PROJECTILE_TINT: Record<string, number> = Object.fromEntries(
 );
 /** The Elo forge's slow motion: how long (real ms) and how slow. */
 const FORGE_SLOW_MS = 500;
+/** Seconds the Mãe-Aranha takes to come down her web on arrival. */
+const BOSS_DROP = 1.3;
 /** The first Elo of a life slows the run this long, under the HUD's fusion (PX-11). */
 const FIRST_FORGE_SLOW_MS = 2000;
 const FORGE_SLOW = 0.25;
@@ -300,6 +302,11 @@ export class GameScene extends Phaser.Scene {
   private bigForgeDone = false;
   /** This run beat the hero's longest one. */
   private newBest = false;
+  /** Entrance of the boss (PX-14): when it came, the camera's pull-back factor and where it was last seen. */
+  private bossIntroAt = -99;
+  private camPull = { k: 1 };
+  private baseZoom = 1;
+  private bossAt = { x: 0, y: 0 };
   /** A level was gained and its ring waits for the choice to close. */
   private levelRingPending = false;
   private rewardIcon!: Phaser.GameObjects.Image;
@@ -401,6 +408,8 @@ export class GameScene extends Phaser.Scene {
     );
     this.moments = newMoments();
     this.bigForgeDone = false;
+    this.bossIntroAt = -99;
+    this.camPull.k = 1;
     this.levelRingPending = false;
     this.sparks = new Sparks();
     this.lastTime = 0;
@@ -575,8 +584,17 @@ export class GameScene extends Phaser.Scene {
           const sw = 14 - (hover - HOVER) * 0.6;
           this.shadows.fillStyle(0x000000, 0.3).fillEllipse(e.x, e.y + 8, sw, sw * 0.32);
         }
+        // The Mãe-Aranha arrives down a web: for a moment she hangs above where she lands (PX-14).
+        const intro =
+          e === w.boss && e.type === 'spiderMother'
+            ? Math.max(0, 1 - (w.time - this.bossIntroAt) / BOSS_DROP) * 260
+            : 0;
+        if (intro > 0)
+          this.shadows
+            .lineStyle(2, 0xe8e2d0, 0.75)
+            .lineBetween(e.x, e.y - intro - 30, e.x, e.y - intro - 800);
         img
-          .setPosition(e.x + shake, e.y - lift - hover)
+          .setPosition(e.x + shake, e.y - lift - hover - intro)
           .setScale(
             ART_SCALE * sx * (SPRITE_SCALE[sprite] ?? 1),
             ART_SCALE * sy * (SPRITE_SCALE[sprite] ?? 1),
@@ -815,7 +833,8 @@ export class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const side = height > width ? config.view.portraitWorldSide : config.view.minWorldSide;
     const zoom = clamp(Math.min(width, height) / side, 0.5, 4);
-    this.cameras.main.setZoom(zoom);
+    this.baseZoom = zoom;
+    this.cameras.main.setZoom(zoom * this.camPull.k);
     this.viewMargin = Math.ceil(MAX_SHAKE * Math.max(width, height) * zoom) + 4;
     this.numberScale = Math.max(NUMBER_WORLD, NUMBER_SCREEN / zoom) / NUMBER_FONT;
     this.world.setView(width / zoom, height / zoom);
@@ -919,6 +938,10 @@ export class GameScene extends Phaser.Scene {
     else this.heroRim.setTintFill(HERO_RIM);
     // A discreet contact shadow under the hero's feet.
     this.shadows.clear();
+    if (w.boss && !w.boss.dead) {
+      this.bossAt.x = w.boss.x;
+      this.bossAt.y = w.boss.y;
+    }
     // A pale halo behind the body so a dark hero (Andilla) still stands out on the dark ground (DD-12).
     for (let i = 0; i < 4; i++)
       this.shadows
@@ -1494,6 +1517,33 @@ export class GameScene extends Phaser.Scene {
     this.hud.forged(elo);
   }
 
+  /**
+   * The boss falls (PX-14): a short slow motion and a rain of gems and coins where it stood. Looks only; the drops and
+   * their values come from the core.
+   */
+  private bossDeathShow(): void {
+    this.slowUntil = this.time.now + 1100;
+    const { x, y } = this.bossAt;
+    const sp = this.sparks;
+    for (let k = 0; k < 46; k++) {
+      const a = sp.rand() * Math.PI * 2;
+      const v = 60 + sp.rand() * 190;
+      sp.add(
+        x + (sp.rand() - 0.5) * 40,
+        y - 30,
+        Math.cos(a) * v,
+        Math.sin(a) * v - 140,
+        0.9 + sp.rand() * 0.6,
+        6,
+        k % 2 ? 0xffd36a : 0x6ab8ff,
+        SPARK.confetti,
+        true,
+      );
+    }
+    sp.add(x, y, 0, 0, 0.7, 90, 0xffffff, SPARK.ring, true);
+    if (!this.calm) this.lighting.flash(x, y, 700, 0xfff0d0, 0.8);
+  }
+
   /** The chest's reward icon pops out of the hero and floats up, then fades. */
   private showReward(): void {
     const age = this.world.time - this.moments.chest;
@@ -1670,6 +1720,18 @@ export class GameScene extends Phaser.Scene {
               : t.bossWarning(t.enemies[w.stage.boss.id]),
           );
           this.shake(400, 0.01);
+          // The entrance (PX-14): the camera pulls back in the drawing only (the core's view stays, so spawning and
+          // aiming do not change), the boss comes down on a web, and its name shows huge.
+          this.bossIntroAt = w.time;
+          this.hud.bossTitle(t.enemies[w.stage.boss.id]);
+          if (!this.calm) {
+            this.tweens.killTweensOf(this.camPull);
+            const follow = (): void => {
+              this.cameras.main.setZoom(this.baseZoom * this.camPull.k);
+            };
+            this.tweens.add({ targets: this.camPull, k: 0.8, duration: 500, onUpdate: follow });
+            this.tweens.add({ targets: this.camPull, k: 1, delay: 1900, duration: 700, onUpdate: follow });
+          }
           break;
         case 'eliteSpawned':
           sound.play('elite');
@@ -1750,6 +1812,7 @@ export class GameScene extends Phaser.Scene {
         case 'lost': {
           sound.play(e.type);
           if (e.type === 'lost') this.fallAtMs = this.time.now;
+          else if (!w.endless) this.bossDeathShow();
           const unlocked = w.endless ? this.bankVigil() : this.bank();
           this.time.delayedCall(900, () =>
             this.scene.launch(SCENES.end, {

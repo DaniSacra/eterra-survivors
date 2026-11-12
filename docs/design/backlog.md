@@ -186,7 +186,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 - O quê: luz, roleta curta dos prêmios (≤ 1,2 s, toque pula) e som; o prêmio é decidido no core (`CHEST`), a festa só
   mostra (teste no core). Liga: NB-05, RF-04.
 
-**PX-14 [15] · Entrada e morte da Mãe-Aranha** · vfx + impl · M · pendente (resto da Fase 4)
+**PX-14 [15] · Entrada e morte da Mãe-Aranha** · vfx + impl · M · feito (2026-11-12: câmera recua a 0,8 só no desenho, a Mãe-Aranha desce de uma teia em 1,3 s, nome grande; na vitória, câmera lenta de 1,1 s e chuva de gemas e moedas; a câmera lenta e a chuva valem para qualquer chefe; a teia só para a Mãe-Aranha)
 - O quê: câmera se afasta só no desenho (a vista do core não muda, para não mexer em nascimento e mira), o bando recua
   (`clearCrowd`, já existe), ela desce de uma teia com o nome grande; morte com câmera lenta curta, queda e chuva de
   gemas e moedas (os valores do core não mudam). Liga: FT-12, CU-03, NE-05.
