@@ -50,13 +50,13 @@ const anim = (
 
 /** Enemies with state animations, by sprite key (bosses and elites first; the crowd follows). */
 export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
-  'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7]),
-  'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9]),
-  'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7]),
+  'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7, 6]),
+  'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9, 6]),
+  'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7, 6]),
   'enemy.golem': anim(96, 112, [7, 9, 5, 9]),
-  'enemy.witch': anim(96, 112, [7, 5, 5, 7]),
-  'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7]),
-  'enemy.bellRinger': anim(95, 102, [7, 7, 5, 7]),
+  'enemy.witch': anim(96, 112, [7, 5, 5, 7, 6]),
+  'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7, 6]),
+  'enemy.bellRinger': anim(95, 102, [7, 7, 5, 7, 6]),
   // The crowd: walk, attack (the bite or swing at contact) and, where the behaviour has one, windup and strike.
   // [walk, windup, strike, death, attack]; then walk fps, step hop (art px) and attack fps. Sizes are the final display size.
   'enemy.bat': anim(32, 32, [5, 0, 0, 0, 6], 12, 0, 12),
