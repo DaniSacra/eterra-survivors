@@ -21,7 +21,7 @@ import { isFaded } from './behaviours';
 import { addBolt, addLink } from './effects';
 import { damageEnemy, isUntouchable, type Enemy } from './enemies';
 import { TAU, angleDiff } from './math';
-import { nearestEnemy, randomEnemyNear, type Projectile } from './projectiles';
+import { nearestEnemy, nearestVisible, randomEnemyNear, type Projectile } from './projectiles';
 import { addZone } from './zones';
 import type { World } from './world';
 
@@ -393,7 +393,7 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   // around, where the hero faces.
   const t =
     (WEAPONS[w.id] as WeaponDef).aim === 'nearest'
-      ? (bossOnScreen(world) ?? nearestEnemy(world, p.x, p.y, onScreen(world)))
+      ? (bossOnScreen(world) ?? nearestVisible(world))
       : null;
   const facing = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.atan2(p.facing.y, p.facing.x);
   const count = amount(world, s.count);
@@ -543,7 +543,7 @@ function fireStrike(world: World, s: StrikeLevel, w: OwnedWeapon): boolean {
     // that matters); the rest fall at random.
     const t =
       (i === 0
-        ? (bossOnScreen(world) ?? nearestEnemy(world, world.player.x, world.player.y, onScreen(world)))
+        ? (bossOnScreen(world) ?? nearestVisible(world))
         : null) ?? randomEnemyNear(world, world.view.w / 2, world.view.h / 2, targets);
     if (!t) break;
     targets.push(t.uid);
@@ -594,9 +594,6 @@ function chainBolt(
     y = next.y;
   }
 }
-
-/** A distance that always stays inside the visible area. */
-const onScreen = (world: World): number => Math.min(world.view.w, world.view.h) / 2;
 
 /** The boss while it is alive and inside the visible rectangle, else null. */
 function bossOnScreen(world: World): Enemy | null {

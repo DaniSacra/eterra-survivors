@@ -107,6 +107,33 @@ export function nearestEnemy(
 }
 
 /**
+ * Nearest living, hittable enemy to the hero inside the visible rectangle (half-size `view.w / 2` by `view.h / 2`),
+ * not just a circle: on a phone held upright it reaches the whole height of the screen (B-04).
+ */
+export function nearestVisible(world: World): Enemy | null {
+  const p = world.player;
+  const hw = world.view.w / 2;
+  const hh = world.view.h / 2;
+  const list = world.enemies.active;
+  const ids = world.enemyHash.query(p.x, p.y, Math.hypot(hw, hh), world.scratch);
+  let best: Enemy | null = null;
+  let bestSq = Infinity;
+  for (let i = 0; i < ids.length; i++) {
+    const e = list[ids[i] as number] as Enemy;
+    if (e.dead || isFaded(e)) continue;
+    const dx = e.x - p.x;
+    const dy = e.y - p.y;
+    if (Math.abs(dx) > hw || Math.abs(dy) > hh) continue;
+    const dSq = dx * dx + dy * dy;
+    if (dSq < bestSq) {
+      bestSq = dSq;
+      best = e;
+    }
+  }
+  return best;
+}
+
+/**
  * A random living enemy inside the rectangle of half-size (hw, hh) around the player (the visible area), not
  * in `exclude`. A few random probes of the active list first; when they all miss (most of the crowd off screen),
  * one pass over the list from a random start. No allocation; null only when no enemy qualifies.
@@ -219,8 +246,8 @@ export function updateProjectiles(world: World, dt: number): void {
           p.bounces--;
           p.angle = Math.atan2(next.y - p.y, next.x - p.x);
           p.ttl = Math.max(p.ttl, def.ricochet.range / p.speed);
-          break;
-        }
+        } else if (--p.pierce < 0) p.dead = true;
+        break;
       }
       if (--p.pierce < 0) {
         p.dead = true;

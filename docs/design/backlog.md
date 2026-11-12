@@ -92,7 +92,7 @@ fases novos já nasçam no estilo novo. A lista anterior (FT-01 a FT-08) volta d
 - Aceite: com 0 cargas, os três botões aparecem desabilitados e não respondem; na Loja dá para distinguir à primeira
   vista comprável, caro e completo.
 
-**B-04 · Raio e Geada miram fora da tela no retrato** · impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 (2) · proposto
+**B-04 · Raio e Geada miram fora da tela no retrato** · impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 (2) · ✅ refeito (2026-11-11; `nearestVisible`; sim antes e depois pendente, junto do PE-02)
 
 - Por quê: balance-tester: `viewReach = max(w,h)/2` (`core/weapons.ts`) deixa alvos nas laterais fora da tela no
   celular em pé. Baixa severidade, mas é o caso de uso principal do Daniel.
@@ -3432,7 +3432,7 @@ em `ART_RES`.
 - O quê: gravar o atordoamento só depois de checar `isFaded` e a guarda da pilha (CB-01).
 - Aceite: teste: pancada num fantasma esmaecido e numa pilha dentro de `pileGuard` não atordoa; num comum, atordoa.
 
-**PB-06 · Ricochete segue sobre uma lista sobrescrita** · impl · P · proposto
+**PB-06 · Ricochete segue sobre uma lista sobrescrita** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code B1. `core/projectiles.ts:217-224`: sem alvo de ricochete, `nearestEnemy` já reescreveu
   `world.scratch` e o laço do projétil continua com índices de outra lista; candidatos podem ser pulados ou repetidos no

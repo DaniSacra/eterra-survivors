@@ -102,6 +102,17 @@ describe('Leque de Facas: ricochet and bleeding', () => {
     expect(w.projectiles.size).toBe(0);
   });
 
+  it('with no enemy to bounce to, the knife still spends its pierce and the search ends the loop', () => {
+    const w = armed('fan');
+    w.player.stats.amount = 1 - l.count;
+    const only = tough(w, 60, 0);
+    run(w, 0.02);
+    w.weapons[0]!.timer = 99;
+    run(w, 1);
+    expect(only.maxHp - only.hp).toBeCloseTo(l.damage);
+    expect(w.projectiles.size).toBe(0);
+  });
+
   it('a critical hit makes the enemy bleed: damage over time, emerald tint', () => {
     const w = armed('fan');
     w.player.stats.amount = 1 - l.count;

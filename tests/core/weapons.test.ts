@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { damageEnemy, rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
+import { nearestVisible } from '../../src/core/projectiles';
 import { isFaded } from '../../src/core/behaviours';
 import { BossAct } from '../../src/core/bosses';
 import { updateWeapons as rawUpdate } from '../../src/core/weapons';
@@ -411,5 +412,19 @@ describe('rhythm texts match the data', () => {
   it('Fúria and Maça say the rhythm they have', () => {
     expect(said(t.weapons.fury.desc)).toBe(WEAPONS.fury.wave.every);
     expect(said(t.weapons.mace.desc)).toBe(WEAPONS.mace.waveEvery);
+  });
+});
+
+describe('automatic aim follows the visible rectangle (B-04)', () => {
+  it('on a 390x844 view an enemy 300 px above the hero is a target, one 250 px to the side is not', () => {
+    const w = bareWorld();
+    w.setView(390, 844);
+    const above = spawnEnemy(w, 'skeleton', 0, -300);
+    const side = spawnEnemy(w, 'skeleton', 250, 0);
+    rebuildEnemyHash(w);
+    expect(nearestVisible(w)).toBe(above);
+    above.dead = true;
+    expect(nearestVisible(w)).toBeNull();
+    expect(side.dead).toBe(false);
   });
 });
