@@ -3402,7 +3402,7 @@ em `ART_RES`.
 - Aceite: teste: 100 moedas com Ganância 1,1 dão 330; com `mult.gold` 1,5 dão 450. `LOJA` entre 40 e 60 corridas e
   ouro por corrida por fase na tabela do `balance-baseline.md`.
 
-**PB-03 · Música: faixa em dobro, entrada de uma vez, religar volta à introdução** · impl · P · proposto
+**PB-03 · Música: faixa em dobro, entrada de uma vez, religar volta à introdução** · impl · P · ✅ feito (2026-11-11; falta conferir no navegador)
 
 - Por quê: 02-code M2, 03-qa B2 e B3. (1) `render/music.ts:34-38` registra um `once('filecomplete-audio-<id>')` a cada
   `play()` durante o download (2 a 3 MB), e `start()` não confere voz do mesmo `id`: um `sync` vindo das Opções ou da
