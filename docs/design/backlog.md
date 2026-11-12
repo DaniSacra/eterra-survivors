@@ -44,6 +44,16 @@ estavam.
   (NE-06, PE-01, PE-02) · sistemas e conteúdo 4 (ND-01, ND-02, CD-01, FT-18) · música 1 (MU-01) · lançamento 1 (L-01).
 - **Descartados:** seção no fim do arquivo.
 
+## Decisões do Daniel (2026-11-12)
+
+- **Desistir** não conta como derrota nas estatísticas: só guarda a partida (o ouro e o que rendeu). Vitórias são o único resultado contado.
+- **O Sineiro** fica no tamanho atual (sem regenerar).
+- **Chão de neve de Valmor** fica; `valmor-alt.png` continua como reserva.
+- **Jersey 15** fica em todo o jogo, inclusive nos textos longos.
+- **Música**: os arquivos ficam no repositório, a música fica desligada por padrão e não se geram mais faixas até o Daniel pedir. Direções a oferecer então: chiptune de RPG, orquestral sombrio, folk nórdico.
+- **Aprovados sem mudanças**: frases de derrota do CB-04, o texto "Partida abandonada", a frase da Cripta no cartão de fase e as dicas e avisos de elite dos inimigos (marcas de "provisório" removidas).
+- **Decididas pelo game-director, valem**: botão da pausa "continuar"; botão da Loja no fim só quando algo cabe no ouro; Pular +15 fixo; barra de vida do herói sempre visível; aviso de chefe com 3 s; alma da Procissão ciano pálido; sem contorno âmbar; grupos por fase no Bestiário opcionais.
+
 ## Próximos 10 (sugestão do game-director, 2026-11-12; a ordem muda com o Daniel)
 
 A lista anterior (AR-01 a AR-05, aprovada em 2026-11-10) está fechada: AR-02, AR-03 e AR-05 feitos, AR-01 e AR-04
@@ -53,7 +63,7 @@ reescritos abaixo.
 
 1. **NB-08** Setas da borda e aviso de conquista por cima do level-up (visto de novo em captura de 2026-11-12) e
    conquista no meio da luta do chefe.
-2. **CB-04** "Tombou na neve" na Cripta: frase de derrota por fase (texto provisório, o Daniel confirma).
+2. **CB-04** "Tombou na neve" na Cripta: frase de derrota por fase (aprovada pelo Daniel em 2026-11-12, sem mudanças).
 
 **Ganhos rápidos**
 
@@ -2967,7 +2977,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   (`STAGES[*].elites`), para não divergir de novo.
 - Aceite: teste que falha se uma elite de fase não contar; save antigo com abates de Golem continua contando.
 
-**CB-04 · "Tombou na neve" na Cripta** · impl · P · ✅ feito (2026-11-12) · TEXTO PROVISÓRIO, o Daniel reescreve (`end.lostByStage` em `pt-BR.ts`; Valmor igual, Cripta e Estrada neutras, sem nomear sino, lobo, pessoa ou lugar da história)
+**CB-04 · "Tombou na neve" na Cripta** · impl · P · ✅ feito (2026-11-12) · texto APROVADO pelo Daniel em 2026-11-12, sem mudanças (`end.lostByStage` em `pt-BR.ts`; Valmor igual, Cripta e Estrada neutras, sem nomear sino, lobo, pessoa ou lugar da história)
 
 - Por quê: 03-qa B1, 05-ui UI-03. `t.end.lostText` (`pt-BR.ts:373`) diz "<herói> tombou na neve. Valmor ainda espera
   por um herói." em todas as fases (`r420-death-end.png`): é a primeira frase depois da morte, dentro de uma cripta.
@@ -3212,7 +3222,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   `groundSlow` no render; `world.hurtBy` só é somado em `core/elos.ts`). Uma parte já está pronta: a barrinha de vida sob
   os pés existe, em textura (PA-01), sempre visível; fica assim.
 
-**CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · ✅ feito (2026-11-12): `core/tips.ts` (`nextTip`, puro, com teste) acha o inimigo com verbo (reassemble, burst, dig, trail, shoot, leap, nest, flee, banner, brew) a menos de 700 px; `GameScene.checkTips` mostra `t.bestiary.tips[id]` (os textos do Bestiário, não os provisórios do item) por 4 s no `HudScene.tip` (sprite em 28 px), no máximo um a cada 20 s, nunca com chefe vivo, banner ou aviso na tela; "visto" fica em `save.tipsSeen` (campo novo, `sanitizeSave` migra para vazio, união na `serializeSave`); opção "Dicas de inimigos" (ligada por padrão, na Opções e na Pausa). Aviso de elite nomeia: "Coveiro chegou! Cuidado com as covas." (`t.eliteArrived`/`t.eliteHint` para Golem, Bruxa e Coveiro, provisórios, só jogabilidade; evento `eliteSpawned` agora leva o `id`). Elite e chefe não ganham dica (têm aviso próprio)
+**CU-01 · Primeira vez de cada inimigo com verbo: dica curta e aviso com nome** · ui + impl · M · ✅ feito (2026-11-12): `core/tips.ts` (`nextTip`, puro, com teste) acha o inimigo com verbo (reassemble, burst, dig, trail, shoot, leap, nest, flee, banner, brew) a menos de 700 px; `GameScene.checkTips` mostra `t.bestiary.tips[id]` (os textos do Bestiário, não os provisórios do item) por 4 s no `HudScene.tip` (sprite em 28 px), no máximo um a cada 20 s, nunca com chefe vivo, banner ou aviso na tela; "visto" fica em `save.tipsSeen` (campo novo, `sanitizeSave` migra para vazio, união na `serializeSave`); opção "Dicas de inimigos" (ligada por padrão, na Opções e na Pausa). Aviso de elite nomeia: "Coveiro chegou! Cuidado com as covas." (`t.eliteArrived`/`t.eliteHint` para Golem, Bruxa e Coveiro, aprovados pelo Daniel em 2026-11-12, só jogabilidade; evento `eliteSpawned` agora leva o `id`). Elite e chefe não ganham dica (têm aviso próprio)
 
 - Por quê: 05-ui UI-01. FT-14, 15 e 16 empilharam cinco verbos numa fase; o jogador só os descobre apanhando, e o
   aviso de elite é sempre "Um inimigo poderoso se aproxima!" (`GameScene.ts:983-985`).
@@ -3282,7 +3292,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   nenhum (`useCharge` em `LevelUpScene` só retorna): um tremor curto no botão e o som surdo; (2) os pips da faixa da
   build (`buildPanel.ts`) com pelo menos 4 px de altura no celular. Tamanho P.
 
-**CU-08 · Desistir mostra a tela final** · ui + impl · P · ✅ feito (2026-11-12): `World.abandon()`, `GameScene.abandonRun` guarda a partida e abre o Fim titulado "Partida abandonada"
+**CU-08 · Desistir mostra a tela final** · ui + impl · P · ✅ feito (2026-11-12): `World.abandon()`, `GameScene.abandonRun` guarda a partida e abre o Fim titulado "Partida abandonada" (texto aprovado pelo Daniel em 2026-11-12; desistir NÃO conta como derrota nas estatísticas, só guarda a partida)
 
 - Por quê: 03-qa B5. Desistir (em duas etapas) vai direto ao menu; o Elo forjado é gravado, mas o jogador não vê o que
   a partida rendeu. Pilar 4: toda partida mostra o que avançou.
@@ -3291,7 +3301,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 - Reavaliação 2026-11-12 · mantido: `PauseScene.quit` ainda para o jogo e abre o Menu. Ficou mais barato: o Fim já tem
   o atalho da Loja (PU-04) e cabe em qualquer tela (NB-02).
 
-**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · ✅ feito em parte (2026-11-12): cartão ganha "N vitórias · vigília mm:ss" (soma dos heróis; o tempo da vigília mais longa, pois `fastestWin` é por herói e não por fase), e a frase da Cripta virou "Lajes cinzentas, limo no chão e ossos que levantam de novo." (PROVISÓRIA, só o que se vê, o Daniel confirma). Ícones de perigo ficaram de fora (não cabem sem apertar a ilustração em 360x640; reabrir com o ND-01)
+**CU-07 · Cartão de fase com perigos e marcas; moldura das barras do HUD** · ui + visual · M · ✅ feito em parte (2026-11-12): cartão ganha "N vitórias · vigília mm:ss" (soma dos heróis; o tempo da vigília mais longa, pois `fastestWin` é por herói e não por fase), e a frase da Cripta virou "Lajes cinzentas, limo no chão e ossos que levantam de novo." (aprovada pelo Daniel em 2026-11-12, sem mudanças). Ícones de perigo ficaram de fora (não cabem sem apertar a ilustração em 360x640; reabrir com o ND-01)
 
 - Por quê: 05-ui UI-09. O cartão da Preparação tem nome e frase ("Pedra azul..." num chão que agora é violeta), sem
   vitórias, melhor tempo nem perigos; as barras do HUD são retângulos planos, longe dos painéis finos dourados das
@@ -3509,7 +3519,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
   mudanças de compasso e tom), trilha de chefe e trilha do menu, em laço, geradas no PixelLab (`create_music` e
   `make_music_loop`, registradas em `docs/art/credits.md`). Player em `render/music.ts` (Phaser, fusão entre faixas,
   abaixa na pausa), mapa em `render/musics.ts`, opção Música em Opções e na pausa. Feito: valmor, crypt, southRoad,
-  boss (toca quando o chefe chega), menu (toca no menu). Falta: Daniel escolher a faixa A ou B de cada fase,
+  boss (toca quando o chefe chega), menu (toca no menu). Decisão do Daniel 2026-11-12: arquivos ficam, música desligada por padrão, sem novas faixas até ele pedir. Falta: Daniel escolher a faixa A ou B de cada fase,
   nomes das faixas (provisórios). 2026-11-12: Daniel achou o primeiro conjunto ruim (ambiente demais); valmor refeita como TESTE no estilo de fase 16 bits (gancho no primeiro compasso, seções curtas), aguardando o ouvido dele antes de refazer as outras quatro. Falta também: vitória e derrota (stings), evento de fim para tocá-los.
   - Revisão 2026-11-11 (2) (03-qa, observação; `t15.mjs`): na vitória e na derrota o Fim segue com a faixa do chefe.
     Somar: ao abrir o Fim, a faixa em curso sai em fusão curta e toca o sting (3 a 5 s, mesmo timbre da fase); depois,
