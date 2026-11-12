@@ -128,12 +128,16 @@ export class Lighting {
     blend: Phaser.BlendModes,
     depth: number,
   ): Phaser.GameObjects.RenderTexture {
-    return this.scene.add
+    const rt = this.scene.add
       .renderTexture(0, 0, w, h)
       .setOrigin(0)
       .setDepth(depth)
       .setBlendMode(blend)
       .setScale(1 / RES);
+    // The map has a quarter of the screen's resolution: stretched with nearest-neighbour every small light showed as a
+    // square (the wisps' "square halo"), so lights are stretched smoothly.
+    rt.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    return rt;
   }
 
   /** Starts a frame's light list. */

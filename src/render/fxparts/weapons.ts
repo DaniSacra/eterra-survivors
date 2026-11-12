@@ -796,6 +796,12 @@ export function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moment
   }
 }
 
+/** An aura with at least this cooldown (s) is a burst: it charges visibly and goes off, instead of ticking. */
+export const BURST_COOLDOWN = 2;
+/** How long (s) the burst's flash and wave last, and how many runes mark the rim. */
+const BURST_FLARE = 0.5;
+const RUNES = 6;
+
 /**
  * Aura de Yah: warm light around the hero that beats with its damage. `k` is the tick phase (0 right at a tick,
  * 1 just before the next): each tick a wave runs out to exactly the damage radius and the rim lights up. Motes of
@@ -811,10 +817,15 @@ export function drawAura(
   elo: boolean,
   heat = 0,
   pulseR = 0,
+  cooldown = 0,
 ): void {
   const p = world.player;
   const t = world.time;
   const c = elo ? FLAME_COLOR : AURA_COLOR;
+  // Aura de Yah is a burst (a long cooldown): its light fills up until the runes on the rim are all lit, then it goes
+  // off. Chama de Yah keeps its quick ticks.
+  const burst = !elo && cooldown >= BURST_COOLDOWN;
+  const since = k * cooldown;
   // Chama de Yah, the tick before its wave: a thin ring where the wave will reach, fading in (NF-08).
   if (pulseR > 0 && heat >= 1) {
     top.lineStyle(2, 0xffd080, 0.25 + 0.5 * k);
@@ -828,7 +839,24 @@ export function drawAura(
   g.fillStyle(elo ? 0xfff0c0 : c, 0.12);
   disc(g, p.x, p.y, r * 0.3);
   // The rim flares on the tick and rests between ticks.
-  const flare = Math.max(0, 1 - k * 3);
+  const flare = burst ? Math.max(0, 1 - since / BURST_FLARE) : Math.max(0, 1 - k * 3);
+  if (burst) {
+    // The charge: a disc of light growing from the heart to the edge, and one rune per tip lighting up in turn.
+    g.fillStyle(c, 0.04 + 0.14 * k);
+    disc(g, p.x, p.y, r * k);
+    g.lineStyle(2, 0xfff0c0, 0.12 + 0.4 * k);
+    ring(g, p.x, p.y, r * k);
+    for (let i = 0; i < RUNES; i++) {
+      const lit = Math.min(1, Math.max(0, (k - 0.5 - i * 0.07) / 0.07));
+      if (lit <= 0) continue;
+      const a = (i * Math.PI * 2) / RUNES - Math.PI / 2;
+      const rx = p.x + Math.cos(a) * r;
+      const ry = p.y + Math.sin(a) * r;
+      top.fillStyle(0xfff0c0, 0.25 * lit);
+      disc(top, rx, ry, 9 * lit);
+      star(top, rx, ry, 5 + 6 * lit, 0xfff0a0, Math.min(1, 0.5 + 0.5 * lit));
+    }
+  }
   // The pixel ring of light, turning, out at the exact edge of the aura.
   const halo = VFX.aura;
   fxSprites.putFrame(
@@ -840,17 +868,26 @@ export function drawAura(
     p.y,
     r / AURA_RING,
     // It charges with the tick: dim right after a hit, slowly brighter, flaring on the next one.
-    Math.min(1, 0.05 + 0.65 * k ** 2.5 + 0.35 * flare + 0.25 * heat),
+    burst
+      ? Math.min(1, 0.04 + 0.55 * k ** 2 + 0.45 * flare)
+      : Math.min(1, 0.05 + 0.65 * k ** 2.5 + 0.35 * flare + 0.25 * heat),
   );
   if (elo) {
     g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
     ring(g, p.x, p.y, r);
   }
   // The beat: a wave from the core out to the exact edge (over the crowd, thin, so it is seen but hides nothing).
-  if (k < 0.45) {
-    const wk = k / 0.45;
+  const beat = burst ? BURST_FLARE : 0.45;
+  const beatAt = burst ? since / beat : k / beat;
+  if (beatAt < 1) {
+    const wk = beatAt;
     const wr = r * (0.3 + 0.7 * (1 - (1 - wk) ** 2));
-    top.lineStyle(4 - 3 * wk, elo ? 0xffc060 : 0xfff0a0, 0.7 * (1 - wk));
+    if (burst) {
+      // The burst itself: the whole radius flashes and a thick wave runs out to the rim.
+      g.fillStyle(0xfff0c0, 0.3 * (1 - wk));
+      disc(g, p.x, p.y, wr);
+    }
+    top.lineStyle((burst ? 7 : 4) - (burst ? 6 : 3) * wk, elo ? 0xffc060 : 0xfff0a0, 0.8 * (1 - wk));
     ring(top, p.x, p.y, wr);
   }
   // Motes of light (embers for the Chama) drifting up inside the radius, more with each level.

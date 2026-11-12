@@ -225,18 +225,18 @@ export const WEAPONS = {
       { damage: 17, pierce: 2 },
     ),
   },
-  /** Aura de Yah: a burning halo that hurts everything close. */
+  /** Aura de Yah: a burst of holy fire every few seconds that fills up around the hero and hurts everything close. */
   yahAura: {
     kind: 'aura',
     category: 'area',
     levels: levels<AuraLevel>(
-      { damage: 4.2, cooldown: 0.5, radius: 55 },
-      { radius: 65 },
-      { damage: 6.3 },
-      { radius: 75, cooldown: 0.45 },
-      { damage: 6.5 },
-      { radius: 120 },
-      { damage: 4.8, cooldown: 0.35, radius: 150 },
+      { damage: 24, cooldown: 6, radius: 80 },
+      { radius: 100 },
+      { damage: 32 },
+      { radius: 125, cooldown: 5.5 },
+      { damage: 40 },
+      { radius: 155 },
+      { damage: 49, cooldown: 5, radius: 190 },
     ),
   },
   /** Adagas de Andilla: quick knives thrown where she runs, in a narrow fan; each stops in the first enemy, and some crit. */

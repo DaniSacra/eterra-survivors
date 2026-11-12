@@ -16,6 +16,7 @@ import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, markLessonSeen, markTipSeen, recordRun, recordVigil } from '../render/save';
 import { nextTip, TIP_GAP } from '../core/tips';
+import { BURST_COOLDOWN } from '../render/fxparts/weapons';
 import { LESSON_GAP, nextLesson, type LessonId } from '../core/coach';
 import { ENEMIES, type EnemyId } from '../data/enemies';
 import { lastChoice, type RunChoice } from './choice';
@@ -742,7 +743,12 @@ export class GameScene extends Phaser.Scene {
       const st = weaponStats(wp) as AuraLevel;
       const k = 1 - wp.timer / (st.cooldown * w.player.stats.cooldown);
       // The light charges between ticks, then flares right at the tick (the same beat as the wave of the rim).
-      const flare = calm ? 0 : Math.max(0, 1 - k * 3);
+      const cd = st.cooldown * w.player.stats.cooldown;
+      const flare = calm
+        ? 0
+        : cd >= BURST_COOLDOWN
+          ? Math.max(0, 1 - (k * cd) / 0.5)
+          : Math.max(0, 1 - k * 3);
       l.add(
         w.player.x,
         w.player.y,

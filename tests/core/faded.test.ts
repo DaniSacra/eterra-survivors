@@ -69,6 +69,8 @@ describe('faded ghosts', () => {
     w.addWeapon('yahAura');
     const ghost = fadedGhost(w, 30, 0);
     dropPickup(w, 'freeze', 0, 0);
+    // The aura is a burst now: hold its first one back until the freeze has begun.
+    w.weapons[0]!.timer = 0.5;
     for (let i = 0; i < 60; i++) w.step(STEP, still);
     expect(w.freeze).toBeGreaterThan(0);
     expect(isFaded(ghost)).toBe(false);

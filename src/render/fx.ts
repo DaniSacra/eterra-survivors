@@ -190,6 +190,7 @@ export function drawFx(
         // Chama de Yah heats up towards its wave: 0 just after one, 1 on the tick before the next.
         pulse ? (w.swings % pulse.every) / (pulse.every - 1) : 0,
         pulse ? pulse.radius : 0,
+        st.cooldown * p.stats.cooldown,
       );
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
