@@ -172,6 +172,19 @@ describe('upgrade descriptions', () => {
         `Elo ${t.weapons.vigil.name}: arma 5/7 · ${t.passives.armor} 3/3`,
     );
     expect(armor.recipeMissing).toBe(false);
+    // The picture: the closest recipe (the paladin swords, 5/7 and 3/3), and the Elo stays a "?" until forged once.
+    expect(armor.picture?.weaponIcon).toBe('icon.mace');
+    expect(armor.picture?.ready).toBe(true);
+    expect(armor.picture?.eloIcon).toBe('icon.jointBreaker');
+    const fresh = describeUpgrade(blade3, owned, { might: 5 });
+    expect(fresh.picture).toMatchObject({
+      weaponLevel: 3,
+      weaponMax: 7,
+      passiveLevel: 5,
+      passiveMax: 5,
+      ready: false,
+    });
+    expect(fresh.picture?.eloIcon).toBeNull();
   });
 });
 

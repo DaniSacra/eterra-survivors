@@ -20,6 +20,8 @@ export type GameEvent =
   /** An elite's chest: the level it gave (null if nothing could level), with its gold and heal (data CHEST). */
   | { type: 'chest'; reward: UpgradeOption | null }
   /** A recipe was completed (weapon and passive at max level): `from` just turned into the Elo `elo`. */
+  /** A weapon the hero did not have joined the build (a level-up or a chest; not the starting weapon). */
+  | { type: 'weaponAdded'; id: WeaponId }
   | { type: 'eloForged'; elo: WeaponId; from: WeaponId; passive: PassiveId }
   | { type: 'pickup'; id: PickupId }
   /** Muralha de Valmor's guard took a hit (and gave it back). */

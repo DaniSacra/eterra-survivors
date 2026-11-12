@@ -84,6 +84,15 @@ export const t = {
     reward: 'Recompensa',
     hintTouch: 'Toque numa opção',
     hintKeys: 'Clique ou use 1, 2, 3',
+    /** The banner when a weapon joins the build. */
+    newWeapon: (name: string) => `Nova arma: ${name}`,
+    /** A passive card that moves an owned weapon's Elo recipe (PX-08). */
+    matches: (weapon: string) => `Combina com a sua ${weapon}`,
+    /** The first run's level-up: what the choice is (PX-20). */
+    firstTouch: 'Toque numa opção: uma arma nova ou uma melhoria',
+    firstKeys: 'Clique ou use 1, 2, 3: uma arma nova ou uma melhoria',
+    /** Second run, first level-up: what the three buttons do (PX-09). */
+    chargesLesson: 'Trocar muda as opções. Pular dá ouro. Banir tira uma opção da partida.',
     /** Card title with its key on keyboards ("1. Força"). */
     numbered: (n: number, title: string) => `${n}. ${title}`,
     banishHint: 'Escolha o que banir desta partida',

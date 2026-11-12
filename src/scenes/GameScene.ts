@@ -1667,6 +1667,11 @@ export class GameScene extends Phaser.Scene {
           this.rewardIcon.setTexture(e.reward ? describeUpgrade(e.reward).icon : 'pickup.chest');
           break;
         }
+        case 'weaponAdded':
+          // A new weapon: its name at the top and a soft light on the hero, so the first blow is easy to find (PX-10).
+          this.hud.announce(t.levelUp.newWeapon(t.weapons[e.id].name), true);
+          if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 260, 0xffe9a8, 0.45);
+          break;
         case 'eloForged':
           this.forgeMoment(e.elo);
           break;

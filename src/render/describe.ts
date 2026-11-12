@@ -72,6 +72,44 @@ export function weaponStartLine(id: WeaponId): string {
     .join(t.sep);
 }
 
+/** A recipe as a picture (PX-08): the weapon and the passive with their levels, and the Elo they open. */
+export interface RecipePicture {
+  weaponIcon: string;
+  weaponLevel: number;
+  weaponMax: number;
+  passiveIcon: string;
+  passiveLevel: number;
+  passiveMax: number;
+  /** The Elo's own icon once it has been forged before; null keeps it a golden "?" (NU-02). */
+  eloIcon: string | null;
+  /** Both levels are at their max: this choice forges the Elo. */
+  ready: boolean;
+  /** The base weapon's name, for "Combina com a sua ...". */
+  weaponName: string;
+}
+
+export function recipePicture(
+  base: WeaponId,
+  weaponLevel: number,
+  passiveLevel: number,
+  known: readonly WeaponId[],
+): RecipePicture | null {
+  const evo = evolutionOf(base);
+  if (!evo) return null;
+  const passive = evo.evo.passive;
+  return {
+    weaponIcon: `icon.${base}`,
+    weaponLevel,
+    weaponMax: WEAPONS[base].levels.length,
+    passiveIcon: `icon.${passive}`,
+    passiveLevel,
+    passiveMax: PASSIVES[passive].maxLevel,
+    eloIcon: known.includes(evo.id) ? `icon.${evo.id}` : null,
+    ready: completes(base, weaponLevel, passiveLevel),
+    weaponName: t.weapons[base].name,
+  };
+}
+
 export interface UpgradeText {
   title: string;
   tag: string;
@@ -84,6 +122,8 @@ export interface UpgradeText {
   recipeIcon: string;
   /** The recipe is still incomplete after this choice (it reads muted); false when this choice forges the Elo. */
   recipeMissing: boolean;
+  /** The recipe this option moves, as a picture (the first one, or the closest to done for a passive). */
+  picture?: RecipePicture;
   /** A new weapon's level 1 numbers; shown before its flavour text (numbers first, flavour only with room). */
   stats?: string;
 }
@@ -152,6 +192,7 @@ export function describeUpgrade(
           tag: t.levelUp.newWeaponOf(t.levelUp.category[weaponCategory(opt.id)]),
           desc: w.desc,
           stats: weaponStartLine(opt.id),
+          picture: recipePicture(opt.id, opt.level, passiveLevel, known) ?? undefined,
           icon,
           recipe,
           recipeIcon,
@@ -171,6 +212,7 @@ export function describeUpgrade(
         title: w.name,
         tag: t.units.of(t.levelUp.level(opt.level), max),
         desc,
+        picture: recipePicture(opt.id, opt.level, passiveLevel, known) ?? undefined,
         icon,
         recipe,
         recipeIcon,
@@ -185,6 +227,14 @@ export function describeUpgrade(
         tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
         icon: `icon.${opt.id}`,
+        picture: moved
+          .map((o) => recipePicture(o.id, o.level, opt.level, known) as RecipePicture)
+          .sort(
+            (a, b) =>
+              b.weaponLevel / b.weaponMax +
+              b.passiveLevel / b.passiveMax -
+              (a.weaponLevel / a.weaponMax + a.passiveLevel / a.passiveMax),
+          )[0],
         recipe: moved.map((o) => recipeProgress(o.id, o.level, opt.level, known)).join(t.levelUp.recipeSep),
         recipeIcon: '',
         recipeMissing: !moved.some((o) => completes(o.id, o.level, opt.level)),

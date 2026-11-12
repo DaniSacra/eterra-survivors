@@ -5,9 +5,10 @@ import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
 import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
-import { loadSave } from '../render/save';
+import { loadSave, markLessonSeen } from '../render/save';
 import { describeUpgrade, formatCardTotal } from '../render/describe';
 import { sound } from '../render/sound';
+import { drawRecipe, matchesText } from '../render/recipeStrip';
 import { ART_SCALE } from '../render/art/pen';
 import {
   UI,
@@ -66,6 +67,9 @@ export class LevelUpScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const w = this.world;
     const opts = w.upgradeOptions;
+    // The first run keeps the choice bare: no Trocar/Pular/Banir and no stat table (PX-09, PX-20).
+    const save = loadSave();
+    const first = save.totals.runs === 0;
     // Phones have no number keys: no "1." on the cards and a hint about touching.
     const touch = this.sys.game.device.input.touch;
     // The HUD (bars, counters, build strip) is drawn on top: the cards stay clear of it.
@@ -85,13 +89,14 @@ export class LevelUpScene extends Phaser.Scene {
     const belowH = BuildSlots.heightFor(slotSize) + 10 + StatSheet.heightFor(true) + PANEL_PAD * 2;
     const belowKeep = hud.countersBottom;
     const belowCardH = (height - belowKeep - 62 - (touch ? 80 : 100) - belowH - 8) / n - gap;
-    const panel: 'right' | 'below' | null = side
-      ? null
-      : width >= cardW + 16 + PANEL_W + 32 && height >= 560
-        ? 'right'
-        : height >= 700 && belowCardH >= 76
-          ? 'below'
-          : null;
+    const panel: 'right' | 'below' | null =
+      side || first
+        ? null
+        : width >= cardW + 16 + PANEL_W + 32 && height >= 560
+          ? 'right'
+          : height >= 700 && belowCardH >= 76
+            ? 'below'
+            : null;
     // Lying down on a small phone, the cards can't fit under the build strip: it hides for the choice (the cards
     // say each level) and the cards start right under the bars.
     const tight = side && !besideStrip && (height - hud.bottom - 88) / n - gap < 60;
@@ -145,7 +150,7 @@ export class LevelUpScene extends Phaser.Scene {
       },
     );
     const owned = w.weapons;
-    const known = loadSave().elos;
+    const known = save.elos;
     this.cards = opts.map((opt, i) => {
       const y = top + i * (cardH + gap) + cardH / 2;
       const card = button(this, cx, y, cardW, cardH, () => this.choose(i));
@@ -199,7 +204,20 @@ export class LevelUpScene extends Phaser.Scene {
       );
       // The card's text ends here: above the recipe when there is one, else near the bottom edge.
       let limit = y + cardH / 2 - 4;
-      if (d.recipe) {
+      if (d.picture) {
+        // The recipe as a picture: weapon and passive with their levels, then the Elo as a golden "?" (PX-08).
+        const cy = y + cardH / 2 - (tight ? 12 : 15);
+        const used = drawRecipe(this, left, cy, d.picture);
+        // A passive that moves the recipe of a weapon the hero owns says so, beside the picture when there is room.
+        const room = left + textW - (left + used + 8);
+        if (opt.kind === 'passive' && room >= 70)
+          label(this, left + used + 8, cy, matchesText(d.picture.weaponName), 11, {
+            color: UI.gold,
+            align: 'left',
+            wrap: room,
+          }).setOrigin(0, 0.5);
+        limit = cy - 12;
+      } else if (d.recipe) {
         const ry = y + cardH / 2 - (tight ? 4 : 7);
         // The recipe's passive as a mini icon, then its state ("você tem", "falta" or "Elo pronto").
         const rx = d.recipeIcon ? left + 18 : left;
@@ -224,34 +242,58 @@ export class LevelUpScene extends Phaser.Scene {
     });
 
     const bottom = top + n * (cardH + gap);
-    const hint = this.banishing ? t.levelUp.banishHint : touch ? t.levelUp.hintTouch : t.levelUp.hintKeys;
-    label(this, cx, bottom + (side ? 8 : 14), hint, 14, { color: this.banishing ? UI.danger : UI.muted });
+    // Second run, first choice: one line says what the three buttons do, once.
+    const teach = !first && !this.banishing && !save.lessonsSeen.includes('charges');
+    if (teach) markLessonSeen('charges');
+    const plain = touch ? t.levelUp.hintTouch : t.levelUp.hintKeys;
+    const hint = this.banishing
+      ? t.levelUp.banishHint
+      : teach
+        ? t.levelUp.chargesLesson
+        : first
+          ? touch
+            ? t.levelUp.firstTouch
+            : t.levelUp.firstKeys
+          : plain;
+    label(this, cx, bottom + (side ? 8 : 14), hint, 14, {
+      color: this.banishing ? UI.danger : teach ? UI.gold : UI.muted,
+      wrap: cardW,
+    });
 
     // Trocar · Pular · Banir: a row under the cards, or a column beside them.
     const bx = cx + cardW / 2 + 12 + bw / 2;
-    CHARGES.forEach((key, i) => {
-      const c = w.charges[key];
-      const x = side ? bx : cx + (i - 1) * (bw + 8);
-      const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
-      const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
-      this.chargeButtons[key] = b;
-      if (key === 'skip') {
-        // What skipping pays, in gold under the label.
-        const main = b.getData('label') as Phaser.GameObjects.Text;
-        const h = b.height;
-        main.setY(y - h * 0.16).setFontSize(fontPx(Math.min(18, h * 0.36)));
-        label(this, x, y + h * 0.25, t.levelUp.skipGold(config.skipGold), Math.min(13, h * 0.3), {
-          bold: true,
-          color: UI.gold,
-        });
-      }
-      // A charge that would do nothing here is off too: Trocar with no other cards, Banir with no card to spare.
-      const useless =
-        (key === 'reroll' && !canReroll(w)) || (key === 'banish' && !opts.some((o) => canBanish(w, o)));
-      if (c <= 0 || useless) disable(b);
-      if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
-    });
-    if (!touch)
+    if (!first)
+      CHARGES.forEach((key, i) => {
+        const c = w.charges[key];
+        const x = side ? bx : cx + (i - 1) * (bw + 8);
+        const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
+        const b = button(
+          this,
+          x,
+          y,
+          bw,
+          side ? 44 : 40,
+          () => this.useCharge(key),
+          t.levelUp.charges[key](c),
+        );
+        this.chargeButtons[key] = b;
+        if (key === 'skip') {
+          // What skipping pays, in gold under the label.
+          const main = b.getData('label') as Phaser.GameObjects.Text;
+          const h = b.height;
+          main.setY(y - h * 0.16).setFontSize(fontPx(Math.min(18, h * 0.36)));
+          label(this, x, y + h * 0.25, t.levelUp.skipGold(config.skipGold), Math.min(13, h * 0.3), {
+            bold: true,
+            color: UI.gold,
+          });
+        }
+        // A charge that would do nothing here is off too: Trocar with no other cards, Banir with no card to spare.
+        const useless =
+          (key === 'reroll' && !canReroll(w)) || (key === 'banish' && !opts.some((o) => canBanish(w, o)));
+        if (c <= 0 || useless) disable(b);
+        if (key === 'banish' && this.banishing) b.setStrokeStyle(3, UI.dangerHex);
+      });
+    if (!touch && !first)
       label(this, side ? bx : cx, side ? chargeTop + 22 + 3 * 52 : bottom + 90, t.levelUp.chargeKeys, 12, {
         color: UI.muted,
         wrap: side ? bw : undefined,
@@ -328,6 +370,7 @@ export class LevelUpScene extends Phaser.Scene {
 
   private useCharge(key: ChargeKey): void {
     const w = this.world;
+    if (loadSave().totals.runs === 0) return; // no buttons on the first run
     if (w.charges[key] <= 0) return this.deny(key);
     if (key === 'banish' && !this.banishing && !w.upgradeOptions.some((o) => canBanish(w, o)))
       return this.deny(key);

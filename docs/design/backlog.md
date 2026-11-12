@@ -158,20 +158,20 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 
 ### Fase 3 · Entender as armas
 
-**PX-07 [8] · Uma frase do que cada arma, passiva e Elo faz** · game-director + ui + impl · M · proposto (frases com o Daniel)
+**PX-07 [8] · Uma frase do que cada arma, passiva e Elo faz** · game-director + ui + impl · M · rascunho em docs/design/frases-px07.md, espera o Daniel
 - O quê: 13 armas, 10 passivas, 13 Elos = 36 frases curtas em `pt-BR.ts`; na carta, a frase vem antes dos números, que
   ficam menores. A frase do Elo só aparece depois da forja (NU-02). Liga: NU-04, CU-05, NU-07.
 
-**PX-08 [9] · Receita de Elo em imagem** · ui + visual · M · proposto
+**PX-08 [9] · Receita de Elo em imagem** · ui + visual · M · feito na carta de nível (2026-11-12: ícones com barra e "?" dourado, "Combina com a sua <arma>"; falta a mesma peça na Pausa)
 - O quê: ícone da arma e da passiva, cada um com barrinha de nível, e um "?" dourado no lugar do Elo (nome secreto até a
   forja, NU-02); etiqueta "Combina com a sua <arma>" quando a opção avança uma receita. A mesma peça na Pausa
   (`eloStatus`, CU-04), para uma leitura só. Substitui a linha "Elo de ...: arma 1/7 · Atração 0/5".
 
-**PX-09 [10] · Trocar, Pular e Banir só a partir da segunda partida** · ui + impl · P · proposto
+**PX-09 [10] · Trocar, Pular e Banir só a partir da segunda partida** · ui + impl · P · feito (2026-11-12: escondidos com 0 partidas; na 2ª uma linha explica, uma vez, lição `charges`)
 - O quê: na primeira partida os três botões não aparecem (as cargas não se perdem); na primeira carta da segunda
   partida, uma linha curta explica os três, uma vez só (`lessonsSeen`, ON-01). Liga: NB-11, CU-06.
 
-**PX-10 [11] · Arma nova anunciada e primeiro golpe em destaque** · ui + vfx · P · proposto
+**PX-10 [11] · Arma nova anunciada e primeiro golpe em destaque** · ui + vfx · P · feito (2026-11-12: evento `weaponAdded`, faixa "Nova arma: <nome>" e luz suave no herói; o destaque do golpe é só essa luz)
 - O quê: aviso no topo "Nova arma: <nome>" e o primeiro golpe com um destaque leve na cor da arma, sem tremer a tela.
 
 **PX-11 [12] · Primeiro Elo da vida como evento; "Você descobriu N de 13 Elos"** · vfx + ui + impl · M · proposto
@@ -218,7 +218,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 
 ### Itens que a lista do Daniel não cobre (propostos pelo game-director)
 
-**PX-20 · Carta de nível enxuta na primeira partida** · ui + impl · P · proposto (achado 1)
+**PX-20 · Carta de nível enxuta na primeira partida** · ui + impl · P · feito (2026-11-12: sem tabela de atributos nem botões na 1ª partida, e a linha "uma arma nova ou uma melhoria")
 - O quê: tabela de atributos só com as linhas que mudam (sem traços); a etiqueta de categoria em palavra simples ou fora
   da primeira partida; a primeira carta da vida com uma linha "Escolha uma: arma nova ou melhoria" (ON-01).
 

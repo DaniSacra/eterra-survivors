@@ -218,3 +218,15 @@ describe('Elo status (pause screen)', () => {
     });
   });
 });
+
+describe('weaponAdded event', () => {
+  it('fires when a level-up adds a weapon the hero lacks, not on a level of an owned one', () => {
+    const w = quietWorld();
+    w.events.length = 0;
+    applyUpgrade(w, { kind: 'weapon', id: 'frost', level: 1 });
+    expect(w.events.filter((e) => e.type === 'weaponAdded')).toEqual([{ type: 'weaponAdded', id: 'frost' }]);
+    w.events.length = 0;
+    applyUpgrade(w, { kind: 'weapon', id: 'frost', level: 2 });
+    expect(w.events.some((e) => e.type === 'weaponAdded')).toBe(false);
+  });
+});

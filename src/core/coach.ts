@@ -1,8 +1,13 @@
 import type { World } from './world';
 
-/** The basics a new player is told once, in this order of priority (shown as short tips, never blocking). */
-export const LESSON_IDS = ['move', 'auto', 'gems', 'life'] as const;
+/**
+ * The basics a new player is told once, in this order of priority (shown as short tips, never blocking). `charges`
+ * is not picked by `nextLesson`: the level-up screen teaches Trocar, Pular and Banir on the second run (PX-09).
+ */
+export const LESSON_IDS = ['move', 'auto', 'gems', 'life', 'charges'] as const;
 export type LessonId = (typeof LESSON_IDS)[number];
+/** The lessons `nextLesson` can pick (the rest are taught by their own screen). */
+export type CoachLesson = Exclude<LessonId, 'charges'>;
 
 /** Seconds between two lessons, and how long into the run each one may start. */
 export const LESSON_GAP = 7;
@@ -17,7 +22,7 @@ export const LIFE_SHARE = 0.75;
  * The next lesson to show, or null. `seen` holds the lessons already taught (kept in the save, never repeated).
  * Pure and allocation-free; the render layer decides the wording and when to call it.
  */
-export function nextLesson(world: World, seen: ReadonlySet<LessonId>): LessonId | null {
+export function nextLesson(world: World, seen: ReadonlySet<LessonId>): CoachLesson | null {
   const p = world.player;
   const t = world.time;
   if (!seen.has('move') && t >= 1.5 && p.x * p.x + p.y * p.y < MOVE_DONE * MOVE_DONE) return 'move';
