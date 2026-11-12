@@ -167,6 +167,8 @@ export const config = {
      */
     arcNumbers: 4,
     strikeNumbers: 2,
+    /** Whatever the weapon, at most this many new numbers appear per frame (hits on a shown number still add up). */
+    frameNumbers: 6,
     puffTtl: 0.3,
     maxPuffs: 60,
     /** Of those, kept for gem and item glints (deaths never take them). */

@@ -38,10 +38,12 @@ Todo item aberto foi conferido contra o código e a arte de `e1bff09` (detalhe e
 outros itens, 1 foi descartado, 2 foram mesclados, 9 reescritos para a arte e o código de hoje e 18 seguem como
 estavam.
 
-- **Feitos:** 229 itens com ✅ (contando os DD da tarde de 2026-11-11 e os reconhecidos nesta reavaliação).
-- **Abertos: 25**, por área: bugs 2 (NB-08, CB-04) · interface 8 (CC-06, CU-01, CU-02, CU-03, CU-04, CU-06,
-  CU-07, CU-08) · efeitos 4 (AR-01, RF-04, A-04, CF-07) · arte 3 (AR-04, CA-02, CA-03) · equilíbrio 3, em espera
-  (NE-06, PE-01, PE-02) · sistemas e conteúdo 4 (ND-01, ND-02, CD-01, FT-18) · música 1 (MU-01) · lançamento 1 (L-01).
+- **Atualização de 2026-11-12 (tarde):** todos os itens da lista "Próximos 10" que pedem código já estão feitos e
+  commitados (NB-08, CB-04, RF-04, CU-08, CC-06, AR-01, CA-02, AR-04, CF-07, CA-03, CU-01 a CU-07, NE-06, PE-01) e o
+  A-04 fechou agora. **Seguem abertos de verdade:** ND-01 (nome com o Daniel), ND-02 (regras e nomes com o Daniel),
+  CD-01 (aprovação e lore com o Daniel), FT-18 (fase nova), PE-02 (Espadas de Elun sem ganho), CU-07 (ícones de
+  perigo, junto do ND-01), L-01 (medição em celular real) e MU-01 (música pausada). A contagem "Abertos: 25" e a
+  lista "Próximos 10" abaixo são da reavaliação da manhã e estão superadas por este parágrafo.
 - **Descartados:** seção no fim do arquivo.
 
 ## Decisões do Daniel (2026-11-12)
@@ -320,7 +322,7 @@ depois e registra em `docs/balance-baseline.md`.
   margens com `env(safe-area-inset-*)`.
 - Aceite: em 390x844 e em paisagem, nenhum texto do HUD cortado pelo notch; vida legível sem olhar para o canto.
 
-**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
+**A-04 · Números de dano que não poluem** · impl + visual · M · ↩ reaberto na Revisão 2026-11-08 · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · ✅ fechado em 2026-11-12 (`zone` sem número, como `aura` e `orbit`; orçamento por quadro `config.effects.frameNumbers` = 6, `world.frameNumbers`, com teste)
 
 - Por quê: plano do Daniel e visual-director: sans-serif, todos brancos e iguais, empilham sobre a multidão.
 - O quê: menores, somados por inimigo num intervalo curto (~0.25 s), cor própria para golpe forte, ocultos para

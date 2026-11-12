@@ -131,8 +131,10 @@ export function addDamageNumber(world: World, uid: number, x: number, y: number,
     d.strong = d.value >= fx.strongHit;
     return;
   }
-  if (world.damageNumbers.size >= fx.maxDamageNumbers || world.numberBudget <= 0) return;
+  if (world.damageNumbers.size >= fx.maxDamageNumbers || world.numberBudget <= 0 || world.frameNumbers <= 0)
+    return;
   world.numberBudget--;
+  world.frameNumbers--;
   const d = world.damageNumbers.acquire();
   // Spread from the enemy's uid (both axes, so a crowd's numbers don't line up in one column): purely visual, so
   // it must never draw from the run's Rng.

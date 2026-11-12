@@ -324,9 +324,31 @@ describe('damage numbers', () => {
     expect(hit).toBeGreaterThan(config.effects.arcNumbers);
     expect(w.damageNumbers.size).toBe(config.effects.arcNumbers);
     expect(w.numberBudget).toBe(Infinity);
-    // Other hits (not area) are not limited.
+    // Other hits (not area) are only held back by the per-frame budget.
+    w.frameNumbers = 100;
     for (const e of crowd) w.onEnemyDamaged(e, 1, null);
     expect(w.damageNumbers.size).toBe(16);
+  });
+
+  it('a frame shows at most frameNumbers new numbers, and the budget comes back next step', () => {
+    const w = bareWorld();
+    const crowd = [];
+    for (let i = 0; i < 20; i++) crowd.push(spawnEnemy(w, 'blackKnight', i * 30, 0));
+    for (const e of crowd) w.onEnemyDamaged(e, 1, null);
+    expect(w.damageNumbers.size).toBe(config.effects.frameNumbers);
+    // A hit on an enemy that already shows a number still adds up.
+    w.onEnemyDamaged(crowd[0]!, 1, null);
+    expect(w.damageNumbers.active[0]!.value).toBe(2);
+    w.step(1 / 60, still);
+    expect(w.frameNumbers).toBe(config.effects.frameNumbers);
+  });
+
+  it('ground zones show no damage numbers', () => {
+    const w = bareWorld();
+    const e = spawnEnemy(w, 'blackKnight', 0, 0);
+    const id = WEAPON_IDS.find((k) => WEAPONS[k].kind === 'zone')!;
+    w.onEnemyDamaged(e, 5, { id, level: 1, timer: 0 } as never);
+    expect(w.damageNumbers.size).toBe(0);
   });
 
   it('numbers of a crowd spread on both axes, the same way for the same enemy', () => {

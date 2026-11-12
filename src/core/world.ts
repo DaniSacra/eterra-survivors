@@ -154,6 +154,8 @@ export class World {
   readonly targetsScratch: number[] = [];
   /** New damage numbers the current area hit may still show (set by area fires, Infinity otherwise). */
   numberBudget = Infinity;
+  /** New damage numbers left this frame, whatever the weapon (reset every step). */
+  frameNumbers: number = config.effects.frameNumbers;
 
   constructor(seed?: number, setup: RunSetup = {}) {
     this.seed = (seed ?? Date.now()) >>> 0;
@@ -210,6 +212,7 @@ export class World {
     if (this.state !== 'playing') return;
     dt = Math.min(dt, config.maxDt);
     this.time += dt;
+    this.frameNumbers = config.effects.frameNumbers;
     // On the Lobo Velho's ice the hero is slower (FT-08).
     const ice = this.marks.size > 0 ? groundSlow(this) : 1;
     this.slowed = ice < 1;
@@ -297,9 +300,9 @@ export class World {
   }
 
   onEnemyDamaged(e: Enemy, amount: number, source: OwnedWeapon | null): void {
-    // Auras and orbiting pieces hit constantly: their numbers would only bury the screen.
+    // Auras, orbiting pieces and ground zones hit constantly: their numbers would only bury the screen.
     const kind = source ? WEAPONS[source.id].kind : null;
-    if (kind === 'aura' || kind === 'orbit') return;
+    if (kind === 'aura' || kind === 'orbit' || kind === 'zone') return;
     addDamageNumber(this, e.uid, e.x, e.y - e.def.radius, amount);
   }
 
