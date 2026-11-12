@@ -4,7 +4,7 @@ import { ENEMY_ANIMS, declaredPoses, poseKey } from './enemyAnims';
 import { ICON_ART } from './art/icons';
 import { OBSTACLE_FILES } from '../data/obstacles';
 import { ITEM_ART } from './art/items';
-import { ART_RES, Pen } from './art/pen';
+import { ART_RES, ART_SCALE, Pen } from './art/pen';
 import type { ArtDef } from './art/types';
 
 /**
@@ -156,8 +156,28 @@ export const ASSETS: Record<string, AssetDef> = {
  */
 function pixelIcons(): Record<string, AssetDef> {
   return Object.fromEntries(
-    PIXEL_ICONS.map((id) => [`icon.${id}`, { kind: 'image', url: `sprites/icons/${id}.png` } as AssetDef]),
+    PIXEL_ICONS.flatMap((id) => [
+      [`icon.${id}`, { kind: 'image', url: `sprites/icons/${id}.png` } as AssetDef],
+      // The same icon redrawn on a 16 px grid (files at ART_RES) for uses of 20 px and under.
+      [`icon.${id}.s`, { kind: 'image', url: `sprites/icons16/${id}.png` } as AssetDef],
+    ]),
   );
+}
+
+/** Icon uses at or under this size (world px) take the 16 px set at integer scale. */
+export const SMALL_ICON_MAX = 20;
+/** World px that `size` 28 stands for in every call site: the 32 px medallion is scaled by size / ICON_BADGE. */
+export const ICON_BADGE = 28;
+const PIXEL_ICON_KEYS = new Set(PIXEL_ICONS.map((id) => `icon.${id}`));
+
+/**
+ * Shows icon `key` on `img` at `size` (the old badge-relative size): the 32 px medallion scaled to fit, or, for pixel
+ * icons at SMALL_ICON_MAX and under, the 16 px set at exactly one world px per art px (crisp, never fractional).
+ */
+export function fitIcon(img: Phaser.GameObjects.Image, key: string, size: number): Phaser.GameObjects.Image {
+  if (size <= SMALL_ICON_MAX && PIXEL_ICON_KEYS.has(key))
+    return img.setTexture(`${key}.s`).setScale(ART_SCALE);
+  return img.setTexture(key).setScale((ART_SCALE * size) / ICON_BADGE);
 }
 
 /** Pixel props by folder: key `decal.<name>` / `obstacle.<name>`, file `sprites/<folder>/<name>.png`. */

@@ -12,6 +12,7 @@ import { SHOP, SHOP_IDS, SHOP_SECTIONS, type ShopId, type ShopSection } from '..
 import { t } from '../i18n/pt-BR';
 import { homeBackdrop } from '../render/backdrop';
 import { ART_SCALE } from '../render/art/pen';
+import { fitIcon } from '../render/assets';
 import { STAT_ICON } from '../render/buildPanel';
 import { formatStatDelta } from '../render/describe';
 import { loadSave, writeSave } from '../render/save';
@@ -204,7 +205,7 @@ export class ShopScene extends Phaser.Scene {
     const cardW = (listW - GAP * (cols - 1)) / cols;
     for (const key of shown) {
       if (fits) {
-        this.add.image(left + 9, y + HEAD / 2 - 2, SECTION_ICON[key]).setScale((ART_SCALE * 18) / BADGE);
+        fitIcon(this.add.image(left + 9, y + HEAD / 2 - 2, SECTION_ICON[key]), SECTION_ICON[key], 18);
         label(this, left + 22, y + 2, t.shop.sections[key], 14, {
           bold: true,
           color: UI.muted,
@@ -302,7 +303,7 @@ export class ShopScene extends Phaser.Scene {
     // A name on two lines in a short tile (740x360) takes the icon's room, so it never reaches the pips.
     const twoLines = name.getWrappedText().length > 1;
     const icon = Math.min(40, h * (twoLines && h < 90 ? 0.24 : 0.32));
-    this.add.image(x, top + 5 + icon / 2, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    fitIcon(this.add.image(x, top + 5 + icon / 2, itemIcon(id)), itemIcon(id), icon);
     name.setY(top + 7 + icon);
     const level = shopLevel(save, id);
     const max = SHOP[id].maxLevel;
@@ -339,7 +340,7 @@ export class ShopScene extends Phaser.Scene {
     const l = x - w / 2;
     if (w < NARROW_CARD) return this.narrowCard(id, card, x, y, w, h);
     const icon = Math.min(26, h - 12);
-    this.add.image(l + 8 + icon / 2, y, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    fitIcon(this.add.image(l + 8 + icon / 2, y, itemIcon(id)), itemIcon(id), icon);
     const tx = l + 14 + icon;
     const cost = shopCost(save, id);
     const level = t.shop.level(shopLevel(save, id), SHOP[id].maxLevel);
@@ -383,7 +384,7 @@ export class ShopScene extends Phaser.Scene {
     const save = this.save;
     const l = x - w / 2;
     const icon = 22;
-    this.add.image(l + 6 + icon / 2, y - 4, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    fitIcon(this.add.image(l + 6 + icon / 2, y - 4, itemIcon(id)), itemIcon(id), icon);
     const tx = l + icon + 11;
     const tw = l + w - 4 - tx;
     const name = label(this, tx, y - h / 2 + 4, t.shop.items[id], 12, { bold: true, align: 'left', wrap: tw })
@@ -468,7 +469,7 @@ export class ShopScene extends Phaser.Scene {
 
     // The item: icon, name, level, and a bar with one segment per level (the next one outlined).
     const big = roomy ? 52 : 36;
-    d.push(this.add.image(x + pad + big / 2, cy + big / 2, itemIcon(id)).setScale((ART_SCALE * big) / BADGE));
+    d.push(fitIcon(this.add.image(x + pad + big / 2, cy + big / 2, itemIcon(id)), itemIcon(id), big));
     const tx = x + pad * 2 + big;
     d.push(
       label(this, tx, cy + 2, t.shop.items[id], roomy ? 20 : 16, { bold: true, align: 'left' }).setOrigin(0),

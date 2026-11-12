@@ -6,12 +6,11 @@ import type { World } from '../core/world';
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { t } from '../i18n/pt-BR';
-import { ART_SCALE } from './art/pen';
+import { fitIcon } from './assets';
 import { UI, label, skin } from './ui';
 import { formatDecimal, recipeProgress } from './describe';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
-const BADGE = 28;
 const ROW = 46;
 /** A weapon's row in the compact list: one line, no recipe (phones, NU-03). */
 const ROW_COMPACT = 28;
@@ -71,7 +70,7 @@ export function drawBuildList(
       .fillRect(bx, by, (bw * r.damage) / most, bh);
   };
   const icon = (ix: number, iy: number, key: string, size: number) =>
-    scene.add.image(ix, iy, key).setScale((ART_SCALE * size) / BADGE);
+    fitIcon(scene.add.image(ix, iy, key), key, size);
   world.weapons.forEach((o, wi) => {
     const report = rows[wi];
     if (compact) {

@@ -6,13 +6,11 @@ import { PASSIVES, PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import { WEAPONS, type WeaponId } from '../data/weapons';
 import { EVOLUTIONS, type ElementId, type Evolution } from '../data/evolutions';
 import { t } from '../i18n/pt-BR';
-import { ART_SCALE } from './art/pen';
+import { fitIcon } from './assets';
 import { formatStatValue } from './describe';
 import { ovalRing } from './shapes';
 import { ELEMENT_COLOR, UI, label } from './ui';
 
-/** Icon badges are drawn 28 world px wide (render/art/icons.ts). */
-const BADGE = 28;
 const GAP = 4;
 const PIP_H = 4;
 /** Margin around the baked textures for frames drawn just outside a slot. */
@@ -129,11 +127,11 @@ export class BuildSlots {
       }
       const elo = isElo(o.id);
       this.slot(g, x, 0, S, true, elo);
-      this.icons[icon++]
-        ?.setTexture(`icon.${o.id}`)
-        .setPosition(x + S / 2, S / 2)
-        .setScale((ART_SCALE * (S - 2)) / BADGE)
-        .setVisible(true);
+      const wi = this.icons[icon++];
+      if (wi)
+        fitIcon(wi, `icon.${o.id}`, S - 2)
+          .setPosition(x + S / 2, S / 2)
+          .setVisible(true);
       if (!elo) this.pips(g, x, S + 2, S, o.level, WEAPONS[o.id].levels.length);
       const evo = EVOLUTIONS[o.id];
       if (evo) {
@@ -152,11 +150,11 @@ export class BuildSlots {
         continue;
       }
       this.slot(g, x, py, P, true, false);
-      this.icons[icon++]
-        ?.setTexture(`icon.${id}`)
-        .setPosition(x + P / 2, py + P / 2)
-        .setScale((ART_SCALE * (P - 2)) / BADGE)
-        .setVisible(true);
+      const pi = this.icons[icon++];
+      if (pi)
+        fitIcon(pi, `icon.${id}`, P - 2)
+          .setPosition(x + P / 2, py + P / 2)
+          .setVisible(true);
       this.pips(g, x, py + P + 2, P, world.passives[id] ?? 0, PASSIVES[id].maxLevel);
     }
     for (let i = icon; i < this.icons.length; i++) this.icons[i]?.setVisible(false);
@@ -222,7 +220,7 @@ export class BuildSlots {
       [a, `icon.${elo}`, S],
       [b, `icon.${evo.passive}`, P],
     ] as const) {
-      const img = this.scene.add.image(pos.x, pos.y, key).setScale((ART_SCALE * (side - 2)) / BADGE);
+      const img = fitIcon(this.scene.add.image(pos.x, pos.y, key), key, side - 2);
       this.container.add(img);
       this.scene.tweens.add({
         targets: img,
@@ -453,9 +451,8 @@ export class StatSheet {
     const colW = columns ? w / 2 : w;
     const names = colW < 150 ? t.statsShort : t.stats;
     const row = (gx: number, gy: number, stat: StatKey) => {
-      scene.add
-        .image(gx + 7, gy + ROW / 2 - 1, STAT_ICON[stat] ?? 'icon.greed')
-        .setScale((ART_SCALE * 15) / BADGE);
+      const key = STAT_ICON[stat] ?? 'icon.greed';
+      fitIcon(scene.add.image(gx + 7, gy + ROW / 2 - 1, key), key, 15);
       label(scene, gx + 18, gy, names[stat], FONT, { align: 'left' });
       const right = gx + colW - (columns ? 10 : 0);
       this.values.set(stat, label(scene, right, gy, '', FONT, { bold: true }).setOrigin(1, 0));
