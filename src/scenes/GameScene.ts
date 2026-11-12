@@ -90,6 +90,8 @@ const RISE_SQUASH = 0.25;
 
 /** Dust and earth kicked up by bosses. */
 const DUST = 0xc8bca8;
+/** The pale cool light behind the hero. */
+const HERO_HALO = 0xdfe8ff;
 /** Distance from the hero's centre to their feet (world px), where the contact shadow sits. */
 const HERO_FEET = 36;
 /** Flyers hover this high (px) over the spot they threaten, bob a little and flap fast. */
@@ -799,6 +801,11 @@ export class GameScene extends Phaser.Scene {
       .setAlpha(ps.alpha * 0.5);
     // A discreet contact shadow under the hero's feet.
     this.shadows.clear();
+    // A pale halo behind the body so a dark hero (Andilla) still stands out on the dark ground (DD-12).
+    for (let i = 0; i < 4; i++)
+      this.shadows
+        .fillStyle(HERO_HALO, 0.045)
+        .fillEllipse(w.player.x, w.player.y - 6, 96 - i * 15, 112 - i * 17);
     this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET, 26, 8);
     // Life under the feet: wide, framed in dark, always over the crowd; blinks coral when low.
     const hpK = Math.max(0, w.player.hp / w.player.stats.maxHp);
