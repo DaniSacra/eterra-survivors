@@ -137,3 +137,10 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 | 2026-11-12 | 41 icons as round medallions in `public/sprites/icons/<id>.png` (32x32 art px centred in 40x40, packed at 2x, no smoothing): 13 weapons, 13 Elos, 10 passives, greed, reroll, skip, revive, anvil. One sheet of 64 candidates, each with its own description (23 repeats of the hardest symbols, the best taken)          | PixelLab create_1_direction_object 32x32 with item_descriptions (object 965ca074-ced7-4b3e-8480-8158d73726fa, 10 generations) |
 | 2026-11-12 | 41 small icons, 16x16 art px (packed at 2x, 32x32 files) in `public/sprites/icons16/<id>.png`, same shapes and rim colours as the 32 px set, used by `fitIcon()` for uses of 20 px and under (stat sheet, build list, Loja chips). One sheet of 64 candidates (41 symbols plus 23 repeats of the hardest, the best taken) | PixelLab create_1_direction_object 16x16 with item_descriptions (object 169f78a8-9eec-4358-a998-1be3711742e8, 10 generations) |
 | 2026-11-12 | Fúria icon (`icons/fury.png`) replaced: the old one was a flaming sword like Espada de Fogo; now a steel sword inside a red slash ring (it cuts all around). Candidate 0 of 64                                                                                                                                            | PixelLab create_1_direction_object 32x32 (object f6dd8d39-b98c-49f8-9072-c20c30f3b5d8, 10 generations)                        |
+
+## 2026-11-12: sprites drawn by script (no PixelLab generation)
+
+- `public/sprites/items/food.png`: Pão da Berta as a round loaf with two cuts (the drumstick read as meat; Daniel prefers bread).
+- `public/sprites/fx/staffOrb.png`: Cajado de Lyra fireball (small at level 1, scaled up by hit radius).
+- `public/sprites/fx/wisp.png`: Fogos-Fátuos green flame shot.
+- `public/icon-*.png`, favicon: Aldo's front sprite on a snowy night with lantern light.
