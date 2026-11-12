@@ -981,6 +981,9 @@ function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm
  * light drift up inside. Chama de Yah: a white-hot core, round flame tongues on the rim and rising embers, over a
  * very faint disc (its 150 px would cover the crowd).
  */
+/** Radians per second of the Aura de Yah's glow: one breath about every 1.6 s. */
+const AURA_BREATH = 3.9;
+
 function drawAura(
   g: Phaser.GameObjects.Graphics,
   top: Phaser.GameObjects.Graphics,
@@ -1018,7 +1021,8 @@ function drawAura(
     p.x,
     p.y,
     r / AURA_RING,
-    0.45 + 0.35 * flare + 0.3 * heat,
+    // It breathes: the ring swells bright, then all but vanishes, about every 1.6 s.
+    Math.min(1, 0.04 + 0.8 * (0.5 + 0.5 * Math.sin(t * AURA_BREATH)) ** 1.5 + 0.2 * flare + 0.25 * heat),
   );
   if (elo) {
     g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
