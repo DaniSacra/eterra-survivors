@@ -49,6 +49,7 @@ export const t = {
   title: 'Valmor Resiste',
   subtitle: 'Crônicas de Eterra',
 
+  boot: { loading: (pct: number) => `Carregando… ${pct}%` },
   menu: {
     /** The one-time notice on the menu: what is counted and how to stop it. */
     statsNotice:
