@@ -112,16 +112,17 @@ describe('thief rat arrival (DD-02)', () => {
 });
 
 describe('edge arrow targets (DD-02)', () => {
-  const far = (): boolean => false;
-  const near = (): boolean => true;
+  // The view rectangle (x, y, w, h): around the hero, or nowhere near the targets.
+  const far = [0, 0, 100, 100] as const;
+  const near = [-5000, -5000, 10000, 10000] as const;
 
   it('point at a thief only while it is off screen', () => {
     const w = bareWorld();
     spawnEnemy(w, 'thiefRat', 900, 0);
     const out = createTargets();
-    expect(arrowTargets(w, far, out)).toBe(1);
+    expect(arrowTargets(w, ...far, out)).toBe(1);
     expect(out[0]?.kind).toBe('thief');
-    expect(arrowTargets(w, near, out)).toBe(0);
+    expect(arrowTargets(w, ...near, out)).toBe(0);
   });
 
   it('put the thief before any elite', () => {
@@ -131,7 +132,7 @@ describe('edge arrow targets (DD-02)', () => {
     spawnEnemy(w, 'witch', 800, 100);
     spawnEnemy(w, 'thiefRat', 900, 0);
     const out = createTargets();
-    const n = arrowTargets(w, far, out);
+    const n = arrowTargets(w, ...far, out);
     expect(n).toBe(3);
     expect(out[0]?.kind).toBe('thief');
     expect(out[1]?.kind).toBe('elite');

@@ -47,7 +47,7 @@ export class EdgeArrows {
     const view = cam.worldView;
     const cx = w / 2;
     const cy = (top + bottom) / 2;
-    const n = arrowTargets(world, (x, y) => view.contains(x, y), this.targets);
+    const n = arrowTargets(world, view.x, view.y, view.width, view.height, this.targets);
     for (let i = 0; i < n; i++) {
       const t = this.targets[i] as (typeof this.targets)[number];
       this.arrow(

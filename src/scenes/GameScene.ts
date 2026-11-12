@@ -786,7 +786,9 @@ export class GameScene extends Phaser.Scene {
     this.lastTime = w.time;
     this.sparks.frame(this.calm);
     // The piles seen last frame are the reference for this frame's deaths; the mirror refills the new list.
-    [this.pilesPrev, this.pilesNow] = [this.pilesNow, this.pilesPrev];
+    const spare = this.pilesPrev;
+    this.pilesPrev = this.pilesNow;
+    this.pilesNow = spare;
     this.nPrev = this.nNow;
     this.nNow = 0;
     if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) {
@@ -927,7 +929,12 @@ export class GameScene extends Phaser.Scene {
         const f = this.world.puffs.active[i] as (typeof this.world.puffs.active)[number];
         const anim = ENEMY_ANIMS[f.sprite];
         if (f.kind !== 'death' || f.ttl < fresh || !anim?.frames.death) continue;
-        let c = this.corpsePool.find((o) => !o.img.visible);
+        let c: Corpse | undefined;
+        for (let k = 0; k < this.corpsePool.length; k++)
+          if (!(this.corpsePool[k] as Corpse).img.visible) {
+            c = this.corpsePool[k];
+            break;
+          }
         if (!c && this.corpsePool.length < MAX_CORPSES) {
           c = { img: this.add.image(0, 0, f.sprite).setDepth(4).setScale(ART_SCALE), sprite: '', t0: 0 };
           this.corpsePool.push(c);
@@ -944,7 +951,8 @@ export class GameScene extends Phaser.Scene {
         c.img.setTint(this.lighting.enemyTint(f.x, f.y));
       }
     }
-    for (const c of this.corpsePool) {
+    for (let k = 0; k < this.corpsePool.length; k++) {
+      const c = this.corpsePool[k] as Corpse;
       if (!c.img.visible) continue;
       const a = ENEMY_ANIMS[c.sprite] as (typeof ENEMY_ANIMS)[string];
       const t = (now - c.t0) / 1000;
@@ -1433,7 +1441,8 @@ export class GameScene extends Phaser.Scene {
 
   private handleEvents(): void {
     const w = this.world;
-    for (const e of w.events) {
+    for (let iE = 0; iE < w.events.length; iE++) {
+      const e = w.events[iE] as (typeof w.events)[number];
       switch (e.type) {
         case 'levelUp':
           sound.play('levelUp');

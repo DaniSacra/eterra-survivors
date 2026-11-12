@@ -3671,7 +3671,7 @@ em `ART_RES`.
 
 ### P7 · Técnico
 
-**PT-01 · Alocações por quadro que sobraram** · impl · P · proposto
+**PT-01 · Alocações por quadro que sobraram** · impl · P · ✅ feito (2026-11-11; F4 com 500 inimigos não medido)
 
 - Por quê: 02-code M3 (regra de desempenho do CLAUDE.md). `GameScene.ts:924` `corpsePool.find(...)` cria um closure por
   morte nova por quadro; `GameScene.ts:786` troca `pilesPrev`/`pilesNow` com um array por quadro; `edgeArrows.ts:50` e
