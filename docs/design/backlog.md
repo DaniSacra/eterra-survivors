@@ -3658,7 +3658,7 @@ em `ART_RES`.
   teto de partículas.
 - Aceite: captura de morte em massa (Chama, Tempestade) sem disco branco; F4 igual ou melhor.
 
-**PF-06 · Pulso de nível depois da escolha** · vfx · P · proposto
+**PF-06 · Pulso de nível depois da escolha** · vfx · P · ✅ feito (2026-11-12; escolhi: o anel fica retido (`levelRingPending`) até `pendingLevelUps` zerar e o overlay fechar, e então toca como sprite dourado de 8 quadros no `drawFx`, 64 px no auge, sob `moments.level`; nenhum objeto nem tween por nível; a Segunda Chance toca na hora; a forja não compete: o anel só segue a subida de nível; corrigi também o `pulse` da Chama, cujo slider segurava o anel em 50 e não em 90)
 
 - Por quê: 06-vfx #9. `GameScene.ts:1365` cria um círculo vetorial e um tween a cada nível, e o anel de 450 ms corre
   por baixo do overlay, invisível.

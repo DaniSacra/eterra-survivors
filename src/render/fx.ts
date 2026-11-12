@@ -187,6 +187,27 @@ export const TINT = {
 export const DAMAGE_TEXT = { color: '#ffffff', strong: '#ffd870', stroke: '#1a1424' };
 /** Pixel dust clouds drawn at once in a mass death. */
 const DUST_SHOWN = 28;
+/**
+ * The level-up ring (PF-06): a ring of gold light from the hero's feet out to 64 px, with motes, played once the
+ * choice is made (never under the overlay). Held back while the forge moment's slow motion plays.
+ */
+function drawLevelRing(world: World, m: Moments): void {
+  const age = world.time - m.level;
+  if (age < 0 || age >= LEVEL_SHOW) return;
+  const r = VFX.levelRing;
+  const p = world.player;
+  fxSprites.putFrame(
+    vfxKey('levelRing'),
+    Math.min(r.frames - 1, Math.floor((age / LEVEL_SHOW) * r.frames)),
+    r.anchor[0],
+    r.anchor[1],
+    p.x,
+    p.y + 20,
+    64 / LEVEL_RING,
+    0.85,
+  );
+}
+
 /** Segments of Tempestade's jump line. */
 const CHAIN_SEGS = 5;
 /** Lightning layers: width factor, color (-1 = the bolt's color), alpha. Preallocated. */
@@ -216,6 +237,8 @@ export interface Moments {
   frost: number;
   /** The hero's life went up (Luz Sagrada's kills, a chest, food). */
   heal: number;
+  /** The moment a level-up ring started (after the choice, PF-06). */
+  level: number;
   /** The last Ossada em Brasa blasts (CF-02), a ring of slots reused in turn. */
   bursts: { t: number; x: number; y: number; r: number }[];
   nextBurst: number;
@@ -231,6 +254,7 @@ export const newMoments = (): Moments => ({
   bomb: -Infinity,
   frost: -Infinity,
   heal: -Infinity,
+  level: -Infinity,
 });
 /** Regeneration is green, never the life bar's red (a red rise reads as losing life). */
 /** No ground zone is filled more opaque than this: the ring says where it ends, the fill only tints. */
@@ -238,6 +262,10 @@ export const ZONE_FILL_MAX = 0.35;
 /** Texture width of the shield sprite (art px). */
 /** Width of the shield art and length of the sword art, in art px. */
 const SWORD_ART = 40;
+/** The ring of light after a level-up, seconds (8 frames at 14 fps). */
+export const LEVEL_SHOW = 0.57;
+/** The ring sprite's outer edge, art px. */
+const LEVEL_RING = 70;
 export const HEAL_COLOR = 0x7ae890;
 /** How long the chest moment lasts (rays, ring and the reward's icon rising), seconds. */
 export const CHEST_SHOW = 1.3;
@@ -268,6 +296,7 @@ export function drawFx(
   drawPatches(g, world);
   drawMoments(g, top, world, m, hero);
   drawBursts(g, top, world.time, m);
+  drawLevelRing(world, m);
   drawCharges(g, world);
   drawLeaps(g, world);
   drawPushes(g, world);

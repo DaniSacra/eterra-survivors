@@ -271,6 +271,8 @@ export class GameScene extends Phaser.Scene {
   private stopUntil = 0;
   /** Chest, Badalada and Sopro de Geada moments (drawn by drawFx), and the chest reward's icon rising. */
   private moments = newMoments();
+  /** A level was gained and its ring waits for the choice to close. */
+  private levelRingPending = false;
   private rewardIcon!: Phaser.GameObjects.Image;
   /** Hit sparks, death stars and confetti (a fixed pool). */
   private sparks = new Sparks();
@@ -365,6 +367,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.moments = newMoments();
+    this.levelRingPending = false;
     this.sparks = new Sparks();
     this.lastTime = 0;
     this.lastHp = this.world.player.hp;
@@ -877,6 +880,7 @@ export class GameScene extends Phaser.Scene {
     this.lighting.render(v.x, v.y, v.w, v.h, delta / 1000);
     this.showReward();
     this.handleEvents();
+    this.releaseLevelRing();
     this.frameSounds();
     this.checkAchievements();
   }
@@ -1395,18 +1399,21 @@ export class GameScene extends Phaser.Scene {
       .setAlpha(age > CHEST_SHOW - 0.3 ? (CHEST_SHOW - age) / 0.3 : 1);
   }
 
-  /** A golden ring that bursts from the hero when a level is gained. */
-  private levelUpPulse(): void {
-    const p = this.world.player;
-    const ring = this.add.circle(p.x, p.y, 20).setStrokeStyle(4, UI.goldHex).setDepth(11);
-    this.tweens.add({
-      targets: ring,
-      scale: 4,
-      alpha: 0,
-      duration: 450,
-      ease: 'Cubic.easeOut',
-      onComplete: () => ring.destroy(),
-    });
+  /**
+   * The ring of light for a level gained: held until the choice is made (the overlay would hide it), then played
+   * as a pixel sprite from `drawFx` (PF-06). Nothing is created per level.
+   */
+  private levelUpPulse(now = false): void {
+    if (now) this.moments.level = this.world.time;
+    else this.levelRingPending = true;
+  }
+
+  /** Plays a held level ring once the level-up overlay is gone. */
+  private releaseLevelRing(): void {
+    if (!this.levelRingPending || this.world.pendingLevelUps > 0 || this.scene.isActive(SCENES.levelUp))
+      return;
+    this.levelRingPending = false;
+    this.moments.level = this.world.time;
   }
 
   /**
@@ -1581,7 +1588,7 @@ export class GameScene extends Phaser.Scene {
           sound.play('levelUp');
           this.hud.announce(t.revived, true);
           if (!this.calm) this.cameras.main.flash(400, 255, 240, 200);
-          this.levelUpPulse();
+          this.levelUpPulse(true);
           break;
         case 'won':
         case 'lost': {
