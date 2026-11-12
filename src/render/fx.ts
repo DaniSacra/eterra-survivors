@@ -406,6 +406,7 @@ export function drawFx(
     const pr = world.projectiles.active[iPr] as (typeof world.projectiles.active)[number];
     const tr = pr.source ? TRAIL[pr.source.id] : undefined;
     if (tr) drawTrail(g, pr, tr, world.time);
+    if (pr.source) drawVerb(g, pr, WEAPONS[pr.source.id] as WeaponDef, world.time);
   }
   for (let iF = 0; iF < world.puffs.active.length; iF++) {
     const f = world.puffs.active[iF] as (typeof world.puffs.active)[number];
@@ -518,6 +519,51 @@ const TRAIL: Partial<Record<WeaponId, Trail>> = {
   wisps: { color: 0x40e0d8, core: 0xe8ffff, width: 4, len: 0.12, dots: true, star: false },
   soulProcession: { color: ELEMENT_COLOR.soul, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
 };
+
+/** How long the mark of a turn (ricochet, return, far side of a loop) shows, seconds. */
+const TURN_SHOW = 0.3;
+
+/**
+ * The Elo verbs of thrown shots that turn (PF-03): a ricochet leaves an emerald streak from the bounce to the new
+ * target and a star where it bounced; the boomerang leaves a faint ghost of its way out and flares when it turns
+ * home; a shield's loop shows the steel arc it still has to fly before it comes back, and flares at its far side.
+ * All of it reads from the shot's own turn marks (`turnAt`, `turnX`, `turnY`, `fromX`, `fromY`): no state here.
+ */
+function drawVerb(g: Phaser.GameObjects.Graphics, pr: Projectile, def: WeaponDef, time: number): void {
+  const since = time - pr.turnAt;
+  const flare = since >= 0 && since < TURN_SHOW ? 1 - since / TURN_SHOW : 0;
+  if (def.ricochet && flare > 0) {
+    const c = ELEMENT_COLOR.shadow;
+    g.lineStyle(4, c, 0.7 * flare).lineBetween(pr.turnX, pr.turnY, pr.x, pr.y);
+    g.lineStyle(1.5, 0xe0ffe8, 0.9 * flare).lineBetween(pr.turnX, pr.turnY, pr.x, pr.y);
+    star(g, pr.turnX, pr.turnY, 5 + 9 * flare, 0xe0ffe8, flare);
+  } else if (def.boomerang && pr.home) {
+    // The way out stays as a faint ghost until the hammer is caught.
+    g.lineStyle(5, ELEMENT_COLOR.forge, 0.16).lineBetween(pr.fromX, pr.fromY, pr.turnX, pr.turnY);
+    if (flare > 0) {
+      g.lineStyle(3 * flare + 1, 0xfff0a0, flare);
+      ring(g, pr.turnX, pr.turnY, 10 + 26 * (1 - flare));
+      star(g, pr.turnX, pr.turnY, 6 + 10 * flare, 0xffffff, flare);
+    }
+  } else if (def.loop) {
+    if (flare > 0) {
+      g.lineStyle(3 * flare + 1, 0xffffff, 0.9 * flare);
+      ring(g, pr.turnX, pr.turnY, 8 + 24 * (1 - flare));
+      star(g, pr.turnX, pr.turnY, 5 + 8 * flare, ELEMENT_COLOR.steel, flare);
+    }
+    if (pr.back > 0 && pr.curve !== 0) {
+      // The circle it flies: centre to the side it turns toward; the arc ahead, up to the far side.
+      const rs = pr.speed / pr.curve;
+      const cx = pr.x - Math.sin(pr.angle) * rs;
+      const cy = pr.y + Math.cos(pr.angle) * rs;
+      const t0 = Math.atan2(pr.y - cy, pr.x - cx);
+      const sweep = pr.curve * (pr.ttl - pr.back);
+      g.lineStyle(2, ELEMENT_COLOR.steel, 0.38);
+      if (sweep > 0) arcLine(g, cx, cy, Math.abs(rs), t0, t0 + sweep);
+      else arcLine(g, cx, cy, Math.abs(rs), t0 + sweep, t0);
+    }
+  }
+}
 
 function drawTrail(g: Phaser.GameObjects.Graphics, pr: Projectile, tr: Trail, time: number): void {
   const len = pr.speed * tr.len;
@@ -884,6 +930,12 @@ function drawSouls(g: Phaser.GameObjects.Graphics, world: World, n: number, left
   const p = world.player;
   const t = world.time;
   const a = left < 1 ? 0.45 + 0.45 * Math.sin(t * 24) : 0.9;
+  // A pale halo round the hero that grows and brightens with every soul gathered: the swell, readable at a glance.
+  const swell = Math.min(1, n / ((WEAPONS.soulProcession as WeaponDef).swell?.cap ?? 4));
+  g.fillStyle(ELEMENT_COLOR.soul, (0.05 + 0.1 * swell) * a);
+  disc(g, p.x, p.y - 6, 24 + 16 * swell);
+  g.lineStyle(2, ELEMENT_COLOR.soul, (0.2 + 0.4 * swell) * a);
+  ring(g, p.x, p.y - 6, 24 + 16 * swell);
   for (let i = 0; i < n; i++) {
     const ang = t * 2.2 + (i * Math.PI * 2) / n;
     const x = p.x + Math.cos(ang) * 30;

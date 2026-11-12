@@ -35,6 +35,15 @@ export interface Projectile extends Poolable {
   home: boolean;
   /** Escudos de Valmor: the heading turns at this rad/s (signed), so the shot flies a loop (0 = straight). */
   curve: number;
+  /**
+   * Where it was thrown from, and the last moment (world time) and place it turned on purpose: a ricochet, the
+   * boomerang's return, a shield halfway round its loop. The renderer draws the verbs from these (PF-03).
+   */
+  fromX: number;
+  fromY: number;
+  turnAt: number;
+  turnX: number;
+  turnY: number;
   /** Asset key (one per weapon). */
   sprite: string;
   /** The weapon credited with its damage. */
@@ -66,6 +75,11 @@ export const createProjectile = (): Projectile => ({
   back: 0,
   home: false,
   curve: 0,
+  fromX: 0,
+  fromY: 0,
+  turnAt: -1e9,
+  turnX: 0,
+  turnY: 0,
   sprite: '',
   source: null,
   target: null,
@@ -182,12 +196,14 @@ export function updateProjectiles(world: World, dt: number): void {
         // Halfway round the loop the shield may hit everyone again.
         p.back = 0;
         p.hits.length = 0;
+        markTurn(world, p);
       }
     } else if (p.back > 0 && p.ttl <= p.back) {
       // Halfway: the hammer turns home, and may hit everything again on the way back.
       p.back = 0;
       p.home = true;
       p.hits.length = 0;
+      markTurn(world, p);
       p.ttl += p.ttl; // time enough to come all the way back
     }
     if (p.home) {
@@ -244,6 +260,7 @@ export function updateProjectiles(world: World, dt: number): void {
         const next = nearestEnemy(world, p.x, p.y, def.ricochet.range, p.hits);
         if (next) {
           p.bounces--;
+          markTurn(world, p);
           p.angle = Math.atan2(next.y - p.y, next.x - p.x);
           p.ttl = Math.max(p.ttl, def.ricochet.range / p.speed);
         } else if (--p.pierce < 0) p.dead = true;
@@ -256,6 +273,13 @@ export function updateProjectiles(world: World, dt: number): void {
     }
   }
   world.projectiles.releaseWhere(isDead);
+}
+
+/** Records that `p` turned here, now (a ricochet, a boomerang's return, a loop's far side). */
+function markTurn(world: World, p: Projectile): void {
+  p.turnAt = world.time;
+  p.turnX = p.x;
+  p.turnY = p.y;
 }
 
 const isDead = (p: Projectile): boolean => p.dead;
@@ -297,6 +321,7 @@ function scatterStars(
     const star = world.projectiles.acquire();
     star.x = p.x;
     star.y = p.y;
+    star.turnAt = -1e9;
     star.angle = turn + (k * Math.PI * 2) / split.count;
     star.speed = (split.distance * world.player.stats.area) / split.fall;
     star.ttl = split.fall;

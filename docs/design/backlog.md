@@ -3629,7 +3629,7 @@ em `ART_RES`.
   roda por inimigo, sem objeto novo; cor própria no `HIT_SPARK` para Vigília (ouro-branco) e Escudos (aço).
 - Aceite: captura da Aura, Geada, Maça e Lâmina no máximo com 30 inimigos: os tocados se distinguem; F4 igual.
 
-**PF-03 · Verbos dos Elos com desenho próprio** · vfx · M · proposto
+**PF-03 · Verbos dos Elos com desenho próprio** · vfx · M · ✅ feito (2026-11-12; escolhi: o `Projectile` ganhou `fromX/fromY/turnAt/turnX/turnY` (campos no core, sem evento nem alocação, com testes) e o render desenha: ricochete = risco esmeralda do ponto do rebote até o novo alvo e estrela no rebote; volta da Fúria da Forja = fantasma fraco do caminho de ida e anel na virada; laço = arco de aço do que falta voar até o lado oposto e anel ao chegar lá; cadeia = DD-15; Procissão = halo azul-pálido que cresce com as almas (`swell.cap`); pouso da Estrela de Lyra: já existe o estouro da própria estrelinha (`addBolt` em `burst`), então não somei outro anel; a folha de captura dos seis verbos com 26 inimigos não foi feita, vi cada um com 14 e o lado de volta da Fúria da Forja não foi pego em captura; F4 não medido neste item)
 
 - Por quê: 06-vfx #5 (absorve o rebote do CF-08). Ricochete (Leque), volta (Fúria da Forja), laço (Escudos e Muralha),
   cadeia (Tempestade, linha roxa de 2 px), pouso da estrelinha (Estrela de Lyra) e cargas da Procissão (`swell`) têm

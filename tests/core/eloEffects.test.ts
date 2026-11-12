@@ -102,6 +102,20 @@ describe('Leque de Facas: ricochet and bleeding', () => {
     expect(w.projectiles.size).toBe(0);
   });
 
+  it('a bounce is marked with its time and place for the renderer', () => {
+    const w = armed('fan');
+    w.player.stats.amount = 1 - l.count;
+    tough(w, 60, 0);
+    tough(w, 60, 100);
+    run(w, 0.02);
+    w.weapons[0]!.timer = 99;
+    const k = w.projectiles.active[0]!;
+    expect(k.turnAt).toBeLessThan(0);
+    run(w, 0.3);
+    expect(k.turnAt).toBeGreaterThanOrEqual(0);
+    expect(Math.abs(k.turnX - 60)).toBeLessThan(40);
+  });
+
   it('with no enemy to bounce to, the knife still spends its pierce and the search ends the loop', () => {
     const w = armed('fan');
     w.player.stats.amount = 1 - l.count;
@@ -291,6 +305,21 @@ describe('Fúria da Forja: the boomerang', () => {
     run(w, l.lifetime);
     expect(e.maxHp - e.hp).toBeCloseTo(l.damage * 2);
     expect(w.projectiles.size).toBe(0); // caught again
+  });
+
+  it('remembers where it was thrown from and when and where it turned (the renderer draws the return)', () => {
+    const w = armed('forgeFury');
+    const l = WEAPONS.forgeFury.levels[0]!;
+    w.player.stats.amount = 1 - l.count;
+    tough(w, 100, 0);
+    run(w, 1 / 60);
+    w.weapons[0]!.timer = 99;
+    const h = w.projectiles.active[0]!;
+    expect(h.turnAt).toBeLessThan(0);
+    expect(h.fromX).toBeCloseTo(w.player.x);
+    run(w, l.lifetime / 2 + 0.1);
+    expect(h.turnAt).toBeGreaterThanOrEqual(0);
+    expect(h.turnX).toBeGreaterThan(h.fromX);
   });
 });
 

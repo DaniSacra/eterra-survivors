@@ -160,6 +160,9 @@ function launch(world: World, w: OwnedWeapon, angle: number): Projectile {
   const shot = world.projectiles.acquire();
   shot.x = p.x;
   shot.y = p.y;
+  shot.fromX = p.x;
+  shot.fromY = p.y;
+  shot.turnAt = -1e9;
   shot.angle = angle;
   shot.sprite = PROJECTILE_SPRITE[w.id];
   shot.source = w;
