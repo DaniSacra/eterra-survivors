@@ -3258,3 +3258,12 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
 - **DD-15 · Refazer todos os efeitos com sprites em pixel** · vfx · G. Raio e Tempestade, Fogo e Espada de Fogo,
   zonas de Geada/Nevasca, chão em chamas, auras, golpes em arco e pancadas, trabalhados no workbench de efeitos do
   PixelLab (My effects) e empacotados em `public/sprites/fx/vfx/` (`render/vfx.ts`). Feito: Raio, Fogo (explosão e chama), Geada (cristais), Aura de Yah, onda de choque da Maça, corte da Lâmina. Falta: Fúria (giro), cadeia da Tempestade, onda da Chama, acertos.
+
+### Fase 8 · Música (pedido do Daniel, 2026-11-12)
+
+- **MU-01 · Uma trilha de metal progressivo por fase** · música · G. Valmor, Cripta e Estrada do Sul (guitarras, solo,
+  mudanças de compasso e tom), trilha de chefe e trilha do menu, em laço, geradas no PixelLab (`create_music` e
+  `make_music_loop`, registradas em `docs/art/credits.md`). Player em `render/music.ts` (Phaser, fusão entre faixas,
+  abaixa na pausa), mapa em `render/musics.ts`, opção Música em Opções e na pausa. Feito: valmor, crypt, southRoad,
+  boss (toca quando o chefe chega), menu (ver estado abaixo). Falta: Daniel escolher a faixa A ou B de cada fase,
+  nomes das faixas (provisórios), vitória e derrota (stings), evento de fim para tocá-los.

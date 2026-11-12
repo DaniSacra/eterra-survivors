@@ -6,6 +6,8 @@ export interface Settings {
   calm: boolean;
   /** All sound off. */
   muted: boolean;
+  /** The background music (sound effects stay). */
+  music: boolean;
   /** Gaspar already greeted the player (his line shows on the first visit to the Loja). */
   gasparMet: boolean;
 }
@@ -14,6 +16,7 @@ export const defaultSettings = (): Settings => ({
   damageNumbers: true,
   calm: false,
   muted: false,
+  music: true,
   gasparMet: false,
 });
 

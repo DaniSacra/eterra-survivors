@@ -393,8 +393,10 @@ export const t = {
     damageNumbers: 'Números de dano',
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
+    music: 'Música',
     /** Short names, for the one-row toggles on the pause screen. */
     soundShort: 'Som',
+    musicShort: 'Música',
     numbersShort: 'Números',
     calmShort: 'Calma',
     /** The seal beside each option. */

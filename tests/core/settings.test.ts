@@ -14,8 +14,10 @@ describe('settings', () => {
       damageNumbers: false,
       calm: false,
       muted: true,
+      music: true,
       gasparMet: false,
     });
     expect(sanitizeSettings({ gasparMet: true }).gasparMet).toBe(true);
+    expect(sanitizeSettings({ music: false }).music).toBe(false);
   });
 });

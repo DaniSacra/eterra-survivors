@@ -1,3 +1,4 @@
+import { music } from '../render/music';
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
 import { UI, bindKeys, button, dim, isShort, keyNav, label, restartOnResize, safeArea } from '../render/ui';
@@ -32,6 +33,8 @@ export class PauseScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const cx = width / 2;
     this.confirming = false;
+    music.duck(true);
+    this.events.once('shutdown', () => music.duck(false));
     dim(this);
     this.scene.bringToTop(SCENES.hud);
     const hud = this.scene.get(SCENES.hud) as HudScene;

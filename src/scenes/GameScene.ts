@@ -48,6 +48,8 @@ import { fxSprites } from '../render/fxSprites';
 import { HIT_SPARK, HitWeight, SPARK, Sparks } from '../render/sparks';
 import { settings } from '../render/settings';
 import { sound } from '../render/sound';
+import { music } from '../render/music';
+import { STAGE_MUSIC } from '../render/musics';
 import { Decals } from '../render/decals';
 import { Obstacles } from '../render/obstacles';
 import { Lighting, mixColor } from '../render/lighting';
@@ -318,6 +320,7 @@ export class GameScene extends Phaser.Scene {
     this.vigilBefore = null;
     this.vigilRecord = false;
     this.world = new World(Date.now() >>> 0, { ...this.choice, bonuses: shopBonuses(this.liveSave) });
+    music.play(this, STAGE_MUSIC[this.world.stageId]);
     this.banked = false;
     this.vigilBanked = false;
     this.corpsePool = [];
@@ -1395,6 +1398,7 @@ export class GameScene extends Phaser.Scene {
     if (w.state !== 'won' || w.endless) return;
     this.vigilBefore = summarizeRun(w);
     w.continueVigil();
+    music.play(this, STAGE_MUSIC[w.stageId]);
     this.hud.announce(t.vigil.start, true);
     this.hud.hint(t.vigil.hint);
   }
@@ -1446,6 +1450,7 @@ export class GameScene extends Phaser.Scene {
           break;
         case 'bossSpawned':
           sound.play('boss');
+          music.play(this, 'boss');
           this.hud.announce(
             w.arena.on
               ? t.arenaClosed(t.enemies[w.stage.boss.id])

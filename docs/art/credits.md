@@ -55,3 +55,20 @@ Sem gerações novas em 2026-11-11 (revisão de tamanhos): os sprites acima só 
 
 | 2026-11-12 | Animated effect: slash (Lâmina de Valmor's cut) from preset slash_arc, enlarged to a 224 px canvas and set to a 145 degree crescent, effect id 7d76a2b2-1e37-4054-8f0f-c517c215a2d0 | 2x strip in `public/sprites/fx/vfx/` |
 - 2026-11-11: Luz Sagrada dove projectile (`public/sprites/fx/holyDove.png`): PixelLab `create_image_pro`, job 4f1f6c0d, candidate 0 (10 generations). Luz de Elun orb recoloured to a gold/white ramp (local script, no generation). Aura de Yah ring replaced by a lighter version (effect ffa2b1fe).
+
+## Música (PixelLab `create_music` + `make_music_loop`, 2026-11-12)
+
+Instrumental, sem vocais. Cada `create_music` gera duas faixas (10 gerações); cada `make_music_loop` gera dois laços
+(4 gerações). No jogo vai o laço da faixa 1; a faixa 2 fica na biblioteca do PixelLab para o Daniel trocar. Os mp3 do
+laço vêm com cerca de 256 kbps e 5 a 6 minutos (introdução, trecho em laço, final): em `public/audio/music/` ficam
+cortados no fim do laço (sem o final) e recodificados em 80 a 112 kbps para caber em cerca de 3 MB; o jogo toca do
+início e volta para `loopStart` (`src/render/musics.ts`). Estilo (resumo), em inglês no pedido: metal progressivo,
+riffs com palm mute, melodia harmonizada, solo de guitarra, baixo e bateria dupla, toques de chiptune.
+
+| Faixa (id) | Fase | BPM | Faixa base (take 1 / take 2) | Laço (take 1 usado / take 2) | Ponto do laço |
+| --- | --- | --- | --- | --- | --- |
+| valmor | Arredores de Valmor (brilhante, gelo, solo maior) | 150 | af562e7a-28b7-456a-a5be-b0462343e413 / 3fa33dc9-ab5a-413a-922f-56c2772252a5 | dcc7b85a-4410-4b9f-a7a4-e2ea0447e325 / 286f9e98-3ff0-4554-a4b0-b92cad285187 | 81.061 a 226.041 s |
+| crypt | Cemitério e Cripta (menor, órgão e sinos, solo neoclássico) | 160 | 680be507-d388-4f61-a21d-41f9d0ab5b68 / be584fb4-853d-4a4f-9a2f-b5071a8bdd6f | fda58842-97d2-4d13-b89b-bebbd2bcc4ea / d420474c-6495-4f87-b5ad-7426ca10b821 | 84.079 a 245.914 s |
+| southRoad | Estrada do Sul (galope, folk metal, solo longo) | 170 | c122a952-a3b1-46ef-b5d1-0a14305929fe / 4a82a4bc-f73b-4c25-acdd-bcb9f3f6cd4b | 3cbab8ac-a55a-46a2-95be-f1b4388dfdaf / d5fb96e3-b6ba-425d-9862-940a7a3d4b50 | 90.117 a 272.433 s |
+| boss | Chefes (denso, breakdown, solo) | 165 | ce7d2ae1-f167-48f5-b63a-3d106c01a635 / 61da6042-b337-4e24-9f21-3860f3e024c7 | cd5f5c61-15c5-4dfe-98f3-6a686163f0e6 / e5611956-fae9-425d-86dd-890d137256ae | 73.793 a 217.584 s |
+| menu | Menu (lareira, guitarra limpa, calmo) | 80 | a02c10c4-4021-43a4-9964-11fa56ebede2 / 64c49a71-5e08-4452-b324-2323c80edfff | a80e6c71-6859-4922-bef5-38fd10cc3893 / 2bdcac56-3237-4967-89f0-91033d571b3d | ver abaixo |
