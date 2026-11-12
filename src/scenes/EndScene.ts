@@ -282,7 +282,7 @@ export class EndScene extends Phaser.Scene {
       ? this.add.image(cx, feet, `player.${id}.fall`, 6)
       : this.add.image(cx, feet, `player.${id}.front`);
     hero.setOrigin(0.5, 1);
-    hero.setScale(size / (fallen ? 80 : hero.height));
+    hero.setScale(size / (fallen ? 60 : hero.height));
     return feet + 6;
   }
 
