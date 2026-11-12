@@ -3572,7 +3572,7 @@ em `ART_RES`.
 - Aceite: capturas 360x640, 420x820 e 1000x680 de Menu, Heróis, Loja, Pausa, level-up e HUD sem a serifada do sistema
   (ou só nos textos longos, se for a escolha); nenhum texto abaixo de 12 px de altura real; F4 igual.
 
-**PA-02 · Valmor com neve, e lanternas que leem como lanternas** · visual · M · proposto (dois candidatos ao Daniel)
+**PA-02 · Valmor com neve, e lanternas que leem como lanternas** · visual · M · ✅ feito (2026-11-11; Daniel escolhe entre `valmor.png` (neve fria, instalado) e `valmor-alt.png` (terra escura com neve rala): `cp public/sprites/tiles/valmor-alt.png public/sprites/tiles/valmor.png`)
 
 - Por quê: 04-visual #1 e #13. O chão de Valmor (`public/sprites/tiles/valmor.png`) é cascalho azul-acinzentado com
   tufos secos: sem neve, sem estrada, sem campo, embora o cartão diga "campos na neve" e o Menu mostre neve e luz quente.

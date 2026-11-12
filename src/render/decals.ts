@@ -1,4 +1,4 @@
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
 import type { StageId } from '../data/stages';
 import { ART_SCALE } from './art/pen';
 import type { Lighting } from './lighting';
@@ -34,11 +34,19 @@ const STAGE_DECALS: Record<StageId, string[]> = {
 };
 
 /** Decals that carry a flame: its light (radius world px, colour) and height of the flame over the decal's centre. */
-const DECAL_LIGHT: Record<string, { radius: number; color: number; dy: number }> = {
-  'decal.candle': { radius: 120, color: 0xffb860, dy: -9 },
-  'decal.lantern': { radius: 170, color: 0xffc070, dy: -2 },
+const DECAL_LIGHT: Record<
+  string,
+  { radius: number; color: number; dy: number; dx?: number; halo?: { r: number; a: number } }
+> = {
+  'decal.candle': { radius: 120, color: 0xffb860, dy: -9, halo: { r: 40, a: 0.22 } },
+  // The lamp post (PA-02): the lantern hangs to the right of the post (mirrored with the decal) near its top.
+  'decal.lantern': { radius: 190, color: 0xffc070, dy: -30, dx: 16, halo: { r: 84, a: 0.34 } },
   'decal.campfire': { radius: 230, color: 0xff9040, dy: -4 },
 };
+
+/** Depth of the flame halos: over the light map (2.9), so a lantern glows warm in the dark. */
+const HALO_DEPTH = 2.95;
+const MAX_HALOS = 14;
 
 /** World cell size; each cell holds at most one decal, picked by a hash of the cell. */
 const CELL = 150;
@@ -53,6 +61,9 @@ const MAX = 80;
 export class Decals {
   private readonly images: Phaser.GameObjects.Image[] = [];
   private readonly keys: string[];
+  private readonly scene: Phaser.Scene;
+  /** Warm additive glows over the flames (created on the first `lights`, once the radial texture exists). */
+  private halos: Phaser.GameObjects.Image[] = [];
   /** How many images are laid out (the first `shown`). */
   private shown = 0;
   private lastCx = NaN;
@@ -61,6 +72,7 @@ export class Decals {
   private lastRows = 0;
 
   constructor(scene: Phaser.Scene, stage: StageId) {
+    this.scene = scene;
     this.keys = STAGE_DECALS[stage];
     for (let i = 0; i < MAX; i++)
       this.images.push(
@@ -105,13 +117,37 @@ export class Decals {
     this.shown = n;
   }
 
-  /** Adds the lights of the flames on screen (candles, lanterns, fires). */
+  /** Adds the lights of the flames on screen (candles, lanterns, fires) and lays their warm halos. */
   lights(l: Lighting, time: number, calm: boolean): void {
+    if (this.halos.length === 0 && this.scene.textures.exists('light.radial'))
+      for (let i = 0; i < MAX_HALOS; i++)
+        this.halos.push(
+          this.scene.add
+            .image(0, 0, 'light.radial')
+            .setDepth(HALO_DEPTH)
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setVisible(false),
+        );
+    let h = 0;
     for (let i = 0; i < this.shown; i++) {
       const img = this.images[i] as Phaser.GameObjects.Image;
       const light = DECAL_LIGHT[img.texture.key];
-      if (light) l.flame(img.x, img.y + light.dy, light.radius, light.color, time, calm);
+      if (!light) continue;
+      const fx = img.x + (light.dx ?? 0) * (img.flipX ? -1 : 1);
+      const fy = img.y + light.dy;
+      l.flame(fx, fy, light.radius, light.color, time, calm);
+      const halo = light.halo;
+      if (halo && h < this.halos.length) {
+        const flick = calm ? 1 : 1 + Math.sin(time * 9 + fx * 0.13) * 0.08 + Math.sin(time * 23 + fy) * 0.04;
+        (this.halos[h++] as Phaser.GameObjects.Image)
+          .setPosition(fx, fy)
+          .setScale((halo.r / 64) * flick)
+          .setTint(light.color)
+          .setAlpha(halo.a)
+          .setVisible(true);
+      }
     }
+    for (; h < this.halos.length; h++) (this.halos[h] as Phaser.GameObjects.Image).setVisible(false);
   }
 }
 
