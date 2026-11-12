@@ -152,7 +152,6 @@ export class PauseScene extends Phaser.Scene {
       });
       return;
     }
-    this.scene.stop(SCENES.game);
-    this.scene.start(SCENES.menu);
+    (this.scene.get(SCENES.game) as GameScene).abandonRun();
   }
 }

@@ -80,6 +80,18 @@ describe('shop', () => {
     expect(w.state).toBe('lost');
   });
 
+  it('Desistir ends the run as an abandoned loss, once', () => {
+    const w = new World(1);
+    w.abandon();
+    expect(w.state).toBe('lost');
+    expect(w.abandoned).toBe(true);
+    const lost = new World(1);
+    lost.player.hp = -5;
+    lost.step(1 / 60, still);
+    expect(lost.state).toBe('lost');
+    expect(lost.abandoned).toBe(false);
+  });
+
   it('repairs broken or tampered saves', () => {
     expect(sanitizeSave(null)).toEqual(newSave());
     expect(sanitizeSave('x')).toEqual(newSave());

@@ -217,6 +217,8 @@ export const t = {
     empty: 'Os inimigos que você encontrar nas partidas aparecem aqui.',
     seenIn: 'Visto em',
     killed: 'Abatidos',
+    /** A boss met but never beaten, in place of "0". */
+    standing: 'De pé',
     hp: 'Vida',
     hpGrows: (n: string) => `${n}, cresce com o tempo`,
     speed: 'Velocidade',
@@ -422,7 +424,15 @@ export const t = {
     vigilRecord: 'Novo recorde da vigília!',
     won: 'Vitória!',
     lost: 'Fim de jogo',
-    lostText: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
+    /** PROVISIONAL (CB-04): neutral lines that name no event, person or place from the story; Daniel rewrites. */
+    lostByStage: {
+      valmor: (hero: string) => `${hero} tombou na neve. Valmor ainda espera por um herói.`,
+      crypt: (hero: string) => `${hero} caiu entre as pedras frias. Respire fundo e tente de novo.`,
+      southRoad: (hero: string) => `${hero} caiu na estrada gelada. Respire fundo e tente de novo.`,
+    } satisfies Record<StageId, (hero: string) => string>,
+    /** Quitting from the Pausa (CU-08). */
+    abandoned: 'Partida abandonada',
+    abandonedText: (hero: string) => `${hero} deixou a luta. O que a partida rendeu ficou guardado.`,
     unlocked: (stage: string) => `Nova fase liberada: ${stage}`,
     newElo: (name: string, gold: number) => `Elo descoberto: ${name}! +${gold} de ouro. Veja na Coleção.`,
     banked: (gold: number) => `No cofre: ${gold} ouro`,

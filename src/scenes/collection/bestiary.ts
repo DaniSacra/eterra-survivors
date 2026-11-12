@@ -24,7 +24,8 @@ function portrait(
   // Pixel sprites have a thin transparent border: fit the drawing (most of the frame), not the frame.
   const frame = Math.max(img.frame.width, img.frame.height) * 0.86;
   img.setScale(ART_SCALE * ((box * ART_RES) / frame));
-  if (!seen) img.setTint(UI.border);
+  // A true silhouette: tint-fill keeps the shape and drops colour and eyes (a plain tint only multiplies them).
+  if (!seen) img.setTintFill(UI.borderOff).setAlpha(0.9);
   return img;
 }
 
@@ -159,12 +160,13 @@ class Sheet {
       }).setOrigin(1, 0.5),
     );
     y += name.height + 2;
+    const kills = entry.kills === 0 && kind === 'boss' ? t.bestiary.standing : t.int(entry.kills);
     const where = add(
       label(
         s,
         lx,
         y,
-        `${t.bestiary.seenIn}: ${t.stages[entry.stage].name}  ·  ${t.bestiary.killed}: ${t.int(entry.kills)}`,
+        `${t.bestiary.seenIn}: ${t.stages[entry.stage].name}  ·  ${t.bestiary.killed}: ${kills}`,
         12,
         { color: UI.muted, align: 'left', wrap: w },
       ),

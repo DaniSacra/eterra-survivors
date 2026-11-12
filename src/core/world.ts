@@ -100,6 +100,8 @@ export class World {
   /** Level at that moment. */
   poolShortLevel = 0;
   state: WorldState = 'playing';
+  /** The player gave up from the Pausa (CU-08): the run ends as a loss, shown as abandoned. */
+  abandoned = false;
   /** The run's seed (shown on the F3 panel), so a run seen in the game can be replayed. */
   readonly seed: number;
   readonly rng: Rng;
@@ -345,6 +347,13 @@ export class World {
     this.player.hp = this.player.stats.maxHp * config.revive.hp;
     this.player.iframes = config.revive.iframes;
     this.events.push({ type: 'revived' });
+  }
+
+  /** Gives the run up (Desistir): it ends as a loss that the end screen reads as abandoned. */
+  abandon(): void {
+    if (this.state === 'won' || this.state === 'lost') return;
+    this.abandoned = true;
+    this.end('lost');
   }
 
   private end(state: 'won' | 'lost'): void {

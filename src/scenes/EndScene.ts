@@ -163,7 +163,7 @@ export class EndScene extends Phaser.Scene {
     const cx = x + w / 2;
     const world = this.world;
     const vigil = world.endless;
-    label(this, cx, y + 18, vigil ? t.end.vigilOver : won ? t.end.won : t.end.lost, compact ? 30 : 36, {
+    label(this, cx, y + 18, vigil ? t.end.vigilOver : world.abandoned ? t.end.abandoned : won ? t.end.won : t.end.lost, compact ? 30 : 36, {
       bold: true,
       color: won ? UI.gold : UI.danger,
     });
@@ -172,7 +172,9 @@ export class EndScene extends Phaser.Scene {
       ? t.end.vigilText(formatTime(world.vigilTime))
       : won
         ? t.stages[world.stageId].won
-        : t.end.lostText(t.characters[world.character].name);
+        : world.abandoned
+          ? t.end.abandonedText(t.characters[world.character].name)
+          : t.end.lostByStage[world.stageId](t.characters[world.character].name);
     const text = label(this, cx, y, flavor, compact ? 14 : 15, { wrap: w }).setOrigin(0.5, 0);
     y += text.height + 6;
     if (vigil && this.vigilRecord) {

@@ -887,7 +887,7 @@ Tudo em `render/fx.ts`, `scenes/GameScene.ts` e `render/art/`, lendo estado que 
   Lanceiro e Golem com anel dourado no chão desenhado na textura (`Pen.eliteRing`, no lugar da sombra preta); baú
   caído com anel dourado pulsando e uma estrela branca que pisca na tampa (`fx.ts`).
 
-**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto
+**RF-04 · Sem flash de tela inteira: baú, Badalada e Sopro de Geada com forma** · vfx + impl · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · ✅ fechado em 2026-11-12 (Segunda Chance: o flash virou luz de 900 px no herói, `lighting.flash`, mais o anel de nível em pixel; nenhum `cameras.main.flash` resta)
 
 - Por quê: 06-vfx #5 e #12: o baú (`cameras.main.flash`, `GameScene.ts:331`) pinta a tela de amarelo opaco num quadro e
   não mostra o que veio, justamente o momento do Elo; Badalada e Sopro de Geada idem; o fim do congelamento chega sem
@@ -1296,7 +1296,7 @@ implementação abaixo; cada item é um commit.
   título. Teclado: `keyNav` ganhou navegação livre por posição (`navNearest`, testada); esquerda/direita na linha de
   abas troca na hora, Q/E (e PageUp/PageDown) trocam de qualquer lugar, Esc volta. Ponto dourado em `newsDot`.
 
-**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito · ↩ reaberto na Revisão 2026-11-09 · proposto · ampliado na Revisão 2026-11-11 · reescrito na reavaliação 2026-11-12 (P)
+**CC-06 · Aba Bestiário** · impl + visual · M · ✅ feito (2026-11-12: silhueta com `setTintFill` e "De pé" nos chefes; grupos por fase seguem opcionais) · ↩ reaberto na Revisão 2026-11-09 · proposto · ampliado na Revisão 2026-11-11 · reescrito na reavaliação 2026-11-12 (P)
 
 - O quê: grade com silhuetas, ficha com abates, primeira fase, características em termos de jogador
   (`enemyTraits` puro e testado) e frase do original onde houver (fontes em `conquistas.md`).
@@ -1585,7 +1585,7 @@ quick wins NT-01, NT-04, NE-03, NE-04, NF-01, NA-01, NA-06, NA-08, mais parte do
 - Aceite: teste com multidão dentro e um alvo fora: as espadas avançam; no sim, investida em pelo menos 30% dos passos
   com inimigos nessa faixa; Vigília ainda na faixa do lab.
 
-**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto · reescrito na reavaliação 2026-11-12
+**NB-08 · Avisos do HUD por cima do level-up e da Pausa** · ui + impl · P · ✅ feito · ↩ reaberto na Revisão 2026-11-11 · proposto · reescrito na reavaliação 2026-11-12 · ✅ fechado em 2026-11-12 (setas somem com level-up, Pausa e Fim; conquista espera enquanto o chefe vive ou a vida está abaixo de 30%)
 
 - Por quê: 03-qa #9, 05-ui #2. O toast de conquista já iniciado e o aviso grande (`announce`: "Um inimigo poderoso se
   aproxima!", "Ganhou: X") continuam animando sobre o título, a 1ª carta, a linha da receita e o Trocar
@@ -2956,7 +2956,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   (`STAGES[*].elites`), para não divergir de novo.
 - Aceite: teste que falha se uma elite de fase não contar; save antigo com abates de Golem continua contando.
 
-**CB-04 · "Tombou na neve" na Cripta** · impl · P · proposto (texto com o Daniel)
+**CB-04 · "Tombou na neve" na Cripta** · impl · P · ✅ feito (2026-11-12) · TEXTO PROVISÓRIO, o Daniel reescreve (`end.lostByStage` em `pt-BR.ts`; Valmor igual, Cripta e Estrada neutras, sem nomear sino, lobo, pessoa ou lugar da história)
 
 - Por quê: 03-qa B1, 05-ui UI-03. `t.end.lostText` (`pt-BR.ts:373`) diz "<herói> tombou na neve. Valmor ainda espera
   por um herói." em todas as fases (`r420-death-end.png`): é a primeira frase depois da morte, dentro de uma cripta.
@@ -3265,7 +3265,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   nenhum (`useCharge` em `LevelUpScene` só retorna): um tremor curto no botão e o som surdo; (2) os pips da faixa da
   build (`buildPanel.ts`) com pelo menos 4 px de altura no celular. Tamanho P.
 
-**CU-08 · Desistir mostra a tela final** · ui + impl · P · proposto (decidi; o Daniel pode vetar)
+**CU-08 · Desistir mostra a tela final** · ui + impl · P · ✅ feito (2026-11-12): `World.abandon()`, `GameScene.abandonRun` guarda a partida e abre o Fim titulado "Partida abandonada"
 
 - Por quê: 03-qa B5. Desistir (em duas etapas) vai direto ao menu; o Elo forjado é gravado, mas o jogador não vê o que
   a partida rendeu. Pilar 4: toda partida mostra o que avançou.

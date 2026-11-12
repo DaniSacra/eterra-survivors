@@ -671,7 +671,9 @@ export class GameScene extends Phaser.Scene {
     for (let i = 0; i < zones.length; i++) {
       const z = zones[i] as (typeof zones)[number];
       const color = z.burnDps > 0 ? BURN_LIGHT : z.slows ? FROST_LIGHT : ZONE_LIGHT;
-      l.add(z.x, z.y, z.radius * 2.2, color, 0.6);
+      // A fresh zone lands with a brief brightening (none with the calm screen).
+      const landed = this.calm ? 0 : Math.max(0, 1 - (z.duration - z.ttl) / 0.3);
+      l.add(z.x, z.y, z.radius * 2.2, color, 0.55 + 0.3 * landed, 0.12 * landed);
     }
     this.effectLights();
     // Chests glow where they lie.
@@ -697,16 +699,36 @@ export class GameScene extends Phaser.Scene {
       if (def.kind !== 'aura') continue;
       const st = weaponStats(wp) as AuraLevel;
       const k = 1 - wp.timer / (st.cooldown * w.player.stats.cooldown);
+      // The light charges between ticks, then flares right at the tick (the same beat as the wave of the rim).
       const flare = calm ? 0 : Math.max(0, 1 - k * 3);
       l.add(
         w.player.x,
         w.player.y,
         st.radius * w.player.stats.area * 1.3,
         isElo(wp.id) ? 0xff8a30 : 0xffc860,
-        0.45 + 0.4 * flare,
-        0.1 + 0.1 * flare,
+        0.4 + 0.15 * k * k + 0.35 * flare,
+        0.08 + 0.04 * k * k + 0.12 * flare,
       );
       used++;
+    }
+    // Blows that land: Chama de Yah's wave and the mace's blow and shock wave light the ground where they hit and
+    // fade with them (half strength with the calm screen; never under the level-up overlay).
+    if (w.state !== 'levelup') {
+      const slashes = w.slashes.active;
+      const fx = config.effects;
+      for (let i = 0; i < slashes.length && used < FX_LIGHTS - 2; i++) {
+        const sl = slashes[i] as (typeof slashes)[number];
+        const form = sl.form;
+        if (form !== 'smash' && form !== 'shock' && form !== 'pulse') continue;
+        const total = form === 'smash' ? fx.smashTtl : form === 'shock' ? fx.shockTtl : fx.pulseTtl;
+        const q = Math.min(1, Math.max(0, 1 - sl.ttl / total)); // 0 at the blow, 1 when it is gone
+        const reach = form === 'smash' ? sl.range : sl.shock;
+        const colour = form === 'pulse' ? 0xff9a40 : (HIT_SPARK[sl.weapon]?.[1] ?? 0xffb040);
+        const a = (sl.echo ? 0.3 : 0.55) * (1 - q) * (calm ? 0.5 : 1);
+        const grow = form === 'smash' ? 1.4 : 1.1 + 0.5 * q;
+        l.add(sl.x, sl.y, reach * grow + 30, colour, a, calm ? 0 : 0.14 * (1 - q));
+        used++;
+      }
     }
     const foes = w.enemies.active;
     if (w.alive.emberBones) {
@@ -722,17 +744,8 @@ export class GameScene extends Phaser.Scene {
       const b = bolts[i] as (typeof bolts)[number];
       const k = Math.min(1, b.ttl / config.effects.boltTtl);
       const c = HIT_SPARK[b.weapon]?.[1] ?? 0xfff0c0;
-      l.add(b.x, b.y, b.radius * 2 + 50, c, 0.6 * k, 0.15 * k);
+      l.add(b.x, b.y, b.radius * 2 + 50, c, (calm ? 0.35 : 0.6) * k, calm ? 0 : 0.15 * k);
       used++;
-    }
-    if (!calm && w.state !== 'levelup') {
-      const slashes = w.slashes.active;
-      for (let i = 0; i < slashes.length && used < FX_LIGHTS; i++) {
-        const sl = slashes[i] as (typeof slashes)[number];
-        if (sl.form !== 'smash' && sl.form !== 'shock') continue;
-        l.add(sl.x, sl.y, sl.range * 1.5 + 40, HIT_SPARK[sl.weapon]?.[1] ?? 0xfff0c0, 0.4, 0);
-        used++;
-      }
     }
   }
 
@@ -1484,6 +1497,23 @@ export class GameScene extends Phaser.Scene {
     } else ps.play(loop, true);
   }
 
+  /** Desistir (from the Pausa): banks what the run earned and opens the end screen, titled as abandoned (CU-08). */
+  abandonRun(): void {
+    const w = this.world;
+    if (w.state !== 'playing') return;
+    w.abandon();
+    w.events.length = 0;
+    const unlocked = w.endless ? this.bankVigil() : this.bank();
+    this.scene.stop(SCENES.pause);
+    this.scene.launch(SCENES.end, {
+      world: w,
+      unlocked,
+      newElos: this.newElos,
+      newAchievements: this.newAchievements,
+      vigilRecord: this.vigilRecord,
+    });
+  }
+
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
@@ -1587,7 +1617,7 @@ export class GameScene extends Phaser.Scene {
         case 'revived':
           sound.play('levelUp');
           this.hud.announce(t.revived, true);
-          if (!this.calm) this.cameras.main.flash(400, 255, 240, 200);
+          if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 900, 0xfff0d0, 0.7);
           this.levelUpPulse(true);
           break;
         case 'won':
