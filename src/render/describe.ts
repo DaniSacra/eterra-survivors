@@ -122,6 +122,8 @@ export interface UpgradeText {
   recipeIcon: string;
   /** The recipe is still incomplete after this choice (it reads muted); false when this choice forges the Elo. */
   recipeMissing: boolean;
+  /** What the thing does, in one short line; the numbers come after it (PX-07). A new weapon, or a passive's first level. */
+  phrase?: string;
   /** The recipe this option moves, as a picture (the first one, or the closest to done for a passive). */
   picture?: RecipePicture;
   /** A new weapon's level 1 numbers; shown before its flavour text (numbers first, flavour only with room). */
@@ -191,6 +193,7 @@ export function describeUpgrade(
           // How it fights: aimed (walk to aim it), automatic or around the hero (NU-07).
           tag: t.levelUp.newWeaponOf(t.levelUp.category[weaponCategory(opt.id)]),
           desc: w.desc,
+          phrase: w.desc,
           stats: weaponStartLine(opt.id),
           picture: recipePicture(opt.id, opt.level, passiveLevel, known) ?? undefined,
           icon,
@@ -226,6 +229,7 @@ export function describeUpgrade(
         title: t.passives[opt.id],
         tag: t.units.of(t.levelUp.level(opt.level), def.maxLevel),
         desc: formatStatDelta(def.stat, def.perLevel),
+        phrase: opt.level === 1 ? t.passiveDesc[opt.id] : undefined,
         icon: `icon.${opt.id}`,
         picture: moved
           .map((o) => recipePicture(o.id, o.level, opt.level, known) as RecipePicture)

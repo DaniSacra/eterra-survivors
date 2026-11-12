@@ -158,7 +158,7 @@ a troca de preços só depois da aprovação. A arte do cartaz (Fase 6) pode ser
 
 ### Fase 3 · Entender as armas
 
-**PX-07 [8] · Uma frase do que cada arma, passiva e Elo faz** · game-director + ui + impl · M · rascunho em docs/design/frases-px07.md, espera o Daniel
+**PX-07 [8] · Uma frase do que cada arma, passiva e Elo faz** · game-director + ui + impl · M · feito (2026-11-12: as 36 frases aprovadas pelo Daniel; carta com a frase primeiro e os números menores embaixo; passivas só no nível 1)
 - O quê: 13 armas, 10 passivas, 13 Elos = 36 frases curtas em `pt-BR.ts`; na carta, a frase vem antes dos números, que
   ficam menores. A frase do Elo só aparece depois da forja (NU-02). Liga: NU-04, CU-05, NU-07.
 

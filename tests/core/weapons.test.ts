@@ -435,7 +435,9 @@ describe('rhythm texts match the data', () => {
   };
   it('Fúria and Maça say the rhythm they have', () => {
     expect(said(t.weapons.fury.desc)).toBe(WEAPONS.fury.wave.every);
-    expect(said(t.weapons.mace.desc)).toBe(WEAPONS.mace.waveEvery);
+    // The short phrase of the mace (PX-07) no longer names its rhythm; if one ever does, it must be right.
+    const mace = said(t.weapons.mace.desc);
+    if (mace !== undefined) expect(mace).toBe(WEAPONS.mace.waveEvery);
   });
 });
 

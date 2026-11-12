@@ -203,19 +203,20 @@ export class LevelUpScene extends Phaser.Scene {
       // A long name next to a long tag (narrow phones): the name shrinks until they no longer touch.
       for (let size = tight ? 15 : 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
         title.setFontSize(fontPx(size));
-      // Numbers first (a new weapon's level 1 line), the flavour only when there is room.
-      const desc = label(
-        this,
-        left,
-        y - cardH / 2 + (tight ? 24 : 33),
-        d.stats ? `${d.stats}\n${d.desc}` : d.desc,
-        tight ? 13 : 14,
-        {
-          color: UI.muted,
-          align: 'left',
-          wrap: textW,
-        },
-      );
+      // What it does first, in one line, then the numbers smaller under it (PX-07).
+      const numbers = d.phrase ? (d.stats ?? d.desc) : '';
+      const desc = label(this, left, y - cardH / 2 + (tight ? 24 : 33), d.phrase ?? d.desc, tight ? 13 : 14, {
+        color: d.phrase ? UI.text : UI.muted,
+        align: 'left',
+        wrap: textW,
+      });
+      const nums = numbers
+        ? label(this, left, desc.y + desc.height + 2, numbers, tight ? 11 : 12, {
+            color: UI.muted,
+            align: 'left',
+            wrap: textW,
+          })
+        : null;
       // The card's text ends here: above the recipe when there is one, else near the bottom edge.
       let limit = y + cardH / 2 - 4;
       if (d.picture) {
@@ -245,7 +246,8 @@ export class LevelUpScene extends Phaser.Scene {
       }
       // The recipe always stays (it is what opens an Elo, NU-02). A new weapon gives up its flavour first, then a long
       // description its last lines; a single line that still overlaps goes (the title and tag say the rest).
-      if (d.stats && desc.y + desc.height > limit) desc.setText(d.stats);
+      // No room for the numbers: the phrase stays (it says what the thing does).
+      if (nums && nums.y + nums.height > limit) nums.setVisible(false);
       let lines = desc.getWrappedText();
       while (desc.y + desc.height > limit && lines.length > 1) {
         lines = lines.slice(0, -1);
