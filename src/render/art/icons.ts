@@ -211,6 +211,18 @@ export const ICON_ART: Record<string, ArtDef> = {
       p.fill(0xb07a30).fillRect(5.5, 18.6, 9, 1.2);
     },
   },
+  /** A slime drop with a down chevron: the hero is slowed (CU-02). */
+  'icon.slow': {
+    w: 16,
+    h: 16,
+    draw(p) {
+      p.outline = 1.5;
+      p.poly([8, 1.5, 12.5, 8, 12.5, 10.5, 10.5, 14, 5.5, 14, 3.5, 10.5, 3.5, 8], 0x7ad04a);
+      p.ink();
+      p.fill(0xe8ffc0, 0.7).fillEllipse(6.2, 9, 1.6, 2.6);
+      p.fill(INK).fillRect(7.2, 7.5, 1.6, 3).fillTriangle(5.8, 10, 10.2, 10, 8, 12.4);
+    },
+  },
   /** A small cartoon skull, for the kill counter in the HUD. */
   'icon.kills': {
     w: 16,

@@ -75,6 +75,8 @@ export class World {
   level = 1;
   xp = 0;
   pendingLevelUps = 0;
+  /** The hero is slowed by the ground right now (ice, slime, tar, web): the HUD and the hero's rim show it. */
+  slowed = false;
   /** The choices on screen while `state === 'levelup'`. */
   upgradeOptions: UpgradeOption[] = [];
   readonly passives: Partial<Record<PassiveId, number>> = {};
@@ -210,6 +212,7 @@ export class World {
     this.time += dt;
     // On the Lobo Velho's ice the hero is slower (FT-08).
     const ice = this.marks.size > 0 ? groundSlow(this) : 1;
+    this.slowed = ice < 1;
     if (ice < 1) {
       ICE_INPUT.x = input.x * ice;
       ICE_INPUT.y = input.y * ice;

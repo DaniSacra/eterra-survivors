@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
-import { almostElo, passiveReport, weaponReport } from '../../src/core/report';
+import { almostElo, hurtShare, passiveReport, weaponReport } from '../../src/core/report';
 import { PASSIVES } from '../../src/data/upgrades';
 import { maxLevel } from '../../src/core/weapons';
 import { WEAPONS } from '../../src/data/weapons';
@@ -69,5 +69,21 @@ describe('end-of-run report', () => {
     expect(almostElo(w)).toBeNull();
     forgeFury(w);
     expect(almostElo(w)).toBeNull();
+  });
+});
+
+describe('hurtShare', () => {
+  const none = { contact: 0, shot: 0, leap: 0, ground: 0, boss: 0 };
+  it('is empty when nothing hurt the hero', () => {
+    expect(hurtShare(none)).toEqual([]);
+  });
+  it('orders sources by share, leaves out the idle ones and keeps the top three', () => {
+    const r = hurtShare({ contact: 62, shot: 25, leap: 0, ground: 13, boss: 0 });
+    expect(r).toEqual([
+      { source: 'contact', percent: 62 },
+      { source: 'shot', percent: 25 },
+      { source: 'ground', percent: 13 },
+    ]);
+    expect(hurtShare({ contact: 40, shot: 30, leap: 20, ground: 10, boss: 0 })).toHaveLength(3);
   });
 });

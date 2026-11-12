@@ -3187,7 +3187,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C5 · Interface (dono: ui-designer)
 
-**CU-02 · Vida baixa, lentidão e "Caiu por"** · ui + impl · M · proposto
+**CU-02 · Vida baixa, lentidão e "Caiu por"** · ui + impl · M · ✅ feito (2026-11-12): `render/lowHp.ts` (vinheta coral abaixo de 35% com pulso lento e abaixo de 15% com pulso rápido; fixa no modo calmo); `World.slowed` liga `icon.slow` (16 px) na linha dos contadores e o contorno do herói em verde-limo; `hurtShare` em `core/report.ts` (com teste) e a linha "Caiu por: contato 62% · tiros 25% · marcas no chão 13%" no Fim (só derrota, os três maiores). A barrinha sob os pés ficou como estava
 
 - Por quê: 05-ui UI-03. Com 18/160 só o número muda (`lowhp-420.png`); no celular o polegar cobre o canto e o olho
   está no herói. A lentidão do limo não tem sinal. A tela final não usa o `world.hurtBy` que o mundo já conta: na

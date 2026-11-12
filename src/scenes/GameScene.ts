@@ -82,6 +82,8 @@ const RISE_SQUASH = 0.25;
 const DUST = 0xc8bca8;
 /** The pale cool light behind the hero. */
 const HERO_HALO = 0xdfe8ff;
+const HERO_RIM = 0xb4d0ff;
+const HERO_SLOW_RIM = 0x7ad04a;
 /** Distance from the hero's centre to their feet (world px), where the contact shadow sits. */
 const HERO_FEET = 36;
 /**
@@ -402,7 +404,7 @@ export class GameScene extends Phaser.Scene {
     this.shadows = this.add.graphics().setDepth(4.5);
     this.heroBar = new PixelBar(this, 'hp', true).place(0, 0, HERO_BAR_W + 4, 10).setDepth(13.2);
     this.playerSprite = this.add.sprite(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
-    this.heroRim = this.add.image(0, 0, heroSprite).setDepth(13.05).setTintFill(0xb4d0ff);
+    this.heroRim = this.add.image(0, 0, heroSprite).setDepth(13.05).setTintFill(HERO_RIM);
     const walk = `${heroSprite}.walk`;
     this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
     this.heroKey = heroSprite;
@@ -883,6 +885,9 @@ export class GameScene extends Phaser.Scene {
       .setScale(ps.scaleX, ps.scaleY)
       .setFlipX(ps.flipX)
       .setAlpha(ps.alpha * 0.5);
+    // Slowed by the ground (slime, ice): the rim turns slime-green and stronger (CU-02).
+    if (w.slowed) this.heroRim.setTintFill(HERO_SLOW_RIM).setAlpha(ps.alpha * 0.9);
+    else this.heroRim.setTintFill(HERO_RIM);
     // A discreet contact shadow under the hero's feet.
     this.shadows.clear();
     // A pale halo behind the body so a dark hero (Andilla) still stands out on the dark ground (DD-12).

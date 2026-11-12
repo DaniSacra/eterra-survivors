@@ -1,7 +1,7 @@
 import { ELO_DISCOVERY_GOLD } from '../data/evolutions';
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
-import { almostElo, passiveReport, weaponReport } from '../core/report';
+import { almostElo, hurtShare, passiveReport, weaponReport } from '../core/report';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
@@ -163,10 +163,17 @@ export class EndScene extends Phaser.Scene {
     const cx = x + w / 2;
     const world = this.world;
     const vigil = world.endless;
-    label(this, cx, y + 18, vigil ? t.end.vigilOver : world.abandoned ? t.end.abandoned : won ? t.end.won : t.end.lost, compact ? 30 : 36, {
-      bold: true,
-      color: won ? UI.gold : UI.danger,
-    });
+    label(
+      this,
+      cx,
+      y + 18,
+      vigil ? t.end.vigilOver : world.abandoned ? t.end.abandoned : won ? t.end.won : t.end.lost,
+      compact ? 30 : 36,
+      {
+        bold: true,
+        color: won ? UI.gold : UI.danger,
+      },
+    );
     y += compact ? 40 : 46;
     const flavor = vigil
       ? t.end.vigilText(formatTime(world.vigilTime))
@@ -177,6 +184,17 @@ export class EndScene extends Phaser.Scene {
           : t.end.lostByStage[world.stageId](t.characters[world.character].name);
     const text = label(this, cx, y, flavor, compact ? 14 : 15, { wrap: w }).setOrigin(0.5, 0);
     y += text.height + 6;
+    // A lost run says what did the damage: the lesson that changes the next run (CU-02).
+    const shares = world.state === 'lost' && !vigil && !world.abandoned ? hurtShare(world.hurtBy) : [];
+    if (shares.length > 0) {
+      const parts = shares.map((h) => `${t.end.hurt[h.source]} ${h.percent}%`).join(' · ');
+      const line = label(this, cx, y, t.end.hurtBy(parts), 14, {
+        bold: true,
+        color: UI.muted,
+        wrap: w,
+      }).setOrigin(0.5, 0);
+      y += line.height + 6;
+    }
     if (vigil && this.vigilRecord) {
       label(this, cx, y, t.end.vigilRecord, 15, { bold: true, color: UI.gold }).setOrigin(0.5, 0);
       y += 22;

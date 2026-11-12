@@ -1,6 +1,7 @@
 import { evolutionOf } from '../data/evolutions';
 import { PASSIVE_IDS, type PassiveId } from '../data/upgrades';
 import type { WeaponId } from '../data/weapons';
+import { HURT_SOURCES, type HurtSource } from './enemyShots';
 import { eloStatus } from './upgrades';
 import { levelDps } from './weapons';
 import type { World } from './world';
@@ -61,4 +62,20 @@ export function almostElo(
     return { weapon: o.id, elo: evo.id, missing, passive: evo.evo.passive };
   }
   return null;
+}
+
+/**
+ * Where the damage the hero took came from, largest first, as whole percentages (sources that did nothing are left
+ * out). `max` keeps the top few; the shown shares may then add to less than 100. Empty when nothing hurt the hero.
+ */
+export function hurtShare(
+  hurtBy: Record<HurtSource, number>,
+  max = 3,
+): { source: HurtSource; percent: number }[] {
+  const total = HURT_SOURCES.reduce((n, k) => n + hurtBy[k], 0);
+  if (total <= 0) return [];
+  return HURT_SOURCES.filter((k) => hurtBy[k] > 0)
+    .sort((a, b) => hurtBy[b] - hurtBy[a])
+    .slice(0, max)
+    .map((source) => ({ source, percent: Math.max(1, Math.round((hurtBy[source] / total) * 100)) }));
 }

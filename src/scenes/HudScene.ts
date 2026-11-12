@@ -16,6 +16,7 @@ import { sound } from '../render/sound';
 import type { GameScene } from './GameScene';
 import { SCENES } from './keys';
 import { vignetteTexture } from '../render/lighting';
+import { LowHpFrame } from '../render/lowHp';
 import { EdgeArrows } from '../render/edgeArrows';
 import { settings } from '../render/settings';
 import { fxSprites } from '../render/fxSprites';
@@ -111,12 +112,15 @@ export class HudScene extends Phaser.Scene {
   }
 
   private vignette!: Phaser.GameObjects.Image;
+  private lowHp!: LowHpFrame;
+  private slowIcon!: Phaser.GameObjects.Image;
   /** Arrows on the frame toward chests and elites out of view (NU-01). */
   private arrows!: EdgeArrows;
 
   create(): void {
     // Under everything on the HUD: the light vignette that frames the game view.
     this.vignette = this.add.image(0, 0, vignetteTexture(this)).setOrigin(0).setDepth(-10);
+    this.lowHp = new LowHpFrame(this);
     this.arrows = new EdgeArrows(this);
     this.bars = this.add.graphics();
     this.xpBar = new PixelBar(this, 'xp');
@@ -133,6 +137,7 @@ export class HudScene extends Phaser.Scene {
     this.revives = label(this, 0, 0, '', 15, { bold: true, color: UI.danger, stroke: true })
       .setOrigin(1, 0.5)
       .setVisible(false);
+    this.slowIcon = this.add.image(0, 0, 'icon.slow').setScale(ART_SCALE).setVisible(false);
     this.hpText = label(this, 0, 0, '', 14, { bold: true, stroke: true });
     this.bossName = label(this, 0, 0, t.enemies[this.world.stage.boss.id], 15, {
       bold: true,
@@ -189,6 +194,7 @@ export class HudScene extends Phaser.Scene {
   private layout(): void {
     const { width, height } = this.scale;
     this.vignette.setDisplaySize(width, height);
+    this.lowHp.resize(width, height);
     const s = (this.inset = safeArea());
     // The strip behind the XP bar keeps the notch area dark.
     this.bars
@@ -240,6 +246,9 @@ export class HudScene extends Phaser.Scene {
     this.coinIcon.setPosition(this.gold.x - this.gold.width - 11, y);
     this.revives.setPosition(this.coinIcon.x - 17, y);
     this.reviveIcon.setPosition(this.revives.x - this.revives.width - 13, y);
+    // The slowness sign sits at the left end of the counters line.
+    const first = this.reviveIcon.visible ? this.reviveIcon.x - 24 : this.coinIcon.x - this.gold.width - 22;
+    this.slowIcon.setPosition(first, y);
   }
 
   private hpWidth(): number {
@@ -372,6 +381,8 @@ export class HudScene extends Phaser.Scene {
     else this.arrows.hide();
     this.xpBar.set(w.xp / xpToNext(w.level));
     this.hpBar.set(p.hp / p.stats.maxHp);
+    this.lowHp.update(p.hp / p.stats.maxHp, w.time, settings().calm);
+    this.slowIcon.setVisible(w.slowed);
     const hp = Math.ceil(p.hp);
     if (hp !== this.shown.hp || p.stats.maxHp !== this.shown.maxHp)
       this.hpText.setText(t.hud.hp((this.shown.hp = hp), (this.shown.maxHp = p.stats.maxHp)));

@@ -2,6 +2,7 @@ import type { StatKey } from '../data/config';
 import type { ElementId } from '../data/evolutions';
 import type { AchievementGroup, AchievementId } from '../data/achievements';
 import type { CharacterId } from '../data/characters';
+import type { HurtSource } from '../core/enemyShots';
 import type { EnemyId } from '../data/enemies';
 import type { StageId } from '../data/stages';
 import type { PickupId } from '../data/pickups';
@@ -422,6 +423,15 @@ export const t = {
     vigilOver: 'A vigília terminou',
     vigilText: (time: string) => `Você aguentou ${time} na Noite Sem Fim.`,
     vigilRecord: 'Novo recorde da vigília!',
+    /** CU-02: where the damage came from, on a lost run ("Caiu por: contato 62% · tiros 25%"). */
+    hurtBy: (parts: string) => `Caiu por: ${parts}`,
+    hurt: {
+      contact: 'contato',
+      shot: 'tiros',
+      leap: 'saltos',
+      ground: 'marcas no chão',
+      boss: 'o chefe',
+    } satisfies Record<HurtSource, string>,
     won: 'Vitória!',
     lost: 'Fim de jogo',
     /** PROVISIONAL (CB-04): neutral lines that name no event, person or place from the story; Daniel rewrites. */
