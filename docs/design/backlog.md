@@ -3620,7 +3620,7 @@ em `ART_RES`.
   está parado).
 - Aceite: captura com 30 inimigos: contorno dos esqueletos visível dentro dos anéis; F4 igual ou melhor.
 
-**PF-01 · Acerto de área diz quem apanhou** · vfx · P · proposto
+**PF-01 · Acerto de área diz quem apanhou** · vfx · P · ✅ feito (2026-11-12; escolhi: o `setTint` do Phaser só multiplica e não dá para somar claridade, então o contorno é um anel fino mais um preenchimento de 16% no `fxGlow` (aditivo), na cor de faísca da arma, que some junto com o flash do acerto, no máximo 48 por quadro, sem objeto novo; `AREA_HIT` foi para `sparks.ts`; Vigília, Escudos e Muralha ganharam cor de faísca; F4 não medido neste item)
 
 - Por quê: 06-vfx #3. O `AREA_HIT` (`GameScene.ts:70-77`) desliga o flash para aura, zona, arco, pancada e verbos de
   área (certo, NF-01); sobra a cruz de 2 a 3 px de `HIT_SPARK`. Com a Aura no máximo sobre 30 inimigos quase não se vê

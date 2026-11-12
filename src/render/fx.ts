@@ -16,7 +16,7 @@ import { ENEMIES, type EnemyDef, type EnemyId } from '../data/enemies';
 import type { EnemyShot } from '../core/enemyShots';
 import { fxSprites } from './fxSprites';
 import { VFX, vfxKey } from './vfx';
-import { star } from './sparks';
+import { AREA_HIT, HIT_SPARK, star } from './sparks';
 import { arcLine, band, disc, oval, ovalRing, ring } from './shapes';
 import type { CharacterId } from '../data/characters';
 
@@ -855,6 +855,9 @@ function drawSouls(g: Phaser.GameObjects.Graphics, world: World, n: number, left
 export const FX_LIGHTS = 8;
 /** The most burning bodies drawn with flames in a frame. */
 const BURNING_SHOWN = 14;
+/** Rims of area hits drawn per frame, and the colour of a weapon with no spark colour of its own. */
+const HIT_RIMS = 48;
+const HIT_RIM_PLAIN = 0xffe6b0;
 const FLAME_OUTER = 0xff5a14;
 const FLAME_MID = 0xffa030;
 const FLAME_CORE = 0xfff2c0;
@@ -938,6 +941,21 @@ function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm
         dim > 0.9 ? 1 : 0.8,
       );
     }
+  }
+  // Who was hit by an area weapon (no white flash for those): a thin rim of the weapon's own light that fades with
+  // the hit, added over the body (PF-01). The calm screen keeps it, only dimmer.
+  let rims = 0;
+  for (let i = 0; i < foes.length && rims < HIT_RIMS; i++) {
+    const e = foes[i] as (typeof foes)[number];
+    if (e.dead || e.flash <= 0 || !e.hitBy || !AREA_HIT[e.hitBy]) continue;
+    rims++;
+    const f = Math.min(1, e.flash / config.enemies.hitFlash);
+    const c = HIT_SPARK[e.hitBy]?.[1] ?? HIT_RIM_PLAIN;
+    const r = e.def.radius;
+    g.fillStyle(c, 0.16 * f * dim);
+    oval(g, e.x, e.y - r * 0.2, r * 1.1, r * 1.25);
+    g.lineStyle(2, c, 0.7 * f * dim);
+    ovalRing(g, e.x, e.y - r * 0.2, r * 1.15, r * 1.3);
   }
   for (let iW = 0; iW < world.weapons.length; iW++) {
     const w = world.weapons[iW] as (typeof world.weapons)[number];

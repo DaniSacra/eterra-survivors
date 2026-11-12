@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import type { WeaponId } from '../data/weapons';
+import { WEAPON_IDS, WEAPONS, type WeaponDef, type WeaponId } from '../data/weapons';
 import { ring } from './shapes';
 import { ELEMENT_COLOR } from './ui';
 
@@ -45,6 +45,21 @@ const CAP = 96;
 /** New sparks allowed per frame (big moments may go over it, never over the cap). */
 const BUDGET = 24;
 
+/**
+ * Weapons that hit many at once (swings, slams, auras, frost, bursts, chains, ricochets, burning ground): no white
+ * flash, or the crowd inside would turn into one white blob; their sparks, the squash and the weapon's own shape
+ * show the hit, and `drawGlow` lights a thin rim on each enemy hit (PF-01). Only single-target hits (bolts, thrown shots,
+ * orbiting blades, homing motes) flash white.
+ */
+export const AREA_HIT = Object.fromEntries(
+  WEAPON_IDS.map((id) => {
+    const d = WEAPONS[id] as WeaponDef;
+    const kind = d.kind === 'aura' || d.kind === 'zone' || d.kind === 'arc' || d.kind === 'slam';
+    const blast = d.kind === 'thrown' && d.levels.some((l) => (l.blast ?? 0) > 0);
+    return [id, kind || blast || !!(d.split || d.chain || d.ricochet || d.ward || d.ground || d.wave)];
+  }),
+) as Record<WeaponId, boolean>;
+
 /** The spark a weapon's hit makes: [kind, color]. Weapons not listed make a white star. */
 export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> = {
   yahAura: [SPARK.cross, 0xffd870],
@@ -63,6 +78,10 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   // The Elos' sparks in their element's colour.
   jointBreaker: [SPARK.star, ELEMENT_COLOR.earth],
   fury: [SPARK.star, ELEMENT_COLOR.fury],
+  // Orbiting swords and thrown shields had no colour of their own (PF-01).
+  vigil: [SPARK.cross, 0xfff0c0],
+  shields: [SPARK.star, 0xa8c4e8],
+  valmorWall: [SPARK.star, ELEMENT_COLOR.steel],
   staff: [SPARK.cross, 0xd8b0ff],
   lyraStar: [SPARK.cross, 0xfff0c0],
 };
