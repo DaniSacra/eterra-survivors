@@ -23,6 +23,8 @@ export const VFX = {
   flame: { frames: 8, w: 48, h: 76, anchor: [0.5, 0.763], fps: 10 },
   /** Geada and Nevasca's crystals: they rise, shimmer and melt over the patch's life (stretch the 11 frames to it). */
   ice: { frames: 11, w: 144, h: 72, anchor: [0.5, 0.778], fps: 3 },
+  /** Aura de Yah's ring of light and turning runes (looping); its outer ring is 57 art px from the centre. */
+  aura: { frames: 12, w: 128, h: 128, anchor: [0.5, 0.5], fps: 12 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;

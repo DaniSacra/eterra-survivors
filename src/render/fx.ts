@@ -64,6 +64,8 @@ const BLAST_RING = 44;
 const ICE_SPAN = 80;
 /** Burning patch radius that a flame at its own size suits. */
 const EMBER_SPAN = 70;
+/** The aura ring sprite's outer ring, art px from the centre. */
+const AURA_RING = 57;
 /** Espada de Fogo's burning ground: the flames' light orange. */
 const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
@@ -995,8 +997,22 @@ function drawAura(
   // The rim flares on the tick and rests between ticks.
   const flare = Math.max(0, 1 - k * 3);
   // ...and the Chama's rim glows hotter and thicker as its wave comes near.
-  g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
-  ring(g, p.x, p.y, r);
+  // The pixel ring of light, turning, out at the exact edge of the aura.
+  const halo = VFX.aura;
+  fxSprites.putFrame(
+    vfxKey('aura'),
+    Math.floor(t * halo.fps) % halo.frames,
+    halo.anchor[0],
+    halo.anchor[1],
+    p.x,
+    p.y,
+    r / AURA_RING,
+    0.6 + 0.4 * flare + 0.3 * heat,
+  );
+  if (elo) {
+    g.lineStyle(2 + 2 * flare + 3 * heat, heat > 0.5 ? 0xffd080 : c, 0.35 + 0.55 * flare + 0.3 * heat);
+    ring(g, p.x, p.y, r);
+  }
   // The beat: a wave from the core out to the exact edge (over the crowd, thin, so it is seen but hides nothing).
   if (k < 0.45) {
     const wk = k / 0.45;
@@ -1021,20 +1037,20 @@ function drawAura(
     }
   }
   if (!elo) return;
-  // Round flame tongues licking up from the rim (they rise in screen space, like real flames), taller on a tick.
-  // Ten big tongues (not a ring of candles), taller as the wave comes near.
+  // Ten real flames standing on the rim, taller as the wave comes near.
   const n = 10;
+  const fl = VFX.flame;
   for (let i = 0; i < n; i++) {
     const a = (i * Math.PI * 2) / n + t * 0.4;
-    const bx = p.x + Math.cos(a) * r;
-    const by = p.y + Math.sin(a) * r;
-    const h = 16 + 5 * Math.sin(t * 9 + i * 1.7) + 4 * flare + 9 * heat;
-    const w = 9;
-    g.fillStyle(i % 2 ? AURA_COLOR : FLAME_COLOR, 0.55);
-    disc(g, bx, by, w);
-    g.fillTriangle(bx - w, by, bx + w, by, bx + Math.sin(t * 5 + i) * 2, by - h - w);
-    g.fillStyle(0xfff0c0, 0.5);
-    disc(g, bx, by + 1, w * 0.45);
+    fxSprites.putFrame(
+      vfxKey('flame'),
+      Math.floor(t * fl.fps + i * 3) % fl.frames,
+      fl.anchor[0],
+      fl.anchor[1],
+      p.x + Math.cos(a) * r,
+      p.y + Math.sin(a) * r + 6,
+      0.7 + 0.15 * flare + 0.25 * heat,
+    );
   }
 }
 
