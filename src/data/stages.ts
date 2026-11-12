@@ -61,7 +61,7 @@ export const STAGES = {
   valmor: {
     tile: 'tile',
     layout: { kind: 'obstacles', set: 'village', cell: 260, chance: 0.16, clear: 220 },
-    mult: { hp: 0.9, damage: 0.95, speed: 1, spawn: 1, gold: 1 },
+    mult: { hp: 0.9, damage: 0.9, speed: 1, spawn: 1, gold: 1 },
     waves: buildWaves({ basic: 'graveRat', fast: 'bat', tank: 'rat', extra: 'spider' }),
     elites: elites('witch'),
     specials: [
@@ -77,7 +77,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', set: 'crypt', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 0.78, damage: 0.42, speed: 1.0, spawn: 1.0, gold: 1.5 },
+    mult: { hp: 0.82, damage: 0.46, speed: 1.0, spawn: 1.0, gold: 1.5 },
     waves: buildWaves({
       basic: 'bones',
       fast: 'vampireBat',

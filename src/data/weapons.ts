@@ -234,9 +234,9 @@ export const WEAPONS = {
       { radius: 65 },
       { damage: 6.3 },
       { radius: 75, cooldown: 0.45 },
-      { damage: 8.4 },
-      { radius: 90 },
-      { damage: 10, cooldown: 0.35 },
+      { damage: 6.5 },
+      { radius: 120 },
+      { damage: 4.8, cooldown: 0.35, radius: 150 },
     ),
   },
   /** Adagas de Andilla: quick knives thrown where she runs, in a narrow fan; each stops in the first enemy, and some crit. */
@@ -301,9 +301,9 @@ export const WEAPONS = {
       { count: 2 },
       { damage: 10.7 },
       { count: 3, spin: 5.8 },
-      { orbitRadius: 82, radius: 10 },
+      { orbitRadius: 88, radius: 12 },
       { count: 4 },
-      { damage: 13.4, spin: 6.6 },
+      { damage: 14, spin: 6.6 },
     ),
   },
   /** Geada de Valmor: patches of frost that hurt and slow. */
@@ -331,7 +331,7 @@ export const WEAPONS = {
       { count: 3, cooldown: 2 },
       { radius: 36 },
       { count: 4, damage: 78 },
-      { damage: 99, radius: 40, cooldown: 1.7 },
+      { damage: 90, radius: 40, cooldown: 1.7 },
     ),
   },
   /** Martelo do Gaspar: the smith's heavy hammer, thrown ahead; it ploughs through rows. */
@@ -421,10 +421,10 @@ export const WEAPONS = {
         damage: 20,
         cooldown: 1.4,
         radius: 60,
-        knockback: 220,
+        knockback: 160,
         wave: 0.8,
         waveRadius: 105,
-        waveKnockback: 700,
+        waveKnockback: 450,
         stun: 0.4,
       },
       { damage: 26 },
@@ -432,7 +432,7 @@ export const WEAPONS = {
       { damage: 32, cooldown: 1.25 },
       { radius: 70 },
       { damage: 41 },
-      { damage: 53, cooldown: 1.1, radius: 75, waveRadius: 125 },
+      { damage: 58, cooldown: 1.1, radius: 75, waveRadius: 125 },
     ),
   },
 
@@ -447,7 +447,7 @@ export const WEAPONS = {
       { radius: 48, cooldown: 1.8 },
       { damage: 26 },
       { count: 3 },
-      { damage: 42, radius: 56 },
+      { damage: 38, radius: 56 },
     ),
   },
 
@@ -481,7 +481,7 @@ export const WEAPONS = {
   yahFlame: {
     kind: 'aura',
     pulse: { every: 10, damage: 4, radius: 1.25, knockback: 650 },
-    levels: [{ damage: 10, cooldown: 0.3, radius: 150 }],
+    levels: [{ damage: 11, cooldown: 0.3, radius: 150 }],
   },
   /** Leque de Facas: knives that bounce from enemy to enemy, and crits that make them bleed. */
   fan: {
@@ -523,7 +523,7 @@ export const WEAPONS = {
   storm: {
     kind: 'strike',
     chain: { count: 2, range: 170, damage: 0.7 },
-    levels: [{ damage: 25, cooldown: 0.8, count: 8, radius: 52 }],
+    levels: [{ damage: 38, cooldown: 0.8, count: 6, radius: 52 }],
   },
   /** Quebra-Junta: the shock wave on every blow, an aftershock right after it, and the stunned get crushed. */
   jointBreaker: {
@@ -533,7 +533,7 @@ export const WEAPONS = {
     crush: 1.5,
     levels: [
       {
-        damage: 70,
+        damage: 76,
         cooldown: 0.9,
         radius: 70,
         knockback: 260,
@@ -549,7 +549,7 @@ export const WEAPONS = {
   fireSword: {
     kind: 'strike',
     ground: { duration: 2.5, damage: 0.15, burn: 0.3, for: 2 },
-    levels: [{ damage: 12, cooldown: 0.8, count: 7, radius: 70 }],
+    levels: [{ damage: 18, cooldown: 0.8, count: 5, radius: 70 }],
   },
   /** Fúria da Forja: hammers that never stop. */
   forgeFury: {

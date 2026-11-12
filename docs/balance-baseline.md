@@ -1086,3 +1086,37 @@ A tabela `TARGETS` do sim agora imprime `ok` ou `OFF lo-hi` por célula.
 - `REACH` (meia Loja, 8 sementes): Aura de Yah 0,2 inimigos no alcance, Espadas de Elun 0,1, Chama de Yah 1,3, Vigília 0,4.
   Ou seja, o bot mata a multidão antes de ela chegar a 90 px: a Aura e as Espadas quase nunca têm alvo (DPS real 6 e 3 com
   meia Loja); o problema é alcance, não dano por golpe.
+
+## PE-02 (2026-11-12): as cinco cartas fracas
+
+`SIM_SEEDS=16 SIM_SHOP=all`. Ruído de 64 corridas: cerca de ±8 pontos por célula (Valmor meia Loja deu 55%, 42%, 39% e 44% com
+quase os mesmos números).
+
+| Arma (DPS real, nível máximo)            | Antes | Depois | Meta                                |
+| ---------------------------------------- | ----- | ------ | ----------------------------------- |
+| Aura de Yah                              | 15    | 56     | >= 1/4 da melhor `aimed` (~100–120) |
+| Espadas de Elun                          | 21    | 15     | idem                                |
+| Maça de Ferro                            | 100   | 90–160 | idem (amostras pequenas: 10 a 19)   |
+| Tempestade (`ELO X`)                     | 1,6x  | 2,2x   | >= 2,5x                             |
+| Espada de Fogo (`ELO X`)                 | 1,9x  | 2,2x   | >= 2,5x                             |
+| Quebra-Junta (`ELO X`, efeito colateral) | 8,1x  | 2,3x   | >= 2,5x                             |
+| Chama de Yah (`ELO X`)                   | 13,9x | 2,7x   | >= 2,5x                             |
+
+`REACH` da Aura de Yah: 0,2 → 1,8 inimigos no alcance. Espadas de Elun seguem em 0,2 (o bot mata a multidão antes de 88 px).
+
+Números mudados: Aura de Yah N5 dano 8,4 → 6,5, N6 raio 90 → 120, N7 dano 10 → 4,8 e raio 90 → 150 (o lab é proporcional à
+área: mesmo DPS no campo congelado, muito mais alcance); Chama de Yah dano 10 → 11. Espadas de Elun N5 raio 82 → 88 e
+alcance 10 → 12, N7 dano 13,4 → 14. Maça: empurrão 220 → 160, onda 700 → 450 (empurrava o alvo para fora do alcance), N7 dano 53 → 58;
+Quebra-Junta dano 70 → 76. Tempestade 8 raios de 25 → 6 de 38; Espada de Fogo 7 de 12 → 5 de 18; Fogo N7 dano 42 → 38 e Raio N7 dano 99 → 90
+(bases mais baixas dentro da faixa `auto`, para o Elo valer mais sobre elas). Bandas do lab verdes.
+Cripta `mult` hp 0,78 → 0,82, dano 0,42 → 0,46 (as armas mais fortes subiram o "nenhuma Loja" para 14–19%); Valmor dano 0,95 → 0,9.
+
+Tabela final (16 sementes): Valmor 8% / 44% / 95%, Cripta 9% / 81% / 94%, Estrada 0% / 0% / 44% (metas atendidas).
+Heróis fora de 20 pontos: Valmor half Lyra/Andilla 31% contra 44%; Cripta half Aldo 63% contra 81%; Estrada full Teo 13% e Andilla 69%.
+Picks entre 26 e 52%. Linha `LOJA`: 50 corridas médias (meta 40–60).
+
+Pendente: as Espadas de Elun e a Aura continuam sem atingir 1/4 do DPS real da melhor `aimed`: o bot mata tudo antes de
+88 px e as faixas do lab (campo congelado) não deixam subir o dano sem estourar a banda `area`. Precisa de decisão de desenho
+(Daniel): um verbo que traga a multidão (puxão) ou alcance muito maior nas Espadas. Tempestade e Espada de Fogo estão no teto da faixa `auto`
+do lab, então só sobem mais com a base mais fraca ou com a banda `auto` revista. Reteste à mão: Cripta e Valmor com meia Loja; Aura
+de Yah no nível máximo (raio 150, dano por tique menor).
