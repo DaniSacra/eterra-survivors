@@ -17,6 +17,7 @@ import { SCENES } from './keys';
 import { vignetteTexture } from '../render/lighting';
 import { EdgeArrows } from '../render/edgeArrows';
 import { settings } from '../render/settings';
+import { fxSprites } from '../render/fxSprites';
 import { EVOLUTIONS, type Evolution } from '../data/evolutions';
 import type { WeaponId } from '../data/weapons';
 
@@ -384,7 +385,8 @@ export class HudScene extends Phaser.Scene {
         `${d.fps} ${Math.round(this.game.loop.actualFps)}\n` +
           `${w.enemies.size} ${d.enemies}${t.sep}${w.projectiles.size} ${d.projectiles}\n` +
           `${w.gems.size} ${d.gems}${t.sep}${w.damageNumbers.size} ${d.numbers}\n` +
-          `${d.seed} ${w.seed}`,
+          `${d.seed} ${w.seed}` +
+          (import.meta.env.DEV && fxSprites.overflow > 0 ? `\n${d.fxFull} ${fxSprites.overflow}` : ''),
       );
     }
   }

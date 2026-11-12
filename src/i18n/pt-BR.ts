@@ -733,6 +733,7 @@ export const t = {
     gems: 'gemas',
     numbers: 'números',
     seed: 'semente',
+    fxFull: 'efeitos sem lugar',
   },
 
   weapons: {

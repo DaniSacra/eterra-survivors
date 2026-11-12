@@ -269,7 +269,9 @@ export function drawFx(
   const frostK = Math.min(1, FROST_FILLS / Math.max(1, frosts));
   const burnK = Math.min(1, EMBER_FILLS / Math.max(1, burns));
   const fewFlames = burns > 8;
-  for (let iZ = 0; iZ < world.zones.active.length; iZ++) {
+  // Flames share one budget per frame, handed to the newest patches first (the array's tail); old ones keep the ring.
+  flames.left = FLAME_BUDGET;
+  for (let iZ = world.zones.active.length - 1; iZ >= 0; iZ--) {
     const z = world.zones.active[iZ] as (typeof world.zones.active)[number];
     if (z.slows) drawZone(g, z, world.time, frostK, frosts > 8);
     else drawEmbers(g, z, world.time, burnK, fewFlames);
@@ -1119,6 +1121,9 @@ function drawZone(
       z.x + Math.cos(ang) * r * 0.55,
       z.y + Math.sin(ang) * r * 0.4 + 8,
       (r / ICE_SPAN) * (elo ? 1.1 : 1),
+      1,
+      0,
+      true,
     );
   }
   if (!elo) return;
@@ -1154,7 +1159,8 @@ function drawEmbers(
   ring(g, z.x, z.y, r);
   // Real flames standing on the patch, each at its own point of the loop.
   const flame = VFX.flame;
-  const n = fewFlames ? 3 : 6;
+  const n = Math.min(fewFlames ? 3 : 6, flames.left);
+  flames.left -= n;
   for (let i = 0; i < n; i++) {
     const a = (i * Math.PI * 2) / n + z.y * 0.01;
     const d = r * (0.2 + 0.55 * ((i * 0.618) % 1));
@@ -1166,9 +1172,16 @@ function drawEmbers(
       z.x + Math.cos(a) * d,
       z.y + Math.sin(a) * d * 0.7,
       (r / EMBER_SPAN) * fade,
+      1,
+      0,
+      true,
     );
   }
 }
+
+/** Flame sprites all burning patches may place in one frame (PB-01). */
+const FLAME_BUDGET = 36;
+const flames = { left: FLAME_BUDGET };
 
 /** How many stacked patches' worth of fill the screen takes: past it, each patch's fill fades (NF-02). */
 const FROST_FILLS = 5;

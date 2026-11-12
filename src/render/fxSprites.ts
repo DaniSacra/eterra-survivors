@@ -6,10 +6,14 @@ import { ART_SCALE } from './art/pen';
  * Graphics-only, so it asks here for an image instead. A fixed pool of reused images, nothing allocated per frame.
  */
 const MAX = 160;
+/** Slots only damage pieces may take: decoration (zone flames, crystals) stops before them (PB-01). */
+const RESERVE = 48;
 
 class FxSprites {
   private images: Phaser.GameObjects.Image[] = [];
   private used = 0;
+  /** Pieces refused this frame because the pool was full (shown on the F3 panel in dev builds). */
+  overflow = 0;
 
   /** Creates the pool in the scene (call again on every scene start). */
   init(scene: Phaser.Scene): void {
@@ -24,12 +28,16 @@ class FxSprites {
   /** Starts a frame: every image is free again. */
   begin(): void {
     this.used = 0;
+    this.overflow = 0;
   }
 
   /** Puts `key` at (x, y), turned `rot` radians, grown by `scale` (1 = the art's own size). */
   put(key: string, x: number, y: number, rot = 0, scale = 1, alpha = 1): void {
     const img = this.images[this.used];
-    if (!img) return;
+    if (!img) {
+      this.overflow++;
+      return;
+    }
     this.used++;
     if (img.texture.key !== key) img.setTexture(key);
     else if (img.frame.name !== '__BASE') img.setFrame('__BASE');
@@ -56,9 +64,18 @@ class FxSprites {
     scale = 1,
     alpha = 1,
     rot = 0,
+    decor = false,
   ): void {
+    // Decoration leaves the last RESERVE slots to the pieces that show where the damage is.
+    if (decor && this.used >= MAX - RESERVE) {
+      this.overflow++;
+      return;
+    }
     const img = this.images[this.used];
-    if (!img) return;
+    if (!img) {
+      this.overflow++;
+      return;
+    }
     this.used++;
     if (img.texture.key !== key) img.setTexture(key, frame);
     else img.setFrame(frame);

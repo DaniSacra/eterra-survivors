@@ -3375,7 +3375,7 @@ em `ART_RES`.
 
 ### P1 · Bugs
 
-**PB-01 · Efeitos com dano somem quando o pool de sprites enche** · vfx + impl · P · proposto
+**PB-01 · Efeitos com dano somem quando o pool de sprites enche** · vfx + impl · P · ✅ feito (2026-11-11; capturas de 30 s não feitas)
 
 - Por quê: 06-vfx #1 e #7. `fxSprites` tem `MAX = 160` (`fxSprites.ts:9`) e `put`/`putFrame` saem calados sem imagem
   (`:32`, `:61`). Medido: Espada de Fogo, Vigília, Nevasca, Chama e Geada no nível 7 travam em 158 a 160 peças depois
