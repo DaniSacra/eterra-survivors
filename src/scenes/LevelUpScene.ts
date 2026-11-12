@@ -162,19 +162,25 @@ export class LevelUpScene extends Phaser.Scene {
           align: 'left',
         },
       );
-      const tag = label(this, x0 + cardW - 12, y - cardH / 2 + (tight ? 14 : 19), d.tag, 13, { color: UI.gold }).setOrigin(
-        1,
-        0.5,
-      );
+      const tag = label(this, x0 + cardW - 12, y - cardH / 2 + (tight ? 14 : 19), d.tag, 13, {
+        color: UI.gold,
+      }).setOrigin(1, 0.5);
       // A long name next to a long tag (narrow phones): the name shrinks until they no longer touch.
       for (let size = tight ? 15 : 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
         title.setFontSize(size);
       // Numbers first (a new weapon's level 1 line), the flavour only when there is room.
-      const desc = label(this, left, y - cardH / 2 + (tight ? 24 : 33), d.stats ? `${d.stats}\n${d.desc}` : d.desc, tight ? 13 : 14, {
-        color: UI.muted,
-        align: 'left',
-        wrap: textW,
-      });
+      const desc = label(
+        this,
+        left,
+        y - cardH / 2 + (tight ? 24 : 33),
+        d.stats ? `${d.stats}\n${d.desc}` : d.desc,
+        tight ? 13 : 14,
+        {
+          color: UI.muted,
+          align: 'left',
+          wrap: textW,
+        },
+      );
       // The card's text ends here: above the recipe when there is one, else near the bottom edge.
       let limit = y + cardH / 2 - 4;
       if (d.recipe) {

@@ -110,7 +110,9 @@ export class EndScene extends Phaser.Scene {
     actions.push([t.end.again, () => this.play(w.stageId)], [t.end.menu, () => this.toMenu()]);
     // The Loja shortcut (PU-04) only shows when the cofre pays something; the focus stays on the first action.
     const save0 = loadSave();
-    const shop: [string, () => void] | null = canBuyAny(save0) ? [t.end.shop(save0.gold), () => this.toShop()] : null;
+    const shop: [string, () => void] | null = canBuyAny(save0)
+      ? [t.end.shop(save0.gold), () => this.toShop()]
+      : null;
     const buttons: Phaser.GameObjects.Rectangle[] = [];
     let by = y + 30;
     const top = by;

@@ -54,6 +54,8 @@ function levelPips(scene: Phaser.Scene, x: number, y: number, level: number, max
 const TILE_MIN_W = 96;
 const TILE_MIN_H = 80;
 const TILE_FLOOR = 70;
+/** Cards narrower than this (a 360 px phone, three columns) use the narrow layout. */
+const NARROW_CARD = 120;
 /** Section tabs, when the whole list doesn't fit. */
 const TAB_H = 40;
 
@@ -157,7 +159,8 @@ export class ShopScene extends Phaser.Scene {
       this.detailBox = { x: right - dw, y: top, w: dw, h: bottom - top };
       listRight = right - dw - 14;
     } else {
-      const dh = 262;
+      // Narrow phones (360 px): a shorter counter, so the seven-plus items keep 44 px each (PU-02).
+      const dh = width < 400 ? 200 : 262;
       this.detailBox = { x: left, y: bottom - dh, w: right - left, h: dh };
       listBottom = bottom - dh - 10;
     }
@@ -193,7 +196,7 @@ export class ShopScene extends Phaser.Scene {
       y += TAB_H + GAP;
     }
     const heads = fits ? SECTIONS.length * HEAD : 0;
-    const cardH = Math.max(40, Math.min(118, (listBottom - y - heads) / rowsOf(shown) - GAP));
+    const cardH = Math.max(44, Math.min(118, (listBottom - y - heads) / rowsOf(shown) - GAP));
     const cardW = (listW - GAP * (cols - 1)) / cols;
     for (const key of shown) {
       if (fits) {
@@ -289,15 +292,18 @@ export class ShopScene extends Phaser.Scene {
     });
     card.setData('action', () => (DEV_MODE ? this.devStep(1) : this.confirm()));
     const top = y - h / 2;
-    const icon = Math.min(40, h * 0.32);
-    this.add.image(x, top + 6 + icon / 2, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
-    label(this, x, top + 9 + icon, t.shop.items[id], 12, { bold: true, wrap: w - 10 })
+    const name = label(this, x, top, t.shop.items[id], 12, { bold: true, wrap: w - 10 })
       .setOrigin(0.5, 0)
       .setLineSpacing(-3);
+    // A name on two lines in a short tile (740x360) takes the icon's room, so it never reaches the pips.
+    const twoLines = name.getWrappedText().length > 1;
+    const icon = Math.min(40, h * (twoLines && h < 90 ? 0.24 : 0.32));
+    this.add.image(x, top + 5 + icon / 2, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    name.setY(top + 7 + icon);
     const level = shopLevel(save, id);
     const max = SHOP[id].maxLevel;
     const pw = max > 5 ? 44 : max * 9 - 3;
-    levelPips(this, x - pw / 2, y + h / 2 - 24, level, max);
+    levelPips(this, x - pw / 2, y + h / 2 - (twoLines && h < 90 ? 22 : 24), level, max);
     const cost = shopCost(save, id);
     const py = y + h / 2 - 11;
     if (DEV_MODE)
@@ -327,6 +333,7 @@ export class ShopScene extends Phaser.Scene {
     // Space/Enter on the focused card buys it (the confirmation); in test mode it raises it for free.
     card.setData('action', () => (DEV_MODE ? this.devStep(1) : this.confirm()));
     const l = x - w / 2;
+    if (w < NARROW_CARD) return this.narrowCard(id, card, x, y, w, h);
     const icon = Math.min(26, h - 12);
     this.add.image(l + 8 + icon / 2, y, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
     const tx = l + 14 + icon;
@@ -358,6 +365,53 @@ export class ShopScene extends Phaser.Scene {
   }
 
   /**
+   * A card in a three-column list on a 360 px phone: icon, the name on up to two lines (shrunk until it fits), the
+   * level as pips and, if there is room beside them, the price. The level never shares a corner with the name.
+   */
+  private narrowCard(
+    id: ShopId,
+    card: Phaser.GameObjects.Rectangle,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ): Phaser.GameObjects.Rectangle {
+    const save = this.save;
+    const l = x - w / 2;
+    const icon = 22;
+    this.add.image(l + 6 + icon / 2, y - 4, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    const tx = l + icon + 11;
+    const tw = l + w - 4 - tx;
+    const name = label(this, tx, y - h / 2 + 4, t.shop.items[id], 12, { bold: true, align: 'left', wrap: tw })
+      .setOrigin(0)
+      .setLineSpacing(-3);
+    // Two lines at most, and no word cut in the middle: shrink until the longest word fits and 2 lines are enough.
+    for (let size = 12; size > 9 && (name.getWrappedText().length > 2 || this.widest(name) > tw); size--)
+      name.setFontSize(size - 1);
+    const level = shopLevel(save, id);
+    const max = SHOP[id].maxLevel;
+    const pw = max > 5 ? 44 : max * 9 - 3;
+    const py = y + h / 2 - 8;
+    levelPips(this, tx, py, level, max);
+    if (DEV_MODE) return card;
+    const cost = shopCost(save, id);
+    const text = cost === null ? t.shop.maxedShort : t.shop.costShort(cost);
+    const price = label(this, l + w - 4, py, text, 11, {
+      bold: true,
+      color: cost === null ? UI.okText : cost <= save.gold ? UI.gold : UI.danger,
+    }).setOrigin(1, 0.5);
+    if (price.x - price.width < tx + pw + 4) price.destroy();
+    return card;
+  }
+
+  /** The width of the widest wrapped line of `text`. */
+  private widest(text: Phaser.GameObjects.Text): number {
+    let w = 0;
+    for (const line of text.getWrappedText()) w = Math.max(w, text.context.measureText(line).width);
+    return w;
+  }
+
+  /**
    * Gaspar's counter for `id`: Gaspar and what he says about it, the item (icon, name, level bar), what it does, what
    * it gives now and next, its price and the Comprar button.
    */
@@ -377,27 +431,30 @@ export class ShopScene extends Phaser.Scene {
     let cy = y + pad;
 
     // Gaspar and his speech bubble (his hello on the first visit).
-    const face = roomy ? 56 : 40;
-    d.push(
-      this.add.image(x + pad + face / 2, cy + face / 2, 'icon.gaspar').setScale((ART_SCALE * face) / BADGE),
-    );
-    const bx = x + pad + face + 12;
-    const bw = x + w - pad - bx;
-    const said = label(this, bx + 10, cy + 8, this.greet ? t.shop.greeting : t.shop.pitch[id], 13, {
-      italic: true,
-      align: 'left',
-      wrap: bw - 20,
-    }).setOrigin(0);
-    const bh = Math.max(face, said.height + 16);
-    const bubble = this.add.graphics();
-    bubble.fillStyle(UI.panelHover, 1).fillRoundedRect(bx, cy, bw, bh, 8);
-    bubble.lineStyle(2, UI.border, 1).strokeRoundedRect(bx, cy, bw, bh, 8);
-    bubble
-      .fillStyle(UI.panelHover, 1)
-      .fillTriangle(bx + 1, cy + face / 2 - 6, bx + 1, cy + face / 2 + 6, bx - 8, cy + face / 2);
-    said.setDepth(1);
-    d.push(bubble, said);
-    cy += bh + (roomy ? 18 : 10);
+    // Without the height for it (a 200 px counter) Gaspar's bubble is left out.
+    if (h >= 230) {
+      const face = roomy ? 56 : 40;
+      d.push(
+        this.add.image(x + pad + face / 2, cy + face / 2, 'icon.gaspar').setScale((ART_SCALE * face) / BADGE),
+      );
+      const bx = x + pad + face + 12;
+      const bw = x + w - pad - bx;
+      const said = label(this, bx + 10, cy + 8, this.greet ? t.shop.greeting : t.shop.pitch[id], 13, {
+        italic: true,
+        align: 'left',
+        wrap: bw - 20,
+      }).setOrigin(0);
+      const bh = Math.max(face, said.height + 16);
+      const bubble = this.add.graphics();
+      bubble.fillStyle(UI.panelHover, 1).fillRoundedRect(bx, cy, bw, bh, 8);
+      bubble.lineStyle(2, UI.border, 1).strokeRoundedRect(bx, cy, bw, bh, 8);
+      bubble
+        .fillStyle(UI.panelHover, 1)
+        .fillTriangle(bx + 1, cy + face / 2 - 6, bx + 1, cy + face / 2 + 6, bx - 8, cy + face / 2);
+      said.setDepth(1);
+      d.push(bubble, said);
+      cy += bh + (roomy ? 18 : 10);
+    }
 
     // The item: icon, name, level, and a bar with one segment per level (the next one outlined).
     const big = roomy ? 52 : 36;
@@ -445,7 +502,7 @@ export class ShopScene extends Phaser.Scene {
       );
     };
     row(cy, t.shop.now, effectAt(id, level), UI.text);
-    if (DEV_MODE) return this.devControls(id, level);
+    if (DEV_MODE) return this.devControls(id, level, cy + 16);
     if (!this.sys.game.device.input.touch && roomy)
       d.push(label(this, x + w / 2, y + h - pad - 60, t.shop.hintKeys, 12, { color: UI.muted }));
     if (cost === null) {
@@ -512,7 +569,7 @@ export class ShopScene extends Phaser.Scene {
   }
 
   /** Test mode: − and + for this item, and the whole Loja at max or at zero, all free. */
-  private devControls(id: ShopId, level: number): void {
+  private devControls(id: ShopId, level: number, rowsEnd: number): void {
     const { x, y, w, h } = this.detailBox;
     const d = this.detail;
     const pad = 12;
@@ -527,12 +584,14 @@ export class ShopScene extends Phaser.Scene {
       if (off) disable(b);
     };
     const low = y + h - pad - 18;
-    const high = low - 44;
+    const high = low - 48;
     add(x + pad, high, t.dev.down, () => this.devStep(-1), level === 0);
     add(x + pad * 2 + bw, high, t.dev.up, () => this.devStep(1), level === SHOP[id].maxLevel);
     add(x + pad, low, t.dev.allZero, () => this.devAll(false));
     add(x + pad * 2 + bw, low, t.dev.allMax, () => this.devAll(true));
-    if (h >= 200) d.push(label(this, x + w / 2, high - 30, t.dev.hint, 12, { color: UI.muted }));
+    // The key hint only where it clears the "Agora" row (PU-02): no overlap, whatever the height.
+    if (high - 32 - 8 >= rowsEnd)
+      d.push(label(this, x + w / 2, high - 32, t.dev.hint, 12, { color: UI.muted }));
   }
 
   private devStep(by: number): void {

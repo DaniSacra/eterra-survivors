@@ -387,7 +387,11 @@ export class HudScene extends Phaser.Scene {
     const sec = Math.floor(w.time);
     if (sec !== this.shown.time) this.timer.setText(formatTime((this.shown.time = sec)));
     if (w.level !== this.shown.level) this.level.setText(t.hud.level((this.shown.level = w.level)));
-    if (Math.floor(w.gold) !== this.shown.gold || w.kills !== this.shown.kills || w.revives !== this.shown.revives) {
+    if (
+      Math.floor(w.gold) !== this.shown.gold ||
+      w.kills !== this.shown.kills ||
+      w.revives !== this.shown.revives
+    ) {
       this.gold.setText(t.hud.gold((this.shown.gold = Math.floor(w.gold))));
       this.kills.setText(t.hud.kills((this.shown.kills = w.kills)));
       const r = (this.shown.revives = w.revives);

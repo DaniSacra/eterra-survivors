@@ -3522,7 +3522,7 @@ em `ART_RES`.
   CU-05). Texto novo: `levelUp.previewBase: (de: string, para: string) => \`${de} → ${para}\``.
 - Aceite: teste do formatador (`forCard`); capturas 360x640, 740x360 e 667x375 sem sobreposição e com o número atual.
 
-**PU-02 · Loja em 360x640 sem nome cortado nem item escondido; Loja do `?dev` sem texto sobreposto** · ui + impl · P · proposto
+**PU-02 · Loja em 360x640 sem nome cortado nem item escondido; Loja do `?dev` sem texto sobreposto** · ui + impl · P · ✅ feito (2026-11-11; causa: em 360 rodava o ramo de abas, mas com painel de 262 e piso de 40 px. Decidi: abaixo de 400 px painel de 200 px sem o balão do Gaspar, cartões estreitos com nome em até duas linhas e pips, preço só se couber; no `?dev` a dica de teclas só aparece onde não toca a linha "Agora")
 
 - Por quê: 05-ui UI-C; 03-qa B6, 04-visual #10. Em 360x640: "Pedra de Amo", "Gibão Acolchoa", nível "0/10" sobre o nome,
   e "Dados da Andilla" metade atrás do painel do Gaspar (`cardH = max(40, ...)` e painel de 262 px,
