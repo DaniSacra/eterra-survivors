@@ -6,6 +6,7 @@ import { t } from '../i18n/pt-BR';
 import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
 import { describeUpgrade, formatCardTotal } from '../render/describe';
+import { sound } from '../render/sound';
 import { ART_SCALE } from '../render/art/pen';
 import {
   UI,
@@ -41,6 +42,8 @@ export class LevelUpScene extends Phaser.Scene {
   private sheet: StatSheet | null = null;
   /** After pressing Banir, the next card picked is banished instead of taken. */
   private banishing = false;
+  /** The Trocar / Pular / Banir buttons, so a key with no charge can shake its own. */
+  private chargeButtons: Partial<Record<ChargeKey, Phaser.GameObjects.Rectangle>> = {};
 
   constructor() {
     super(SCENES.levelUp);
@@ -229,6 +232,7 @@ export class LevelUpScene extends Phaser.Scene {
       const x = side ? bx : cx + (i - 1) * (bw + 8);
       const y = side ? chargeTop + 22 + i * 52 : bottom + 54;
       const b = button(this, x, y, bw, side ? 44 : 40, () => this.useCharge(key), t.levelUp.charges[key](c));
+      this.chargeButtons[key] = b;
       if (key === 'skip') {
         // What skipping pays, in gold under the label.
         const main = b.getData('label') as Phaser.GameObjects.Text;
@@ -322,12 +326,32 @@ export class LevelUpScene extends Phaser.Scene {
 
   private useCharge(key: ChargeKey): void {
     const w = this.world;
-    if (w.charges[key] <= 0) return;
-    if (key === 'banish' && !this.banishing && !w.upgradeOptions.some((o) => canBanish(w, o))) return;
+    if (w.charges[key] <= 0) return this.deny(key);
+    if (key === 'banish' && !this.banishing && !w.upgradeOptions.some((o) => canBanish(w, o)))
+      return this.deny(key);
     if (key === 'reroll') w.reroll();
     else if (key === 'skip') w.skipLevelUp();
     else return this.refresh(!this.banishing);
     this.refresh(false);
+  }
+
+  /** A charge key that does nothing: a short shake of its button and a dull sound. */
+  private deny(key: ChargeKey): void {
+    sound.play('denied');
+    const b = this.chargeButtons[key];
+    if (!b || this.tweens.isTweening(b)) return;
+    const labelText = b.getData('label') as Phaser.GameObjects.Text | undefined;
+    const x = b.x;
+    this.tweens.add({
+      targets: labelText ? [b, labelText] : [b],
+      x: '+=6',
+      duration: 40,
+      yoyo: true,
+      repeat: 2,
+      onComplete: () => {
+        b.x = x;
+      },
+    });
   }
 
   private choose(i: number): void {

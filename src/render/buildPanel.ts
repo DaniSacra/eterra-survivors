@@ -14,7 +14,7 @@ import { ELEMENT_COLOR, UI, label } from './ui';
 /** Icon badges are drawn 28 world px wide (render/art/icons.ts). */
 const BADGE = 28;
 const GAP = 4;
-const PIP_H = 3;
+const PIP_H = 4;
 /** Margin around the baked textures for frames drawn just outside a slot. */
 const BLEED = 4;
 let nextId = 0;

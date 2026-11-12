@@ -3259,7 +3259,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   nunca a receita (`levelUp.newStats`).
 - Aceite: captura de arma nova em 420x820 e 360x640 com números e receita.
 
-**CU-06 · Celular: nível, pips, joystick e cargas** · ui + impl · P · proposto · reescrito na reavaliação 2026-11-12
+**CU-06 · Celular: nível, pips, joystick e cargas** · ui + impl · P · ✅ feito (2026-11-12): tecla R, X ou B sem carga (ou sem efeito) treme o botão por ~0,2 s e toca `denied` (som grave e seco, `LevelUpScene.deny`); pips da faixa da build com 4 px (`PIP_H`); o resto já estava no PA-01. Não verificado em captura: o tremor em movimento (só o quadro parado)
 
 - Por quê: 05-ui UI-10, 03-qa B4. "Nv" de 14 px sobre a barra de XP (`HudScene.ts:94`); pips da faixa de 3 px;
   joystick com alfa 0,08/0,25 some no chão violeta (`joystick.ts:21`); R, X e B com 0 cargas não dão nenhum sinal.
