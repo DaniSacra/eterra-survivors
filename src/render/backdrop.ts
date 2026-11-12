@@ -23,3 +23,13 @@ export function homeBackdrop(scene: Phaser.Scene, strength = 1): void {
     img.texture.setFilter(1); // NEAREST
   }
 }
+
+/**
+ * The ground behind the hero and stage pickers: a dark slate with a faint cold tile, never a stage's own ground (the
+ * pale snow of Valmor made the spider card unreadable).
+ */
+export function selectBackdrop(scene: Phaser.Scene): void {
+  const { width, height } = scene.scale;
+  scene.add.rectangle(0, 0, width, height, 0x0a0d16).setOrigin(0);
+  scene.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.22).setTint(0x4a5478);
+}

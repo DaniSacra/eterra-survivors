@@ -1,3 +1,4 @@
+import { selectBackdrop } from '../render/backdrop';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { formatTime } from '../core/format';
@@ -53,7 +54,7 @@ export class HeroesScene extends Phaser.Scene {
     const gap = 8;
     this.scroll = 0;
 
-    this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
+    selectBackdrop(this);
     label(this, cx, short ? 22 : 30, t.heroes.title, short ? 22 : 26, { bold: true, color: UI.gold });
     if (!short) label(this, cx, 58, t.heroes.pick, 14, { color: UI.muted });
     label(this, short ? cx + wrapW / 2 : cx, short ? 22 : 80, t.select.gold(save.gold), 15, {

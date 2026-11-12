@@ -1,3 +1,4 @@
+import { selectBackdrop } from '../render/backdrop';
 import Phaser from 'phaser';
 import { devTag } from '../render/dev';
 import { formatTime } from '../core/format';
@@ -25,7 +26,7 @@ export class StageScene extends Phaser.Scene {
     const short = isShort(this);
     const wrapW = Math.min(640, width - 24);
     const gap = 8;
-    this.add.tileSprite(0, 0, width, height, 'tile').setOrigin(0).setAlpha(0.5);
+    selectBackdrop(this);
     label(this, cx, short ? 22 : 30, t.stageScreen.title, short ? 22 : 26, { bold: true, color: UI.gold });
 
     // Three cards in a column, or side by side on a wide, low screen.
@@ -79,6 +80,7 @@ export class StageScene extends Phaser.Scene {
     const iy = tall ? topY + 6 + ih / 2 : y;
     this.add
       .tileSprite(ix, iy, iw, ih, STAGES[id].tile)
+      .setTint(0xa4acc4) // dims the pale snow so the boss reads
       .setAlpha(open ? 1 : 0.4)
       .setTilePosition(20, 20);
     this.add.rectangle(ix, iy, iw, ih).setStrokeStyle(1.5, open ? UI.border : UI.borderOff);
