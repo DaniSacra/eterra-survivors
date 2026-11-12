@@ -15,6 +15,7 @@ import { achievementProgress, describeAchievement, formatCompact, formatDecimal 
 import { UI, skin, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { firstFit } from '../core/layout';
 import { ART_SCALE } from '../render/art/pen';
+import { HERO_COLOR } from '../render/fxparts/common';
 import { PASSIVES } from '../data/upgrades';
 import { setChoice } from './choice';
 import type { GameScene } from './GameScene';
@@ -216,6 +217,7 @@ export class EndScene extends Phaser.Scene {
       },
     );
     y += compact ? 40 : 46;
+    y = this.portrait(cx, y, compact ? 44 : 64, won);
     const flavor = vigil
       ? t.end.vigilText(formatTime(world.vigilTime))
       : won
@@ -267,6 +269,21 @@ export class EndScene extends Phaser.Scene {
       y += 19;
     }
     return y + 28;
+  }
+
+  /** The hero on its light: standing after a victory, fallen after a defeat (PX-16). Returns the next y. */
+  private portrait(cx: number, y: number, size: number, won: boolean): number {
+    const id = this.world.character;
+    const color = HERO_COLOR[id];
+    const feet = y + size;
+    this.add.ellipse(cx, feet - 3, size * 0.9, size * 0.2, color, 0.4).setStrokeStyle(2, color, 0.9);
+    const fallen = !won && this.world.state === 'lost';
+    const hero = fallen
+      ? this.add.image(cx, feet, `player.${id}.fall`, 6)
+      : this.add.image(cx, feet, `player.${id}.front`);
+    hero.setOrigin(0.5, 1);
+    hero.setScale(size / (fallen ? 80 : hero.height));
+    return feet + 6;
   }
 
   /** The run's gold in one line, counting up (PX-15). Returns the next y. */
