@@ -243,6 +243,8 @@ export class GameScene extends Phaser.Scene {
   /** The "+N" of a heal, rising and fading, and the life it adds up while it waits to be shown. */
   private healText!: Phaser.GameObjects.Text;
   private healAcc = 0;
+  /** When the hero last gained life (world time), to tell a new healing from steady regeneration. */
+  private lastHealAt = -Infinity;
   private healAge = 9;
   private banked = false;
   /** The Noite Sem Fim was recorded (it ends once: death or quitting). */
@@ -367,6 +369,7 @@ export class GameScene extends Phaser.Scene {
     this.sparks = new Sparks();
     this.lastTime = 0;
     this.lastHp = this.world.player.hp;
+    this.lastHealAt = -Infinity;
     this.bossAct = 0;
     this.rewardIcon = this.add.image(0, 0, 'pickup.chest').setDepth(12.6).setVisible(false);
     this.fx = this.add.graphics().setDepth(4);
@@ -788,7 +791,10 @@ export class GameScene extends Phaser.Scene {
     this.nNow = 0;
     if (this.stepDt > 0 && w.player.hp > this.lastHp + 0.01) {
       this.healAcc += w.player.hp - this.lastHp;
-      this.healSpark();
+      // A new healing starts the 3 s glow; steady regeneration does not keep renewing it.
+      if (w.time - this.lastHealAt > 1) this.moments.heal = w.time;
+      this.lastHealAt = w.time;
+      if (w.time - this.moments.heal < 3) this.healSpark();
     }
     this.lastHp = w.player.hp;
     this.deathSparks();
@@ -1240,7 +1246,6 @@ export class GameScene extends Phaser.Scene {
   private healSpark(): void {
     const p = this.world.player;
     const sp = this.sparks;
-    this.moments.heal = this.world.time;
     for (let i = 0; i < 2; i++)
       sp.add(
         p.x + (sp.rand() - 0.5) * 40,

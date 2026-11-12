@@ -853,7 +853,7 @@ const BURNING_SHOWN = 14;
 const FLAME_OUTER = 0xff5a14;
 const FLAME_MID = 0xffa030;
 const FLAME_CORE = 0xfff2c0;
-const HEAL_FLASH = 0.45;
+const HEAL_FLASH = 3;
 
 /** A soft pool of light: nested ovals on the additive layer, brighter in the middle. */
 function softPool(
@@ -964,14 +964,13 @@ function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moments, calm
       }
     }
   }
-  // Healed: a green glow under the hero and green motes of light rising from it.
+  // Healing: a soft green glow around the hero's body for a few seconds after the last heal, fading out
+  // (regeneration keeps renewing it). The life bar itself stays as it is.
   const healed = world.time - m.heal;
   if (healed < HEAL_FLASH) {
-    const hk = 1 - healed / HEAL_FLASH;
-    softPool(g, p.x, p.y + 6, 34, 26, HEAL_COLOR, 0.45 * hk * dim);
-    // The life bar under the feet (GameScene.heroBar: 44 px wide, 44 px below the centre) glows green too.
-    g.lineStyle(2, HEAL_COLOR, 0.9 * hk * dim).strokeRoundedRect(p.x - 24, p.y + 42, 48, 10, 3);
-    softPool(g, p.x, p.y + 47, 34, 9, HEAL_COLOR, 0.6 * hk * dim);
+    const hk = Math.min(1, (HEAL_FLASH - healed) / 1.2);
+    const beat = 0.75 + 0.25 * Math.sin(world.time * 5);
+    softPool(g, p.x, p.y - 12, 36, 44, HEAL_COLOR, 0.34 * hk * beat * dim);
   }
 }
 
