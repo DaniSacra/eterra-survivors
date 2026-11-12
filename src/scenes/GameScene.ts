@@ -11,13 +11,14 @@ import { PICKUPS } from '../data/pickups';
 import { FLYERS, HERO_FALL, HERO_HURT, SPRITE_SCALE } from '../render/assets';
 import { ENEMY_ANIMS, enemyPose, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
-import { shopBonuses, stageUnlocked } from '../core/meta';
+import { playtest, shopBonuses, stageUnlocked } from '../core/meta';
+import { formatTime } from '../core/format';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, markLessonSeen, markTipSeen, recordRun, recordVigil } from '../render/save';
 import { nextTip, TIP_GAP } from '../core/tips';
 import { BURST_COOLDOWN } from '../render/fxparts/weapons';
-import { LESSON_GAP, nextLesson, type LessonId } from '../core/coach';
+import { LESSON_GAP, eliteOnField, nextLesson, type LessonId } from '../core/coach';
 import { ENEMIES, type EnemyId } from '../data/enemies';
 import { lastChoice, type RunChoice } from './choice';
 import { World } from '../core/world';
@@ -982,8 +983,13 @@ export class GameScene extends Phaser.Scene {
         // A finger as the main pointer (phones, tablets), not just a touch screen on a laptop.
         const touch =
           !this.sys.game.device.os.desktop || window.matchMedia?.('(pointer: coarse)').matches === true;
-        const text = t.lessons[lesson];
-        this.hud.tip(t.lessons.icon[lesson], typeof text === 'function' ? text(touch) : text);
+        let text: string;
+        if (lesson === 'move') text = t.lessons.move(touch);
+        else if (lesson === 'elite') text = t.lessons.elite(t.enemies[eliteOnField(w) ?? 'skeleton']);
+        else if (lesson === 'boss')
+          text = t.lessons.boss(formatTime(playtest.bossAt ?? w.stage.boss.at), t.enemies[w.stage.boss.id]);
+        else text = t.lessons[lesson];
+        this.hud.tip(t.lessons.icon[lesson], text);
         return;
       }
     }

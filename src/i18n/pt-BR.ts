@@ -430,8 +430,19 @@ export const t = {
     auto: 'Suas armas atacam sozinhas. Você só precisa se mexer e desviar.',
     gems: 'Gemas azuis dão experiência. Ande até elas para subir de nível.',
     life: 'Cada golpe tira vida. Não pare: fuja dos grupos e pegue comida.',
+    /** The first elite: what it is and what it gives. */
+    elite: (name: string) => `${name} é uma elite: derrote para ganhar um baú.`,
+    /** About two minutes in: what to aim for. */
+    boss: (time: string, name: string) => `Aguente até ${time}: o chefe ${name} vai aparecer.`,
     /** The texture shown beside each lesson. */
-    icon: { move: 'icon.swiftness', auto: 'icon.blade', gems: 'gem.medium', life: 'icon.vigor' },
+    icon: {
+      move: 'icon.swiftness',
+      auto: 'icon.blade',
+      gems: 'gem.medium',
+      life: 'icon.vigor',
+      elite: 'pickup.chest',
+      boss: 'icon.lock',
+    },
   },
 
   options: {

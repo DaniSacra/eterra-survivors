@@ -1,18 +1,21 @@
+import type { EnemyId } from '../data/enemies';
 import type { World } from './world';
 
 /**
  * The basics a new player is told once, in this order of priority (shown as short tips, never blocking). `charges`
  * is not picked by `nextLesson`: the level-up screen teaches Trocar, Pular and Banir on the second run (PX-09).
  */
-export const LESSON_IDS = ['move', 'auto', 'gems', 'life', 'charges'] as const;
+export const LESSON_IDS = ['move', 'auto', 'gems', 'life', 'elite', 'boss', 'charges'] as const;
 export type LessonId = (typeof LESSON_IDS)[number];
-/** The lessons `nextLesson` can pick (the rest are taught by their own screen). */
+/** The lessons `nextLesson` can pick (`charges` is taught by its own screen). */
 export type CoachLesson = Exclude<LessonId, 'charges'>;
 
 /** Seconds between two lessons, and how long into the run each one may start. */
 export const LESSON_GAP = 7;
 /** The hero must have walked less than this (px) from the start for the "move" lesson to show. */
 export const MOVE_DONE = 40;
+/** The "boss" lesson shows this many seconds into the run (the boss comes much later). */
+export const BOSS_LESSON_AT = 120;
 /** A gem this close (px) to the hero is "on screen" for the "gems" lesson. */
 export const GEM_RANGE = 420;
 /** Below this share of max life the "life" lesson shows. */
@@ -35,5 +38,17 @@ export function nextLesson(world: World, seen: ReadonlySet<LessonId>): CoachLess
     }
   }
   if (!seen.has('life') && p.hp > 0 && p.hp < p.stats.maxHp * LIFE_SHARE) return 'life';
+  if (!seen.has('elite') && eliteOnField(world)) return 'elite';
+  if (!seen.has('boss') && !world.boss && t >= BOSS_LESSON_AT) return 'boss';
+  return null;
+}
+
+/** The first elite alive on the field (its enemy id), or null. The lesson names it. */
+export function eliteOnField(world: World): EnemyId | null {
+  const list = world.enemies.active;
+  for (let i = 0; i < list.length; i++) {
+    const e = list[i];
+    if (e && !e.dead && e.def.elite) return e.type;
+  }
   return null;
 }

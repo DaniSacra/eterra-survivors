@@ -1,10 +1,44 @@
 import { describe, expect, it } from 'vitest';
-import { LESSON_IDS, LIFE_SHARE, MOVE_DONE, nextLesson, type LessonId } from '../../src/core/coach';
+import {
+  BOSS_LESSON_AT,
+  LESSON_IDS,
+  LIFE_SHARE,
+  eliteOnField,
+  MOVE_DONE,
+  nextLesson,
+  type LessonId,
+} from '../../src/core/coach';
 import { sanitizeSave } from '../../src/core/meta';
+import { spawnEnemy } from '../../src/core/enemies';
 import { dropGem } from '../../src/core/xp';
 import { bareWorld } from './helpers';
 
 const none = new Set<LessonId>();
+
+describe('elite and boss lessons', () => {
+  it('names the first elite on the field, once', () => {
+    const w = bareWorld();
+    w.player.x = 500;
+    w.time = 10;
+    const seen = new Set<LessonId>(['move', 'auto', 'gems', 'life']);
+    expect(nextLesson(w, seen)).toBeNull();
+    spawnEnemy(w, 'witch', 600, 0);
+    expect(nextLesson(w, seen)).toBe('elite');
+    expect(eliteOnField(w)).toBe('witch');
+    seen.add('elite');
+    expect(nextLesson(w, seen)).toBeNull();
+  });
+
+  it('tells about the boss two minutes in, not after it arrived', () => {
+    const w = bareWorld();
+    w.player.x = 500;
+    const seen = new Set<LessonId>(['move', 'auto', 'gems', 'life', 'elite']);
+    w.time = BOSS_LESSON_AT - 1;
+    expect(nextLesson(w, seen)).toBeNull();
+    w.time = BOSS_LESSON_AT;
+    expect(nextLesson(w, seen)).toBe('boss');
+  });
+});
 
 describe('nextLesson', () => {
   it('says nothing in the first second, then tells a hero who stands still to move', () => {
