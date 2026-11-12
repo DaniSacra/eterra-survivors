@@ -1044,3 +1044,30 @@ Luta do chefe (Loja inteira, 12 sementes): mediana 29 s em cada fase (meia Loja 
 
 Fonte de dano em Valmor: contato 92%, chão (poças) 6%, chefe 2%. Primeiro Elo mediano em 5,7 min (half). Cripta provisória
 (Ossada, Morcego, Esqueleto, Espectro): 0% / 16% / 84%. Estrada: sem mudança. Linha `LOJA`: 55 corridas médias.
+
+## PE-01 (2026-11-12): primeira rodada depois de B-04, PB-02, PB-05, PB-07, verbos novos e escudos em laço
+
+`SIM_SEEDS=16 SIM_SHOP=all` (64 corridas por célula). Antes, sem mexer em nada:
+
+| Fase    | Antes (none / half / full) | Meta               |
+| ------- | -------------------------- | ------------------ |
+| Valmor  | 13% / 50% / 92%            | 0–15 / 40–60 / 85+ |
+| Cripta  | 2% / 53% / 94%             | 0–10 / 80–90 / 90+ |
+| Estrada | 0% / 0% / 44%              | 0 / 0–10 / 35–55   |
+
+Valmor e Estrada já estavam na meta; só a Cripta com meia Loja (53%, Teo 31%, Lyra 75%) ficou fora. A Cripta passou de
+`mult` hp 0,85 / damage 0,9 para **hp 0,78 / damage 0,42** (a nota abaixo explica o tamanho do corte). Sensibilidade
+(meia Loja): damage 0,75 → 63%, 0,62 (hp 0,8) → 66%, 0,5 (hp 0,7) → 84% mas nenhuma Loja 14%, 0,42 (hp 0,78) → 84%.
+Depois:
+
+| Fase    | Depois (none / half / full) | Meta               |
+| ------- | --------------------------- | ------------------ |
+| Valmor  | 13% / 50% / 92% (igual)     | 0–15 / 40–60 / 85+ |
+| Cripta  | 9% / 84% / 94%              | 0–10 / 80–90 / 90+ |
+| Estrada | 0% / 0% / 44% (igual)       | 0 / 0–10 / 35–55   |
+
+Heróis fora de 20 pontos: Cripta half Teo 63% contra 84% da fase (21 pontos; vai para o PE-02). Valmor half: Lyra 13% contra
+50% (era assim antes; Lyra), Estrada full Aldo 69% e Teo 6%.
+Nota: o corte de dano é grande porque o bot é bem mais forte que uma pessoa; o Daniel disse que com meia Loja uma pessoa
+deve ganhar ~60% na Cripta e que o bot está à frente. **Precisa de reteste à mão** (`?dev`, Cripta, meia Loja).
+A tabela `TARGETS` do sim agora imprime `ok` ou `OFF lo-hi` por célula.

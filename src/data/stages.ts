@@ -77,7 +77,7 @@ export const STAGES = {
   crypt: {
     tile: 'tile.crypt',
     layout: { kind: 'obstacles', set: 'crypt', cell: 170, chance: 0.4, clear: 260 },
-    mult: { hp: 0.85, damage: 0.9, speed: 1.0, spawn: 1.0, gold: 1.5 },
+    mult: { hp: 0.78, damage: 0.42, speed: 1.0, spawn: 1.0, gold: 1.5 },
     waves: buildWaves({
       basic: 'bones',
       fast: 'vampireBat',

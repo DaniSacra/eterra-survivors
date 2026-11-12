@@ -3653,7 +3653,7 @@ em `ART_RES`.
 
 ### P2 · Equilíbrio
 
-**PE-01 · Cripta e Valmor de volta à meta depois do Assombro e dos obstáculos** · bal + impl · P · proposto · ⏸ em espera (Daniel, equilíbrio e simulações)
+**PE-01 · Cripta e Valmor de volta à meta depois do Assombro e dos obstáculos** · bal + impl · P · ✅ feito (2026-11-12; Cripta hp 0,78 / dano 0,42: 9% / 84% / 94%; Valmor já na meta; Teo 21 pontos abaixo, vai ao PE-02; reteste à mão pendente)
 
 - Por quê: 01-balance #6 e #7, com a leitura corrigida (conflito 1 da `07-direcao.md`). O alvo do **bot** no CLAUDE.md
   para a Cripta com meia Loja é 80 a 90% (o ~60% é o de uma pessoa); estava em 84% em `8a9a23d` e hoje está em

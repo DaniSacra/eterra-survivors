@@ -40,6 +40,18 @@ type Run = SimResult & { profile: Profile };
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+/** Bot win-rate goals (percent) per stage and Loja profile, from CLAUDE.md. */
+const WIN_TARGETS: Record<string, Record<Profile, [number, number]>> = {
+  valmor: { none: [0, 15], half: [40, 60], full: [85, 100] },
+  crypt: { none: [0, 10], half: [80, 90], full: [90, 100] },
+  southRoad: { none: [0, 0], half: [0, 10], full: [35, 55] },
+};
+const targetMark = (stage: string, profile: Profile, rate: number) => {
+  const t = WIN_TARGETS[stage]?.[profile];
+  if (!t) return '';
+  const r = Math.round(rate * 100);
+  return r >= t[0] && r <= t[1] ? ' ok' : ` OFF ${t[0]}-${t[1]}`;
+};
 
 function line(r: Run): string {
   const boss = r.bossHpLeft === null ? '' : ` boss ${pct(r.bossHpLeft)} left after ${r.bossTime}s`;
@@ -94,6 +106,7 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
     return v.length ? ((v[(v.length - 1) >> 1] as number) + (v[v.length >> 1] as number)) / 2 : 0;
   };
   out.push('\nTARGETS  stage     shop  wins        death(median)  gold/run  heroes (win % vs stage)');
+  // Bot win-rate goals per stage and Loja profile (CLAUDE.md, "Bot targets"): `ok` or `OFF lo-hi` after the rate.
   for (const stage of stages)
     for (const profile of profiles) {
       const rs = results.filter((r) => r.stage === stage && r.profile === profile);
@@ -105,7 +118,7 @@ it.skipIf(!import.meta.env.SIM)('full-run simulator', { timeout: 600_000 }, () =
         return `${h} ${pct(hrate)}${Math.abs(hrate - rate) > 0.2 ? '!' : ''}`;
       });
       out.push(
-        `         ${stage.padEnd(10)}${profile.padEnd(6)}${`${rs.filter((r) => r.won).length}/${rs.length} ${pct(rate)}`.padEnd(12)}` +
+        `         ${stage.padEnd(10)}${profile.padEnd(6)}${`${rs.filter((r) => r.won).length}/${rs.length} ${pct(rate)}${targetMark(stage, profile, rate)}`.padEnd(22)}` +
           `${(dead.length ? median(dead).toFixed(1) + ' min' : '-').padStart(13)}` +
           `  ${Math.round(rs.reduce((a, r) => a + r.gold, 0) / rs.length)
             .toString()
