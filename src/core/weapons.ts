@@ -19,7 +19,7 @@ import {
 } from '../data/weapons';
 import { isFaded } from './behaviours';
 import { addBolt, addLink } from './effects';
-import { damageEnemy, type Enemy } from './enemies';
+import { damageEnemy, isUntouchable, type Enemy } from './enemies';
 import { TAU, angleDiff } from './math';
 import { nearestEnemy, randomEnemyNear, type Projectile } from './projectiles';
 import { addZone } from './zones';
@@ -309,7 +309,7 @@ function slamHit(
 ): void {
   const crush = (WEAPONS[w.id] as WeaponDef).crush;
   const hard = crush && e.stun > 0 ? amount * crush : amount;
-  if (stuns && e.stun <= 0) e.stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
+  if (stuns && e.stun <= 0 && !isUntouchable(e)) e.stun = e.def.boss ? Math.min(s.stun, config.weapons.bossStun) : s.stun;
   damageEnemy(world, e, hard, kx, ky, knockback, w);
 }
 

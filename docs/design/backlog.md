@@ -3424,7 +3424,7 @@ em `ART_RES`.
 - O quê: o mesmo `ARM_DELAY` vale para `onKey` no LevelUp (e na escolha do baú, se houver).
 - Aceite: teste de cena ou script: tecla a 100 ms não escolhe; a 350 ms escolhe.
 
-**PB-05 · Maça atordoa o fantasma esmaecido e a pilha de ossos** · impl · P · proposto
+**PB-05 · Maça atordoa o fantasma esmaecido e a pilha de ossos** · impl · P · ✅ feito (2026-11-11)
 
 - Por quê: 02-code B2. `core/weapons.ts:312` (`slamHit`) grava `e.stun` antes do `damageEnemy`, que sai cedo para
   fantasma esmaecido (`isFaded`) e pilha recém-caída: o intocável ganha atordoamento. Mexe no valor real da Maça, que o

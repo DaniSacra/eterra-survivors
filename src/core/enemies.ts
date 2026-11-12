@@ -208,6 +208,18 @@ export function rebuildEnemyHash(world: World): void {
 }
 
 /**
+ * Whether a hit passes over `e` without touching it: dead, a faded ghost, or a pile that has just fallen (the same
+ * swing's other hits, an aura, an orbit or a piercing shot, must not break it: CB-01). Anything tied to a hit, like a
+ * stun, must check this too.
+ */
+export function isUntouchable(e: Enemy): boolean {
+  if (e.dead || isFaded(e)) return true;
+  if (e.pile <= 0) return false;
+  const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
+  return e.pile > re.delay - config.enemies.pileGuard;
+}
+
+/**
  * Damages an enemy; death is deferred to `sweepDeadEnemies`. Knockback direction (kx, ky) is a unit-ish vector.
  * `source` is credited with the damage actually dealt (for the end-of-run report).
  */
@@ -220,11 +232,9 @@ export function damageEnemy(
   knockback = 0,
   source: OwnedWeapon | null = null,
 ): void {
-  if (e.dead || isFaded(e)) return;
+  if (isUntouchable(e)) return;
   if (e.pile > 0) {
     const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
-    // Just fallen: the same swing's other hits (an aura, an orbit, a piercing shot) pass over it (CB-01).
-    if (e.pile > re.delay - config.enemies.pileGuard) return;
     // After that, any hit breaks it for good, and counts like the hit it is.
     const dealt = Math.min(amount, e.maxHp * re.hp);
     if (source) {

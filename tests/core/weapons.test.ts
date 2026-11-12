@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
+import { damageEnemy, rebuildEnemyHash, spawnEnemy } from '../../src/core/enemies';
+import { isFaded } from '../../src/core/behaviours';
+import { BossAct } from '../../src/core/bosses';
 import { updateWeapons as rawUpdate } from '../../src/core/weapons';
 import type { World } from '../../src/core/world';
 import { WEAPONS, WEAPON_IDS, type WeaponId } from '../../src/data/weapons';
@@ -55,6 +57,23 @@ describe('Maça de Ferro (slam: a blow in front, a shock wave every few)', () =>
     expect(back.hp).toBe(back.maxHp);
     expect(far.hp).toBe(far.maxHp);
     expect(w.slashes.active.some((s) => s.form === 'smash')).toBe(true);
+  });
+
+  it('does not stun a faded ghost or a pile that has just fallen, but stuns a common enemy', () => {
+    const w = prepared('mace');
+    w.player.facing.x = 1;
+    const ghost = spawnEnemy(w, 'ghost', ahead, 0);
+    ghost.act = BossAct.Active;
+    ghost.actT = 5;
+    const pile = spawnEnemy(w, 'bones', ahead, 20);
+    damageEnemy(w, pile, 9999);
+    expect(pile.pile).toBeGreaterThan(0);
+    const plain = spawnEnemy(w, 'skeleton', ahead, -20);
+    blow(w);
+    expect(isFaded(ghost)).toBe(true);
+    expect(ghost.stun).toBe(0);
+    expect(pile.stun).toBe(0);
+    expect(plain.stun).toBeGreaterThan(0);
   });
 
   it('every `waveEvery` blows a shock wave reaches farther and throws enemies back', () => {
