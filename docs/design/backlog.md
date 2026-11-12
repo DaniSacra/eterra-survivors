@@ -4081,3 +4081,8 @@ como histórico. Detalhe em `docs/reviews/2026-11-11-2/08-reavaliacao.md`.
 
 - Motivo: Valmor e a Cripta são mundos abertos, sem borda que o jogador alcance, e a Estrada do Sul já termina na
   floresta (DD-10). O resto do AR-02 está feito.
+
+**DASH-01 · Esquiva (dash) do herói** · mecânica · M · ideia (2026-11-12, Daniel)
+
+- Daniel: "talvez pensar em um dash seria interessante para dar mais dinamismo", dito junto com "achei um pouco difícil o jogo". Por enquanto fica como está; decidir depois do feedback dos primeiros jogadores e dos dados de morte por minuto (GoatCounter).
+- A pensar quando vier: recarga curta, breve invulnerabilidade, botão na tela no celular, como interage com os Elos e com a ajuda por derrota.
