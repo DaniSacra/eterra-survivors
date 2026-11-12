@@ -4,6 +4,7 @@ import { ENEMIES, type EnemyId } from '../data/enemies';
 import { STAGES, type StageId } from '../data/stages';
 import { ART_RES } from './art/pen';
 import { ENEMY_ANIMS, poseKey } from './enemyAnims';
+import { showScale } from './showScale';
 import { UI } from './ui';
 
 /** What an enemy shows off in the Bestiário: one of its tricks, drawn with a small effect. */
@@ -78,11 +79,10 @@ const TINT: Partial<Record<EnemyId, number>> = {
 /** Who hovers instead of walking. */
 const FLYING = new Set<EnemyId>(['bat', 'vampireBat', 'ghost', 'coldSpirit', 'crow']);
 
-const SPEED = { slow: 34, medium: 50, fast: 72, faster: 90 } as const;
-
 /**
- * The Bestiário's stage: the enemy at a large, whole-pixel size on a strip of its own stage's ground, walking from
- * side to side and, every few steps, stopping to wind up and show one of its tricks. Render only.
+ * The Bestiário's stage: the enemy at a large size (in order of its real size, see `showScale`) on a strip of its own
+ * stage's ground, standing in place: its walk cycle loops and, every few seconds, it winds up and shows one of its
+ * tricks. Render only.
  */
 export class Showcase {
   private root: Phaser.GameObjects.Container;
@@ -150,7 +150,7 @@ export class Showcase {
     if (!s.textures.exists(tex)) return;
     const frameH = (anim ? anim.h : s.textures.getFrame(tex).height) / ART_RES;
     const frameW = (anim ? anim.w : s.textures.getFrame(tex).width) / ART_RES;
-    const k = Math.max(1, Math.floor(Math.min((h * 0.78) / frameH, (w * 0.42) / frameW)));
+    const k = showScale(frameW, frameH, w, h);
     const scale = k / ART_RES;
     const fly = FLYING.has(id);
     const footY = fly ? feet - h * 0.12 : feet;
@@ -177,32 +177,16 @@ export class Showcase {
         ease: 'Sine.easeInOut',
       });
 
-    // Walk from side to side; every other leg, stop and show a trick.
-    const margin = (frameW * k) / 2 + 12;
-    const speed = SPEED[enemyTraits(def).speed] * k * 0.5;
+    // In place: the walk cycle loops on the spot and, every couple of seconds, the enemy winds up and shows a trick
+    // (its attack frames and a small effect), without crossing the box.
     const moves = showMoves(id);
-    let leg = 0;
-    const walk = () => {
+    const loop = () => {
       if (!sprite.active) return;
-      const target = sprite.x < x + w / 2 ? x + w - margin : x + margin;
-      sprite.setFlipX(target < sprite.x);
       if (s.anims.exists(tex)) sprite.play(tex, true);
-      s.tweens.add({
-        targets: [sprite, shadow],
-        x: target,
-        duration: (Math.abs(target - sprite.x) / speed) * 1000,
-        onUpdate: () => shadow.setX(sprite.x),
-        onComplete: () => {
-          leg += 1;
-          const move = moves[this.moveIndex++ % moves.length] as ShowMove;
-          this.after(leg % 2 === 1 ? this.trick(sprite, shadow, id, move, k, footY) : 200, walk);
-        },
-      });
+      const move = moves[this.moveIndex++ % moves.length] as ShowMove;
+      this.after(this.trick(sprite, shadow, id, move, k, footY) + 900, loop);
     };
-    // Starts mid-walk from the left third, so the first trick comes soon.
-    sprite.setX(x + margin + (w - margin * 2) * 0.3);
-    shadow.setX(sprite.x);
-    this.after(400, walk);
+    this.after(700, loop);
   }
 
   /** Winds up (its own frames when it has them) and plays `move`; returns how long it takes, in ms. */
@@ -271,15 +255,19 @@ export class Showcase {
         onComplete: () => r.destroy(),
       });
     };
+    // A lunge on the spot: a short step toward `to` and back (the enemy never leaves its place).
     const dash = (to: number, duration: number) => {
+      const home = sprite.x;
+      const step = Phaser.Math.Clamp(to - home, -10 * k, 10 * k);
       s.tweens.add({
         targets: sprite,
-        x: Phaser.Math.Clamp(to, this.x + 20, this.x + this.w - 20),
-        duration,
+        x: home + step,
+        duration: Math.min(duration, 220) / 2,
+        yoyo: true,
         ease: 'Quad.easeOut',
         onUpdate: () => shadow.setX(sprite.x),
       });
-      for (let i = 0; i < 3; i++) ring(sprite.x - dir * i * 10, footY, 0xd8d0c0, 18 + i * 6, i * 60);
+      for (let i = 0; i < 3; i++) ring(home - dir * i * 10, footY, 0xd8d0c0, 18 + i * 6, i * 60);
     };
     switch (move) {
       case 'swing':
@@ -299,7 +287,6 @@ export class Showcase {
         dash(sprite.x + dir * reach * 1.4, 260);
         break;
       case 'flee':
-        sprite.setFlipX(!sprite.flipX);
         dash(sprite.x - dir * reach * 1.6, 300);
         break;
       case 'zigzag':
@@ -335,24 +322,14 @@ export class Showcase {
       }
       case 'leap': {
         const top = sprite.y - Math.min(this.h * 0.3, 30 * k);
-        const land = Phaser.Math.Clamp(sprite.x + dir * reach, this.x + 30, this.x + this.w - 30);
-        ring(land, footY, 0x05040f, 40 * k);
+        ring(sprite.x, footY, 0x05040f, 40 * k);
         s.tweens.add({
           targets: sprite,
           y: top,
           duration: 260,
           yoyo: true,
           ease: 'Quad.easeOut',
-        });
-        s.tweens.add({
-          targets: sprite,
-          x: land,
-          duration: 520,
-          onUpdate: () => shadow.setX(sprite.x),
-          onComplete: () => {
-            ring(land, footY, tint === 0xf0ecff ? 0xd8c8a0 : tint, 70 * k);
-            this.scene.cameras.main.shake(120, 0.004);
-          },
+          onComplete: () => ring(sprite.x, footY, tint === 0xf0ecff ? 0xd8c8a0 : tint, 70 * k),
         });
         break;
       }
