@@ -27,6 +27,8 @@ export const VFX = {
   aura: { frames: 12, w: 128, h: 128, anchor: [0.5, 0.5], fps: 12 },
   /** The mace's shock wave: two dusty rings running out; the big one reaches 50 art px (scaled to the wave radius). */
   shock: { frames: 7, w: 112, h: 112, anchor: [0.5, 0.5], fps: 14 },
+  /** The hero blade's cut: a crescent of 145 degrees pointing right, 92 art px from the centre (rotate and scale to the swing). */
+  slash: { frames: 6, w: 224, h: 224, anchor: [0.5, 0.5], fps: 16 },
 } as const satisfies Record<string, VfxDef>;
 
 export type VfxId = keyof typeof VFX;

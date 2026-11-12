@@ -98,7 +98,7 @@ const HERO_FEET = 36;
  * The hero is drawn this much higher than their position, which is where every weapon starts from: so shots,
  * swings and orbits leave from the chest and hands, not from the head.
  */
-const HERO_LIFT = 14;
+const HERO_LIFT = 22;
 /** Flyers hover this high (px) over the spot they threaten, bob a little and flap fast. */
 const HOVER = 13;
 /** Width of the hero's life bar (px). */

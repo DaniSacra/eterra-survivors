@@ -55,6 +55,7 @@ class FxSprites {
     y: number,
     scale = 1,
     alpha = 1,
+    rot = 0,
   ): void {
     const img = this.images[this.used];
     if (!img) return;
@@ -64,7 +65,7 @@ class FxSprites {
     img
       .setOrigin(ox, oy)
       .setPosition(x, y)
-      .setRotation(0)
+      .setRotation(rot)
       .setScale(ART_SCALE * scale)
       .setAlpha(alpha)
       .setVisible(true);

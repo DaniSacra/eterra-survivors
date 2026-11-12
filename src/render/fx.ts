@@ -37,10 +37,12 @@ interface SwingStyle {
   band: number;
   fillAlpha: number;
   mark: 'none' | 'shock' | 'crack';
+  /** Drawn as the pixel crescent sprite (render/vfx.ts) instead of code. */
+  sprite?: boolean;
 }
 const SWING_PLAIN: SwingStyle = { fill: 0xe8f0ff, edge: 0x9ad8ff, band: 0.5, fillAlpha: 0.4, mark: 'none' };
 const SWING_STYLE: Partial<Record<WeaponId, SwingStyle>> = {
-  blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none' },
+  blade: { fill: 0xf0f4ff, edge: HERO_COLOR.aldo, band: 0.5, fillAlpha: 0.4, mark: 'none', sprite: true },
   fury: { fill: 0xffe4dc, edge: ELEMENT_COLOR.fury, band: 0.62, fillAlpha: 0.45, mark: 'none' },
 };
 /** The Black Knight's Corte Brutal landing: a white blade with a coral edge. */
@@ -68,6 +70,8 @@ const EMBER_SPAN = 70;
 const AURA_RING = 57;
 /** The shock wave sprite's outer ring, art px from the centre. */
 const SHOCK_RING = 50;
+/** The slash sprite's edge, art px from the centre. */
+const SLASH_REACH = 92;
 /** Espada de Fogo's burning ground: the flames' light orange. */
 const EMBER = 0xffb040;
 /** How each orbit weapon's pieces look: cartoon swords pointing the way they spin, or round shields. */
@@ -636,6 +640,22 @@ function drawSwing(
   t: number,
   st: SwingStyle,
 ): void {
+  if (st.sprite) {
+    // The pixel crescent: centred on the swing, scaled so its edge is the weapon's reach.
+    const cut = VFX.slash;
+    fxSprites.putFrame(
+      vfxKey('slash'),
+      Math.max(0, Math.min(cut.frames - 1, Math.floor(t * cut.frames))),
+      cut.anchor[0],
+      cut.anchor[1],
+      cx,
+      cy,
+      range / SLASH_REACH,
+      1,
+      (a0 + a1) / 2,
+    );
+    return;
+  }
   const span = a1 - a0;
   const sk = Math.min(1, t / SWEEP);
   const lead = a0 + span * (1 - (1 - sk) * (1 - sk));
