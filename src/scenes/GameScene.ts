@@ -978,7 +978,9 @@ export class GameScene extends Phaser.Scene {
         this.lessonsSeen.add(lesson);
         this.tipAt = w.time;
         markLessonSeen(lesson);
-        const touch = !this.sys.game.device.os.desktop;
+        // A finger as the main pointer (phones, tablets), not just a touch screen on a laptop.
+        const touch =
+          !this.sys.game.device.os.desktop || window.matchMedia?.('(pointer: coarse)').matches === true;
         const text = t.lessons[lesson];
         this.hud.tip(t.lessons.icon[lesson], typeof text === 'function' ? text(touch) : text);
         return;
