@@ -37,6 +37,14 @@ export function weaponReport(world: World): WeaponReport[] {
   });
 }
 
+/**
+ * What each weapon's damage bar is drawn against (the end screen and the pause use the same numbers): the best DPS
+ * (that weapon is gold) and the most damage (a bar's full length).
+ */
+export function reportExtent(rows: readonly WeaponReport[]): { best: number; most: number } {
+  return { best: Math.max(0, ...rows.map((r) => r.dps)), most: Math.max(1, ...rows.map((r) => r.damage)) };
+}
+
 /** Passives taken this run with their levels, in data order. */
 export function passiveReport(world: World): { id: PassiveId; level: number }[] {
   return PASSIVE_IDS.filter((id) => (world.passives[id] ?? 0) > 0).map((id) => ({

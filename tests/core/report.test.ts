@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { spawnEnemy } from '../../src/core/enemies';
-import { almostElo, hurtShare, passiveReport, weaponReport } from '../../src/core/report';
+import { almostElo, hurtShare, passiveReport, reportExtent, weaponReport } from '../../src/core/report';
 import { PASSIVES } from '../../src/data/upgrades';
 import { maxLevel } from '../../src/core/weapons';
 import { WEAPONS } from '../../src/data/weapons';
@@ -85,5 +85,13 @@ describe('hurtShare', () => {
       { source: 'ground', percent: 13 },
     ]);
     expect(hurtShare({ contact: 40, shot: 30, leap: 20, ground: 10, boss: 0 })).toHaveLength(3);
+  });
+});
+
+describe('reportExtent', () => {
+  it('takes the best DPS and the most damage, and never divides by zero', () => {
+    const row = (damage: number, dps: number) => ({ damage, dps }) as never;
+    expect(reportExtent([row(100, 5), row(300, 2)])).toEqual({ best: 5, most: 300 });
+    expect(reportExtent([])).toEqual({ best: 0, most: 1 });
   });
 });

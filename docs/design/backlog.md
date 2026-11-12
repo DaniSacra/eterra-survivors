@@ -3249,7 +3249,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   mesmo visual `hp` da vida do herói. O O quê fica, agora como um terceiro visual em `LOOKS` (roxo-escuro com a moldura
   de aço/ouro) em vez de `UI.bossBar`.
 
-**CU-04 · Pausa com dano por arma** · ui + impl · P · proposto
+**CU-04 · Pausa com dano por arma** · ui + impl · P · ✅ feito (2026-11-12): cada linha de arma da Pausa ganha a barra fina de dano (gold para o melhor DPS) e, quando cabe ao lado da receita, "50,0 DPS"; na lista compacta (celular em pé com muitas armas) só a barra de 2 px. A conta é a mesma do Fim: `weaponReport` + `reportExtent` em `core/report.ts` (com teste), usada por `EndScene` e `buildList.ts`. Linhas ficaram 4 px mais altas (ROW 46, compacta 28)
 
 - Por quê: 05-ui UI-05. A pausa é a ficha da build (NU-03) e não responde "o que está funcionando?"; a tela final já
   calcula o DPS.

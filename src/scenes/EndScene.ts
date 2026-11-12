@@ -1,7 +1,7 @@
 import { ELO_DISCOVERY_GOLD } from '../data/evolutions';
 import Phaser from 'phaser';
 import { formatTime } from '../core/format';
-import { almostElo, hurtShare, passiveReport, weaponReport } from '../core/report';
+import { almostElo, hurtShare, passiveReport, reportExtent, weaponReport } from '../core/report';
 import type { World } from '../core/world';
 import type { StageId } from '../data/stages';
 import type { WeaponId } from '../data/weapons';
@@ -238,8 +238,7 @@ export class EndScene extends Phaser.Scene {
   private weapons(x: number, y: number, w: number, noTime = false): number {
     const small = w < 440;
     const rows = weaponReport(this.world);
-    const best = Math.max(...rows.map((r) => r.dps));
-    const most = Math.max(1, ...rows.map((r) => r.damage));
+    const { best, most } = reportExtent(rows);
     const right = x + w;
     const fs = small ? 13 : 14;
     const colW = small ? 50 : 66;

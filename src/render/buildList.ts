@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { reportExtent, weaponReport } from '../core/report';
 import { eloStatus } from '../core/upgrades';
 import { isElo, maxLevel } from '../core/weapons';
 import type { World } from '../core/world';
@@ -7,13 +8,13 @@ import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from './art/pen';
 import { UI, label, skin } from './ui';
-import { recipeProgress } from './describe';
+import { formatDecimal, recipeProgress } from './describe';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
 const BADGE = 28;
-const ROW = 38;
+const ROW = 46;
 /** A weapon's row in the compact list: one line, no recipe (phones, NU-03). */
-const ROW_COMPACT = 24;
+const ROW_COMPACT = 28;
 const PASSIVE = 30;
 const PAD = 10;
 
@@ -52,9 +53,27 @@ export function drawBuildList(
   );
   label(scene, x + PAD, y + PAD, t.pause.build, 14, { bold: true, color: UI.muted, align: 'left' });
   let ry = y + PAD + 22;
+  // CU-04: a thin damage bar in every row (the same numbers as the end screen: share of the most damage, gold for the best DPS).
+  const rows = weaponReport(world);
+  const { best, most } = reportExtent(rows);
+  const bars = scene.add.graphics();
+  const damageBar = (
+    bx: number,
+    by: number,
+    bw: number,
+    bh: number,
+    r: (typeof rows)[number] | undefined,
+  ): void => {
+    if (!r) return;
+    bars.fillStyle(UI.borderOff, 1).fillRect(bx, by, bw, bh);
+    bars
+      .fillStyle(r.dps === best && best > 0 ? UI.goldHex : UI.accent, 1)
+      .fillRect(bx, by, (bw * r.damage) / most, bh);
+  };
   const icon = (ix: number, iy: number, key: string, size: number) =>
     scene.add.image(ix, iy, key).setScale((ART_SCALE * size) / BADGE);
-  for (const o of world.weapons) {
+  world.weapons.forEach((o, wi) => {
+    const report = rows[wi];
     if (compact) {
       // One line: icon, name, and on the right its level or "Elo formado".
       const cy = ry + ROW_COMPACT / 2;
@@ -69,8 +88,9 @@ export function drawBuildList(
       label(scene, x + w - PAD, cy, elo ? t.pause.formed : t.pause.level(o.level, maxLevel(o.id)), 12, {
         color: elo || max ? UI.gold : UI.muted,
       }).setOrigin(1, 0.5);
+      damageBar(x + PAD + 26, ry + ROW_COMPACT - 6, w - PAD * 2 - 26, 2, report);
       ry += ROW_COMPACT;
-      continue;
+      return;
     }
     const cy = ry + ROW / 2;
     icon(x + PAD + 13, cy, `icon.${o.id}`, 26);
@@ -99,9 +119,17 @@ export function drawBuildList(
       icon(tx + 7, cy + 9, `icon.${evo.evo.passive}`, 14);
       lx += 18;
     }
-    label(scene, lx, cy + 9, text, 12, { color, align: 'left' }).setOrigin(0, 0.5);
+    const recipe = label(scene, lx, cy + 9, text, 12, { color, align: 'left' }).setOrigin(0, 0.5);
+    // The DPS only when it fits beside the recipe line (the bar always shows).
+    if (report) {
+      const dps = label(scene, x + w - PAD, cy + 9, t.pause.dps(formatDecimal(report.dps)), 12, {
+        color: report.dps === best && best > 0 ? UI.gold : UI.muted,
+      }).setOrigin(1, 0.5);
+      if (dps.x - dps.width < lx + recipe.width + 8) dps.destroy();
+    }
+    damageBar(tx, ry + ROW - 6, w - PAD * 2 - 32, 3, report);
     ry += ROW;
-  }
+  });
   const ids = Object.keys(world.passives) as PassiveId[];
   if (withPassives && ids.length) {
     ry += 6;

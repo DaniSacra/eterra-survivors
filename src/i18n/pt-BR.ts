@@ -183,6 +183,8 @@ export const t = {
     level: (n: number, max: number) => `Nv ${n}/${max}`,
     /** Each weapon's Elo recipe status. */
     formed: 'Elo formado',
+    /** A weapon's damage per second, on its pause row (CU-04). */
+    dps: (n: string) => `${n} DPS`,
     none: 'Sem Elo',
   },
 
