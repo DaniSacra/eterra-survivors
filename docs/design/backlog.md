@@ -3641,7 +3641,7 @@ em `ART_RES`.
   Tudo do pool de faíscas ou 1 sprite por evento, dentro da reserva do PB-01.
 - Aceite: folha de captura dos seis verbos no nível máximo com 26 inimigos; F4 igual.
 
-**PF-04 · Projéteis de Elo em pixel: Leque, onda da Fúria, Fogos-Fátuos, Procissão** · vfx · P · proposto (com o NA-05)
+**PF-04 · Projéteis de Elo em pixel: Leque, onda da Fúria, Fogos-Fátuos, Procissão** · vfx · P · ✅ feito (2026-11-12; escolhi desenhar os quatro por script local em vez de gastar gerações (0 usadas): onda carmim, faca com guarda esmeralda, fogo-fátuo violeta (saiu do ciano das gemas) e alma ciano-pálido com cauda; têm cor própria, sem a tinta do elemento; sem 4 quadros de brilho, são imagens fixas; capturas só no Valmor, não na Cripta)
 
 - Por quê: 06-vfx #6. `proj.fan`, `proj.fury`, `proj.wisps` e `proj.soulProcession` ainda são `Pen`
   (`art/items.ts:147-152`); a Procissão são seis pontos ciano quase invisíveis contra esqueleto claro (`soul-3`), e é um

@@ -516,7 +516,7 @@ const TRAIL: Partial<Record<WeaponId, Trail>> = {
   shields: { color: 0x8aa8c8, core: 0xffffff, width: 9, len: 0.2, dots: false, star: false },
   valmorWall: { color: ELEMENT_COLOR.steel, core: 0xffffff, width: 11, len: 0.2, dots: false, star: false },
   forgeFury: { color: ELEMENT_COLOR.forge, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
-  wisps: { color: 0x40e0d8, core: 0xe8ffff, width: 4, len: 0.12, dots: true, star: false },
+  wisps: { color: 0x8a7aff, core: 0xe4dcff, width: 4, len: 0.12, dots: true, star: false },
   soulProcession: { color: ELEMENT_COLOR.soul, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
 };
 

@@ -84,6 +84,11 @@ export const ASSETS: Record<string, AssetDef> = {
   'proj.elunLight': { kind: 'image', url: 'sprites/fx/elunOrb.png' },
   'proj.starlet': { kind: 'image', url: 'sprites/fx/starlet.png' },
   'proj.lyraStar': { kind: 'image', url: 'sprites/fx/lyraStar.png' },
+  // Elo and Fogos-Fátuos projectiles (PF-04): hand-built pixel sprites with their own colours (not element-tinted).
+  'proj.fury': { kind: 'image', url: 'sprites/fx/furyWave.png' },
+  'proj.fan': { kind: 'image', url: 'sprites/fx/fanKnife.png' },
+  'proj.wisps': { kind: 'image', url: 'sprites/fx/wisp.png' },
+  'proj.soulProcession': { kind: 'image', url: 'sprites/fx/soul.png' },
   'fx.shield': { kind: 'image', url: 'sprites/fx/shield.png' },
   'fx.sword': { kind: 'image', url: 'sprites/fx/sword.png' },
   'fx.maceHead': { kind: 'image', url: 'sprites/fx/maceHead.png' },

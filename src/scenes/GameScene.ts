@@ -123,8 +123,9 @@ const PROJECTILE_TINT: Record<string, number> = Object.fromEntries(
 const FORGE_SLOW_MS = 500;
 const FORGE_SLOW = 0.25;
 const FORGE = 'proj.forgeFury';
-/** Luz Sagrada's doves keep their own white and gold. */
+/** Luz Sagrada's doves and the pixel Elo shots keep their own colours instead of the element tint. */
 const DOVE = 'proj.holyLight';
+const OWN_COLOUR = new Set([DOVE, 'proj.fury', 'proj.fan', 'proj.soulProcession']);
 
 /** Sparks a swing throws when it starts: [color, size, count]. */
 const SWING_SPARK: Partial<Record<WeaponId, readonly [number, number, number]>> = {
@@ -402,7 +403,7 @@ export class GameScene extends Phaser.Scene {
           img.setTexture(p.sprite);
           img.baseR = (Math.max(img.width, img.height) * ART_SCALE) / 2;
           // An Elo's projectiles take its element's colour.
-          const tint = p.sprite === DOVE ? undefined : PROJECTILE_TINT[p.sprite];
+          const tint = OWN_COLOUR.has(p.sprite) ? undefined : PROJECTILE_TINT[p.sprite];
           if (tint === undefined) img.clearTint();
           else img.setTint(tint);
         }

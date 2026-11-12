@@ -44,56 +44,6 @@ const hammer = (head: number, glow: boolean): ArtDef => ({
   },
 });
 
-const wisp = (core: number, halo: number, s: number): ArtDef => ({
-  w: 22 * s,
-  h: 14 * s,
-  draw(p) {
-    p.g.save();
-    p.g.scaleCanvas(s, s);
-    // A flame lying down: tail to the left, head to the right.
-    p.fill(halo, 0.35).fillEllipse(14, 7, 14, 12);
-    p.fill(halo, 0.8).fillPoints(
-      [
-        { x: 1, y: 7 },
-        { x: 9, y: 3 },
-        { x: 16, y: 2.5 },
-        { x: 20, y: 7 },
-        { x: 16, y: 11.5 },
-        { x: 9, y: 11 },
-      ],
-      true,
-    );
-    p.fill(core).fillCircle(15, 7, 3.4);
-    p.fill(0xffffff, 0.9).fillCircle(14, 6, 1.4);
-    p.g.restore();
-  },
-});
-
-/**
- * Fúria's cutting wave: a crescent bulging forward (to the right), drawn pale so the element's red tint shows
- * true; a white edge on the front reads as the cut.
- */
-const crescent = (r: number): ArtDef => ({
-  w: r * 2,
-  h: r * 2,
-  draw(p) {
-    const c = r;
-    const pts: { x: number; y: number }[] = [];
-    const span = 1.25;
-    for (let k = 0; k <= 10; k++) {
-      const a = -span + (k / 10) * span * 2;
-      pts.push({ x: c + Math.cos(a) * r * 0.95, y: c + Math.sin(a) * r * 0.95 });
-    }
-    for (let k = 10; k >= 0; k--) {
-      const a = -span + (k / 10) * span * 2;
-      pts.push({ x: c - r * 0.35 + Math.cos(a) * r * 0.95, y: c + Math.sin(a) * r * 0.8 });
-    }
-    p.fill(0xffffff, 0.3).fillCircle(c + r * 0.2, c, r * 0.9);
-    p.fill(0xffe8e0).fillPoints(pts, true);
-    p.g.lineStyle(1.5, 0xffffff, 0.95).strokePoints(pts.slice(0, 11), false);
-  },
-});
-
 /** Estrela de Lyra's small falling stars: a five-point star in the arcane pink, with a halo. */
 const starlet = (r: number): ArtDef => ({
   w: r * 3,
@@ -144,12 +94,8 @@ export const ITEM_ART: Record<string, ArtDef> = {
   'proj.staff': glowOrb(0xf4e8ff, 0xb070f0, 5), // Lyra's purple
   'proj.lyraStar': glowOrb(0xfff6c0, 0xd8a0ff, 7),
   'proj.starlet': starlet(6),
-  'proj.fury': crescent(18),
-  'proj.fan': blade(0xffd8e0, 0xa8323e, 18),
   'proj.hammer': hammer(0xc4cede, false),
   'proj.forgeFury': hammer(0xffa040, true),
-  'proj.wisps': wisp(0xe8ffff, 0x40e0d8, 1),
-  'proj.soulProcession': wisp(0xffffff, 0x8ac0f0, 1.3),
 
   // ---- XP gems ----
   'gem.small': gem(0.9),
