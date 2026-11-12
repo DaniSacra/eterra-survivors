@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { musicScale } from '../core/settings';
 import { settings } from './settings';
 import { MUSIC, MUSIC_DUCK, MUSIC_FADE, MUSIC_LEVEL, type MusicId } from './musics';
 import { levelStep, rampVolume } from './musicRamp';
@@ -85,7 +86,7 @@ class MusicPlayer {
     if (this.voices.length === 0) return;
     this.duckNow = levelStep(this.duckNow, this.duckTarget, dt);
     const silent = this.silenced();
-    const level = silent ? 0 : MUSIC_LEVEL * this.duckNow;
+    const level = silent ? 0 : MUSIC_LEVEL * musicScale(settings()) * this.duckNow;
     for (let i = this.voices.length - 1; i >= 0; i--) {
       const v = this.voices[i] as Voice;
       const sound = v.sound as Phaser.Sound.WebAudioSound;

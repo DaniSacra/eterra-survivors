@@ -3660,7 +3660,7 @@ em `ART_RES`.
 
 ### P6 · Som e música
 
-**PS-01 · Volume da música em três níveis** · impl + ui · P · proposto
+**PS-01 · Volume da música em três níveis** · impl + ui · P · ✅ feito (2026-11-11; decidi: `music` continua o liga/desliga da Pausa e `musicLevel` (`low`/`normal`) é o campo novo; o botão das Opções cicla Desligada, Baixa, Normal; Baixa = metade do `MUSIC_LEVEL`; "audivelmente abaixo dos efeitos" não foi ouvido, só o volume conferido no código)
 
 - Por quê: 05-ui UI-G. Metal contínuo (MU-01) compete com os efeitos e a única saída hoje é desligar tudo. `MUSIC_LEVEL`
   é fixo em 0,45 (`render/musics.ts`).

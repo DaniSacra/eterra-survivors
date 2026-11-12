@@ -396,6 +396,8 @@ export const t = {
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
     music: 'Música',
+    /** The music button in Opções cycles these (PS-01). */
+    musicLevel: { off: 'Desligada', low: 'Baixa', normal: 'Normal' },
     /** Short names, for the one-row toggles on the pause screen. */
     soundShort: 'Som',
     musicShort: 'Música',

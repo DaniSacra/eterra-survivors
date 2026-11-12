@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
 import { music } from './music';
+import { nextMusic } from '../core/settings';
 import { setSetting, settings } from './settings';
 import { UI, button, label, seal } from './ui';
 
@@ -60,13 +61,24 @@ export function optionButtons(
     const by = y + i * (h + gap);
     // Sound is stored as "muted": its seal shows whether the sound is on.
     const isOn = () => (key === 'muted' ? !settings().muted : settings()[key]);
+    // The music has three states (Desligada, Baixa, Normal); the others are on or off.
+    const stateText = () =>
+      key === 'music'
+        ? t.options.musicLevel[settings().music ? settings().musicLevel : 'off']
+        : isOn()
+          ? t.options.on
+          : t.options.off;
     const b = button(scene, x, by, w, h, () => {
-      setSetting(key, !settings()[key]);
+      if (key === 'music') {
+        const next = nextMusic(settings());
+        setSetting('music', next.music);
+        setSetting('musicLevel', next.musicLevel);
+      } else setSetting(key, !settings()[key]);
       music.sync(scene);
-      state.set(isOn() ? t.options.on : t.options.off, isOn());
+      state.set(stateText(), isOn());
     });
     label(scene, x - w / 2 + 14, by, t.options[key], size, { bold: true, align: 'left' }).setOrigin(0, 0.5);
-    const state = seal(scene, x + w / 2 - 12, by, isOn() ? t.options.on : t.options.off, isOn(), 13);
+    const state = seal(scene, x + w / 2 - 12, by, stateText(), isOn(), 13);
     return b;
   });
 }
