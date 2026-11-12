@@ -68,12 +68,18 @@ describe('enemy state animations', () => {
     expect(enemyPose(rat, a, true)).toEqual({ pose: 'attack', k: -1 });
     // A crouching charger, a stunned one and a harmless one do not bite.
     rat.act = BossAct.Windup;
-    expect(enemyPose(rat, a, true).pose).toBe('walk');
+    expect(enemyPose(rat, a, true).pose).toBe('windup');
+    expect(enemyPose(rat, { ...a, frames: { walk: 5, attack: 6 } }, true).pose).toBe('walk');
     rat.act = BossAct.Idle;
     rat.stun = 1;
     expect(enemyPose(rat, a, true).pose).toBe('walk');
     const egg = spawnEnemy(w, 'spiderEgg', 100, 0);
-    expect(enemyPose(egg, ENEMY_ANIMS['enemy.spiderEgg'] as EnemyAnim, true).pose).toBe('walk');
+    const ea = ENEMY_ANIMS['enemy.spiderEgg'] as EnemyAnim;
+    egg.actT = 3;
+    expect(enemyPose(egg, ea, true).pose).toBe('walk');
+    // An egg splits open in the last second before it hatches.
+    egg.actT = 0.5;
+    expect(enemyPose(egg, ea, true)).toEqual({ pose: 'windup', k: 0.5 });
     // An enemy without an attack strip keeps walking.
     expect(enemyPose(rat, { ...a, frames: { walk: 5 } }, true).pose).toBe('walk');
   });

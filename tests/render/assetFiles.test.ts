@@ -32,8 +32,15 @@ describe('asset files', () => {
     }
   });
 
-  it('a walk-only enemy asks for the walk strip alone', () => {
-    expect(declaredPoses(ENEMY_ANIMS['enemy.spiderEgg'] as never)).toEqual(['walk']);
-    expect(declaredPoses(ENEMY_ANIMS['enemy.golem'] as never)).toEqual(['walk', 'windup', 'strike', 'death']);
+  it('an enemy asks only for the strips it declares', () => {
+    expect(declaredPoses(ENEMY_ANIMS['enemy.thiefRat'] as never)).toEqual(['walk']);
+    expect(declaredPoses(ENEMY_ANIMS['enemy.spiderEgg'] as never)).toEqual(['walk', 'windup']);
+    expect(declaredPoses(ENEMY_ANIMS['enemy.golem'] as never)).toEqual([
+      'walk',
+      'windup',
+      'strike',
+      'death',
+      'attack',
+    ]);
   });
 });

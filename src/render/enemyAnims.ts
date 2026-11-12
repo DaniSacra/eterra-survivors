@@ -53,38 +53,41 @@ export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.blackKnight': anim(128, 160, [7, 7, 4, 7, 6]),
   'enemy.spiderMother': anim(160, 112, [7, 9, 4, 9, 6]),
   'enemy.oldWolf': anim(160, 128, [7, 9, 6, 7, 6]),
-  'enemy.golem': anim(96, 112, [7, 9, 5, 9]),
+  'enemy.golem': anim(96, 112, [7, 9, 5, 9, 8]),
   'enemy.witch': anim(96, 112, [7, 5, 5, 7, 6]),
   'enemy.gravedigger': anim(88, 96, [7, 7, 5, 7, 6]),
   'enemy.bellRinger': anim(95, 102, [7, 7, 5, 7, 6]),
   // The crowd: walk, attack (the bite or swing at contact) and, where the behaviour has one, windup and strike.
   // [walk, windup, strike, death, attack]; then walk fps, step hop (art px) and attack fps. Sizes are the final display size.
   'enemy.bat': anim(32, 32, [5, 0, 0, 0, 6], 12, 0, 12),
-  'enemy.rat': anim(40, 32, [6, 0, 0, 0, 6], 9, 1),
+  'enemy.rat': anim(40, 32, [6, 3, 1, 0, 6], 9, 1),
   'enemy.graveRat': anim(36, 32, [6, 0, 0, 0, 6], 9, 1),
   'enemy.spider': anim(40, 32, [6, 0, 0, 0, 6], 9),
-  'enemy.spiderEgg': anim(32, 32, [5], 6),
-  'enemy.spiderNest': anim(64, 56, [5], 6),
+  'enemy.spiderEgg': anim(32, 32, [5, 7], 6),
+  'enemy.spiderNest': anim(64, 56, [5, 7], 6),
   'enemy.thiefRat': anim(44, 36, [5], 10, 1),
   'enemy.crow': anim(40, 32, [5, 6, 6, 0, 6], 12),
   'enemy.frostWolf': anim(64, 48, [5, 0, 0, 0, 6], 10, 1),
-  'enemy.hooded': anim(56, 64, [6, 0, 0, 0, 6], 9, 1),
+  'enemy.hooded': anim(56, 64, [6, 3, 1, 0, 6], 9, 1),
   'enemy.goblin': anim(56, 56, [5, 3, 6, 0, 6], 8, 1),
-  'enemy.frostBoar': anim(72, 56, [5, 6, 0, 0, 6], 10, 1),
+  'enemy.frostBoar': anim(72, 56, [5, 6, 1, 0, 6], 10, 1),
   'enemy.warBanner': anim(48, 80, [6], 5),
   // Cripta crowd (older art, kept at its own scale in SPRITE_SCALE): the walk added in 2026-11.
   'enemy.bones': anim(44, 61, [5, 0, 0, 0, 6], 8, 1),
   'enemy.skeleton': anim(68, 76, [6, 0, 0, 0, 6], 8, 1),
   'enemy.emberBones': anim(35, 63, [6, 0, 0, 0, 6], 9, 1),
-  'enemy.ghost': anim(40, 44, [5, 0, 0, 0, 6], 6),
+  'enemy.ghost': anim(40, 44, [5, 0, 0, 8, 6], 6),
   'enemy.ghostDark': anim(40, 44, [5, 0, 0, 0, 6], 10),
   'enemy.coldSpirit': anim(50, 59, [5, 4, 6, 0, 6], 6),
   'enemy.slime': anim(56, 48, [5, 0, 0, 0, 6], 6, 2),
-  'enemy.vampireBat': anim(40, 40, [6], 12),
+  'enemy.vampireBat': anim(40, 40, [4, 0, 0, 0, 4], 10, 0, 10),
 };
 
 /** How far through a thrower's or digger's windup the throw or the blow begins. */
 const SWING_AT = 0.7;
+
+/** Seconds before a nest's next batch (or an egg's hatching) in which its windup strip plays. */
+const HATCH_LEAD = 1;
 
 /** Extra px around the contact range inside which an enemy already shows its attack (the crowd presses to ~0). */
 const REACH_MARGIN = 6;
@@ -107,6 +110,9 @@ export function enemyPose(
   near = false,
 ): { pose: Exclude<EnemyPose, 'death'>; k: number } {
   const def = e.def;
+  // A nest or an egg splits open in the last second before its batch.
+  if (a.frames.windup && def.nest && e.spawned < def.nest.total && e.actT < HATCH_LEAD)
+    return { pose: 'windup', k: Math.min(1, Math.max(0, 1 - e.actT / HATCH_LEAD)) };
   if (a.frames.windup && e.act === BossAct.Windup) {
     const total =
       def.shoot?.windup ??
