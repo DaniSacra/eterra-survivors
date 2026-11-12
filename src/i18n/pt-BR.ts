@@ -245,6 +245,51 @@ export const t = {
       reassemble: 'Levanta se a pilha não for quebrada',
       burst: 'Estoura ao cair',
     },
+    /** The kind of enemy, as a tag over its showcase. */
+    kinds: { crowd: 'Comum', elite: 'Elite', boss: 'Chefe' },
+    howTo: 'Como enfrentar',
+    loreTitle: 'Das Crônicas',
+    /** How to face each enemy: plain gameplay advice from its traits (written for the Survivors, not lore). */
+    tips: {
+      bones: 'Quebre a pilha de ossos depois que ela cai, ou a Ossada se levanta de novo.',
+      vampireBat: 'Voa em ziguezague e morde de passagem. Armas em área pegam melhor que as de mira.',
+      coldSpirit: 'Atira gelo de longe e anda devagar. Dê a volta e vá até ele.',
+      emberBones: 'Estoura ao cair. Derrube de longe e saia de perto da brasa.',
+      bat: 'Frágil e rápido. Qualquer golpe derruba; o perigo é o bando.',
+      skeleton: 'Resistente e lento. Não deixe encostar, mas não perca tempo fugindo dele.',
+      graveRat: 'Vem em fila pelo chão. Um golpe largo limpa o caminho.',
+      rat: 'Investe em linha reta. Saia de lado quando ele abaixar a cabeça.',
+      spider: 'Rápida e em ziguezague, mas frágil. Armas em área resolvem.',
+      slime: 'Deixa um rastro no chão. Não ande por onde ela passou.',
+      ghost: 'Atravessa e some por um instante. Espere ele aparecer de novo para bater.',
+      hooded: 'Avança de repente. Fique de lado e revide quando ele passar.',
+      crow: 'Salta e cai em área. Saia do círculo antes que ele pouse.',
+      frostWolf: 'Vem com a matilha e cerca pelos lados. Não deixe fechar o círculo.',
+      goblin: 'Arremessa lanças de longe. Ande em curva e chegue perto.',
+      frostBoar: 'Raspa o gelo antes de investir. Saia pelo lado.',
+      warBanner: 'Fortalece quem está perto. Derrube o estandarte primeiro.',
+      spiderNest: 'Gera aranhas até cair. Quebre o ninho cedo.',
+      thiefRat: 'Foge com as suas gemas. Pegue o rato e recupere o saco.',
+      spiderEgg: 'Trinca e solta aranhas. Quebre antes que choque.',
+      golem: 'Salta e cai em área. Saia da sombra no chão e bata depois do pouso.',
+      witch: 'Atira poções e deixa um baú ao cair. Não fique parado nas poças.',
+      gravedigger: 'Quando finca a pá, as covas se abrem. Afaste-se e volte para bater.',
+      bellRinger: 'A Badalada avisa antes de bater: saia do anel. No Dobre Fúnebre, mantenha distância.',
+      oldWolf: 'A Mordida Funda vem em linha: saia de lado. O Uivo da Geada deixa o chão lento.',
+      spiderMother: 'A Ferroada vem em linha, a Teia prende e os Ovos chocam. Quebre os ovos e fuja da teia.',
+      blackKnight: 'O Corte Brutal avisa antes de cair. Saia do arco e bata enquanto ele se recupera.',
+    } as Partial<Record<EnemyId, string>>,
+    /**
+     * Lore from the original game only (never invented here; CLAUDE.md): the Sineiro from src/data.js, the crypt's
+     * dead from the quest notes in src/data.js, the Aliança Negra from canone.md (already in the flavor lines).
+     */
+    lore: {
+      bellRinger: 'O Sineiro ergue o sino de bronze. Em algum lugar acima, a terra das covas estremece.',
+      bones: 'Algo acorda os mortos da cripta. Os paladinos que a fecharam eram quatro.',
+      skeleton: 'Algo acorda os mortos da cripta. Os paladinos que a fecharam eram quatro.',
+      emberBones: 'Algo acorda os mortos da cripta. Os paladinos que a fecharam eram quatro.',
+      warBanner: 'Os goblins fizeram um acordo com os Nekaren: a Aliança Negra.',
+    } as Partial<Record<EnemyId, string>>,
     /** A boss with several abilities lists them by name (the same kind can have another name in another boss). */
     bossAbilities: {
       oldWolf: ['Mordida Funda', 'Uivo da Geada'],
@@ -541,6 +586,50 @@ export const t = {
       skip: 'Paciência',
       banish: 'Bênção do Templo',
       revive: 'Segunda Chance',
+    } satisfies Record<ShopId, string>,
+    /** Gaspar's counter: the overall progress and the level line of the selected item. */
+    progress: (n: number, total: number) => `Loja: ${n} de ${total} níveis comprados`,
+    levelOf: (lv: number, max: number) => `Nível ${lv} de ${max}`,
+    levels: 'Níveis',
+    levelShort: (lv: number) => `Nv ${lv}`,
+    /** What each item does, in one plain sentence (the detail panel). */
+    desc: {
+      might: 'Todo golpe causa mais dano.',
+      maxHp: 'Mais vida máxima em todas as partidas.',
+      armor: 'Cada golpe recebido perde um pouco da força.',
+      regen: 'Recupera vida aos poucos, o tempo todo.',
+      moveSpeed: 'Anda mais rápido para fugir e pegar gemas.',
+      cooldown: 'As armas atacam com menos intervalo.',
+      area: 'Golpes, auras e projéteis ficam maiores.',
+      magnet: 'Puxa as gemas de mais longe.',
+      growth: 'Cada gema vale mais experiência.',
+      greed: 'Mais ouro em cada partida.',
+      amount: 'Uma peça a mais em cada ataque das armas que disparam várias.',
+      reroll: 'Troca as cartas de uma subida de nível por outras.',
+      skip: 'Recusa as cartas de uma subida de nível.',
+      banish: 'Tira uma carta da partida para ela não voltar mais.',
+      revive: 'Na queda, o herói levanta com metade da vida.',
+    } satisfies Record<ShopId, string>,
+    /**
+     * What Gaspar says about each item, in his speech bubble. Written for the Survivors (2026-11-11), no lore facts
+     * beyond the item names; Daniel may rewrite.
+     */
+    pitch: {
+      might: 'Traga a lâmina. Com fio, o osso cede no primeiro golpe.',
+      maxHp: 'Sopa quente antes da vigília. Ninguém luta de barriga vazia.',
+      armor: 'Couro grosso e lã por dentro. Não para espada, mas segura mordida.',
+      regen: 'Mastigue devagar e siga andando. A ferida fecha sozinha.',
+      moveSpeed: 'Sola costurada duas vezes. Na neve, quem para é cercado.',
+      cooldown: 'Braço que treina não cansa. Volte amanhã cedo.',
+      area: 'Cabo mais longo, alcance mais longo. Simples assim.',
+      magnet: 'Bolsa funda, mão rápida. Nenhuma gema fica para trás.',
+      growth: 'Eu não entendo nada desses livros, mas quem lê volta mais esperto.',
+      greed: 'Não pergunte de onde vêm esses dados. Só jogue.',
+      amount: 'Uma segunda bainha dá trabalho. O preço mostra.',
+      reroll: 'O ancião sempre tem outro conselho. Às vezes, um melhor.',
+      skip: 'Nem toda oferta serve. Saber recusar também é preparo.',
+      banish: 'O que foi abençoado no templo não volta para atrapalhar.',
+      revive: 'Isso não é aço, é fé. Mas já vi gente levantar da neve.',
     } satisfies Record<ShopId, string>,
     charges: {
       reroll: 'Trocar +1 por partida',

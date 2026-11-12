@@ -49,9 +49,10 @@ function levelPips(scene: Phaser.Scene, x: number, y: number, level: number, max
     g.fillStyle(i < level ? UI.goldHex : UI.border, 1).fillCircle(x + 3 + i * 9, y, 3);
 }
 
-/** Smallest item card: wide enough for icon, name and price, tall enough to touch. */
-const CARD_MIN_W = 150;
-const CARD_MIN_H = 40;
+/** Smallest item tile (icon over name, level pips and price), and the height under which a card is one row. */
+const TILE_MIN_W = 96;
+const TILE_MIN_H = 80;
+const TILE_FLOOR = 70;
 /** Section tabs, when the whole list doesn't fit. */
 const TAB_H = 40;
 
@@ -101,6 +102,8 @@ export class ShopScene extends Phaser.Scene {
   private nav: KeyNav | null = null;
   /** Purchases wait a moment after (re)building, so a double tap buys one level, not two. */
   private ready = false;
+  /** First visit: Gaspar's bubble says hello instead of talking about the item. */
+  private greet = false;
 
   init(data: { focus?: ShopId }): void {
     this.cart = { selected: data.focus ?? null };
@@ -121,6 +124,7 @@ export class ShopScene extends Phaser.Scene {
     const greet = DEV_MODE ? !devGasparMet : !settings().gasparMet;
     if (greet && DEV_MODE) devGasparMet = true;
     else if (greet) setSetting('gasparMet', true);
+    this.greet = greet;
     /** The title with Gaspar's anvil before it. */
     const title = (y: number, size: number): void => {
       const text = label(this, cx + size * 0.6, y, t.shop.title, size, { bold: true, color: UI.gold });
@@ -128,48 +132,38 @@ export class ShopScene extends Phaser.Scene {
         .image(text.x - text.width / 2 - size * 0.7, y, 'icon.anvil')
         .setScale((ART_SCALE * size) / BADGE);
     };
-    if (short) {
-      // Phone lying down: title, gold and Back share the top row; the greeting fades in and out over the list.
-      title(28, 24);
-      label(this, width - s.right - 16, 28, t.shop.gold(save.gold), 16, {
-        bold: true,
-        color: UI.gold,
-      }).setOrigin(1, 0.5);
-      if (greet) this.greetingBanner(cx, 60);
-    } else {
-      title(30, 28);
-      const intro = label(this, cx + 14, 60, greet ? t.shop.greeting : t.shop.intro, 13, {
-        color: greet ? UI.text : UI.muted,
-        wrap: Math.min(500, width - 64),
-      });
-      this.add.image(intro.x - intro.width / 2 - 16, 60, 'icon.gaspar').setScale((ART_SCALE * 26) / BADGE);
-      label(this, cx, 94, t.shop.gold(save.gold), 18, { bold: true, color: UI.gold });
-    }
-
-    // The detail panel goes beside the list on wide screens, under it on phones.
+    // The detail panel (Gaspar's counter) goes beside the list on wide screens, under it on phones.
     const wide = width >= 760 || (short && width >= 600);
     const left = s.left + 12;
     const right = width - s.right - 12;
-    const top = short ? 54 : 116;
+    const titleY = short ? 26 : 32;
+    title(titleY, short ? 24 : 28);
+    // The gold in a pill: at the right of the title on wide screens, under it on phones.
+    this.goldPill(wide ? right : cx, wide ? titleY : 68, save.gold, wide);
+    if (wide && !short)
+      label(this, cx, 60, t.shop.progress(this.boughtLevels(save), this.totalLevels()), 12, {
+        color: UI.muted,
+      });
+    const top = short ? 52 : wide ? 80 : 96;
     const bottom = short ? height - 10 : height - 68;
     let listRight = right;
     let listBottom = bottom;
     if (wide) {
-      const dw = Math.min(320, (right - left) * (short ? 0.3 : 0.36));
-      this.detailBox = { x: right - dw, y: top, w: dw, h: Math.min(260, bottom - top) };
-      listRight = right - dw - 12;
+      const dw = Math.min(400, (right - left) * 0.38);
+      this.detailBox = { x: right - dw, y: top, w: dw, h: bottom - top };
+      listRight = right - dw - 14;
     } else {
-      const dh = 150;
+      const dh = 262;
       this.detailBox = { x: left, y: bottom - dh, w: right - left, h: dh };
       listBottom = bottom - dh - 10;
     }
 
     // The list, section by section; cards as tall as the space allows (at least a touch target).
     const listW = listRight - left;
-    const cols = Math.max(1, Math.min(3, Math.floor((listW + GAP) / (CARD_MIN_W + GAP))));
+    const cols = Math.max(2, Math.min(5, Math.floor((listW + GAP) / (TILE_MIN_W + GAP))));
     const rowsOf = (keys: readonly ShopSection[]) =>
       keys.reduce((n, k) => n + Math.ceil(SHOP_SECTIONS[k].length / cols), 0);
-    const fits = (listBottom - top - SECTIONS.length * HEAD) / rowsOf(SECTIONS) - GAP >= CARD_MIN_H;
+    const fits = (listBottom - top - SECTIONS.length * HEAD) / rowsOf(SECTIONS) - GAP >= TILE_MIN_H;
     // Too small for the whole list (small phones): one section at a time, under a row of section tabs.
     const current = sectionOf(this.cart.selected ?? (SHOP_SECTIONS.stats[0] as ShopId));
     const shown = fits ? SECTIONS : [current];
@@ -195,7 +189,7 @@ export class ShopScene extends Phaser.Scene {
       y += TAB_H + GAP;
     }
     const heads = fits ? SECTIONS.length * HEAD : 0;
-    const cardH = Math.max(CARD_MIN_H, Math.min(52, (listBottom - y - heads) / rowsOf(shown) - GAP));
+    const cardH = Math.max(40, Math.min(118, (listBottom - y - heads) / rowsOf(shown) - GAP));
     const cardW = (listW - GAP * (cols - 1)) / cols;
     for (const key of shown) {
       if (fits) {
@@ -251,27 +245,69 @@ export class ShopScene extends Phaser.Scene {
     this.scene.restart({ focus: SHOP_SECTIONS[key][0] });
   }
 
-  /** Short layout: Gaspar's first-visit line as a banner that fades out by itself. */
-  private greetingBanner(cx: number, y: number): void {
-    const text = label(this, cx + 14, y, t.shop.greeting, 14, { wrap: this.scale.width - 96 });
-    const w = text.width + 64;
-    const h = Math.max(36, text.height + 14);
-    const bg = this.add.rectangle(cx, y, w, h, UI.panel, 0.96).setStrokeStyle(2, UI.goldHex);
-    const face = this.add
-      .image(text.x - text.width / 2 - 16, y, 'icon.gaspar')
-      .setScale((ART_SCALE * 26) / BADGE);
-    const parts = [bg, face, text];
-    parts.forEach((o, i) => o.setDepth(20 + i)); // the panel was made after the text it measures
-    this.tweens.add({
-      targets: parts,
-      alpha: 0,
-      delay: 3500,
-      duration: 600,
-      onComplete: () => parts.forEach((o) => o.destroy()),
-    });
+  /** The banked gold in a pill with a coin. `atRight`: its right edge at `x` (else centred). */
+  private goldPill(x: number, y: number, gold: number, atRight: boolean): void {
+    const text = label(this, 0, y, t.int(gold), 18, { bold: true, color: UI.gold });
+    const w = text.width + 52;
+    const cx = atRight ? x - w / 2 : x;
+    const g = this.add.graphics();
+    g.fillStyle(UI.panel, 0.95).fillRoundedRect(cx - w / 2, y - 17, w, 34, 17);
+    g.lineStyle(2, UI.goldHex, 0.9).strokeRoundedRect(cx - w / 2, y - 17, w, 34, 17);
+    this.add.image(cx - w / 2 + 20, y, 'icon.greed').setScale((ART_SCALE * 22) / BADGE);
+    text.setX(cx + 12).setDepth(1);
   }
 
+  private boughtLevels(save: MetaSave): number {
+    return SHOP_IDS.reduce((n, id) => n + shopLevel(save, id), 0);
+  }
+
+  private totalLevels(): number {
+    return SHOP_IDS.reduce((n, id) => n + SHOP[id].maxLevel, 0);
+  }
+
+  /**
+   * An item as a tile: its icon, its name under it, the level as pips (a bar past 5 levels) and the price. Too short
+   * for that (a phone lying down), it is one row: icon, name and level, price at the right.
+   */
   private card(
+    id: ShopId,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    index: number,
+  ): Phaser.GameObjects.Rectangle {
+    if (h < TILE_FLOOR) return this.rowCard(id, x, y, w, h, index);
+    const save = this.save;
+    const card = button(this, x, y, w, h, () => {
+      this.nav?.focus(index);
+      this.select(id);
+    });
+    card.setData('action', () => (DEV_MODE ? this.devStep(1) : this.confirm()));
+    const top = y - h / 2;
+    const icon = Math.min(40, h * 0.32);
+    this.add.image(x, top + 6 + icon / 2, itemIcon(id)).setScale((ART_SCALE * icon) / BADGE);
+    label(this, x, top + 9 + icon, t.shop.items[id], 12, { bold: true, wrap: w - 10 })
+      .setOrigin(0.5, 0)
+      .setLineSpacing(-3);
+    const level = shopLevel(save, id);
+    const max = SHOP[id].maxLevel;
+    const pw = max > 5 ? 44 : max * 9 - 3;
+    levelPips(this, x - pw / 2, y + h / 2 - 24, level, max);
+    const cost = shopCost(save, id);
+    const py = y + h / 2 - 11;
+    if (DEV_MODE)
+      label(this, x, py, t.shop.level(level, max), 12, { bold: true, color: level ? UI.gold : UI.muted });
+    else if (cost === null) label(this, x, py, t.shop.maxed, 12, { bold: true, color: UI.okText });
+    else
+      label(this, x, py, t.shop.cost(cost), 12, {
+        bold: true,
+        color: cost <= save.gold ? UI.gold : UI.danger,
+      });
+    return card;
+  }
+
+  private rowCard(
     id: ShopId,
     x: number,
     y: number,
@@ -317,7 +353,10 @@ export class ShopScene extends Phaser.Scene {
     return card;
   }
 
-  /** Shows the detail of `id`: what it gives now and next, its price and the Comprar button. */
+  /**
+   * Gaspar's counter for `id`: Gaspar and what he says about it, the item (icon, name, level bar), what it does, what
+   * it gives now and next, its price and the Comprar button.
+   */
   private select(id: ShopId): void {
     this.cart.selected = id;
     for (const o of this.detail) o.destroy();
@@ -328,43 +367,92 @@ export class ShopScene extends Phaser.Scene {
     const cost = shopCost(save, id);
     const missing = shopShortfall(save, id);
     const d: Phaser.GameObjects.GameObject[] = (this.detail = []);
+    const roomy = h >= 340;
     d.push(this.add.rectangle(x, y, w, h, UI.panel, 0.95).setOrigin(0).setStrokeStyle(2, UI.accent));
     const pad = 12;
-    const big = 36;
+    let cy = y + pad;
+
+    // Gaspar and his speech bubble (his hello on the first visit).
+    const face = roomy ? 56 : 40;
     d.push(
-      this.add.image(x + pad + big / 2, y + pad + big / 2, itemIcon(id)).setScale((ART_SCALE * big) / BADGE),
+      this.add.image(x + pad + face / 2, cy + face / 2, 'icon.gaspar').setScale((ART_SCALE * face) / BADGE),
     );
+    const bx = x + pad + face + 12;
+    const bw = x + w - pad - bx;
+    const said = label(this, bx + 10, cy + 8, this.greet ? t.shop.greeting : t.shop.pitch[id], 13, {
+      italic: true,
+      align: 'left',
+      wrap: bw - 20,
+    }).setOrigin(0);
+    const bh = Math.max(face, said.height + 16);
+    const bubble = this.add.graphics();
+    bubble.fillStyle(UI.panelHover, 1).fillRoundedRect(bx, cy, bw, bh, 8);
+    bubble.lineStyle(2, UI.border, 1).strokeRoundedRect(bx, cy, bw, bh, 8);
+    bubble
+      .fillStyle(UI.panelHover, 1)
+      .fillTriangle(bx + 1, cy + face / 2 - 6, bx + 1, cy + face / 2 + 6, bx - 8, cy + face / 2);
+    said.setDepth(1);
+    d.push(bubble, said);
+    cy += bh + (roomy ? 18 : 10);
+
+    // The item: icon, name, level, and a bar with one segment per level (the next one outlined).
+    const big = roomy ? 52 : 36;
+    d.push(this.add.image(x + pad + big / 2, cy + big / 2, itemIcon(id)).setScale((ART_SCALE * big) / BADGE));
     const tx = x + pad * 2 + big;
     d.push(
-      label(this, tx, y + pad, t.shop.items[id], 16, { bold: true, align: 'left', wrap: w - big - pad * 3 }),
+      label(this, tx, cy + 2, t.shop.items[id], roomy ? 20 : 16, { bold: true, align: 'left' }).setOrigin(0),
     );
-    d.push(label(this, tx, y + pad + 22, t.shop.level(level, max), 13, { color: UI.muted, align: 'left' }));
+    d.push(
+      label(this, tx, cy + (roomy ? 30 : 22), t.shop.levelOf(level, max), 13, {
+        color: UI.muted,
+        align: 'left',
+      }).setOrigin(0),
+    );
+    cy += big + 8;
+    const bar = this.add.graphics();
+    const segW = (w - pad * 2 - (max - 1) * 3) / max;
+    for (let i = 0; i < max; i++) {
+      const sx = x + pad + i * (segW + 3);
+      if (i < level) bar.fillStyle(UI.goldHex, 1).fillRect(sx, cy, segW, 7);
+      else bar.fillStyle(UI.border, 1).fillRect(sx, cy, segW, 7);
+      if (i === level) bar.lineStyle(2, UI.goldHex, 0.9).strokeRect(sx, cy, segW, 7);
+    }
+    d.push(bar);
+    cy += 16;
+
+    // What it does, then now and next.
+    if (h >= 250) {
+      const desc = label(this, x + pad, cy, t.shop.desc[id], roomy ? 15 : 13, {
+        align: 'left',
+        wrap: w - pad * 2,
+      }).setOrigin(0);
+      d.push(desc);
+      cy += desc.height + (roomy ? 14 : 8);
+    }
     const row = (ry: number, name: string, value: string, color: string) => {
-      d.push(label(this, x + pad, ry, name, 13, { color: UI.muted, align: 'left' }));
+      d.push(label(this, x + pad, ry, name, 13, { color: UI.muted, align: 'left' }).setOrigin(0));
       d.push(
         label(this, x + pad + 72, ry, value, 13, {
           bold: true,
           color,
           align: 'left',
           wrap: w - pad * 2 - 72,
-        }),
+        }).setOrigin(0),
       );
     };
-    let ry = y + pad + big + 8;
-    row(ry, t.shop.now, effectAt(id, level), UI.text);
+    row(cy, t.shop.now, effectAt(id, level), UI.text);
     if (DEV_MODE) return this.devControls(id, level);
-    // Keyboard players get the two-step rule spelled out (touch players see the button).
-    if (!this.sys.game.device.input.touch && h >= 180)
-      d.push(label(this, x + w / 2, y + h - 12 - 52, t.shop.hintKeys, 12, { color: UI.muted }));
+    if (!this.sys.game.device.input.touch && roomy)
+      d.push(label(this, x + w / 2, y + h - pad - 60, t.shop.hintKeys, 12, { color: UI.muted }));
     if (cost === null) {
-      const done = seal(this, x + w - pad, y + h - pad - 12, t.shop.maxed);
+      const done = seal(this, x + w - pad, y + h - pad - 20, t.shop.maxed);
       d.push(done.text, done.box);
       return;
     }
-    ry += 20;
-    row(ry, t.shop.next, effectAt(id, level + 1), UI.gold);
-    const by = y + h - pad - 20;
-    const bw = Math.min(220, w - pad * 2);
+    row(cy + 20, t.shop.next, effectAt(id, level + 1), UI.gold);
+    if (roomy) this.levelTable(id, level, x + pad, cy + 52, w - pad * 2, y + h - pad - 80);
+    const by = y + h - pad - 22;
+    const bw2 = Math.min(240, w - pad * 2);
     if (missing)
       d.push(
         label(this, x + pad, by, t.shop.missing(missing), 13, {
@@ -373,18 +461,50 @@ export class ShopScene extends Phaser.Scene {
           align: 'left',
         }).setOrigin(0, 0.5),
       );
-    const narrow = missing ? Math.min(bw, w - pad * 3 - 110) : bw;
+    const narrow = missing ? Math.min(bw2, w - pad * 3 - 120) : bw2;
     const buyBtn = button(
       this,
       x + w - pad - narrow / 2,
       by,
       narrow,
-      40,
+      44,
       () => this.confirm(),
       t.shop.buy(cost),
     );
     d.push(buyBtn, buyBtn.getData('label') as Phaser.GameObjects.Text);
     if (missing) disable(buyBtn);
+  }
+
+  /** Every level of `id` and what it gives in total, the bought ones checked and the next one outlined. */
+  private levelTable(id: ShopId, level: number, x: number, y: number, w: number, bottom: number): void {
+    const max = SHOP[id].maxLevel;
+    const step = Math.min(22, (bottom - y - 22) / max);
+    if (max < 2 || step < 16) return;
+    const d = this.detail;
+    d.push(label(this, x, y, t.shop.levels, 12, { bold: true, color: UI.muted, align: 'left' }).setOrigin(0));
+    for (let lv = 1; lv <= max; lv++) {
+      const ry = y + 20 + (lv - 1) * step;
+      const bought = lv <= level;
+      const next = lv === level + 1;
+      if (next)
+        d.push(
+          this.add
+            .rectangle(x - 4, ry - 2, w + 8, step, UI.goldHex, 0.1)
+            .setOrigin(0)
+            .setStrokeStyle(1, UI.goldHex, 0.7),
+        );
+      const color = bought ? UI.gold : next ? UI.text : UI.muted;
+      d.push(
+        label(this, x, ry, `${bought ? '✓' : ' '}  ${t.shop.levelShort(lv)}`, 13, {
+          bold: bought,
+          color,
+          align: 'left',
+        }).setOrigin(0),
+      );
+      d.push(
+        label(this, x + 76, ry, effectAt(id, lv), 13, { bold: bought, color, align: 'left' }).setOrigin(0),
+      );
+    }
   }
 
   /** Test mode: − and + for this item, and the whole Loja at max or at zero, all free. */

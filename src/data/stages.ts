@@ -160,3 +160,18 @@ export function bestiaryOrder(seen: Partial<Record<EnemyId, unknown>> = {}): Ene
   const placed = new Set(ids);
   return [...placed, ...ENEMY_IDS.filter((id) => !placed.has(id) && seen[id])];
 }
+
+/** The first stage that sends `id` (waves, specials, what its boss raises, its elites or its boss), else the first. */
+export function enemyStage(id: EnemyId): StageId {
+  const found = STAGE_IDS.find((sid) => {
+    const s: StageDef = STAGES[sid];
+    return (
+      s.waves.some((w) => w.enemies.some((e) => e.id === id)) ||
+      (s.specials ?? []).some((e) => e.id === id) ||
+      bossSummons(s.boss.id).includes(id) ||
+      s.elites.some((e) => e.id === id) ||
+      s.boss.id === id
+    );
+  });
+  return found ?? (STAGE_IDS[0] as StageId);
+}

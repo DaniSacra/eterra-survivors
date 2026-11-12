@@ -1,13 +1,14 @@
 import type Phaser from 'phaser';
 import { enemyTraits } from '../../core/format';
 import { ENEMIES, type EnemyId } from '../../data/enemies';
-import { bestiaryOrder } from '../../data/stages';
+import { bestiaryOrder, enemyStage } from '../../data/stages';
 import { t } from '../../i18n/pt-BR';
 import { ART_RES, ART_SCALE } from '../../render/art/pen';
-import { UI, button, disable, label } from '../../render/ui';
+import { Showcase } from '../../render/bestiaryShow';
+import { settings } from '../../render/settings';
+import { UI, button, label } from '../../render/ui';
 import type { TabArea, TabContent } from './tab';
 
-const COLS = 4;
 const GAP = 6;
 
 /** An enemy's sprite fitted in a `box` px square (bosses shrink, bats grow), as a silhouette when not seen. */
@@ -20,72 +21,94 @@ function portrait(
   seen: boolean,
 ): Phaser.GameObjects.Image {
   const img = scene.add.image(x, y, ENEMIES[id].sprite);
-  // The texture has a transparent margin (render/assets.ts PAD, 6 world px a side): fit the drawing, not it.
-  const frame = Math.max(img.frame.width, img.frame.height) - 12 * ART_RES;
+  // Pixel sprites have a thin transparent border: fit the drawing (most of the frame), not the frame.
+  const frame = Math.max(img.frame.width, img.frame.height) * 0.86;
   img.setScale(ART_SCALE * ((box * ART_RES) / frame));
   if (!seen) img.setTint(UI.border);
   return img;
 }
 
+/** Common, elite or boss, for the tag on the sheet. */
+export function enemyKind(id: EnemyId): 'boss' | 'elite' | 'crowd' {
+  const d = ENEMIES[id] as { boss?: unknown; elite?: unknown };
+  return d.boss ? 'boss' : d.elite ? 'elite' : 'crowd';
+}
+const KIND_COLOR = { boss: UI.danger, elite: UI.gold, crowd: UI.muted };
+
 /**
- * Bestiário: every enemy as a small card (a silhouette and "???" until met); focusing or tapping one shows its
- * sheet under the grid (beside it on wide screens).
+ * Bestiário: a stage where the chosen enemy walks and shows its tricks, large, over a sheet with what it is, how to
+ * face it and its lore; every enemy as a small portrait in a grid (a silhouette until met) to choose from.
+ * Wide screens: the grid on the left, the stage and the sheet on the right. Standing phones: stage, sheet, grid.
  */
 export function drawBestiary(a: TabArea): TabContent {
   const { scene, save } = a;
   const order = bestiaryOrder(save.bestiary);
   const seenCount = order.filter((id) => save.bestiary[id]).length;
-  const side = a.w >= 640;
-  const sheetW = side ? Math.min(380, a.w * 0.42) : a.w;
-  const gridW = side ? Math.min(560, a.w - sheetW - 12) : a.w;
-  const gridX = side ? a.x + (a.w - gridW - sheetW - 12) / 2 : a.x;
+  const wide = a.w >= 640;
 
-  label(scene, gridX + gridW / 2, a.y + 8, t.bestiary.count(seenCount, order.length), 13, {
-    color: UI.muted,
-  });
-  const top = a.y + 22;
-  const rows = Math.ceil(order.length / COLS);
-  const cardW = (gridW - GAP * (COLS - 1)) / COLS;
-  // Standing: the grid takes what it needs (the sheet gets the rest); lying down: it fills the height.
-  const cardH = side ? Math.min(96, (a.y + a.h - top) / rows - GAP) : Math.min(88, (a.h * 0.58) / rows - GAP);
-  const box = Math.min(44, cardH - 36);
+  // The grid: square portraits, as many columns as fit the width it gets.
+  const cols = wide ? (a.short ? 6 : 5) : 7;
+  const gridW = wide ? Math.min(a.w * 0.4, cols * (a.short ? 46 : 84)) : a.w;
+  const cell = (gridW - GAP * (cols - 1)) / cols;
+  const rows = Math.ceil(order.length / cols);
+  const gridH = rows * (cell + GAP) - GAP;
+  const rightW = wide ? Math.min(680, a.w - gridW - 16) : a.w;
+  const left = wide ? a.x + (a.w - gridW - 16 - rightW) / 2 : a.x;
+  const gridY = wide ? a.y + 22 : a.y + a.h - gridH;
+  const panelX = wide ? left + gridW + 16 : a.x;
+  const panelY = a.y + (wide ? 22 : 4);
+  const panelH = (wide ? a.y + a.h : gridY - 24) - panelY;
+
+  label(
+    scene,
+    wide ? left + gridW / 2 : a.x + a.w / 2,
+    wide ? a.y + 8 : gridY - 13,
+    t.bestiary.count(seenCount, order.length),
+    13,
+    { color: UI.muted },
+  );
+
+  // The stage takes the top of the panel, the sheet the rest.
+  const showH = Math.round(Math.min(wide ? 360 : 230, panelH * (wide ? 0.56 : 0.5)));
+  const show = new Showcase(scene, panelX, panelY, rightW, showH);
+  const sheet = new Sheet(scene, panelX, panelY + showH + 8, rightW, panelH - showH - 8);
+
   const buttons: Phaser.GameObjects.Rectangle[] = [];
   const ids: EnemyId[] = [];
   order.forEach((id, i) => {
-    const x = gridX + (i % COLS) * (cardW + GAP) + cardW / 2;
-    const y = top + Math.floor(i / COLS) * (cardH + GAP) + cardH / 2;
-    const entry = save.bestiary[id];
-    const card = button(scene, x, y, cardW, cardH, () => focus(buttons.indexOf(card)));
-    const iy = y - cardH / 2 + 4 + box / 2;
-    portrait(scene, x, iy, id, box, !!entry);
-    const nameY = iy + box / 2 + 12;
-    if (entry) {
-      buttons.push(card);
-      ids.push(id);
-      label(scene, x, nameY, t.enemies[id], 12, { wrap: cardW - 6 }).setLineSpacing(-3);
-      label(scene, x, y + cardH / 2 - 9, t.bestiary.kills(t.int(entry.kills)), 12, { color: UI.gold });
-    } else {
-      disable(card);
-      label(scene, x, nameY, t.bestiary.unknown, 13, { bold: true, color: UI.textOff });
-    }
+    const x = left + (i % cols) * (cell + GAP) + cell / 2;
+    const y = gridY + Math.floor(i / cols) * (cell + GAP) + cell / 2;
+    const seen = !!save.bestiary[id];
+    const card = button(scene, x, y, cell, cell, () => focus(buttons.indexOf(card)));
+    portrait(scene, x, y, id, cell - 12, seen);
+    if (!seen) label(scene, x, y, '?', Math.round(cell * 0.4), { bold: true, color: UI.textOff });
+    // Unseen ones can be focused too: the stage shows their silhouette, the sheet "???".
+    buttons.push(card);
+    ids.push(id);
   });
 
-  const gridBottom = top + rows * (cardH + GAP) - GAP;
-  const sx = side ? gridX + gridW + 12 : a.x;
-  const sy = side ? top : gridBottom + 10;
-  const sheet = new Sheet(scene, sx, sy, sheetW, side ? gridBottom - sy : a.y + a.h - sy);
-  let focus = (i: number) => sheet.show(ids[i] ?? null, a);
-  if (ids.length > 0) sheet.show(ids[0] as EnemyId, a);
-  else sheet.show(null, a);
+  const choose = (i: number) => {
+    const id = ids[i];
+    if (!id) return;
+    const entry = save.bestiary[id];
+    show.show(id, entry?.stage ?? enemyStage(id), !!entry, settings().calm);
+    sheet.show(entry ? id : null, a);
+  };
+  let focus = (i: number) => choose(i);
+  const first = Math.max(
+    0,
+    ids.findIndex((id) => save.bestiary[id]),
+  );
+  choose(first);
   return {
     buttons,
-    start: 0,
-    onFocus: (i) => sheet.show(ids[i] ?? null, a),
+    start: first,
+    onFocus: (i) => choose(i),
     bindFocus: (f) => (focus = f),
   };
 }
 
-/** The enemy's sheet: portrait, name, where it was first seen, kills, traits in player terms and its line. */
+/** The enemy's sheet: name and kind, its numbers in one line, how to face it, its lore and its line. */
 class Sheet {
   private parts: Phaser.GameObjects.GameObject[] = [];
 
@@ -108,57 +131,87 @@ class Sheet {
     const pad = 12;
     const lx = this.x + pad;
     const w = this.w - pad * 2;
+    const bottom = this.y + this.h - pad + 4;
     if (!id || !entry) {
       add(
-        label(s, this.x + this.w / 2, this.y + this.h / 2, t.bestiary.empty, 14, {
+        label(s, this.x + this.w / 2, this.y + 24, t.bestiary.unknown, 20, { bold: true, color: UI.textOff }),
+      );
+      add(
+        label(s, this.x + this.w / 2, this.y + this.h / 2 + 10, t.bestiary.empty, 14, {
           color: UI.muted,
           wrap: w,
         }),
       );
       return;
     }
-    const roomy = this.h >= 260;
-    const box = roomy ? 56 : 44;
-    add(portrait(s, lx + box / 2, this.y + pad + box / 2, id, box, true));
-    const tx = lx + box + 12;
-    add(label(s, tx, this.y + pad, t.enemies[id], 18, { bold: true, color: UI.gold, align: 'left' }));
-    add(
-      label(s, tx, this.y + pad + 24, `${t.bestiary.seenIn}: ${t.stages[entry.stage].name}`, 13, {
-        color: UI.muted,
-        align: 'left',
-        wrap: this.x + this.w - pad - tx,
-      }),
+    const roomy = this.h >= 300;
+    const fs = roomy ? 15 : 13;
+    let y = this.y + pad;
+    // Name and kind, then where it was first seen and how many fell.
+    const name = add(
+      label(s, lx, y, t.enemies[id], roomy ? 22 : 18, { bold: true, color: UI.gold, align: 'left' }),
     );
-    let y = this.y + pad + Math.max(box, 44) + 8;
+    const kind = enemyKind(id);
+    add(
+      label(s, lx + w, y + name.height / 2, t.bestiary.kinds[kind], 13, {
+        bold: true,
+        color: KIND_COLOR[kind],
+      }).setOrigin(1, 0.5),
+    );
+    y += name.height + 2;
+    const where = add(
+      label(
+        s,
+        lx,
+        y,
+        `${t.bestiary.seenIn}: ${t.stages[entry.stage].name}  ·  ${t.bestiary.killed}: ${t.int(entry.kills)}`,
+        12,
+        { color: UI.muted, align: 'left', wrap: w },
+      ),
+    );
+    y += where.height + 6;
+    // The numbers in one line, and its tricks.
     const tr = enemyTraits(ENEMIES[id]);
-    const rows: [string, string][] = [
-      [t.bestiary.killed, t.int(entry.kills)],
-      [t.bestiary.hp, t.bestiary.hpGrows(t.int(tr.hp))],
-      [t.bestiary.speed, t.bestiary.speeds[tr.speed]],
-      [t.bestiary.damage, String(tr.damage)],
-      [t.bestiary.push, t.bestiary.pushes[tr.push]],
-    ];
     const abilities = t.bestiary.bossAbilities[id];
-    if (abilities) rows.push([t.bestiary.way, abilities.join(', ')]);
-    else if (tr.way) rows.push([t.bestiary.way, t.bestiary.ways[tr.way]]);
-    const fs = roomy ? 14 : 13;
-    const step = roomy ? 21 : 18;
-    for (const [k, v] of rows) {
-      add(label(s, lx, y, k, fs, { color: UI.muted, align: 'left' }));
-      add(label(s, lx + w, y, v, fs, { bold: true }).setOrigin(1, 0));
-      y += step;
+    const way = abilities ? abilities.join(', ') : tr.way ? t.bestiary.ways[tr.way] : null;
+    const facts = [
+      `${t.bestiary.hp} ${t.int(tr.hp)}`,
+      t.bestiary.speeds[tr.speed],
+      tr.damage ? `${t.bestiary.damage} ${tr.damage}` : null,
+      t.bestiary.pushes[tr.push],
+    ].filter((f): f is string => !!f);
+    const factLine = add(
+      label(s, lx, y, facts.join('  ·  '), fs - 1, { bold: true, align: 'left', wrap: w }),
+    );
+    y += factLine.height + 2;
+    if (way) {
+      const wl = add(label(s, lx, y, way, fs - 1, { bold: true, color: UI.gold, align: 'left', wrap: w }));
+      y += wl.height;
     }
+    // How to face it, then the lore and the line, as far as the sheet has room (the line goes first).
+    const block = (title: string | null, text: string, color: string, italic = false): void => {
+      const head = title
+        ? label(s, lx, y + 8, title, 12, { bold: true, color: UI.muted, align: 'left' })
+        : null;
+      const top = y + 8 + (head ? head.height + 1 : 0);
+      const body = label(s, lx, top, text, fs, { align: 'left', wrap: w, color, italic });
+      if (body.y + body.height > bottom) {
+        head?.destroy();
+        body.destroy();
+        return;
+      }
+      if (head) add(head);
+      add(body);
+      y = body.y + body.height;
+    };
+    const tip = t.bestiary.tips[id];
+    if (tip) block(t.bestiary.howTo, tip, UI.text);
+    const lore = t.bestiary.lore[id];
+    if (lore) block(t.bestiary.loreTitle, lore, UI.text, true);
     const line = t.bestiary.flavor[id];
     if (line) {
       const who = t.bestiary.speakers[id];
-      add(
-        label(s, lx, y + 6, who ? t.bestiary.quoteBy(line, who) : t.bestiary.quote(line), 13, {
-          italic: true,
-          color: UI.text,
-          align: 'left',
-          wrap: w,
-        }),
-      );
+      block(null, who ? t.bestiary.quoteBy(line, who) : t.bestiary.quote(line), UI.muted, true);
     }
   }
 }
