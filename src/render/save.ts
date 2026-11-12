@@ -11,6 +11,7 @@ import { checkAchievements } from '../core/achievements';
 import type { RunSummary } from '../core/records';
 import type { CharacterId } from '../data/characters';
 import type { EnemyId } from '../data/enemies';
+import type { LessonId } from '../core/coach';
 import type { StageId } from '../data/stages';
 import { DEV_MODE } from './dev';
 
@@ -38,6 +39,14 @@ export function markTipSeen(id: EnemyId): void {
   const save = loadSave();
   if (save.tipsSeen.includes(id)) return;
   save.tipsSeen.push(id);
+  writeSave(save);
+}
+
+/** Remembers that a basics lesson was taught (`core/coach.ts`); never again, in any run. */
+export function markLessonSeen(id: LessonId): void {
+  const save = loadSave();
+  if (save.lessonsSeen.includes(id)) return;
+  save.lessonsSeen.push(id);
   writeSave(save);
 }
 

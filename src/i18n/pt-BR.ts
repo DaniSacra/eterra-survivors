@@ -414,12 +414,23 @@ export const t = {
     } satisfies Record<ElementId, string>,
   },
 
+  /** The basics a new player is told once, as a short tip in the run (`core/coach.ts`). */
+  lessons: {
+    move: (touch: boolean) =>
+      touch ? 'Arraste o dedo na tela para andar.' : 'Ande com as setas ou W, A, S, D.',
+    auto: 'Suas armas atacam sozinhas. Você só precisa se mexer e desviar.',
+    gems: 'Gemas azuis dão experiência. Ande até elas para subir de nível.',
+    life: 'Cada golpe tira vida. Não pare: fuja dos grupos e pegue comida.',
+    /** The texture shown beside each lesson. */
+    icon: { move: 'icon.swiftness', auto: 'icon.blade', gems: 'gem.medium', life: 'icon.vigor' },
+  },
+
   options: {
     title: 'Opções',
     damageNumbers: 'Números de dano',
     calm: 'Tela calma (sem tremor)',
     muted: 'Som',
-    tips: 'Dicas de inimigos',
+    tips: 'Dicas do jogo',
     music: 'Música',
     /** The music button in Opções cycles these (PS-01). */
     musicLevel: { off: 'Desligada', low: 'Baixa', normal: 'Normal' },

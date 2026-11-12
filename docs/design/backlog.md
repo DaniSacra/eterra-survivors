@@ -90,6 +90,12 @@ reescritos abaixo.
 
 ---
 
+## Onboarding (2026-11-12, pedido do Daniel: jogador novo é prioridade)
+
+**ON-01 · Lições do básico na primeira partida** · ui + impl · P · ✅ feito (2026-11-12): `core/coach.ts` com quatro lições (andar, armas atacam sozinhas, gemas dão experiência, vida), cada uma uma vez só, na caixa de dica sob o aviso, antes das dicas de inimigos; `lessonsSeen` no save; a opção Dicas liga e desliga tudo. Texto de andar muda no celular. Falta olhar jogando: tempos (1,5 s, 5 s, 3 s, vida abaixo de 75%) e se o texto de 4 s basta.
+
+---
+
 ## Etapa 0: Simulador (medir antes de mexer)
 
 **S-01 · Simulador de partidas completas** · impl · M · ✅ feito

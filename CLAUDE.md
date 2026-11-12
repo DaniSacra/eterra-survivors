@@ -136,6 +136,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   `data/achievements.ts` (declarative list and groups), `core/achievements.ts` (metrics, unlock, live check);
   `core/meta.ts` `recordRun` updates hero records, bestiary, totals and achievements at the end of a run. In a run,
   `GameScene` checks live achievements once a second and the HUD shows a queued toast.
+- Onboarding (ON-01): `core/coach.ts` (`nextLesson`, pure) picks one of four basics for a new player (move, weapons attack alone, gems, life), shown once each as a tip under the banner before any enemy tip; `lessonsSeen` in the save, switched off with the Dicas option. Wording in `t.lessons`.
 - Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
   `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.
 - Music belongs to the `music-director` agent (one progressive heavy metal track per stage with guitar solos, made with PixelLab's music tools, files in `public/audio/music/`).

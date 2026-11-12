@@ -7,6 +7,7 @@ import { ELO_DISCOVERY_GOLD, EVOLVED_IDS } from '../data/evolutions';
 import { WEAPON_IDS, type WeaponId } from '../data/weapons';
 import { ACHIEVEMENTS, ACHIEVEMENT_IDS, type AchievementId } from '../data/achievements';
 import { checkAchievements } from './achievements';
+import { LESSON_IDS, type LessonId } from './coach';
 import type { RunSummary } from './records';
 
 /**
@@ -80,6 +81,8 @@ export interface MetaSave {
   records: Partial<Record<CharacterId, HeroRecord>>;
   /** Enemies whose first-time tip was already shown (CU-01), never shown again. */
   tipsSeen: EnemyId[];
+  /** Basics already taught to the player (`core/coach.ts`), never shown again. */
+  lessonsSeen: LessonId[];
   /** Enemies seen at least once. */
   bestiary: Partial<Record<EnemyId, BestiaryEntry>>;
   totals: Totals;
@@ -115,6 +118,7 @@ export const newSave = (): MetaSave => ({
   elos: [],
   records: {},
   tipsSeen: [],
+  lessonsSeen: [],
   bestiary: {},
   totals: newTotals(),
   achievements: [],
@@ -250,6 +254,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
     records?: unknown;
     bestiary?: unknown;
     tipsSeen?: unknown;
+    lessonsSeen?: unknown;
     totals?: unknown;
     achievements?: unknown;
     fresh?: unknown;
@@ -270,6 +275,7 @@ export function sanitizeSave(raw: unknown): MetaSave {
   for (const id of CHARACTER_IDS) if (id in records) save.records[id] = sanitizeRecord(records[id]);
   save.bestiary = sanitizeBestiary(r.bestiary);
   save.tipsSeen = known(r.tipsSeen, ENEMY_IDS);
+  save.lessonsSeen = known(r.lessonsSeen, LESSON_IDS);
   const totals = obj(r.totals);
   for (const k of Object.keys(save.totals) as (keyof Totals)[])
     save.totals[k] = num(totals[k], k !== 'damage' && k !== 'time');
@@ -333,6 +339,7 @@ export function serializeSave(save: MetaSave): object {
     records: mergeUp(future.records, known.records),
     bestiary: mergeUp(future.bestiary, known.bestiary),
     tipsSeen: union(future.tipsSeen, known.tipsSeen),
+    lessonsSeen: union(future.lessonsSeen, known.lessonsSeen),
     totals: mergeUp(future.totals, known.totals),
     achievements: union(future.achievements, known.achievements),
     fresh: union(future.fresh, known.fresh),

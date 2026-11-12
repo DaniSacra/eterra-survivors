@@ -14,8 +14,9 @@ import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
 import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
-import { loadSave, markTipSeen, recordRun, recordVigil } from '../render/save';
+import { loadSave, markLessonSeen, markTipSeen, recordRun, recordVigil } from '../render/save';
 import { nextTip, TIP_GAP } from '../core/tips';
+import { LESSON_GAP, nextLesson, type LessonId } from '../core/coach';
 import { ENEMIES, type EnemyId } from '../data/enemies';
 import { lastChoice, type RunChoice } from './choice';
 import { World } from '../core/world';
@@ -271,6 +272,8 @@ export class GameScene extends Phaser.Scene {
   private liveShown = new Set<AchievementId>();
   /** Enemies whose first-time tip was shown (this save), the match time of the last tip, and the next check (CU-01). */
   private tipsSeen = new Set<EnemyId>();
+  /** The basics already taught (this save): shown once each, before any enemy tip. */
+  private lessonsSeen = new Set<LessonId>();
   private tipAt = -TIP_GAP;
   private nextTipCheck = 0;
   private nextCheck = 1;
@@ -335,6 +338,7 @@ export class GameScene extends Phaser.Scene {
     this.liveSave = loadSave();
     this.liveShown.clear();
     this.tipsSeen = new Set(this.liveSave.tipsSeen);
+    this.lessonsSeen = new Set(this.liveSave.lessonsSeen);
     this.tipAt = -TIP_GAP;
     this.nextTipCheck = 0;
     this.nextCheck = 1;
@@ -959,7 +963,21 @@ export class GameScene extends Phaser.Scene {
     const w = this.world;
     if (w.state !== 'playing' || w.time < this.nextTipCheck) return;
     this.nextTipCheck = w.time + 0.5;
-    if (!settings().tips || w.boss || w.time - this.tipAt < TIP_GAP || !this.hud.canTip()) return;
+    if (!settings().tips || w.boss || !this.hud.canTip()) return;
+    // The basics first (move, weapons attack alone, gems, life), a short while apart.
+    if (w.time - this.tipAt >= LESSON_GAP) {
+      const lesson = nextLesson(w, this.lessonsSeen);
+      if (lesson) {
+        this.lessonsSeen.add(lesson);
+        this.tipAt = w.time;
+        markLessonSeen(lesson);
+        const touch = !this.sys.game.device.os.desktop;
+        const text = t.lessons[lesson];
+        this.hud.tip(t.lessons.icon[lesson], typeof text === 'function' ? text(touch) : text);
+        return;
+      }
+    }
+    if (w.time - this.tipAt < TIP_GAP) return;
     const id = nextTip(w, this.tipsSeen);
     if (!id) return;
     this.tipsSeen.add(id);
