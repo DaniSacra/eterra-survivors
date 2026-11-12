@@ -74,3 +74,11 @@ Redo of `valmor` (2026-11-12, Daniel found the first five tracks too ambient, lo
 | southRoad | Estrada do Sul (galope, folk metal, solo longo) | 170 | c122a952-a3b1-46ef-b5d1-0a14305929fe / 4a82a4bc-f73b-4c25-acdd-bcb9f3f6cd4b | 3cbab8ac-a55a-46a2-95be-f1b4388dfdaf / d5fb96e3-b6ba-425d-9862-940a7a3d4b50 | 90.117 a 272.433 s |
 | boss | Chefes (denso, breakdown, solo) | 165 | ce7d2ae1-f167-48f5-b63a-3d106c01a635 / 61da6042-b337-4e24-9f21-3860f3e024c7 | cd5f5c61-15c5-4dfe-98f3-6a686163f0e6 / e5611956-fae9-425d-86dd-890d137256ae | 73.793 a 217.584 s |
 | menu | Menu (lareira, guitarra limpa, calmo) | 80 | a02c10c4-4021-43a4-9964-11fa56ebede2 / 64c49a71-5e08-4452-b324-2323c80edfff | a80e6c71-6859-4922-bef5-38fd10cc3893 / 2bdcac56-3237-4967-89f0-91033d571b3d | 53.267 a 151.255 s |
+
+## Arte round 2026-11-11 (3): moldura em pixel (PA-01)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-11 | UI font: **Jersey 15** (Soft Type Project, SIL OFL 1.1, free for commercial use, license in `public/fonts/Jersey15-OFL.txt`), Portuguese accents included; chosen over Pixelify Sans because its 5, 0 and 6 read as S, O and b; sizes scaled by `FONT_K` (1.33) in `render/ui.ts`. Used for every text, long ones included (captures of both fonts compared, Daniel can go back with `UI.font`) | Google Fonts (github.com/google/fonts, ofl/jersey15) |
+| 2026-11-11 | Panel 9-slice `public/sprites/ui/panel.png` (24 art px source: the 48x48 candidate 12 of job 2d1a30d2, top-left quadrant mirrored to make the corners exact, backdrop made transparent, palette-locked) and button 9-slice `ui/button.png` (hand drawn in the same palette; the 36 AI candidates of job 58704135 were too noisy to slice). 20 generations | PixelLab create_image_pro 48x48 (job 2d1a30d2-af1a-47c9-98be-88e4699b3436) and 64x24 (job 58704135-0840-4679-bf5a-678a5a9971e2) |
+| 2026-11-11 | HUD bars (life, boss, XP, hero life) and the joystick ring/knob are baked canvas textures at ART_RES (`render/bars.ts`, `render/joystick.ts`), no generation | local code |

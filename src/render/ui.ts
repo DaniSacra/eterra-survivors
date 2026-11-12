@@ -19,9 +19,17 @@ export const ELEMENT_COLOR: Record<ElementId, number> = {
   steel: 0xd0d8e4, // silver
 };
 
+/**
+ * Jersey 15 is drawn small for its em square: a size asked in the old serif's terms is stretched by this so the
+ * letters keep their height (and 12 px stays readable). The bold flag only picks the weight the file declares.
+ */
+export const FONT_K = 1.33;
+export const fontPx = (size: number): number => Math.round(size * FONT_K);
+
 /** Shared look for menus and overlays. */
 export const UI = {
-  font: 'Georgia, "Times New Roman", serif',
+  /** Pixel font (Jersey 15, OFL, public/fonts); the serif is only the fallback while it loads. */
+  font: '"Jersey 15", Georgia, serif',
   text: '#e8e2d0',
   textHex: 0xe8e2d0,
   muted: '#a8a090',
@@ -80,15 +88,92 @@ export function label(
   return scene.add
     .text(x, y, text, {
       fontFamily: UI.font,
-      fontSize: `${size}px`,
-      fontStyle: [opts.bold ? 'bold' : '', opts.italic ? 'italic' : ''].join(' ').trim() || 'normal',
+      fontSize: `${fontPx(size)}px`,
+      fontStyle: opts.bold ? 'bold' : 'normal',
       color: opts.color ?? UI.text,
       align: opts.align ?? 'center',
       wordWrap: opts.wrap ? { width: opts.wrap } : undefined,
       stroke: opts.stroke ? UI.stroke : undefined,
-      strokeThickness: opts.stroke ? Math.max(3, Math.round(size / 5)) : 0,
+      strokeThickness: opts.stroke ? Math.max(3, Math.round(fontPx(size) / 5)) : 0,
     })
     .setOrigin(opts.align === 'left' ? 0 : 0.5, opts.align === 'left' ? 0 : 0.5);
+}
+
+/** Pixel frames (PixelLab panel, button drawn in its palette): 9-slice textures at ART_RES, see docs/art/credits.md. */
+export const SKIN = {
+  panel: { key: 'ui.panel', corner: 22 },
+  button: { key: 'ui.button', corner: 12 },
+} as const;
+
+interface Skinned {
+  rect: Phaser.GameObjects.Rectangle;
+  frame: Phaser.GameObjects.NineSlice;
+}
+const skins = new WeakMap<Phaser.Scene, Skinned[]>();
+
+function syncSkins(scene: Phaser.Scene): void {
+  const list = skins.get(scene);
+  if (!list) return;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const { rect, frame } = list[i] as Skinned;
+    if (!rect.active) {
+      frame.destroy();
+      list.splice(i, 1);
+      continue;
+    }
+    frame
+      .setPosition(rect.x, rect.y)
+      .setSize(Math.max(8, rect.width), Math.max(8, rect.height))
+      .setScale(rect.scaleX, rect.scaleY)
+      .setRotation(rect.rotation)
+      .setAlpha(rect.alpha)
+      .setVisible(rect.visible);
+    // Same layer as the rectangle (the display list order keeps the frame under it).
+    if (frame.depth !== rect.depth) frame.setDepth(rect.depth);
+  }
+}
+
+/**
+ * Dresses a flat rectangle (a button, a card, a panel) with a pixel 9-slice frame drawn under it. The rectangle stays
+ * the hit area and the thing callers restyle: its panel fill turns the frame's own body, hover and disabled become a
+ * light or dark wash, and the plain border stroke is dropped (only focus, selection and rarity strokes remain, over
+ * the frame). Position, size, scale, alpha and visibility are copied each frame by one `postupdate` hook per scene.
+ */
+export function skin<R extends Phaser.GameObjects.Rectangle>(
+  scene: Phaser.Scene,
+  rect: R,
+  kind: keyof typeof SKIN = 'button',
+): R {
+  const def = SKIN[kind];
+  if (!scene.textures.exists(def.key)) return rect;
+  const c = def.corner;
+  const frame = scene.add
+    .nineslice(rect.x, rect.y, def.key, undefined, rect.width, rect.height, c, c, c, c)
+    .setOrigin(rect.originX, rect.originY);
+  const parent = rect.parentContainer;
+  if (parent) parent.addAt(frame, Math.max(0, parent.getIndex(rect)));
+  else scene.children.moveBelow(frame, rect);
+  let list = skins.get(scene);
+  if (!list) {
+    list = [];
+    skins.set(scene, list);
+    scene.events.on('postupdate', () => syncSkins(scene));
+  }
+  list.push({ rect, frame });
+  const fill = rect.setFillStyle.bind(rect);
+  const stroke = rect.setStrokeStyle.bind(rect);
+  rect.setFillStyle = (color?: number, alpha?: number) => {
+    frame.setTint(color === UI.panelOff ? 0x9aa0b0 : 0xffffff);
+    if (color === UI.panel) return fill(UI.panel, 0);
+    if (color === UI.panelHover) return fill(UI.panelHover, 0.6);
+    if (color === UI.panelOff) return fill(UI.panelOff, 0.55);
+    return fill(color, alpha);
+  };
+  rect.setStrokeStyle = (width?: number, color?: number, alpha?: number) =>
+    color === UI.border || color === UI.borderOff ? stroke() : stroke(width, color, alpha);
+  rect.setFillStyle(UI.panel);
+  stroke();
+  return rect;
 }
 
 /** Clickable panel. Returns the background so callers can highlight it. */
@@ -108,6 +193,7 @@ export function button(
   // Only a press that starts on the button counts: a finger still held on the joystick when an overlay
   // opens (death, level-up) must not trigger whatever button it is lifted over.
   let armed = false;
+  skin(scene, bg);
   bg.on('pointerover', () => bg.setFillStyle(UI.panelHover));
   bg.on('pointerout', () => {
     armed = false;

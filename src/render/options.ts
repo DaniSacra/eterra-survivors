@@ -3,7 +3,7 @@ import { t } from '../i18n/pt-BR';
 import { music } from './music';
 import { nextMusic } from '../core/settings';
 import { setSetting, settings } from './settings';
-import { UI, button, label, seal } from './ui';
+import { UI, fontPx, button, label, seal } from './ui';
 
 /** The options shown as on/off buttons, in order. */
 const OPTIONS: ('muted' | 'music' | 'damageNumbers' | 'calm')[] = ['muted', 'music', 'damageNumbers', 'calm'];
@@ -40,7 +40,7 @@ export function optionRow(
     });
     // The name is centred; the state is a 3 px bar on the bottom edge (green on), so the text width never matters.
     const text = label(scene, bx, y - 2, t.options[SHORT[key]], size, { bold: true });
-    for (let s = size; text.width + 12 > bw && s > 9; s--) text.setFontSize(s - 1);
+    for (let s = size; text.width + 12 > bw && s > 9; s--) text.setFontSize(fontPx(s - 1));
     const bar = scene.add.rectangle(bx, y + h / 2 - 3, bw - 4, 3, UI.panelOff);
     paint();
     return b;

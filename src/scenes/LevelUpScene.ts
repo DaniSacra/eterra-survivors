@@ -7,7 +7,18 @@ import { canBanish, canReroll, statPreview } from '../core/upgrades';
 import { BuildSlots, StatSheet, type SlotFocus } from '../render/buildPanel';
 import { describeUpgrade, formatCardTotal } from '../render/describe';
 import { ART_SCALE } from '../render/art/pen';
-import { UI, bindKeys, button, dim, disable, label, restartOnResize, safeArea } from '../render/ui';
+import {
+  UI,
+  fontPx,
+  skin,
+  bindKeys,
+  button,
+  dim,
+  disable,
+  label,
+  restartOnResize,
+  safeArea,
+} from '../render/ui';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
 
@@ -167,7 +178,7 @@ export class LevelUpScene extends Phaser.Scene {
       }).setOrigin(1, 0.5);
       // A long name next to a long tag (narrow phones): the name shrinks until they no longer touch.
       for (let size = tight ? 15 : 17; size >= 13 && title.x + title.width > tag.x - tag.width - 8; size--)
-        title.setFontSize(size);
+        title.setFontSize(fontPx(size));
       // Numbers first (a new weapon's level 1 line), the flavour only when there is room.
       const desc = label(
         this,
@@ -222,7 +233,7 @@ export class LevelUpScene extends Phaser.Scene {
         // What skipping pays, in gold under the label.
         const main = b.getData('label') as Phaser.GameObjects.Text;
         const h = b.height;
-        main.setY(y - h * 0.16).setFontSize(Math.min(18, h * 0.36));
+        main.setY(y - h * 0.16).setFontSize(fontPx(Math.min(18, h * 0.36)));
         label(this, x, y + h * 0.25, t.levelUp.skipGold(config.skipGold), Math.min(13, h * 0.3), {
           bold: true,
           color: UI.gold,
@@ -252,7 +263,11 @@ export class LevelUpScene extends Phaser.Scene {
 
   /** The build slots and the stat sheet in a panel at (x, y), `w` wide. */
   private buildPanel(x: number, y: number, w: number, slotSize: number, columns: boolean): void {
-    const bg = this.add.rectangle(x, y, w, 10, UI.panel, 0.9).setOrigin(0).setStrokeStyle(2, UI.border);
+    const bg = skin(
+      this,
+      this.add.rectangle(x, y, w, 10, UI.panel, 0.9).setOrigin(0).setStrokeStyle(2, UI.border),
+      'button',
+    );
     const inner = w - PANEL_PAD * 2;
     const slots = (this.slots = new BuildSlots(this, slotSize));
     slots.container.setPosition(x + PANEL_PAD + (columns ? 0 : (inner - slots.width) / 2), y + PANEL_PAD);

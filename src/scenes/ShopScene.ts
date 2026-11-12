@@ -28,6 +28,8 @@ import {
   restartOnResize,
   safeArea,
   seal,
+  skin,
+  fontPx,
   type KeyNav,
 } from '../render/ui';
 import { SCENES } from './keys';
@@ -387,7 +389,7 @@ export class ShopScene extends Phaser.Scene {
       .setLineSpacing(-3);
     // Two lines at most, and no word cut in the middle: shrink until the longest word fits and 2 lines are enough.
     for (let size = 12; size > 9 && (name.getWrappedText().length > 2 || this.widest(name) > tw); size--)
-      name.setFontSize(size - 1);
+      name.setFontSize(fontPx(size - 1));
     const level = shopLevel(save, id);
     const max = SHOP[id].maxLevel;
     const pw = max > 5 ? 44 : max * 9 - 3;
@@ -426,7 +428,13 @@ export class ShopScene extends Phaser.Scene {
     const missing = shopShortfall(save, id);
     const d: Phaser.GameObjects.GameObject[] = (this.detail = []);
     const roomy = h >= 340;
-    d.push(this.add.rectangle(x, y, w, h, UI.panel, 0.95).setOrigin(0).setStrokeStyle(2, UI.accent));
+    d.push(
+      skin(
+        this,
+        this.add.rectangle(x, y, w, h, UI.panel, 0.95).setOrigin(0).setStrokeStyle(2, UI.accent),
+        'button',
+      ),
+    );
     const pad = 12;
     let cy = y + pad;
 
@@ -578,8 +586,8 @@ export class ShopScene extends Phaser.Scene {
       const b = button(this, bx + bw / 2, by, bw, 36, act, text);
       const txt = b.getData('label') as Phaser.GameObjects.Text;
       // The signs read big; the long labels shrink to fit narrow panels.
-      if (text.length === 1) txt.setFontSize(24);
-      else if (txt.width > bw - 12) txt.setFontSize(13);
+      if (text.length === 1) txt.setFontSize(fontPx(24));
+      else if (txt.width > bw - 12) txt.setFontSize(fontPx(13));
       d.push(b, txt);
       if (off) disable(b);
     };

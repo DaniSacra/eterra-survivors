@@ -1,7 +1,53 @@
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
+import { ART_RES } from './art/pen';
 import { config } from '../data/config';
 import { joystickRadius, joystickVector } from '../core/input';
 import type { Vec2 } from '../core/math';
+
+/**
+ * A pixel ring (the base: a faint disc, a lit rim, eight tick marks) or a pixel knob (a disc with a highlight dot) of
+ * radius `r` world px, baked once per size at ART_RES (alpha 0.14 inside, 0.4 on the rim, as PA-01 asks).
+ */
+function joystickTexture(scene: Phaser.Scene, r: number, knob: boolean): string {
+  const R = Math.max(4, Math.round(r / ART_RES)); // radius in art px
+  const name = `joy.${knob ? 'knob' : 'base'}.${R}`;
+  if (scene.textures.exists(name)) return name;
+  const D = R * 2 + 2;
+  const src = document.createElement('canvas');
+  src.width = D;
+  src.height = D;
+  const g = src.getContext('2d') as CanvasRenderingContext2D;
+  const c = D / 2;
+  for (let y = 0; y < D; y++)
+    for (let x = 0; x < D; x++) {
+      const dx = x + 0.5 - c;
+      const dy = y + 0.5 - c;
+      const d = Math.hypot(dx, dy);
+      let a = 0;
+      if (d <= R) a = knob ? 0.4 : 0.14;
+      if (knob) {
+        if (d > R - 1.2 && d <= R) a = 0.55;
+        if (dx < 0 && dy < 0 && Math.abs(Math.hypot(dx + R * 0.4, dy + R * 0.4)) < 1.2) a = 0.8;
+      } else {
+        if (d > R - 2 && d <= R) a = 0.4;
+        // Eight ticks just inside the rim.
+        const ang = Math.atan2(dy, dx);
+        const k = Math.abs((((ang / (Math.PI / 4)) % 1) + 1) % 1);
+        if (d > R - 5 && d <= R - 2 && (k < 0.05 || k > 0.95)) a = 0.4;
+      }
+      if (a > 0) {
+        g.fillStyle = `rgba(255,255,255,${a})`;
+        g.fillRect(x, y, 1, 1);
+      }
+    }
+  const tex = scene.textures.createCanvas(name, D * ART_RES, D * ART_RES) as Phaser.Textures.CanvasTexture;
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(src, 0, 0, D * ART_RES, D * ART_RES);
+  tex.refresh();
+  tex.setFilter(Phaser.Textures.FilterMode.NEAREST);
+  return name;
+}
 
 /** Floating virtual joystick: appears wherever the finger touches down. Screen-space (HUD scene). */
 export class Joystick {
@@ -13,13 +59,13 @@ export class Joystick {
   private baseY = 0;
   /** Sized to the screen on every touch (the window may have been resized or turned). */
   private radius: number = config.joystick.minRadius;
-  private readonly base: Phaser.GameObjects.Arc;
-  private readonly knob: Phaser.GameObjects.Arc;
+  private readonly base: Phaser.GameObjects.Image;
+  private readonly knob: Phaser.GameObjects.Image;
 
   constructor(private readonly scene: Phaser.Scene) {
     const r = this.radius;
-    this.base = scene.add.circle(0, 0, r, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.25).setVisible(false);
-    this.knob = scene.add.circle(0, 0, r * 0.45, 0xffffff, 0.3).setVisible(false);
+    this.base = scene.add.image(0, 0, joystickTexture(scene, r, false)).setVisible(false);
+    this.knob = scene.add.image(0, 0, joystickTexture(scene, r * 0.45, true)).setVisible(false);
     scene.input.on('pointerdown', this.onDown, this);
     scene.input.on('pointermove', this.onMove, this);
     scene.input.on('pointerup', this.onUp, this);
@@ -35,8 +81,8 @@ export class Joystick {
     const r = joystickRadius(width, height, radiusShare, minRadius, maxRadius);
     if (r !== this.radius) {
       this.radius = r;
-      this.base.setRadius(r);
-      this.knob.setRadius(r * 0.45);
+      this.base.setTexture(joystickTexture(this.scene, r, false));
+      this.knob.setTexture(joystickTexture(this.scene, r * 0.45, true));
     }
     this.baseX = p.x;
     this.baseY = p.y;

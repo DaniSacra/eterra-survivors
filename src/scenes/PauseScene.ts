@@ -1,7 +1,18 @@
 import { music } from '../render/music';
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
-import { UI, bindKeys, button, dim, isShort, keyNav, label, restartOnResize, safeArea } from '../render/ui';
+import {
+  UI,
+  skin,
+  bindKeys,
+  button,
+  dim,
+  isShort,
+  keyNav,
+  label,
+  restartOnResize,
+  safeArea,
+} from '../render/ui';
 import { optionRow } from '../render/options';
 import { StatSheet } from '../render/buildPanel';
 import type { GameScene } from './GameScene';
@@ -109,7 +120,11 @@ export class PauseScene extends Phaser.Scene {
   private stats(world: GameScene['world'], x: number, y: number, w: number, bottom: number): void {
     const h = StatSheet.heightFor(true) + 22 + 16;
     if (y + h > bottom) return;
-    this.add.rectangle(x, y, w, h, UI.panel, 0.92).setOrigin(0).setStrokeStyle(2, UI.border);
+    skin(
+      this,
+      this.add.rectangle(x, y, w, h, UI.panel, 0.92).setOrigin(0).setStrokeStyle(2, UI.border),
+      'button',
+    );
     label(this, x + 10, y + 8, t.pause.stats, 14, { bold: true, color: UI.muted, align: 'left' });
     new StatSheet(this, x + 10, y + 30, w - 20, world, true);
   }

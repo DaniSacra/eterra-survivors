@@ -20,34 +20,47 @@ import { config } from './data/config';
 playtest.unlockAll = DEV_MODE;
 playtest.bossAt = DEV_MODE ? config.devBossAt : null;
 
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: 'game',
-  backgroundColor: '#0b0d14',
-  scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
-  input: { activePointers: 2 },
-  fps: { target: 60 },
-  scene: [
-    BootScene,
-    MenuScene,
-    GameScene,
-    HudScene,
-    LevelUpScene,
-    PauseScene,
-    EndScene,
-    ShopScene,
-    HeroesScene,
-    StageScene,
-    StoryScene,
-    OptionsScene,
-    CollectionScene,
-  ],
-});
+/** The pixel UI font must be ready before any text is made (canvas text does not wait for web fonts). */
+function fontsReady(): Promise<unknown> {
+  const load = Promise.all([
+    document.fonts.load('16px "Jersey 15"'),
+    document.fonts.load('bold 16px "Jersey 15"'),
+  ]);
+  // A slow or failed download must not hold the game back: the serif fallback shows instead.
+  return Promise.race([load.catch(() => undefined), new Promise((r) => setTimeout(r, 2500))]);
+}
 
-sound.init();
+function start(): void {
+  const game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: 'game',
+    backgroundColor: '#0b0d14',
+    scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
+    input: { activePointers: 2 },
+    fps: { target: 60 },
+    scene: [
+      BootScene,
+      MenuScene,
+      GameScene,
+      HudScene,
+      LevelUpScene,
+      PauseScene,
+      EndScene,
+      ShopScene,
+      HeroesScene,
+      StageScene,
+      StoryScene,
+      OptionsScene,
+      CollectionScene,
+    ],
+  });
+  sound.init();
 
-// Dev-only handle for browser automation and console debugging.
-if (import.meta.env.DEV || DEV_MODE) (window as unknown as { game: Phaser.Game }).game = game;
+  // Dev-only handle for browser automation and console debugging.
+  if (import.meta.env.DEV || DEV_MODE) (window as unknown as { game: Phaser.Game }).game = game;
+}
+
+void fontsReady().then(start);
 
 // Installed on a phone (Adicionar à tela inicial): the service worker keeps the game playable offline.
 if (import.meta.env.PROD && 'serviceWorker' in navigator)

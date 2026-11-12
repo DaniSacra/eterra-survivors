@@ -57,6 +57,9 @@ export const ASSETS: Record<string, AssetDef> = {
   'tile.crypt': { kind: 'image', url: 'sprites/tiles/crypt.png' },
   'tile.road': { kind: 'image', url: 'sprites/tiles/road.png' },
   'tile.forest': { kind: 'image', url: 'sprites/tiles/forest.png' },
+  // Pixel frames for panels and buttons (9-slice, see render/ui.ts `skin`).
+  'ui.panel': { kind: 'image', url: 'sprites/ui/panel.png' },
+  'ui.button': { kind: 'image', url: 'sprites/ui/button.png' },
   ...vfxAssets(),
   ...art(ITEM_ART, ART_RES),
   // Pixel projectiles and pieces of effects (PixelLab, files at ART_RES); they replace the code-drawn ones of the same key.

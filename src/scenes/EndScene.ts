@@ -11,7 +11,7 @@ import type { AchievementId } from '../data/achievements';
 import { loadSave } from '../render/save';
 import { t } from '../i18n/pt-BR';
 import { achievementProgress, describeAchievement, formatCompact, formatDecimal } from '../render/describe';
-import { UI, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
+import { UI, skin, button, dim, isShort, label, restartOnResize, bindKeys, keyNav } from '../render/ui';
 import { firstFit } from '../core/layout';
 import { ART_SCALE } from '../render/art/pen';
 import { PASSIVES } from '../data/upgrades';
@@ -85,10 +85,14 @@ export class EndScene extends Phaser.Scene {
     const left = cx - pw / 2 + 14;
     const small = pw < 460;
     const first = this.children.list.length;
-    const panel = this.add
-      .rectangle(cx, 0, pw, 10, UI.panel, 0.92)
-      .setOrigin(0.5, 0)
-      .setStrokeStyle(2, won ? UI.accent : UI.dangerDark);
+    const panel = skin(
+      this,
+      this.add
+        .rectangle(cx, 0, pw, 10, UI.panel, 0.92)
+        .setOrigin(0.5, 0)
+        .setStrokeStyle(2, won ? UI.accent : UI.dangerDark),
+      'button',
+    );
 
     const colW = wide ? (pw - 42) / 2 : pw - 28;
     const rightX = wide ? left + colW + 14 : left;

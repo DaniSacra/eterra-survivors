@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { formatTime } from '../core/format';
 import type { World } from '../core/world';
 import { xpToNext } from '../core/xp';
+import { PixelBar } from '../render/bars';
 import { t } from '../i18n/pt-BR';
 import { BuildSlots } from '../render/buildPanel';
 import { Joystick } from '../render/joystick';
@@ -42,7 +43,11 @@ const PAUSE_ARM_MS = 300;
 export class HudScene extends Phaser.Scene {
   joystick!: Joystick;
   private world!: World;
+  /** The dark strip behind the XP bar (drawn on layout, not per frame) and the three pixel bars. */
   private bars!: Phaser.GameObjects.Graphics;
+  private xpBar!: PixelBar;
+  private hpBar!: PixelBar;
+  private bossBar!: PixelBar;
   private timer!: Phaser.GameObjects.Text;
   private level!: Phaser.GameObjects.Text;
   private kills!: Phaser.GameObjects.Text;
@@ -112,9 +117,12 @@ export class HudScene extends Phaser.Scene {
     this.vignette = this.add.image(0, 0, vignetteTexture(this)).setOrigin(0).setDepth(-10);
     this.arrows = new EdgeArrows(this);
     this.bars = this.add.graphics();
+    this.xpBar = new PixelBar(this, 'xp');
+    this.hpBar = new PixelBar(this, 'hp');
+    this.bossBar = new PixelBar(this, 'hp').setVisible(false);
     this.timer = label(this, 0, 0, '', 24, { bold: true, stroke: true });
-    // The level sits at the tip of the XP bar; gold and kills share one line, each after its icon.
-    this.level = label(this, 0, 0, '', 14, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
+    // The level sits in the middle of the XP bar, clear of the pause button; gold and kills share one line, each after its icon.
+    this.level = label(this, 0, 0, '', 10, { bold: true, color: UI.gold, stroke: true });
     this.kills = label(this, 0, 0, '', 15, { bold: true, stroke: true }).setOrigin(1, 0.5);
     this.gold = label(this, 0, 0, '', 15, { bold: true, color: UI.gold, stroke: true }).setOrigin(1, 0.5);
     this.coinIcon = this.add.image(0, 0, 'pickup.gold').setScale(ART_SCALE * 1.25);
@@ -180,12 +188,19 @@ export class HudScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this.vignette.setDisplaySize(width, height);
     const s = (this.inset = safeArea());
+    // The strip behind the XP bar keeps the notch area dark.
+    this.bars
+      .clear()
+      .fillStyle(UI.dim, 0.6)
+      .fillRect(0, 0, width, s.top + XP_H);
+    this.xpBar.place(0, s.top, width, XP_H);
+    this.hpBar.place(s.left + PAD, s.top + XP_H + PAD, this.hpWidth(), HP_H);
     const top = s.top + XP_H;
     const left = s.left + PAD;
     const right = width - s.right - PAD;
     // On the life bar's row, clear of the build strip under it (phones are narrow).
     this.timer.setPosition(width / 2, top + PAD + HP_H / 2 + 2);
-    this.level.setPosition(right - 2, s.top + XP_H / 2 + 1);
+    this.level.setPosition(width / 2, s.top + XP_H / 2);
     this.hpText.setPosition(left + this.hpWidth() / 2, top + PAD + HP_H / 2);
     // Pause in the real top-right corner, gold and kills on one line under it.
     const py = top + 8 + PAUSE / 2;
@@ -206,6 +221,8 @@ export class HudScene extends Phaser.Scene {
     this.bottom = Math.max(stripY + this.build.height, this.countersBottom);
     this.bossY = this.bottom + 26;
     this.bossName.setPosition(width / 2, this.bossY - 13);
+    const bw = Math.min(420, width - PAD * 4);
+    this.bossBar.place((width - bw) / 2, this.bossY, bw, 16);
     this.banner.setPosition(width / 2, Math.max(height * 0.3, this.bossY + 48));
     this.banner.setWordWrapWidth(width - 40).setAlign('center');
     this.debug.setPosition(left, height - s.bottom - PAD);
@@ -348,20 +365,8 @@ export class HudScene extends Phaser.Scene {
     const { width } = this.scale;
     const cam = this.scene.get(SCENES.game).cameras.main;
     this.arrows.update(w, cam, width, this.bottom, this.scale.height - this.inset.bottom, settings().calm);
-    const g = this.bars.clear();
-
-    const s = this.inset;
-    // XP bar across the top edge (under the notch, the strip above it stays dark).
-    g.fillStyle(UI.dim, 0.6).fillRect(0, 0, width, s.top + XP_H);
-    g.fillStyle(UI.xp).fillRect(0, s.top, (width * w.xp) / xpToNext(w.level), XP_H);
-
-    // HP bar, top-left, with the number on it.
-    const hpW = this.hpWidth();
-    const hpX = s.left + PAD;
-    const hpY = s.top + XP_H + PAD;
-    g.fillStyle(UI.dim, 0.6).fillRect(hpX, hpY, hpW, HP_H);
-    g.fillStyle(UI.hp).fillRect(hpX, hpY, (hpW * p.hp) / p.stats.maxHp, HP_H);
-    g.lineStyle(1, UI.border).strokeRect(hpX, hpY, hpW, HP_H);
+    this.xpBar.set(w.xp / xpToNext(w.level));
+    this.hpBar.set(p.hp / p.stats.maxHp);
     const hp = Math.ceil(p.hp);
     if (hp !== this.shown.hp || p.stats.maxHp !== this.shown.maxHp)
       this.hpText.setText(t.hud.hp((this.shown.hp = hp), (this.shown.maxHp = p.stats.maxHp)));
@@ -369,14 +374,8 @@ export class HudScene extends Phaser.Scene {
     // Boss bar, top, under the build strip.
     const boss = w.boss;
     this.bossName.setVisible(!!boss);
-    if (boss) {
-      const bw = Math.min(420, width - PAD * 4);
-      const bx = (width - bw) / 2;
-      const by = this.bossY;
-      g.fillStyle(UI.dim, 0.7).fillRect(bx, by, bw, 14);
-      g.fillStyle(UI.hp).fillRect(bx, by, (bw * Math.max(0, boss.hp)) / boss.maxHp, 14);
-      g.lineStyle(1, UI.dangerHex).strokeRect(bx, by, bw, 14);
-    }
+    this.bossBar.setVisible(!!boss);
+    if (boss) this.bossBar.set(Math.max(0, boss.hp) / boss.maxHp);
 
     if (w.buildRev !== this.shownRev) {
       this.shownRev = w.buildRev;

@@ -3548,7 +3548,7 @@ em `ART_RES`.
 
 ### P4 · Arte (dono: visual-director)
 
-**PA-01 · Moldura em pixel: fonte, painéis, botões, barras e joystick** · visual + impl · M · proposto (fonte dos textos longos com o Daniel)
+**PA-01 · Moldura em pixel: fonte, painéis, botões, barras e joystick** · visual + impl · M · ✅ feito (2026-11-11, escolhas do visual-director abaixo; Daniel revê)
 
 - Por quê: 04-visual #2, #14, #15 (absorve a moldura das barras do CU-07 e o desenho do joystick do CU-06). Toda a
   tipografia é `Georgia, serif` do sistema (`render/ui.ts:24`), suavizada, ao lado de sprites de 2x2 px; painéis e
@@ -3562,6 +3562,13 @@ em `ART_RES`.
   (3) Barras de vida, chefe e XP com moldura e brilho de pixel, assadas em textura (sem `Graphics` por quadro); "Nv" fora
   da barra (CU-06). (4) Joystick como anel e botão em pixel, alfa 0,14 / 0,4. Licença e gerações em
   `docs/art/credits.md`.
+- Feito (escolhas, mude se quiser): fonte **Jersey 15** (OFL, `public/fonts/`; a Pixelify Sans foi descartada porque o 5
+  lê como S) em TUDO, textos longos incluídos (comparei as duas nas capturas; a pixel lê bem a 16 px reais, `FONT_K` 1.33
+  em `render/ui.ts`; voltar à serifada é `UI.font`); painel e botão 9-slice (`skin()` em `render/ui.ts`: veste o
+  retângulo de cada `button`, card e painel, o foco continua o traço dourado); barras de vida, chefe, XP e vida do herói
+  em textura assada (`render/bars.ts`); "Nv" no meio da barra de XP, longe do botão de pausa; joystick em anel e botão
+  de pixel (alfa 0,14 / 0,4). O painel 9-slice largo (`ui.panel`) ainda não é usado: o texto denso das telas cruza a
+  moldura grossa; os painéis usam a do botão.
 - Aceite: capturas 360x640, 420x820 e 1000x680 de Menu, Heróis, Loja, Pausa, level-up e HUD sem a serifada do sistema
   (ou só nos textos longos, se for a escolha); nenhum texto abaixo de 12 px de altura real; F4 igual.
 

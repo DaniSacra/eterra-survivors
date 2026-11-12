@@ -6,7 +6,7 @@ import { evolutionOf } from '../data/evolutions';
 import { PASSIVES, type PassiveId } from '../data/upgrades';
 import { t } from '../i18n/pt-BR';
 import { ART_SCALE } from './art/pen';
-import { UI, label } from './ui';
+import { UI, label, skin } from './ui';
 import { recipeProgress } from './describe';
 
 /** Icon badges are drawn 28 px wide (render/art/icons.ts). */
@@ -45,7 +45,11 @@ export function drawBuildList(
   // Short on room (phone lying down): the passives row goes (the HUD strip shows them anyway).
   const withPassives = buildListHeight(world, w, true, compact) <= maxH;
   const h = buildListHeight(world, w, withPassives, compact);
-  scene.add.rectangle(x, y, w, h, UI.panel, 0.92).setOrigin(0).setStrokeStyle(2, UI.border);
+  skin(
+    scene,
+    scene.add.rectangle(x, y, w, h, UI.panel, 0.92).setOrigin(0).setStrokeStyle(2, UI.border),
+    'button',
+  );
   label(scene, x + PAD, y + PAD, t.pause.build, 14, { bold: true, color: UI.muted, align: 'left' });
   let ry = y + PAD + 22;
   const icon = (ix: number, iy: number, key: string, size: number) =>

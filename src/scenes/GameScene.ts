@@ -26,7 +26,7 @@ import { isElo, weaponStats } from '../core/weapons';
 import { clamp } from '../core/math';
 import { config } from '../data/config';
 import { t } from '../i18n/pt-BR';
-import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, UI } from '../render/ui';
+import { ELEMENT_COLOR, SUMMON_COLOR, SUMMON_EDGE, UI, fontPx } from '../render/ui';
 import { EVOLUTIONS, EVOLVED_IDS, type Evolution } from '../data/evolutions';
 import { Controls } from '../render/controls';
 import {
@@ -54,6 +54,7 @@ import { Decals } from '../render/decals';
 import { Obstacles } from '../render/obstacles';
 import { Lighting, mixColor } from '../render/lighting';
 import { Mirror } from '../render/mirror';
+import { PixelBar } from '../render/bars';
 import { ensureShadowTexture, SHADOW } from '../render/shadow';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
@@ -230,7 +231,7 @@ export class GameScene extends Phaser.Scene {
   /** Contact shadows on the ground (hero, flyers), redrawn each frame under the enemies. */
   private shadows!: Phaser.GameObjects.Graphics;
   /** The hero's life bar, under their feet and over the crowd. */
-  private heroBar!: Phaser.GameObjects.Graphics;
+  private heroBar!: PixelBar;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
   /** One contact shadow per enemy image, on the ground under the crowd (CA-01). */
   private shadowMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
@@ -382,7 +383,7 @@ export class GameScene extends Phaser.Scene {
     this.healText = this.add
       .text(0, 0, '', {
         fontFamily: UI.font,
-        fontSize: `${NUMBER_FONT}px`,
+        fontSize: `${fontPx(NUMBER_FONT)}px`,
         fontStyle: 'bold',
         color: '#9bf0a8',
       })
@@ -392,7 +393,7 @@ export class GameScene extends Phaser.Scene {
       .setVisible(false);
     const heroSprite = CHARACTERS[this.world.character].sprite;
     this.shadows = this.add.graphics().setDepth(4.5);
-    this.heroBar = this.add.graphics().setDepth(13.2);
+    this.heroBar = new PixelBar(this, 'hp', true).place(0, 0, HERO_BAR_W + 4, 10).setDepth(13.2);
     this.playerSprite = this.add.sprite(0, 0, heroSprite).setDepth(13.1).setScale(ART_SCALE);
     this.heroRim = this.add.image(0, 0, heroSprite).setDepth(13.05).setTintFill(0xb4d0ff);
     const walk = `${heroSprite}.walk`;
@@ -425,7 +426,7 @@ export class GameScene extends Phaser.Scene {
         this.add
           .text(0, 0, '', {
             fontFamily: UI.font,
-            fontSize: `${NUMBER_FONT}px`,
+            fontSize: `${fontPx(NUMBER_FONT)}px`,
             fontStyle: 'bold',
             color: DAMAGE_TEXT.color,
           })
@@ -454,7 +455,9 @@ export class GameScene extends Phaser.Scene {
           return;
         }
         const k = (r * 2.4) / 32;
-        sh.setVisible(true).setPosition(e.x, e.y + r * 0.72).setScale(k, k * (e.def.boss ? 1.1 : 1));
+        sh.setVisible(true)
+          .setPosition(e.x, e.y + r * 0.72)
+          .setScale(k, k * (e.def.boss ? 1.1 : 1));
       },
     );
     this.enemyMirror = new Mirror(
@@ -850,13 +853,14 @@ export class GameScene extends Phaser.Scene {
     this.shadows.fillStyle(0x000000, 0.35).fillEllipse(w.player.x, w.player.y + HERO_FEET - HERO_LIFT, 26, 8);
     // Life under the feet: wide, framed in dark, always over the crowd; blinks coral when low.
     const hpK = Math.max(0, w.player.hp / w.player.stats.maxHp);
-    const bx = w.player.x - HERO_BAR_W / 2;
-    const by = w.player.y + HERO_FEET - HERO_LIFT + 8;
-    const bar = this.heroBar.clear();
-    bar.fillStyle(0x0a0810, 0.9).fillRoundedRect(bx - 2, by - 2, HERO_BAR_W + 4, 10, 3);
-    bar.fillStyle(0x3a1018, 1).fillRect(bx, by, HERO_BAR_W, 6);
     const low = hpK <= 0.35 && Math.sin(w.time * 12) > 0;
-    bar.fillStyle(low ? UI.dangerHex : UI.hp, 1).fillRect(bx, by, HERO_BAR_W * hpK, 6);
+    this.heroBar
+      .moveTo(
+        Math.round(w.player.x - HERO_BAR_W / 2) - 2,
+        Math.round(w.player.y + HERO_FEET - HERO_LIFT + 8) - 2,
+      )
+      .set(hpK)
+      .setTint(low ? 0xffb0b8 : 0xffffff);
     this.addLights();
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
