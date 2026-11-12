@@ -3679,7 +3679,7 @@ em `ART_RES`.
 - O quê: laços com índice, variável temporária na troca, retângulo (x, y, w, h) em vez de callback, `put` em linha.
 - Aceite: `grep` sem `.find(`/`=>` nos caminhos por quadro citados; F4 com 500 inimigos igual ou melhor.
 
-**PT-02 · Service Worker com cache versionado** · impl · P · proposto
+**PT-02 · Service Worker com cache versionado** · impl · P · ✅ feito (2026-11-11; offline e dois deploys não conferidos no navegador)
 
 - Por quê: 02-code M4. `public/sw.js:16` guarda toda resposta GET num cache de nome fixo, sem `activate` que limpe: a
   cada deploy os chunks com hash antigo ficam no celular para sempre, e agora há ~13 MB de MP3. `res.ok` aceita 206 e
