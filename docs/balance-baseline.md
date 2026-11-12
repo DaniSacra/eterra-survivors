@@ -1138,3 +1138,9 @@ Espada de Fogo 2,2x seguem abaixo de 2,5x (no teto da banda `auto`).
 
 **Segue pendente:** as Espadas ainda ficam longe de 1/4 do DPS real da melhor arma `aimed` (~136). Com o bot, o alcance dobrou mas
 a multidão que chega perto continua pequena; só um verbo novo (decisão de desenho do Daniel) ou a banda `area` revista resolve.
+
+## 2026-11-12 (tarde): Fogos-Fátuos, Cajado e Aura de Yah redesenhados
+
+- Fogos-Fátuos: de `homing` para `thrown` com `aim: 'nearest'` (2 a 5 tiros em leque no inimigo mais próximo; dano 12,5 → 28). Cajado de Lyra: o raio do orbe cresce de 7 a 15 por nível (mesmo dano e área da explosão). Aura de Yah: explosão a cada 6 s (5 s no nível máximo), dano 24 → 49 e raio 80 → 190. O Elo Procissão das Almas segue `homing` (único Elo que muda o jeito de disparar da base; `evolutions.test.ts` abre essa exceção).
+- Lab: Fogos-Fátuos 56% da banda `auto`, Aura 53% da banda `area`, Cajado inalterado (89% `aimed`).
+- Sim (16 sementes, 3 perfis de Loja): tudo `ok` exceto Cripta sem Loja 16% (meta 0–10) e Cripta meia Loja 78% (meta 80–90), dentro do ruído de ±8 pontos e em direções opostas; não mexi no `mult`. DPS real no nível máximo: Fogos-Fátuos 326 (antes ~270), Cajado 485, Aura 41. `ELO X`: Tempestade 2,1x e Espada de Fogo 2,2x seguem abaixo de 2,5x.
