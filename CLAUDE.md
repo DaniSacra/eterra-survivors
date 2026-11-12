@@ -134,6 +134,7 @@ Stack: Phaser 3 + TypeScript (strict) + Vite + Vitest + ESLint + Prettier. Deplo
   `GameScene` checks live achievements once a second and the HUD shows a queued toast.
 - Communication core → render: `world.events` (drained by GameScene every frame) for rare things, and
   `world.tally` (running counts of attacks, hits, kills, gems) for frequent ones; never allocate per hit.
+- Music belongs to the `music-director` agent (one progressive heavy metal track per stage with guitar solos, made with PixelLab's music tools, files in `public/audio/music/`).
 - Sound: `render/sounds.ts` is the **single sound map** (Web Audio synth recipes today, swap an entry to a file
   URL later); `render/sound.ts` plays them (unlocked on the first gesture, voice cap). Options (mute, damage
   numbers, calm screen) live in `core/settings.ts` (pure) + `render/settings.ts` (localStorage).
