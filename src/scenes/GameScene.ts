@@ -111,7 +111,16 @@ const GEM_GLOW = 0x3ed4ff;
 
 /** Light colours (the light map multiplies the ground by them). */
 const PROJECTILE_LIGHT = 0xffe8b0;
+/** Each boss carries a light of its own colour (CA-02); the Cavaleiro Negro keeps the cold violet. */
 const BOSS_LIGHT = 0xd8b0ff;
+const BOSS_LIGHTS: Record<string, number> = {
+  'enemy.spiderMother': 0xff58c8, // venom magenta, readable on Valmor's blue ground
+  'enemy.bellRinger': 0xffb040, // the bell's amber
+  'enemy.oldWolf': 0xeaf6ff, // frost white
+};
+/** The Sineiro's bell, from his centre in the unflipped sprite (it hangs behind him, so it flips with him). */
+const BELL_DX = 58;
+const BELL_DY = -16;
 const BURN_LIGHT = 0xff9040;
 const FROST_LIGHT = 0x90c8ff;
 const ZONE_LIGHT = 0xd8ffc0;
@@ -623,7 +632,24 @@ export class GameScene extends Phaser.Scene {
     this.decals.lights(l, w.time, this.calm);
     this.obstacles.lights(l, w.time, this.calm);
     // Bosses carry their own light, so they are never a shape in the dark.
-    if (w.boss) l.add(w.boss.x, w.boss.y, w.boss.def.radius * 5, BOSS_LIGHT, 0.7);
+    if (w.boss) {
+      const b = w.boss;
+      l.add(b.x, b.y, b.def.radius * 5, BOSS_LIGHTS[b.def.sprite] ?? BOSS_LIGHT, 0.7);
+      // The bell is lit as it hangs, brighter and pulsing with the toll when he winds up (Badalada, Dobre).
+      if (b.def.sprite === 'enemy.bellRinger') {
+        const warn = b.act === BossAct.Windup;
+        const swing = warn && !this.calm ? 0.5 + 0.5 * Math.sin(w.time * 14) : 0;
+        const side = w.player.x < b.x ? 1 : -1;
+        l.add(
+          b.x + side * BELL_DX,
+          b.y + BELL_DY,
+          warn ? 150 : 90,
+          0xffb040,
+          warn ? 0.95 : 0.6,
+          warn ? 0.3 + 0.35 * swing : 0.2,
+        );
+      }
+    }
     // A war banner's brazier is one of the road's lights: it is seen from afar (FT-06).
     if (w.alive.warBanner) {
       const foes = w.enemies.active;

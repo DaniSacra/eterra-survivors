@@ -2117,7 +2117,7 @@ Origem: a direção de arte mudou para fantasia escura e iluminada (pixel art to
 em `docs/design/art-references/`, padrão em `.claude/agents/visual-director.md`). Até aqui só os documentos mudaram.
 Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 a AR-05, um commit por passo.
 
-**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02) · ↩ reaberto na Revisão 2026-11-11 (luz nos efeitos) · proposto · reescrito na reavaliação 2026-11-12 (absorve o CF-08)
+**AR-01 · Escuridão e luz** · visual + vfx + impl · M · ✅ feito (a vinheta passa para o AR-02; luzes de cenário entram com os objetos do AR-02) · ↩ reaberto na Revisão 2026-11-11 (luz nos efeitos) · proposto · reescrito na reavaliação 2026-11-12 (absorve o CF-08) · ✅ feito 2026-11-12 (luz nos golpes de arma)
 
 - Por quê: é o que mais muda a cara do jogo e não depende de sprite.
 - O quê: uma camada de escuridão por fase (azul-noite em Valmor e na Estrada, quase preto quente na Cripta),
@@ -2154,6 +2154,14 @@ Aprovada pelo Daniel em 2026-11-10, antes das FT. Prefixo: **AR**. Ordem: AR-01 
   luzes de arma por quadro, modo calmo corta o alfa à metade, nada no `fxGlow` que já não exista. Dono: vfx + impl.
   Tamanho P. Aceite: capturas 420x820 da Cripta com Aura, Tempestade, Espada de Fogo e Maça acendendo o chão; a luz
   nunca clareia um telégrafo coral a ponto de apagá-lo; F4 igual antes e depois.
+- Feito 2026-11-12 (`GameScene.effectLights`, sem sprite novo, nenhuma geração): metade já existia (Aura, raio, estouro,
+  Maça), faltava o resto. Aura: a luz carrega entre os tiques (`k²`) e acende no tique, no mesmo ritmo do anel. Onda da
+  Chama de Yah, golpe e onda de choque da Maça e do Quebra-Junta: uma luz que nasce no golpe e some com ele (cor da
+  arma em `HIT_SPARK`, laranja na Chama; eco mais fraco), com brilho aditivo curto; modo calmo corta o alfa à metade
+  em vez de apagar. Zona (Fogo, Espada de Fogo, Geada, Nevasca): clarão de 0,3 s na queda e a luz fraca de antes
+  enquanto dura. Raio e estouros já saíam como `bolt`; agora alfa menor e sem brilho no modo calmo. Teto de 8 luzes de
+  arma (`FX_LIGHTS`), golpes antes dos raios. `fxGlow` intacto. F4 em 420x820 (render por software, ruidoso): 24 FPS
+  antes, 21 depois (dentro do ruído).
 
 **AR-02 · Chão e cenário por fase** · visual · M · ✅ primeira parte feita (2026-11-11) · resto ampliado na Revisão 2026-11-11 · proposto · ✅ feito (reavaliação 2026-11-12: pelo DD-10, DD-11 e PA-02)
 
@@ -3345,7 +3353,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   geração nova). O Sineiro com 102 art px de altura fica abaixo da faixa de chefe do CLAUDE.md (112 a 160): regerar
   maior só se a captura mostrar que ele não é a primeira coisa achada. Dono: visual + vfx. Aceite: o somado acima.
 
-**CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · proposto · ⇢ mesclado no AR-01 (reavaliação 2026-11-12)
+**CF-08 · Armas que ainda não explicam o que fazem** · vfx · P · ✅ feito dentro do AR-01 (2026-11-12) · ⇢ mesclado no AR-01 (reavaliação 2026-11-12)
 
 - Por quê: 06-vfx (tabela de armas). Aura de Yah: anel fino que some na multidão; Adagas e Leque de Facas: o Elo quase
   igual à base; Maça de Ferro: impacto discreto no meio do monte. (Fogos-Fátuos pequenos já estão no NA-05 e em
