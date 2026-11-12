@@ -861,7 +861,10 @@ export const t = {
       desc: 'Golpe largo em arco à frente.',
     },
     elunLight: { name: 'Luz de Elun', desc: 'Luz sagrada que busca o inimigo mais próximo.' },
-    yahAura: { name: 'Aura de Yah', desc: 'Pulso de luz em volta, que queima quem chega perto.' },
+    yahAura: {
+      name: 'Aura de Yah',
+      desc: 'Um grande círculo de luz surge de repente em volta e queima quem estiver dentro por uns 2 segundos, depois some.',
+    },
     daggers: {
       name: 'Adagas de Andilla',
       desc: 'Facas rápidas para onde você anda.',

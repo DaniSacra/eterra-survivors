@@ -272,16 +272,44 @@ describe('Luz de Elun (homing)', () => {
 });
 
 describe('Aura de Yah (area)', () => {
-  it('damages every enemy inside the radius on each tick', () => {
+  const burst = WEAPONS.yahAura.burst!;
+  it('appears after the cooldown, hits inside the radius over its window, then goes dark', () => {
+    const w = prepared('yahAura');
+    w.weapons[0]!.timer = aura.cooldown;
+    w.player.hp = 1e9;
+    const a = spawnEnemy(w, 'blackKnight', 20, 0);
+    const dt = 1 / 60;
+    let t = 0;
+    for (; t < aura.cooldown - 0.1; t += dt) w.step(dt, still);
+    expect(w.weapons[0]!.burst).toBe(0);
+    expect(a.hp).toBe(a.maxHp);
+    for (; t < aura.cooldown + 0.2; t += dt) w.step(dt, still);
+    expect(w.weapons[0]!.burst).toBeGreaterThan(0);
+    expect(a.maxHp - a.hp).toBeGreaterThan(0);
+    for (; t < aura.cooldown + burst.window + 0.2; t += dt) w.step(dt, still);
+    expect(w.weapons[0]!.burst).toBe(0);
+  });
+
+  it('deals the level damage in all over one window, in `ticks` hits', () => {
     const w = prepared('yahAura');
     const a = spawnEnemy(w, 'blackKnight', 20, 0);
-    const b = spawnEnemy(w, 'blackKnight', -20, 10);
+    a.maxHp = a.hp = 1e9;
     const out = spawnEnemy(w, 'skeleton', aura.radius + 80, 0);
     updateWeapons(w, 0);
-    updateWeapons(w, aura.cooldown);
-    expect(a.maxHp - a.hp).toBeCloseTo(aura.damage * 2);
-    expect(b.maxHp - b.hp).toBeCloseTo(aura.damage * 2);
+    expect(w.weapons[0]!.burst).toBe(burst.window);
+    const dealt = () => a.maxHp - a.hp;
+    expect(dealt()).toBeCloseTo((aura.damage / burst.ticks) * w.player.stats.might);
+    for (let i = 0; i < burst.window * 60 + 5; i++) updateWeapons(w, 1 / 60);
+    expect(dealt()).toBeCloseTo(aura.damage * w.player.stats.might);
     expect(out.hp).toBe(out.maxHp);
+  });
+
+  it('Chama de Yah (the Elo) still ticks on its own, without a window', () => {
+    const w = prepared('yahFlame');
+    const a = spawnEnemy(w, 'blackKnight', 20, 0);
+    updateWeapons(w, 0);
+    expect(w.weapons[0]!.burst).toBe(0);
+    expect(a.maxHp - a.hp).toBeGreaterThan(0);
   });
 });
 

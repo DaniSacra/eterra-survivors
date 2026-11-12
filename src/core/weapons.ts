@@ -52,6 +52,9 @@ export interface OwnedWeapon {
   /** Vigília: the direction of the nearest enemy, where the swords dart out, and how far past the circle. */
   aim: number;
   aimReach: number;
+  /** Aura de Yah: seconds left of the active window (0 = off) and until its next tick. */
+  burst: number;
+  burstTick: number;
   /** When the current level (or Elo) started, and `damage` at that moment: the damage per second at this level. */
   levelAt: number;
   levelDamage: number;
@@ -120,6 +123,10 @@ export function updateWeapons(world: World, dt: number): void {
         const scale = (WEAPONS[w.id] as WeaponDef).aftershock?.scale ?? 1;
         shockWave(world, weaponStats(w) as SlamLevel, w, w.afterX, w.afterY, 0, scale);
       }
+    }
+    if (w.burst > 0) {
+      if ((WEAPONS[w.id] as WeaponDef).burst) runBurst(world, w, dt);
+      else w.burst = 0;
     }
     w.timer -= world.haste > 0 ? dt / config.pickups.elixirCooldown : dt;
     if (w.timer > 0) continue;
@@ -620,6 +627,36 @@ function bossOnScreen(world: World): Enemy | null {
 }
 
 function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
+  const burst = (WEAPONS[w.id] as WeaponDef).burst;
+  if (burst) {
+    // The ring appears: its window opens now and the first tick lands at once.
+    w.burst = burst.window;
+    w.burstTick = 0;
+    runBurst(world, w, 0);
+    return true;
+  }
+  auraTick(world, s, w, 1);
+  const pulse = (WEAPONS[w.id] as WeaponDef).pulse;
+  if (pulse && ++w.swings % pulse.every === 0)
+    yahWave(world, s, w, s.radius * world.player.stats.area * pulse.radius, pulse);
+  return true;
+}
+
+/** The active window of a bursting aura: a tick every `window / ticks` s until the window closes. */
+function runBurst(world: World, w: OwnedWeapon, dt: number): void {
+  const burst = (WEAPONS[w.id] as WeaponDef).burst as { window: number; ticks: number };
+  const gap = burst.window / burst.ticks;
+  w.burst -= dt;
+  w.burstTick -= dt;
+  while (w.burstTick <= 1e-9 && w.burst > 1e-9) {
+    auraTick(world, weaponStats(w) as AuraLevel, w, 1 / burst.ticks);
+    w.burstTick += gap;
+  }
+  if (w.burst <= 1e-9) w.burst = 0;
+}
+
+/** One hit on everything inside the aura, for `share` of the level's damage. */
+function auraTick(world: World, s: AuraLevel, w: OwnedWeapon, share: number): void {
   const p = world.player;
   const radius = s.radius * p.stats.area;
   const list = world.enemies.active;
@@ -630,11 +667,8 @@ function fireAura(world: World, s: AuraLevel, w: OwnedWeapon): boolean {
     const r = radius + e.def.radius * 0.5;
     const dx = e.x - p.x;
     const dy = e.y - p.y;
-    if (dx * dx + dy * dy <= r * r) damageEnemy(world, e, dmg(world, s.damage), 0, 0, 0, w);
+    if (dx * dx + dy * dy <= r * r) damageEnemy(world, e, dmg(world, s.damage * share), 0, 0, 0, w);
   }
-  const pulse = (WEAPONS[w.id] as WeaponDef).pulse;
-  if (pulse && ++w.swings % pulse.every === 0) yahWave(world, s, w, radius * pulse.radius, pulse);
-  return true;
 }
 
 /** Chama de Yah's wave: everything out to `radius` is hit harder and thrown back. */

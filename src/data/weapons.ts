@@ -145,6 +145,11 @@ export type WeaponDef = {
     bleed?: { dps: number; duration: number };
     /** Luz Sagrada: each kill heals the hero `heal` HP, at most `perSecond` times a second. */
     mend?: { heal: number; perSecond: number };
+    /**
+     * Aura de Yah: the aura is dark until its cooldown ends, then it appears at full size for `window` s and hits
+     * `ticks` times, evenly spread (each tick is the level's `damage` / `ticks`, so a cycle deals `damage` in all).
+     */
+    burst?: { window: number; ticks: number };
     /** Chama de Yah: every `every`-th pulse is a wave out to x`radius`, x`damage`, pushing everything away. */
     pulse?: { every: number; damage: number; radius: number; knockback: number };
     /**
@@ -225,10 +230,11 @@ export const WEAPONS = {
       { damage: 17, pierce: 2 },
     ),
   },
-  /** Aura de Yah: a burst of holy fire every few seconds that fills up around the hero and hurts everything close. */
+  /** Aura de Yah: a ring of holy light that appears at full size every 6 to 5 s, burns everything inside for 2 s and fades. */
   yahAura: {
     kind: 'aura',
     category: 'area',
+    burst: { window: 2, ticks: 4 },
     levels: levels<AuraLevel>(
       { damage: 24, cooldown: 6, radius: 80 },
       { radius: 100 },

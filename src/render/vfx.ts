@@ -25,6 +25,8 @@ export const VFX = {
   ice: { frames: 11, w: 144, h: 72, anchor: [0.5, 0.778], fps: 3 },
   /** Aura de Yah's ring of light and turning runes (looping); its outer ring is 57 art px from the centre. */
   aura: { frames: 12, w: 128, h: 128, anchor: [0.5, 0.5], fps: 12 },
+  /** Aura de Yah's own ring: two gold rings with a different rune between them at every tip (outer ring 57 art px). */
+  auraRunes: { frames: 12, w: 128, h: 128, anchor: [0.5, 0.5], fps: 12 },
   /** The mace's shock wave: two dusty rings running out; the big one reaches 50 art px (scaled to the wave radius). */
   shock: { frames: 7, w: 112, h: 112, anchor: [0.5, 0.5], fps: 14 },
   /** The hero blade's cut: a crescent of 145 degrees pointing right, 92 art px from the centre (rotate and scale to the swing). */

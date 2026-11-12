@@ -18,7 +18,6 @@ import { CHARACTERS } from '../data/characters';
 import { STAGE_IDS, type StageId } from '../data/stages';
 import { loadSave, markLessonSeen, markTipSeen, recordRun, recordVigil } from '../render/save';
 import { nextTip, TIP_GAP } from '../core/tips';
-import { BURST_COOLDOWN } from '../render/fxparts/weapons';
 import { LESSON_GAP, eliteOnField, nextLesson, type LessonId } from '../core/coach';
 import { ENEMIES, type EnemyId } from '../data/enemies';
 import { lastChoice, type RunChoice } from './choice';
@@ -783,21 +782,29 @@ export class GameScene extends Phaser.Scene {
       const def = WEAPONS[wp.id] as WeaponDef;
       if (def.kind !== 'aura') continue;
       const st = weaponStats(wp) as AuraLevel;
-      const k = 1 - wp.timer / (st.cooldown * w.player.stats.cooldown);
-      // The light charges between ticks, then flares right at the tick (the same beat as the wave of the rim).
-      const cd = st.cooldown * w.player.stats.cooldown;
-      const flare = calm
-        ? 0
-        : cd >= BURST_COOLDOWN
-          ? Math.max(0, 1 - (k * cd) / 0.5)
-          : Math.max(0, 1 - k * 3);
+      let k: number;
+      let flare: number;
+      let on = 1;
+      if (def.burst) {
+        // Aura de Yah lights the ground only while its window is open: in at once, out with the ring.
+        if (wp.burst <= 0) continue;
+        const age = def.burst.window - wp.burst;
+        on = Math.min(1, age / 0.18, wp.burst / 0.5);
+        const gap = def.burst.window / def.burst.ticks;
+        flare = calm ? 0 : Math.max(0, 1 - (age % gap) / 0.3);
+        k = 1;
+      } else {
+        // The light charges between ticks, then flares right at the tick (the same beat as the wave of the rim).
+        k = 1 - wp.timer / (st.cooldown * w.player.stats.cooldown);
+        flare = calm ? 0 : Math.max(0, 1 - k * 3);
+      }
       l.add(
         w.player.x,
         w.player.y,
         st.radius * w.player.stats.area * 1.3,
         isElo(wp.id) ? 0xff8a30 : 0xffc860,
-        0.4 + 0.15 * k * k + 0.35 * flare,
-        0.08 + 0.04 * k * k + 0.12 * flare,
+        (0.4 + 0.15 * k * k + 0.35 * flare) * on,
+        (0.08 + 0.04 * k * k + 0.12 * flare) * on,
       );
       used++;
     }

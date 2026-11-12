@@ -190,7 +190,10 @@ export function drawFx(
         // Chama de Yah heats up towards its wave: 0 just after one, 1 on the tick before the next.
         pulse ? (w.swings % pulse.every) / (pulse.every - 1) : 0,
         pulse ? pulse.radius : 0,
-        st.cooldown * p.stats.cooldown,
+        // Aura de Yah: how long its window has been open (-1 = dark), its length and its ticks.
+        wdef.burst && w.burst > 0 ? wdef.burst.window - w.burst : -1,
+        wdef.burst ? wdef.burst.window : 0,
+        wdef.burst ? wdef.burst.ticks : 1,
       );
     } else if (kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;

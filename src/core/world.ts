@@ -199,6 +199,8 @@ export class World {
       stackTime: 0,
       aim: 0,
       aimReach: 0,
+      burst: 0,
+      burstTick: 0,
       levelAt: this.time,
       levelDamage: 0,
       prevDps: 0,
