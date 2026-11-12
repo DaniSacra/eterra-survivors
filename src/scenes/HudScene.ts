@@ -38,6 +38,8 @@ const PAUSE = 44;
 
 /** Taps on the pause button this soon after the Pausa opened are ignored (a double tap must not open and close it). */
 const PAUSE_ARM_MS = 300;
+/** Notices wait while life is under this share of the maximum (NB-08). */
+const TOAST_MIN_HP = 0.3;
 
 /** Screen-space overlay (no camera zoom): bars, counters, joystick and the F3 debug panel. */
 export class HudScene extends Phaser.Scene {
@@ -364,7 +366,10 @@ export class HudScene extends Phaser.Scene {
     const p = w.player;
     const { width } = this.scale;
     const cam = this.scene.get(SCENES.game).cameras.main;
-    this.arrows.update(w, cam, width, this.bottom, this.scale.height - this.inset.bottom, settings().calm);
+    // No arrows over a choice (level-up, pause, end): the screen is the choice's alone.
+    if (w.state === 'playing' && this.scene.isActive(SCENES.game))
+      this.arrows.update(w, cam, width, this.bottom, this.scale.height - this.inset.bottom, settings().calm);
+    else this.arrows.hide();
     this.xpBar.set(w.xp / xpToNext(w.level));
     this.hpBar.set(p.hp / p.stats.maxHp);
     const hp = Math.ceil(p.hp);
@@ -399,12 +404,14 @@ export class HudScene extends Phaser.Scene {
       this.placeCounters();
     }
 
-    // One notice at a time, and none while the level-up (or the pause) holds the game or a banner is up.
+    // One notice at a time, and none while the level-up (or the pause) holds the game, a banner is up, a boss lives or life is low.
     if (
       !this.toastOn &&
       this.toastQueue.length > 0 &&
       w.state === 'playing' &&
       this.banner.alpha === 0 &&
+      !w.boss &&
+      p.hp >= p.stats.maxHp * TOAST_MIN_HP &&
       this.scene.isActive(SCENES.game)
     )
       this.nextToast();

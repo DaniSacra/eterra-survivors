@@ -24,6 +24,12 @@ export class EdgeArrows {
       this.icons.push(scene.add.image(0, 0, 'pickup.chest').setScale(0.65).setDepth(-4).setVisible(false));
   }
 
+  /** Clears every arrow (a choice is on screen: level-up, pause, end). */
+  hide(): void {
+    this.g.clear();
+    for (const icon of this.icons) icon.setVisible(false);
+  }
+
   /**
    * Draws the arrows inside the screen rectangle (top, bottom: px; between the HUD and the bottom safe area), from
    * the game camera's view. `calm` stops the pulse.
