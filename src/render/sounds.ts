@@ -175,7 +175,16 @@ export const SOUNDS = {
     notes: [0, -3],
     every: 0.3,
   },
-  denied: { kind: 'synth', wave: 'triangle', from: 130, to: 90, dur: 0.09, vol: 0.09, notes: [0, -2], every: 0.2 },
+  denied: {
+    kind: 'synth',
+    wave: 'triangle',
+    from: 130,
+    to: 90,
+    dur: 0.09,
+    vol: 0.09,
+    notes: [0, -2],
+    every: 0.2,
+  },
   lost: { kind: 'synth', wave: 'triangle', from: 392, to: 380, dur: 0.2, vol: 0.11, notes: [7, 4, 0, -5] },
 } satisfies Record<string, SoundDef>;
 
