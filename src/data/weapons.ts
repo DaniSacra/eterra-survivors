@@ -266,7 +266,7 @@ export const WEAPONS = {
     ),
   },
 
-  /** Cajado de Lyra: an orb of arcane light fired where Lyra looks; it bursts on the first enemy it meets. */
+  /** Cajado de Lyra: a fireball fired where Lyra looks, small at first and bigger with each level; it bursts on the first enemy. */
   staff: {
     kind: 'thrown',
     category: 'aimed',
@@ -279,17 +279,17 @@ export const WEAPONS = {
         count: 1,
         pierce: 0,
         lifetime: 1.3,
-        radius: 8,
+        radius: 7,
         spread: 0.25,
         knockback: 60,
         blast: 34,
       },
-      { damage: 51 },
-      { blast: 42 },
-      { count: 2 },
-      { damage: 63, cooldown: 0.9 },
-      { blast: 50 },
-      { damage: 82, cooldown: 0.75 },
+      { damage: 51, radius: 8 },
+      { blast: 42, radius: 9 },
+      { count: 2, radius: 10 },
+      { damage: 63, cooldown: 0.9, radius: 12 },
+      { blast: 50, radius: 13 },
+      { damage: 82, cooldown: 0.75, radius: 15 },
     ),
   },
   /** Espadas dos Paladinos: the four raised swords of the crypt, circling Aldo. */
@@ -358,30 +358,32 @@ export const WEAPONS = {
       { damage: 79, radius: 11 },
     ),
   },
-  /** Fogos-Fátuos: slow, lingering lights that hunt the dead. */
+  /** Fogos-Fátuos: a few green flames shot at once at the nearest enemy on screen, like knives that aim themselves. */
   wisps: {
-    kind: 'homing',
+    kind: 'thrown',
     category: 'auto',
-    levels: levels<HomingLevel>(
+    aim: 'nearest',
+    levels: levels<ThrownLevel>(
       {
-        damage: 12,
-        cooldown: 1.6,
-        speed: 170,
+        damage: 12.5,
+        cooldown: 1.3,
+        speed: 380,
         count: 2,
-        pierce: 1,
-        lifetime: 4,
-        radius: 7,
-        turnRate: 4,
+        pierce: 0,
+        lifetime: 1.3,
+        radius: 6,
+        spread: 0.2,
         knockback: 10,
       },
       { count: 3 },
-      { damage: 15 },
-      { pierce: 3, lifetime: 5 },
+      { damage: 17.5 },
+      { pierce: 1, lifetime: 1.5 },
       { count: 4 },
-      { damage: 21 },
-      { count: 5, damage: 26, cooldown: 1.1 },
+      { damage: 24 },
+      { count: 5, damage: 28, cooldown: 1.0 },
     ),
   },
+
   /**
    * Escudos de Valmor: a shield thrown at the nearest enemy that spins out in a wide curve, loops round and comes
    * back to where it started, hitting everyone along the way (twice: out and home).

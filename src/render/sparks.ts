@@ -65,7 +65,7 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   yahAura: [SPARK.cross, 0xffd870],
   elunLight: [SPARK.cross, 0xfff0b0],
   holyLight: [SPARK.cross, 0xfff6c0],
-  wisps: [SPARK.cross, 0x9af0e8],
+  wisps: [SPARK.cross, 0x7af0a0],
   soulProcession: [SPARK.cross, 0xc0d8ff],
   lightning: [SPARK.cross, 0xe0b8ff],
   storm: [SPARK.cross, 0xe0b8ff],
@@ -82,7 +82,7 @@ export const HIT_SPARK: Partial<Record<WeaponId, readonly [SparkKind, number]>> 
   vigil: [SPARK.cross, 0xfff0c0],
   shields: [SPARK.star, 0xa8c4e8],
   valmorWall: [SPARK.star, ELEMENT_COLOR.steel],
-  staff: [SPARK.cross, 0xd8b0ff],
+  staff: [SPARK.cross, 0xffa850],
   lyraStar: [SPARK.cross, 0xfff0c0],
 };
 const HIT_PLAIN: readonly [SparkKind, number] = [SPARK.star, 0xffffff];

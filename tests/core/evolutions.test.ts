@@ -32,7 +32,8 @@ describe('evolution data', () => {
       const evo = EVOLUTIONS[id]!;
       expect(EVOLUTIONS[evo.from]).toBeUndefined();
       expect(WEAPONS[id].levels).toHaveLength(1);
-      expect(WEAPONS[id].kind).toBe(WEAPONS[evo.from].kind);
+      // The Procissão is the one Elo that changes how its base fires: Fogos-Fátuos' shots become souls that hunt.
+      if (id !== 'soulProcession') expect(WEAPONS[id].kind).toBe(WEAPONS[evo.from].kind);
     }
   });
 });

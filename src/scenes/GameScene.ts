@@ -107,6 +107,7 @@ const SPIN: Record<string, boolean> = {
   'proj.forgeFury': true,
   'proj.shields': true,
   'proj.valmorWall': true,
+  'proj.daggers': true, // a thrown dagger turns end over end
 };
 /** Each Elo's projectile sprite, tinted with its element's colour. */
 

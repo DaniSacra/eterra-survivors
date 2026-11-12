@@ -154,7 +154,7 @@ export const BOLT_STYLE: Partial<Record<WeaponId, BoltStyle>> = {
   storm: { color: ELEMENT_COLOR.storm, core: 0xffffff, width: 7, fire: false, sword: false, branches: 2 },
   fire: { color: 0xffa83a, core: 0xffe070, width: 5, fire: true, sword: false, branches: 0 },
   fireSword: { color: ELEMENT_COLOR.fire, core: 0xfff0a0, width: 7, fire: true, sword: true, branches: 0 },
-  staff: { color: 0xb070f0, core: 0xf4e8ff, width: 3, fire: false, sword: false, branches: 0, burst: true },
+  staff: { color: 0xff8a28, core: 0xfff0b0, width: 3, fire: false, sword: false, branches: 0, burst: true },
   /** Nevasca's shatter: an enemy bursting into ice. */
   blizzard: {
     color: ELEMENT_COLOR.ice,
@@ -216,13 +216,12 @@ export interface Trail {
 export const TRAIL: Partial<Record<WeaponId, Trail>> = {
   elunLight: { color: 0xf0d070, core: 0xfff6d0, width: 5, len: 0.06, dots: false, star: false },
   holyLight: { color: ELEMENT_COLOR.holy, core: 0xffffff, width: 6, len: 0.07, dots: false, star: true },
-  daggers: { color: HERO_COLOR.andilla, core: 0xffffff, width: 3, len: 0.05, dots: false, star: false },
   fan: { color: ELEMENT_COLOR.shadow, core: 0xe0ffe8, width: 3, len: 0.05, dots: false, star: false },
   hammer: { color: 0xcbd8ec, core: 0xffffff, width: 10, len: 0.12, dots: false, star: false },
   shields: { color: 0x8aa8c8, core: 0xffffff, width: 9, len: 0.2, dots: false, star: false },
   valmorWall: { color: ELEMENT_COLOR.steel, core: 0xffffff, width: 11, len: 0.2, dots: false, star: false },
   forgeFury: { color: ELEMENT_COLOR.forge, core: 0xfff0a0, width: 12, len: 0.14, dots: false, star: false },
-  wisps: { color: 0x8a7aff, core: 0xe4dcff, width: 4, len: 0.12, dots: true, star: false },
+  wisps: { color: 0x3ecf6a, core: 0xe0ffd8, width: 4, len: 0.08, dots: false, star: false },
   soulProcession: { color: ELEMENT_COLOR.soul, core: 0xffffff, width: 5, len: 0.2, dots: true, star: false },
 };
 
