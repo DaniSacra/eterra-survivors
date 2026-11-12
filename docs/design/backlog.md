@@ -3592,7 +3592,7 @@ em `ART_RES`.
   um ponto de brilho, nas cores atuais (a gema continua a única coisa ciano, A-05). Comida, elixir e gelo depois.
 - Aceite: captura de multidão em Valmor e na Cripta com baú, ímã e bomba no chão, os três achados de relance.
 
-**PA-03 · O herói reage: dano e queda** · visual + impl · M · proposto (gerações com o Daniel)
+**PA-03 · O herói reage: dano e queda** · visual + impl · M · ✅ feito (2026-11-11; 8 gerações, uma pose de dano de 0,14 s a cada golpe e a queda de 0,6 s na morte; o Fim continua abrindo aos 0,9 s; `heroPose` em `GameScene`)
 
 - Por quê: 04-visual #5. Os heróis têm só andar e respirar (`pixelHero(..., FRAME_HIBIT, 8, 4)`); o dano é só flash e a
   morte é a tela final. É o único elemento do jogo sem reação ao que acontece com ele.

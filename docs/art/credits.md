@@ -95,3 +95,9 @@ Redo of `valmor` (2026-11-12, Daniel found the first five tracks too ambient, lo
 | Data | O que | Fonte |
 | --- | --- | --- |
 | 2026-11-11 | Chest, magnet and bell ("bomb": Badalada) as pixel sprites in `public/sprites/items/{chest,magnet,bell}.png` (trimmed, packed at 2x; the chest is shown at scale 1, the others at ART_SCALE; they replace the code-drawn `pickup.*` of the same key). 15 generations | PixelLab create_object_pro_flash 32x32, one direction (objects 040bf62f-3a61-40f2-96fb-a76d6ad15cfa, 21c7f380-f409-410d-885c-ddc33630ac9d, 1dea2aa3-d092-4caf-8a14-4cb9351349b3) |
+
+## Hero hurt and fall (PA-03, 2026-11-11)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-11 | `public/sprites/{aldo,lyra,teo,andilla}-hurt.png` (6 frames, stagger) and `-fall.png` (7 frames, falling back and lying), aligned to the idle strips by feet and body centre in the 64x80 frame, west view mirrored (the weapon stays visible, as for the walk), 2x without smoothing. Lyra's staff is missing in her hurt and fall frames (the template redraws her without it). 8 generations | PixelLab animate_character, template `taking-punch` and `falling-back-death`, west only, 1 generation each: Aldo hi-bit 6bfaee60, Lyra hi-bit 2fc9e1c3, Teo hi-bit v2 27f446d4, Andilla hi-bit 7022a715 |

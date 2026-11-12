@@ -8,7 +8,7 @@ import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
-import { FLYERS, SPRITE_SCALE } from '../render/assets';
+import { FLYERS, HERO_FALL, HERO_HURT, SPRITE_SCALE } from '../render/assets';
 import { ENEMY_ANIMS, enemyPose, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
 import { shopBonuses, stageUnlocked } from '../core/meta';
@@ -230,6 +230,10 @@ export class GameScene extends Phaser.Scene {
   private heroRim!: Phaser.GameObjects.Image;
   /** The hero's walk and idle animations when they have pixel-art strips (else null: the code art bounces). */
   private heroAnims: { walk: string; idle: string } | null = null;
+  /** Real time (ms) of the last hit on the hero and of the final fall (-1: none), for the hurt and fall strips. */
+  private hurtAtMs = -1e9;
+  private fallAtMs = -1;
+  private heroKey = '';
   /** Contact shadows on the ground (hero, flyers), redrawn each frame under the enemies. */
   private shadows!: Phaser.GameObjects.Graphics;
   /** The hero's life bar, under their feet and over the crowd. */
@@ -402,6 +406,9 @@ export class GameScene extends Phaser.Scene {
     this.heroRim = this.add.image(0, 0, heroSprite).setDepth(13.05).setTintFill(0xb4d0ff);
     const walk = `${heroSprite}.walk`;
     this.heroAnims = this.anims.exists(walk) ? { walk, idle: `${heroSprite}.idle` } : null;
+    this.heroKey = heroSprite;
+    this.hurtAtMs = -1e9;
+    this.fallAtMs = -1;
     this.projectileMirror = new Mirror(
       (): ProjImage => this.add.image(0, 0, 'proj.elunLight').setDepth(12).setScale(ART_SCALE),
       (img, p) => {
@@ -832,7 +839,7 @@ export class GameScene extends Phaser.Scene {
     this.placeView();
     // The hero walks (pixel-art strips) or bounces (code art) and turns to where it goes.
     const anims = this.heroAnims;
-    if (anims) this.playerSprite.play(w.player.moving ? anims.walk : anims.idle, true);
+    if (anims) this.heroPose(w.player.moving ? anims.walk : anims.idle);
     const step = w.player.moving && !anims ? Math.abs(Math.sin(w.time * 12)) : 0;
     const sx = ART_SCALE * (1 + step * 0.05);
     const sy = ART_SCALE * (1 - step * 0.05);
@@ -1457,6 +1464,31 @@ export class GameScene extends Phaser.Scene {
     return null;
   }
 
+  /**
+   * The hero's strip: the fall on the last death (then lying still), a stagger for a moment after a hit, else the
+   * walk or idle loop. Hurt and fall are driven by frame from real time, so they never allocate.
+   */
+  private heroPose(loop: string): void {
+    const ps = this.playerSprite;
+    const now = this.time.now;
+    const fall = this.fallAtMs >= 0 ? `${this.heroKey}.fall` : '';
+    const hurtAge = (now - this.hurtAtMs) / 1000;
+    if (fall && this.textures.exists(fall)) {
+      const f = Math.min(
+        HERO_FALL.frames - 1,
+        Math.floor(((now - this.fallAtMs) / 1000 / HERO_FALL.seconds) * HERO_FALL.frames),
+      );
+      ps.anims.stop();
+      ps.setTexture(fall, f);
+    } else if (hurtAge < HERO_HURT.seconds && this.textures.exists(`${this.heroKey}.hurt`)) {
+      ps.anims.stop();
+      ps.setTexture(
+        `${this.heroKey}.hurt`,
+        Math.min(HERO_HURT.frames - 1, Math.floor((hurtAge / HERO_HURT.seconds) * HERO_HURT.frames)),
+      );
+    } else ps.play(loop, true);
+  }
+
   /** Only a running match can be paused (not during level-up or after the end). */
   pauseGame(): void {
     if (this.world.state !== 'playing' || !this.scene.isActive()) return;
@@ -1482,6 +1514,7 @@ export class GameScene extends Phaser.Scene {
           // The hero keeps their own colours, with only a faint warm flash for a tenth of a second (NF-05).
           if (this.nearCold && this.nearShot < 60)
             this.sparks.burst(w.player.x, w.player.y, 6, 150, 7, 0x7ac8ff, SPARK.flake, 0.45, true);
+          this.hurtAtMs = this.time.now;
           this.playerSprite.setTint(TINT.heroHurt);
           this.time.delayedCall(100, () => this.playerSprite.clearTint());
           break;
@@ -1565,6 +1598,7 @@ export class GameScene extends Phaser.Scene {
         case 'won':
         case 'lost': {
           sound.play(e.type);
+          if (e.type === 'lost') this.fallAtMs = this.time.now;
           const unlocked = w.endless ? this.bankVigil() : this.bank();
           this.time.delayedCall(900, () =>
             this.scene.launch(SCENES.end, {

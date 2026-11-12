@@ -28,6 +28,13 @@ const PAD = 6;
 const art = (defs: Record<string, ArtDef>, res: number): Record<string, AssetDef> =>
   Object.fromEntries(Object.entries(defs).map(([k, d]) => [k, { kind: 'art', art: d, res }]));
 
+/**
+ * The hero's reaction strips (PA-03): a stagger when hit (shown for `seconds`) and a fall on the last death (7 frames
+ * over `seconds`, then it lies still; the end screen opens 0.9 s after the death, so the fall must stay under that).
+ */
+export const HERO_HURT = { frames: 6, seconds: 0.14 };
+export const HERO_FALL = { frames: 7, seconds: 0.6 };
+
 /** PixelLab canvas sizes of the heroes (art px; files are at ART_RES). */
 const FRAME_HIBIT = { w: 64, h: 80 };
 
@@ -175,6 +182,19 @@ function pixelHero(
     [`player.${id}`]: { kind: 'image', url: `sprites/${id}.png` },
     [`player.${id}.walk`]: { kind: 'sheet', url: `sprites/${id}-walk.png`, ...frame, fps: walk },
     [`player.${id}.idle`]: { kind: 'sheet', url: `sprites/${id}-idle.png`, ...frame, fps: idle },
+    // Reacting to damage and the fall before the end screen (PA-03): driven frame by frame by GameScene, not looped.
+    [`player.${id}.hurt`]: {
+      kind: 'sheet',
+      url: `sprites/${id}-hurt.png`,
+      ...frame,
+      fps: HERO_HURT.frames / HERO_HURT.seconds,
+    },
+    [`player.${id}.fall`]: {
+      kind: 'sheet',
+      url: `sprites/${id}-fall.png`,
+      ...frame,
+      fps: HERO_FALL.frames / HERO_FALL.seconds,
+    },
     // The hero facing the viewer (PixelLab south view, native size), for the selection screen.
     [`player.${id}.front`]: { kind: 'image', url: `sprites/${id}-front.png` },
   };
