@@ -15,7 +15,7 @@ export interface MusicDef {
 }
 
 export const MUSIC = {
-  valmor: { url: 'audio/music/valmor.mp3', vol: 0.9, loopStart: 81.061 },
+  valmor: { url: 'audio/music/valmor.mp3', vol: 0.9, loopStart: 56.355 },
   crypt: { url: 'audio/music/crypt.mp3', vol: 0.9, loopStart: 84.079 },
   southRoad: { url: 'audio/music/southRoad.mp3', vol: 0.9, loopStart: 90.117 },
   boss: { url: 'audio/music/boss.mp3', vol: 0.9, loopStart: 73.793 },

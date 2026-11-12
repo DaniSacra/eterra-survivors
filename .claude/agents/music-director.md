@@ -12,17 +12,27 @@ browser survivors-like spin-off of Crônicas de Eterra). You own everything the 
 
 ## The sound we want
 
-**Animated, stimulating, heavy.** Think Mega Man stage themes played by a progressive metal band, with the
-drive of Vampire Survivors: fast and relentless but melodic, a tune you can hum. Per track:
+**Reference (Daniel, 2026-11-12): the energy of SNES-era Mega Man X stage themes.** He rejected the first set
+(long ambient intros of 53 to 90 s, drifting passages, "doesn't sound like anything"). Tight, punchy, melodic: a
+clear catchy main hook you can hum **in the first bar**, fast busy bass, driving drums, bright lead guitar and
+synth hooks, short sections that repeat. Never name the game or any artist in a prompt (the tool refuses artist
+names and we never clone another game's music): describe instruments, tempo and structure.
 
-- Electric guitars carry the melody: tight palm-muted riffs, harmonised leads, and **at least one real guitar
-  solo** (a proper one: phrasing, bends, a run, a climax), never just background chords.
-- A driving rhythm section: double-kick or galloping drums, a busy melodic bass, keyboards or synth leads for
-  colour (chiptune touches are welcome, a nod to the Mega Man side).
-- Progressive: odd time changes or key changes, a bridge, a build-up and a payoff. 2 to 4 minutes, built to
-  loop without a gap.
-- Instrumental only (no vocals). Never ask for an artist's name (the tool refuses it, and we never clone another
-  game's music): describe the instruments, the mood and the structure.
+- No intro beyond a few seconds, no ambient pad opening, no slow section. The hook starts at once.
+- Sections of 8 to 16 bars (at most 32) that repeat: hook, answer phrase, chorus hook, short melodic guitar solo
+  (bends and one quick run, 8 to 16 bars, over the same chords), hook back bigger. Solos are short and singable.
+- Rhythm: palm-muted eighth-note chug, a busy melodic bass, straight rock drums with double-kick fills; synth
+  sparkle or chiptune doubling the lead.
+- Instrumental only. Prompt recipe that worked as a starting point: "tight rock band, bright lead guitar plays a
+  catchy singable hook in the very first bar doubled by a synth lead, no intro", sections spelled out in
+  bars, `style_weight` 0.7, `length_s` about 110, `exclude` "vocals, fade out, long intro, ambient pad intro,
+  slow section". Ask for a short song: `make_music_loop` re-makes it longer (about 220 s, with its own
+  intro of about 55 s before `loopStart`), so a 110 s base gives a 110 s loop body, ideal for 2 to 3 min of play.
+- The help and knowledge base have no music-prompt guide; what is known: BPM and length_s go into the request,
+  a style with a role per instrument beats a tag list, restyle keeps the melody. Unverified (cannot listen): whether
+  higher BPM or explicit bar counts tighten the result; Daniel judges by ear.
+- The tools do not trim: cut the loop mp3 at `loop end` and re-encode (the repo has no ffmpeg; `npm i ffmpeg-static`
+  in the scratchpad works), 112 kbps, under 3 MB.
 - Each stage has its own colour inside that style (below), so a run through the three stages feels like a tour.
 
 ## One track per stage (and a few extras)

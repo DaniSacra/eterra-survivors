@@ -3315,7 +3315,7 @@ efeitos, o vfx-director; telas, o ui-designer. Lore só do cânone; texto novo c
   `make_music_loop`, registradas em `docs/art/credits.md`). Player em `render/music.ts` (Phaser, fusão entre faixas,
   abaixa na pausa), mapa em `render/musics.ts`, opção Música em Opções e na pausa. Feito: valmor, crypt, southRoad,
   boss (toca quando o chefe chega), menu (toca no menu). Falta: Daniel escolher a faixa A ou B de cada fase,
-  nomes das faixas (provisórios), vitória e derrota (stings), evento de fim para tocá-los.
+  nomes das faixas (provisórios). 2026-11-12: Daniel achou o primeiro conjunto ruim (ambiente demais); valmor refeita como TESTE no estilo de fase 16 bits (gancho no primeiro compasso, seções curtas), aguardando o ouvido dele antes de refazer as outras quatro. Falta também: vitória e derrota (stings), evento de fim para tocá-los.
   - Revisão 2026-11-11 (2) (03-qa, observação; `t15.mjs`): na vitória e na derrota o Fim segue com a faixa do chefe.
     Somar: ao abrir o Fim, a faixa em curso sai em fusão curta e toca o sting (3 a 5 s, mesmo timbre da fase); depois,
     silêncio ou a faixa do menu baixa. Na vigília a faixa da fase volta (já funciona). Nomes provisórios: os nomes das
