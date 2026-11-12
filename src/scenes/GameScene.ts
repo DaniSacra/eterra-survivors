@@ -54,6 +54,7 @@ import { Decals } from '../render/decals';
 import { Obstacles } from '../render/obstacles';
 import { Lighting, mixColor } from '../render/lighting';
 import { Mirror } from '../render/mirror';
+import { ensureShadowTexture, SHADOW } from '../render/shadow';
 import { ART_SCALE } from '../render/art/pen';
 import type { HudScene } from './HudScene';
 import { SCENES } from './keys';
@@ -231,6 +232,8 @@ export class GameScene extends Phaser.Scene {
   /** The hero's life bar, under their feet and over the crowd. */
   private heroBar!: Phaser.GameObjects.Graphics;
   private enemyMirror!: Mirror<Enemy, EnemyImage>;
+  /** One contact shadow per enemy image, on the ground under the crowd (CA-01). */
+  private shadowMirror!: Mirror<Enemy, Phaser.GameObjects.Image>;
   private corpsePool: Corpse[] = [];
   private projectileMirror!: Mirror<Projectile, ProjImage>;
   private damageMirror!: Mirror<DamageNumber, NumberText>;
@@ -438,6 +441,20 @@ export class GameScene extends Phaser.Scene {
           .setPosition(d.x, d.y)
           .setScale(d.strong ? this.numberScale * 1.3 : this.numberScale)
           .setAlpha(Math.min(1, d.ttl * 4));
+      },
+    );
+    ensureShadowTexture(this);
+    this.shadowMirror = new Mirror(
+      () => this.add.image(0, 0, SHADOW).setDepth(4.6).setAlpha(0.9),
+      (sh, e) => {
+        const r = e.def.radius;
+        // Flyers have their own bobbing shadow; the rest stand on the ground with theirs at the feet.
+        if (e.pile <= 0 && FLYERS[spriteOf(e)]) {
+          sh.setVisible(false);
+          return;
+        }
+        const k = (r * 2.4) / 32;
+        sh.setVisible(true).setPosition(e.x, e.y + r * 0.72).setScale(k, k * (e.def.boss ? 1.1 : 1));
       },
     );
     this.enemyMirror = new Mirror(
@@ -843,6 +860,7 @@ export class GameScene extends Phaser.Scene {
     this.addLights();
     this.gemMirror.sync(w.gems.active);
     this.pickupMirror.sync(w.pickups.active);
+    this.shadowMirror.sync(w.enemies.active);
     this.enemyMirror.sync(w.enemies.active);
     this.projectileMirror.sync(w.projectiles.active);
     this.damageMirror.sync(settings().damageNumbers ? w.damageNumbers.active : NONE);

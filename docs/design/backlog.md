@@ -3142,7 +3142,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
 
 ### C6 · Arte e luz (dono: visual-director)
 
-**CA-01 · Sombra de contato nos inimigos** · visual + impl · P · proposto
+**CA-01 · Sombra de contato nos inimigos** · visual + impl · P · ✅ feito (2026-11-11; `render/shadow.ts`, um `Mirror` de sombras em `GameScene`; elipse de pixel em três faixas, escala pelo `radius`, voadores seguem com a sombra própria; 0 gerações)
 
 - Por quê: 04-visual #9. Os heróis têm sombra, os inimigos PixelLab não: flutuam e o monte vira uma massa.
 - O quê: uma elipse escura pré-alocada por imagem do espelho (uma textura `shadow`, profundidade abaixo dos
