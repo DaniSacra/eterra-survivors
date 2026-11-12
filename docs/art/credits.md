@@ -121,3 +121,9 @@ Redirect of `valmor` (2026-11-12, Daniel liked the fast 150 BPM test but the gam
 | --- | --- | --- |
 | 2026-11-12 | Ground items and XP gems as pixel sprites in `public/sprites/items/`, trimmed and packed at 2x, shown at ART_SCALE like the chest (they replace the code-drawn keys): `food.png` (16x26 art px), `elixir.png` (18x23), `freeze.png` (20x22), `gold.png` (18x19), and the three gems `gem-small.png` (14x13), `gem-medium.png` (18x17), `gem-large.png` (20x19) in the light blue Daniel chose (the only saturated cyan on screen). The code-drawn gems, coin, food, elixir, freeze and the dead chest/magnet/bomb art were deleted from `render/art/items.ts`. 35 generations (7 x 5), one try each | PixelLab create_object_pro_flash, one direction, style anchor the magnet sprite at native size (except the 16x16 small gem, which is too small for an anchor): food a3692b79-11a5-4759-8817-214ffcddd980, elixir 800f000d-a403-4b4f-b26b-2eff0f3c22f6, freeze cf2fce81-2784-4919-8233-75a93c31012a (32x32); gold 07b49df1-75f5-40fc-aa83-6662bf20f575 (24x24); gems 3bf2ce47-7729-46ca-9b0a-8f3276e14d82 (16x16), e91f8165-9828-46a7-be02-4a237d59918c (20x20), 4f24788b-526e-4c27-865d-7db7927cfb04 (24x24) |
 | 2026-11-12 | CA-02 boss lights: no generation (code only, `BOSS_LIGHTS` and the lit bell in `GameScene.addLights`) | local code |
+
+## Crypt crowd colours (CA-03, 2026-11-12)
+
+| Data | O que | Fonte |
+| --- | --- | --- |
+| 2026-11-12 | Ossada repainted in place to a warm, dimmer bone (`enemies/bones.png`, `bones-walk.png`, `bonePile.png`): every low-saturation pixel multiplied by (0.86, 0.80, 0.67), eyes untouched. No generation | local pixel edit |

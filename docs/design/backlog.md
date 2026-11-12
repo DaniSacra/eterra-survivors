@@ -3315,7 +3315,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   ganho de leitura da multidão; o monte da Cripta flutua sobre a pedra (`m-g-crypt-330.png`). Entra no 4º dos Próximos 5
   da revisão, junto com o PA-01 e o PA-02.
 
-**CA-03 · Cripta com uma cor por criatura** · visual · M · proposto · reescrito na reavaliação 2026-11-12
+**CA-03 · Cripta com uma cor por criatura** · visual · M · proposto · reescrito na reavaliação 2026-11-12 ✅ feito (2026-11-12, só tinta, zero gerações)
 
 - Por quê: 04-visual #7 e #8. Ossada, Esqueleto e Ossada em Brasa são branco-osso e leem como uma massa
   (`m-c2-2.png`); o Espectro lilás-claro tem o maior valor da tela e chama mais atenção que o perigo real.
@@ -3330,6 +3330,7 @@ aviso desta rodada** (CF-04): coral fere ao tocar, marfim (osso pálido) invoca,
   só tinta (zero gerações): Ossada com o crânio levemente amarelado, Ossada em Brasa puxada para o âmbar de brasa
   (é a que estoura, a mais perigosa de perto); só se não bastar, regerar o Esqueleto com armadura azul-aço
   (cerca de 10 gerações). Aceite: o de cima, sem o Espectro.
+- Feito 2026-11-12: a Ossada ganhou osso cinza-amarelado (`bones.png`, `bones-walk.png`, `bonePile.png` repintados pixel a pixel: vermelho -14%, verde -20%, azul -33% só nos pixels sem cor, olhos intactos), zero gerações. O Esqueleto já era azul-aço com capa vermelha e a Ossada em Brasa já é preta com brasa laranja, então não foi preciso regerar nem mexer neles. Captura de multidão da Cripta (420x820 e 1000x680): osso-areia, aço azul, preto-laranja e o fantasma pálido se separam.
 
 **CA-02 · Sineiro em tamanho nativo, com o sino aceso; Coveiro diferente dele** · visual + impl + bal · M · proposto · reescrito na reavaliação 2026-11-12 ✅ feito (2026-11-12)
 
