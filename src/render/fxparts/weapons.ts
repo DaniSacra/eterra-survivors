@@ -765,8 +765,15 @@ export function drawGlow(g: Phaser.GameObjects.Graphics, world: World, m: Moment
       const k = 1 - w.timer / (st.cooldown * p.stats.cooldown);
       const flare = Math.max(0, 1 - k * 3);
       const c = isElo(w.id) ? 0xff9a30 : 0xffd060;
-      softPool(g, p.x, p.y, r * 0.9, r * 0.8, c, (0.22 + 0.4 * flare) * dim);
-      g.lineStyle(3, 0xfff0c0, (0.15 + 0.5 * flare) * dim);
+      // Aura de Yah is dark between its windows: no pool and no ring at all, it lights and goes out with the ring.
+      let act = 1;
+      if (def.burst) {
+        if (w.burst <= 0) continue;
+        const age = def.burst.window - w.burst;
+        act = Math.min(1, age / BURST_IN, w.burst / BURST_OUT);
+      }
+      softPool(g, p.x, p.y, r * 0.9, r * 0.8, c, (0.22 + 0.4 * flare) * dim * act);
+      g.lineStyle(3, 0xfff0c0, (0.15 + 0.5 * flare) * dim * act);
       ring(g, p.x, p.y, r);
     } else if (def.kind === 'orbit') {
       const s = weaponStats(w) as OrbitLevel;
