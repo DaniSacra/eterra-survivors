@@ -23,6 +23,8 @@ import {
   backButton,
   bindKeys,
   button,
+  diamondGap,
+  diamondSize,
   disable,
   isShort,
   keyNav,
@@ -52,6 +54,72 @@ function levelPips(scene: Phaser.Scene, x: number, y: number, level: number, max
   }
   for (let i = 0; i < max; i++)
     g.fillStyle(i < level ? UI.goldHex : UI.border, 1).fillCircle(x + 3 + i * 9, y, 3);
+}
+
+type DiamondState = 'affordable' | 'short' | 'maxed';
+
+/**
+ * The Loja counter's level row (spec: docs/design/loja-losangos.md): one diamond per level, owned filled gold, the
+ * one being bought 2 px bigger with a light outline and a green core (dim when the gold is short), the rest outlined.
+ * Information only, not a touch target. Returns false when it does not fit (the caller draws a bar). `pulse` bounces
+ * the diamond just bought (120 ms), unless calm screen is on.
+ */
+function levelDiamonds(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  width: number,
+  level: number,
+  max: number,
+  state: DiamondState,
+  pulse: boolean,
+): Phaser.GameObjects.Graphics | null {
+  const side = diamondSize(max, width);
+  if (!side) return null;
+  const gap = diamondGap(max);
+  const g = scene.add.graphics();
+  const half = side / 2;
+  const diamond = (
+    gr: Phaser.GameObjects.Graphics,
+    cx: number,
+    cy: number,
+    r: number,
+    fill: boolean,
+    color: number,
+    line?: number,
+  ) => {
+    gr.beginPath()
+      .moveTo(cx, cy - r)
+      .lineTo(cx + r, cy)
+      .lineTo(cx, cy + r)
+      .lineTo(cx - r, cy)
+      .closePath();
+    if (fill) gr.fillStyle(color, 1).fillPath();
+    if (line !== undefined) gr.lineStyle(2, line, 1).strokePath();
+  };
+  const cy = y + 10;
+  for (let i = 0; i < max; i++) {
+    const cx = x + half + i * (side + gap);
+    if (i < level) {
+      if (pulse && i === level - 1 && !settings().calm) {
+        const p = scene.add.graphics().setPosition(cx, cy);
+        diamond(p, 0, 0, half, true, UI.goldHex);
+        p.setScale(1.25);
+        scene.tweens.add({ targets: p, scaleX: 1, scaleY: 1, duration: 120 });
+        g.once('destroy', () => p.destroy());
+      } else diamond(g, cx, cy, half, true, UI.goldHex);
+    } else if (i === level && state !== 'maxed') {
+      const r = half + 1;
+      if (state === 'short') {
+        diamond(g, cx, cy - 1, r, false, 0, UI.ok);
+        diamond(g, cx, cy - 1, r - 4, true, UI.borderOff);
+      } else {
+        diamond(g, cx, cy - 1, r, false, 0, UI.textHex);
+        diamond(g, cx, cy - 1, r - 3, true, UI.ok);
+      }
+    } else diamond(g, cx, cy, half - 1, false, 0, UI.border);
+  }
+  return g;
 }
 
 /** Smallest item tile (icon over name, level pips and price), and the height under which a card is one row. */
@@ -114,9 +182,12 @@ export class ShopScene extends Phaser.Scene {
   /** Set when the end screen sent the player here: leaving the Loja then starts another run (PU-04). */
   private again: RunChoice | null = null;
 
-  init(data: { focus?: ShopId; again?: RunChoice }): void {
+  private justBought = false;
+
+  init(data: { focus?: ShopId; again?: RunChoice; bought?: boolean }): void {
     this.cart = { selected: data.focus ?? null };
     this.again = data.again ?? null;
+    this.justBought = data.bought ?? false;
   }
 
   create(): void {
@@ -481,16 +552,24 @@ export class ShopScene extends Phaser.Scene {
       }).setOrigin(0),
     );
     cy += big + 8;
-    const bar = this.add.graphics();
-    const segW = (w - pad * 2 - (max - 1) * 3) / max;
-    for (let i = 0; i < max; i++) {
-      const sx = x + pad + i * (segW + 3);
-      if (i < level) bar.fillStyle(UI.goldHex, 1).fillRect(sx, cy, segW, 7);
-      else bar.fillStyle(UI.border, 1).fillRect(sx, cy, segW, 7);
-      if (i === level) bar.lineStyle(2, UI.goldHex, 0.9).strokeRect(sx, cy, segW, 7);
+    const state: DiamondState = cost === null ? 'maxed' : missing ? 'short' : 'affordable';
+    const diamonds = levelDiamonds(this, x + pad, cy, w - pad * 2, level, max, state, this.justBought);
+    this.justBought = false;
+    if (diamonds) {
+      d.push(diamonds);
+      cy += 28;
+    } else {
+      const bar = this.add.graphics();
+      const segW = (w - pad * 2 - (max - 1) * 3) / max;
+      for (let i = 0; i < max; i++) {
+        const sx = x + pad + i * (segW + 3);
+        if (i < level) bar.fillStyle(UI.goldHex, 1).fillRect(sx, cy, segW, 7);
+        else bar.fillStyle(UI.border, 1).fillRect(sx, cy, segW, 7);
+        if (i === level) bar.lineStyle(2, UI.goldHex, 0.9).strokeRect(sx, cy, segW, 7);
+      }
+      d.push(bar);
+      cy += 16;
     }
-    d.push(bar);
-    cy += 16;
 
     // What it does, then now and next.
     if (h >= 250) {
@@ -631,7 +710,7 @@ export class ShopScene extends Phaser.Scene {
     if (!this.ready || !confirmPurchase(save, this.cart)) return;
     this.ready = false; // the restart is queued: a second press this frame still lands here
     writeSave(save);
-    this.scene.restart({ focus: this.cart.selected, again: this.again });
+    this.scene.restart({ focus: this.cart.selected, again: this.again, bought: true });
   }
 
   private back(): void {

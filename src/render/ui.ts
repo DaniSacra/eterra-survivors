@@ -210,6 +210,21 @@ export function button(
   return bg;
 }
 
+/** Gap between level diamonds by item max level (Loja). */
+export function diamondGap(max: number): number {
+  return max <= 3 ? 6 : max <= 7 ? 5 : 4;
+}
+
+/**
+ * Side of one level diamond so `max` of them fit in `width`: at most 18 px (16 from 4 levels, 14 from 8), 0 when it
+ * would be under 10 px (the caller falls back to a bar).
+ */
+export function diamondSize(max: number, width: number): number {
+  const cap = max <= 3 ? 18 : max <= 7 ? 16 : 14;
+  const side = Math.floor(Math.min(cap, (width - (max - 1) * diamondGap(max)) / max));
+  return side < 10 ? 0 : side;
+}
+
 /** The one disabled look: opaque dark panel, faded border and text, no input (keyNav skips it). */
 export function disable(bg: Phaser.GameObjects.Rectangle): Phaser.GameObjects.Rectangle {
   bg.disableInteractive().setFillStyle(UI.panelOff).setStrokeStyle(2, UI.borderOff);
