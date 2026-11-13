@@ -8,7 +8,19 @@ import type { Projectile } from '../core/projectiles';
 import type { Gem } from '../core/xp';
 import type { Pickup } from '../core/pickups';
 import { PICKUPS } from '../data/pickups';
-import { FLYERS, HERO_FALL, HERO_HURT, SPRITE_SCALE } from '../render/assets';
+import {
+  FLYERS,
+  HERO_FALL,
+  HERO_HURT,
+  SPRITE_SCALE,
+  eloVfx,
+  prepareAssets,
+  releaseAssets,
+  queueAssets,
+  requestAssets,
+  runKeys,
+} from '../render/assets';
+import { loadingBar } from '../render/loadingBar';
 import { ENEMY_ANIMS, enemyPose, inReach, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
 import { assistMight, playtest, shopBonuses, stageUnlocked } from '../core/meta';
@@ -350,7 +362,17 @@ export class GameScene extends Phaser.Scene {
     this.choice = { ...lastChoice(this.registry), ...data };
   }
 
+  /** The stage's cast, the effects and the hero's reactions load here (not at boot); a replay finds them loaded. */
+  preload(): void {
+    const keys = runKeys(this.choice.stage, this.choice.character);
+    // Another stage's cast (or the Bestiário's sheets) is not needed any more.
+    releaseAssets(this, keys);
+    if (!queueAssets(this, keys)) return;
+    loadingBar(this);
+  }
+
   create(): void {
+    prepareAssets(this, runKeys(this.choice.stage, this.choice.character));
     // The scene instance is reused by "play again": nothing may leak from the last run.
     this.controls = null;
     this.gemStreak = 0;
@@ -515,7 +537,7 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.enemyMirror = new Mirror(
-      (): EnemyImage => this.add.image(0, 0, 'enemy.skeleton').setDepth(5),
+      (): EnemyImage => this.add.image(0, 0, ENEMIES[this.world.stage.boss.id].sprite).setDepth(5),
       (img, e) => {
         const w = this.world;
         // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
@@ -1801,6 +1823,8 @@ export class GameScene extends Phaser.Scene {
           if (!this.calm) this.lighting.flash(w.player.x, w.player.y, 260, 0xffe9a8, 0.45);
           break;
         case 'eloForged':
+          // Its effect strip loads on demand: start now, during the forge moment.
+          requestAssets(this, eloVfx(e.elo));
           this.forgeMoment(e.elo);
           break;
         case 'pickup':

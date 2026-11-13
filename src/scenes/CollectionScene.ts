@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import { t } from '../i18n/pt-BR';
 import { loadSave } from '../render/save';
+import { prepareAssets, queueAssets, releaseAssets } from '../render/assets';
+import { loadingBar } from '../render/loadingBar';
+import { ENEMIES } from '../data/enemies';
+import { bestiaryOrder } from '../data/stages';
 import {
   UI,
   backButton,
@@ -50,7 +54,21 @@ export class CollectionScene extends Phaser.Scene {
     this.registry.set(TAB_KEY, this.tab);
   }
 
+  /** The Bestiário's portraits are the enemies' stills, loaded here (the sheets load as an enemy is chosen). */
+  preload(): void {
+    const stills =
+      this.tab === 'bestiary' ? bestiaryOrder(loadSave().bestiary).map((id) => ENEMIES[id].sprite) : [];
+    // The last run's cast and the sheets of enemies seen before are not needed here.
+    releaseAssets(this, stills);
+    if (queueAssets(this, stills)) loadingBar(this);
+  }
+
   create(): void {
+    if (this.tab === 'bestiary')
+      prepareAssets(
+        this,
+        bestiaryOrder(loadSave().bestiary).map((id) => ENEMIES[id].sprite),
+      );
     const { width, height } = this.scale;
     const safe = safeArea();
     const short = isShort(this);

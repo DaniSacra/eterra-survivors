@@ -134,6 +134,12 @@ https://valmor-resiste.onrender.com); `index.html` uses `%BASE_URL%` so one sour
   `fxSprites` pool, and no ground zone fills past `ZONE_FILL_MAX` (0.35). Every generation is logged in
   `docs/art/credits.md`.
 
+  **Loading (2026-11-12):** the boot loads only what every screen needs (`bootKeys` in `render/assets.ts`, ~9 MB decoded).
+  Enemy sheets, effect strips and a hero's hurt/fall load later: a run loads its stage's cast (`runKeys`, from `stageCast`
+  plus whatever the enemy defs name, found by reading them), `GameScene.preload` frees the last run's textures
+  (`releaseAssets`), the Bestiário loads stills and then the chosen enemy's strips (`Showcase.show`), and Elo-only strips
+  (`ELO_VFX`) load on forging or at first use (`fxSprites.ready`). A new asset used outside a run, or an enemy shown outside the
+  stage's cast, must be added to those lists (`tests/render/assetFiles.test.ts` checks them).
 - `src/scenes/` — Boot, Menu, Select (hero + stage), Shop, Collection, Options, Game, Hud (overlay), LevelUp,
   Pause, End. **Coleção** (`CollectionScene`) has four tabs drawn by `scenes/collection/*.ts` (Bestiário, Elos,
   Conquistas, Heróis): each tab draws in a `TabArea` and returns its focusable buttons; the scene owns the tab row,

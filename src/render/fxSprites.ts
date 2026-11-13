@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { ART_SCALE } from './art/pen';
+import { requestAssets } from './assets';
 
 /**
  * Pixel sprites that effects place each frame (a shield orbiting the hero, a mace head coming down): `drawFx` is
@@ -15,6 +16,7 @@ const MAX_GROUND = 64;
 class FxSprites {
   private images: Phaser.GameObjects.Image[] = [];
   private ground: Phaser.GameObjects.Image[] = [];
+  private scene?: Phaser.Scene;
   private used = 0;
   private usedGround = 0;
   /** Pieces refused this frame because the pool was full (shown on the F3 panel in dev builds). */
@@ -22,6 +24,7 @@ class FxSprites {
 
   /** Creates the pool in the scene (call again on every scene start). */
   init(scene: Phaser.Scene): void {
+    this.scene = scene;
     this.images = [];
     this.ground = [];
     this.used = 0;
@@ -34,6 +37,14 @@ class FxSprites {
       this.images.push(
         scene.add.image(0, 0, 'fx.shield').setDepth(11.5).setScale(ART_SCALE).setVisible(false),
       );
+  }
+
+  /** Whether strip `key` is loaded; if not (an effect loaded on demand), asks for it and skips the piece this frame. */
+  private ready(key: string): boolean {
+    const scene = this.scene;
+    if (!scene || scene.textures.exists(key)) return true;
+    requestAssets(scene, [key]);
+    return false;
   }
 
   /** Starts a frame: every image is free again. */
@@ -78,6 +89,7 @@ class FxSprites {
     rot = 0,
     decor = false,
   ): void {
+    if (!this.ready(key)) return;
     // Decoration leaves the last RESERVE slots to the pieces that show where the damage is.
     if (decor && this.used >= MAX - RESERVE) {
       this.overflow++;
@@ -111,6 +123,7 @@ class FxSprites {
     scale = 1,
     alpha = 1,
   ): void {
+    if (!this.ready(key)) return;
     const img = this.ground[this.usedGround];
     if (!img) {
       this.overflow++;

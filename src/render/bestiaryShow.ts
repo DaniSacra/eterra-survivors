@@ -6,6 +6,7 @@ import { t } from '../i18n/pt-BR';
 import { ENEMY_ANIMS, poseKey, poseMs, showPoses, type EnemyAnim, type EnemyPose } from './enemyAnims';
 import { showScale } from './showScale';
 import { UI, label } from './ui';
+import { enemyKeys, loadThen } from './assets';
 
 /** Who hovers instead of walking. */
 const FLYING = new Set<EnemyId>(['bat', 'vampireBat', 'ghost', 'coldSpirit', 'crow']);
@@ -48,9 +49,22 @@ export class Showcase {
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.clear());
   }
 
-  /** Shows `id` on its stage's ground; `seen` false shows only a dark silhouette standing still. */
+  /** Counts the calls to `show`, so an enemy that loads late never lands over a newer choice. */
+  private ticket = 0;
+
+  /**
+   * Shows `id` on its stage's ground; `seen` false shows only a dark silhouette standing still. The enemy's strips
+   * load on demand (the Bestiário does not keep every sheet in memory): the stage stays empty until they arrive.
+   */
   show(id: EnemyId, stage: StageId, seen = true, calm = false): void {
     this.clear();
+    const ticket = ++this.ticket;
+    loadThen(this.scene, enemyKeys([id]), () => {
+      if (ticket === this.ticket && this.scene.sys.isActive()) this.draw(id, stage, seen, calm);
+    });
+  }
+
+  private draw(id: EnemyId, stage: StageId, seen: boolean, calm: boolean): void {
     const s = this.scene;
     const { x, y, w, h } = this;
     const add = <T extends Phaser.GameObjects.GameObject>(o: T): T => (this.keep(o), o);

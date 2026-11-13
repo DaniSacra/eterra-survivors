@@ -6,6 +6,9 @@ import { OBSTACLE_FILES } from '../data/obstacles';
 import { ITEM_ART } from './art/items';
 import { ART_RES, ART_SCALE, Pen } from './art/pen';
 import type { ArtDef } from './art/types';
+import { ENEMIES, type EnemyId } from '../data/enemies';
+import { STAGES, stageCast, type StageId } from '../data/stages';
+import { CHARACTERS } from '../data/characters';
 
 /**
  * The single asset map. Every visual is referenced by key. Heroes, enemies, decals, obstacles, projectiles and tiles
@@ -265,32 +268,176 @@ function pixelHero(
   };
 }
 
-export function preloadAssets(scene: Phaser.Scene): void {
-  for (const [key, def] of Object.entries(ASSETS)) {
+/**
+ * What loads when. The boot loads what every screen needs; the textures that weigh most (the enemies' sheets and
+ * the effect strips, about 110 of the 128 MB the game decodes) wait until something needs them: a run loads its
+ * stage's cast, the effects and the hero's reactions (`runKeys`), the Bestiário the sheets it shows (`enemyKeys`).
+ */
+const isEnemyKey = (key: string): boolean => key.startsWith('enemy.');
+const isHeroReaction = (key: string): boolean => /^player\.[a-z]+\.(hurt|fall)$/.test(key);
+const isLazy = (key: string): boolean => isEnemyKey(key) || key.startsWith('vfx.') || isHeroReaction(key);
+
+/** The still enemies painted on the home (MenuScene `SIEGE`); the stage and story cards use the bosses' stills. */
+export const HOME_ENEMIES = [
+  'skeleton',
+  'witch',
+  'emberBones',
+  'golem',
+  'vampireBat',
+  'ghost',
+  'blackKnight',
+  'oldWolf',
+  'spiderMother',
+].map((id) => `enemy.${id}`);
+
+/** Every string inside `value`, at any depth (enemy defs name the enemies they raise and the sprites they show). */
+function collectStrings(value: unknown, out: string[]): string[] {
+  if (typeof value === 'string') out.push(value);
+  else if (value && typeof value === 'object') for (const v of Object.values(value)) collectStrings(v, out);
+  return out;
+}
+
+/** Asset keys of one enemy sprite: its still and each strip it declares. */
+function spriteKeys(sprite: string): string[] {
+  const prefix = `${sprite}.`;
+  return [sprite, ...Object.keys(ASSETS).filter((k) => k.startsWith(prefix))];
+}
+
+/**
+ * Asset keys for the enemies `ids` and everything their defs name (summons, nest and dig spawns, the pile they
+ * fall in, a dark form): found by reading the defs, so a new behaviour needs no list.
+ */
+export function enemyKeys(ids: Iterable<EnemyId>): string[] {
+  const seen = new Set<string>();
+  const sprites = new Set<string>();
+  const queue = [...ids];
+  while (queue.length > 0) {
+    const id = queue.pop() as EnemyId;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const def = ENEMIES[id];
+    sprites.add(def.sprite);
+    for (const str of collectStrings(def, [])) {
+      if (str in ENEMIES) queue.push(str as EnemyId);
+      else if (str.startsWith('enemy.') && ASSETS[str]) sprites.add(str);
+    }
+  }
+  return [...sprites].flatMap(spriteKeys);
+}
+
+/** The boss stills of the story and stage cards. */
+const bossSprites = (): string[] => Object.values(STAGES).map((s) => ENEMIES[s.boss.id].sprite);
+
+/** What the boot loads: everything but the lazy groups, plus the stills of the home and of the boss cards. */
+export function bootKeys(): string[] {
+  const stills = new Set([...HOME_ENEMIES, ...bossSprites()]);
+  return Object.keys(ASSETS).filter((k) => !isLazy(k) || stills.has(k));
+}
+
+/**
+ * Effect strips only an Elo plays (6 MB each decoded): not loaded with the run, but when the Elo forges (GameScene)
+ * or, at the latest, the first frame an effect asks for them (`fxSprites`).
+ */
+export const ELO_VFX = ['vfx.pulse', 'vfx.furySpin'];
+
+/** The on-demand strips Elo `id` plays (Chama de Yah's wave, Fúria's spin). */
+export const eloVfx = (id: string): string[] =>
+  id === 'yahFlame' ? ['vfx.pulse'] : id === 'fury' ? ['vfx.furySpin'] : [];
+
+/** What a run of `hero` in `stage` needs on top of the boot: the stage's cast, all effect strips, the hero's reactions. */
+export function runKeys(stage: StageId, hero: string): string[] {
+  const sprite = CHARACTERS[hero as keyof typeof CHARACTERS]?.sprite ?? `player.${hero}`;
+  return [
+    ...enemyKeys(stageCast(stage)),
+    ...Object.keys(ASSETS).filter((k) => k.startsWith('vfx.') && !ELO_VFX.includes(k)),
+    `${sprite}.hurt`,
+    `${sprite}.fall`,
+  ];
+}
+
+/** Queues the files of `keys` that are not loaded yet; true when there is something to load. */
+export function queueAssets(scene: Phaser.Scene, keys: Iterable<string>): boolean {
+  let any = false;
+  for (const key of keys) {
+    const def = ASSETS[key];
+    if (!def || def.kind === 'art' || scene.textures.exists(key)) continue;
     if (def.kind === 'image') scene.load.image(key, def.url);
-    else if (def.kind === 'sheet')
-      scene.load.spritesheet(key, def.url, { frameWidth: def.w, frameHeight: def.h });
+    else scene.load.spritesheet(key, def.url, { frameWidth: def.w, frameHeight: def.h });
+    any = true;
+  }
+  return any;
+}
+
+/** Loads the boot set (call in `preload`). */
+export function preloadAssets(scene: Phaser.Scene): void {
+  queueAssets(scene, bootKeys());
+}
+
+/** Pixel art stays crisp (no smoothing); strips become looping animations of the same key. */
+export function prepareAssets(scene: Phaser.Scene, keys: Iterable<string>): void {
+  for (const key of keys) {
+    const def = ASSETS[key];
+    if (!def || def.kind === 'art' || !scene.textures.exists(key)) continue;
+    scene.textures.get(key).setFilter(NEAREST);
+    if (def.kind === 'sheet' && !scene.anims.exists(key))
+      scene.anims.create({
+        key,
+        frames: scene.anims.generateFrameNumbers(key),
+        frameRate: def.fps,
+        repeat: -1,
+      });
   }
 }
 
-/** Generates the code-drawn textures. Call in `create()` after `preloadAssets`. */
+/**
+ * Loads `keys` (the ones still missing), prepares them and calls `done`; at once when nothing is missing.
+ * `onProgress` gets 0..1 while files arrive.
+ */
+export function loadThen(
+  scene: Phaser.Scene,
+  keys: string[],
+  done: () => void,
+  onProgress?: (p: number) => void,
+): void {
+  if (!queueAssets(scene, keys)) return done();
+  if (onProgress) scene.load.on('progress', onProgress);
+  scene.load.once('complete', () => {
+    if (onProgress) scene.load.off('progress', onProgress);
+    prepareAssets(scene, keys);
+    done();
+  });
+  scene.load.start();
+}
+
+/**
+ * Frees the on-demand textures (and their animations) not in `keep`, so a session that visits several stages or many
+ * Bestiário entries never holds them all at once. The boot set is never freed.
+ */
+export function releaseAssets(scene: Phaser.Scene, keep: Iterable<string> = []): void {
+  const stay = new Set([...bootKeys(), ...keep]);
+  for (const key of Object.keys(ASSETS)) {
+    if (!isLazy(key) || stay.has(key)) continue;
+    if (scene.anims.exists(key)) scene.anims.remove(key);
+    if (scene.textures.exists(key)) scene.textures.remove(key);
+  }
+}
+
+const requested = new Set<string>();
+
+/** Loads `keys` in the background while the scene runs (no bar); asking again for one on its way is harmless. */
+export function requestAssets(scene: Phaser.Scene, keys: string[]): void {
+  const fresh = keys.filter((k) => !requested.has(k) && !scene.textures.exists(k));
+  if (fresh.length === 0) return;
+  for (const k of fresh) requested.add(k);
+  loadThen(scene, fresh, () => fresh.forEach((k) => requested.delete(k)));
+}
+
+/** Generates the code-drawn textures and prepares the loaded ones. Call in `create()` after `preloadAssets`. */
 export function generateAssets(scene: Phaser.Scene): void {
+  prepareAssets(scene, Object.keys(ASSETS));
   const g = scene.make.graphics({}, false);
   for (const [key, def] of Object.entries(ASSETS)) {
-    if (def.kind !== 'art') {
-      // Pixel art stays crisp (no smoothing); strips become looping animations of the same key.
-      if (!scene.textures.exists(key)) continue;
-      scene.textures.get(key).setFilter(NEAREST);
-      if (def.kind === 'sheet' && !scene.anims.exists(key))
-        scene.anims.create({
-          key,
-          frames: scene.anims.generateFrameNumbers(key),
-          frameRate: def.fps,
-          repeat: -1,
-        });
-      continue;
-    }
-    if (scene.textures.exists(key)) continue;
+    if (def.kind !== 'art' || scene.textures.exists(key)) continue;
     // Sprites get a margin so outlines, hats and ears never get cut; images stay centred on their box.
     const pad = PAD;
     g.clear();
