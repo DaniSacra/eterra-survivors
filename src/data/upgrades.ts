@@ -22,6 +22,7 @@ export const PASSIVES = {
   armor: { stat: 'armor', perLevel: 1, maxLevel: 3 },
   amount: { stat: 'amount', perLevel: 1, maxLevel: 2 },
   growth: { stat: 'growth', perLevel: 0.08, maxLevel: 5 },
+  luck: { stat: 'crit', perLevel: 0.1, maxLevel: 5 },
 } satisfies Record<string, PassiveDef>;
 
 export type PassiveId = keyof typeof PASSIVES;

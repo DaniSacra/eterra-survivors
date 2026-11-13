@@ -449,7 +449,7 @@ function star(g: Phaser.GameObjects.Graphics, cx: number, cy: number, r: number)
 const GROUPS: { key: keyof typeof t.levelUp.groups; stats: StatKey[] }[] = [
   { key: 'survive', stats: ['maxHp', 'regen', 'armor', 'moveSpeed'] },
   { key: 'attack', stats: ['might', 'cooldown', 'area', 'amount'] },
-  { key: 'collect', stats: ['magnet', 'growth', 'greed'] },
+  { key: 'collect', stats: ['magnet', 'growth', 'greed', 'crit'] },
 ];
 
 /** Each stat shows the icon of the passive that raises it (gold has no passive: its own icon). */

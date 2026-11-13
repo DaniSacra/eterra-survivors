@@ -43,7 +43,7 @@ export const EVOLUTIONS: Partial<Record<WeaponId, Evolution>> = {
   valmorWall: { from: 'shields', passive: 'attraction', element: 'steel' },
   jointBreaker: { from: 'mace', passive: 'armor', element: 'earth' },
   fireSword: { from: 'fire', passive: 'might', element: 'fire' },
-  lyraStar: { from: 'staff', passive: 'growth', element: 'arcane' },
+  lyraStar: { from: 'staff', passive: 'luck', element: 'arcane' },
 };
 
 export const EVOLVED_IDS = Object.keys(EVOLUTIONS) as WeaponId[];

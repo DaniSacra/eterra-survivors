@@ -61,6 +61,9 @@ https://valmor-resiste.onrender.com); `index.html` uses `%BASE_URL%` so one sour
   first hit (`blast`) or crit (`crit`); slam weapons (Maça de Ferro, Quebra-Junta) land a heavy blow in front that
   stuns (bosses only `config.weapons.bossStun`; a stun running is never renewed, and it does not stop a boss's ability),
   and every `waveEvery` blows a shock wave that throws enemies back (waves hit and push, only the blow stuns).
+  The **Sorte** passive (`luck`, stat `crit`, +10% chance per level, crits do `config.critMult` x) makes any weapon's hit critical
+  (rolled once, in `damageEnemy`; weapons with their own crit, the Leque de Facas, add it to their chance and roll in
+  `core/projectiles.ts`). The Adagas have no crit of their own. Sorte is the recipe passive of Estrela de Lyra.
   Weapons never shake the screen (only hurting the hero, bombs, bosses and the forge moment do). Knockback decays
   at `config.enemies.knockbackDecay` per second, so a push travels about knockback / 10 px: a weapon that "pushes"
   needs hundreds (the shields use 600).

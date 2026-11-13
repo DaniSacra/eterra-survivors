@@ -24,6 +24,8 @@ export const config = {
   firstRunGold: 400,
   /** Help for a player stuck on a stage never won (PX-17): each defeat in a row adds damage to the next run. */
   assist: { mightPerTry: 0.08, maxTries: 3 },
+  /** Damage multiplier of a critical hit rolled by the Sorte passive (weapons with their own crit keep theirs). */
+  critMult: 2,
   view: {
     /** World pixels guaranteed along the screen's shortest side; sets the camera zoom. */
     minWorldSide: 480,
@@ -46,6 +48,7 @@ export const config = {
       amount: 0, // extra projectiles / blades / patches / bolts
       growth: 1, // xp multiplier
       greed: 1, // gold multiplier
+      crit: 0, // chance of a critical hit on every weapon (Sorte); the hit does `config.critMult` x the damage
     },
     /** Hits never do less than this, whatever the armor. */
     minDamage: 2,

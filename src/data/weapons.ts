@@ -252,10 +252,9 @@ export const WEAPONS = {
     kind: 'thrown',
     category: 'aimed',
     aim: 'facing',
-    crit: { chance: 0.2, mult: 2 },
     levels: levels<ThrownLevel>(
       {
-        damage: 17,
+        damage: 21,
         cooldown: 0.5,
         speed: 520,
         count: 1,
@@ -266,11 +265,11 @@ export const WEAPONS = {
         knockback: 25,
       },
       { count: 2 },
-      { damage: 21 },
+      { damage: 26 },
       { cooldown: 0.42 },
       { count: 3 },
-      { damage: 27 },
-      { count: 4, damage: 32, cooldown: 0.36 },
+      { damage: 34 },
+      { count: 4, damage: 40, cooldown: 0.36 },
     ),
   },
 

@@ -247,10 +247,16 @@ export function updateProjectiles(world: World, dt: number): void {
         p.dead = true;
         break;
       }
-      const crit = p.critChance > 0 && world.rng.next() < p.critChance;
-      const amount = crit ? p.damage * p.critMult : p.damage;
-      damageEnemy(world, e, amount, cos, sin, p.knockback, p.source);
-      e.hitCrit = crit;
+      // A weapon with its own crit (Leque de Facas) rolls here, with the Sorte passive added to its chance.
+      let crit = false;
+      let amount = p.damage;
+      if (p.critChance > 0) {
+        crit = world.rng.next() < p.critChance + world.player.stats.crit;
+        if (crit) amount = p.damage * p.critMult;
+      }
+      damageEnemy(world, e, amount, cos, sin, p.knockback, p.source, p.critChance > 0);
+      if (p.critChance > 0) e.hitCrit = crit;
+      else crit = e.hitCrit;
       p.hits.push(e.uid);
       const def = p.source ? (WEAPONS[p.source.id] as WeaponDef) : null;
       // Leque de Facas: a crit opens a wound that bleeds.

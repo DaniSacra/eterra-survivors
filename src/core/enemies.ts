@@ -141,7 +141,7 @@ function tickDot(world: World, e: Enemy, dt: number): void {
   e.dotTick -= dt;
   if (e.dotTick <= 0) {
     e.dotTick += config.dotTick;
-    damageEnemy(world, e, e.dotDps * config.dotTick, 0, 0, 0, e.dotBy);
+    damageEnemy(world, e, e.dotDps * config.dotTick, 0, 0, 0, e.dotBy, true);
   }
   if (e.dot <= 0) e.dotDps = 0;
 }
@@ -231,8 +231,16 @@ export function damageEnemy(
   ky = 0,
   knockback = 0,
   source: OwnedWeapon | null = null,
+  /** The caller already decided about a critical hit (weapons with their own crit; damage over time): no roll here. */
+  rolled = false,
 ): void {
   if (isUntouchable(e)) return;
+  // The Sorte passive: any weapon's hit may be critical (every weapon goes through here).
+  let crit = false;
+  if (!rolled && source && world.player.stats.crit > 0 && world.rng.next() < world.player.stats.crit) {
+    crit = true;
+    amount *= config.critMult;
+  }
   if (e.pile > 0) {
     const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
     // After that, any hit breaks it for good, and counts like the hit it is.
@@ -246,7 +254,7 @@ export function damageEnemy(
     e.dead = true;
     e.hitBy = source ? source.id : null;
     e.hitAmount = amount;
-    e.hitCrit = false;
+    e.hitCrit = crit;
     world.tally.hits++;
     world.onEnemyDamaged(e, amount, source);
     onKill(world, e, source);
@@ -261,7 +269,7 @@ export function damageEnemy(
   e.flash = config.enemies.hitFlash;
   e.hitBy = source ? source.id : null;
   e.hitAmount = amount;
-  e.hitCrit = false;
+  e.hitCrit = crit;
   const kb = knockback * (1 - e.def.knockbackResist);
   e.kbx += kx * kb;
   e.kby += ky * kb;

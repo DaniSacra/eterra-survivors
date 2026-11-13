@@ -965,6 +965,7 @@ export const t = {
     armor: 'Cada golpe que você leva dói menos.',
     amount: 'Cada arma dispara mais vezes de uma vez.',
     growth: 'Você ganha experiência mais rápido.',
+    luck: 'Chance de acerto crítico, que causa o dobro do dano.',
   } satisfies Record<PassiveId, string>,
   passives: {
     vigor: 'Vigor',
@@ -977,6 +978,7 @@ export const t = {
     armor: 'Cota de Malha',
     amount: 'Mãos Ligeiras',
     growth: 'Sabedoria',
+    luck: 'Sorte',
   } satisfies Record<PassiveId, string>,
 
   enemies: {
@@ -1022,6 +1024,7 @@ export const t = {
     amount: 'Quantidade',
     growth: 'Experiência',
     greed: 'Ouro',
+    crit: 'Crítico',
   } satisfies Record<StatKey, string>,
 
   /** Short stat names for narrow stat sheets. */
@@ -1037,6 +1040,7 @@ export const t = {
     amount: 'Quant.',
     growth: 'Exp.',
     greed: 'Ouro',
+    crit: 'Crít.',
   } satisfies Record<StatKey, string>,
 
   /** Labels for weapon level stats (level-up card diffs). Unknown keys are not shown. */

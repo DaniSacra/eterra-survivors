@@ -37,10 +37,10 @@ describe('Adagas de Andilla (thrown where she walks)', () => {
     expect(near.hp).toBe(near.maxHp);
   });
 
-  it('some knives hit critically, for double damage', () => {
+  it('never crit by themselves; with Sorte, some knives hit critically, for double damage', () => {
     const w = prepared('daggers');
     const s = WEAPONS.daggers.levels[0]!;
-    const crit = WEAPONS.daggers.crit;
+    w.player.stats.crit = 0.4;
     const e = spawnEnemy(w, 'blackKnight', 80, 0);
     e.def = { ...e.def, speed: 0, knockbackResist: 1 };
     e.hp = e.maxHp = 1e9;
@@ -55,14 +55,25 @@ describe('Adagas de Andilla (thrown where she walks)', () => {
         expect(e.hitAmount).toBeCloseTo(dealt);
         if (dealt > s.damage * 1.5) {
           crits++;
-          expect(dealt).toBeCloseTo(s.damage * crit.mult);
+          expect(dealt).toBeCloseTo(s.damage * config.critMult);
         }
         // The hit remembers it was critical, for its spark (NF-06).
         expect(e.hitCrit).toBe(dealt > s.damage * 1.5);
       }
     }
-    expect(crits / hits).toBeGreaterThan(crit.chance - 0.08);
-    expect(crits / hits).toBeLessThan(crit.chance + 0.08);
+    expect(crits / hits).toBeGreaterThan(0.4 - 0.08);
+    expect(crits / hits).toBeLessThan(0.4 + 0.08);
+  });
+
+  it('without Sorte no hit is critical (and no random number is spent)', () => {
+    const w = prepared('daggers');
+    const e = spawnEnemy(w, 'blackKnight', 80, 0);
+    e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+    e.hp = e.maxHp = 1e9;
+    for (let i = 0; i < 600; i++) {
+      w.step(1 / 60, still);
+      expect(e.hitCrit).toBe(false);
+    }
   });
 
   it('with nobody around, throws where Andilla faces', () => {
