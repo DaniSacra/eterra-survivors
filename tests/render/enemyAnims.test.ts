@@ -3,7 +3,16 @@ import { BossAct } from '../../src/core/bosses';
 import { spawnEnemy } from '../../src/core/enemies';
 import { config } from '../../src/data/config';
 import { ENEMIES } from '../../src/data/enemies';
-import { ENEMY_ANIMS, enemyPose, inReach, poseFrame, type EnemyAnim } from '../../src/render/enemyAnims';
+import {
+  ENEMY_ANIMS,
+  PILE_FALL,
+  PILE_RISE,
+  enemyPose,
+  inReach,
+  pileFrame,
+  poseFrame,
+  type EnemyAnim,
+} from '../../src/render/enemyAnims';
 import { bareWorld } from '../core/helpers';
 
 const ANIM = ENEMY_ANIMS['enemy.blackKnight'] as EnemyAnim;
@@ -145,5 +154,32 @@ describe('Lobo Velho animation', () => {
     wolf.act = BossAct.Windup;
     wolf.actT = 0.6;
     expect(enemyPose(wolf, wolfAnim).pose).toBe('howl');
+  });
+});
+
+describe('the bone pile and the bursting bones', () => {
+  const bones = ENEMY_ANIMS['enemy.bones'] as EnemyAnim;
+  const delay = (ENEMIES.bones.reassemble as { delay: number }).delay;
+
+  it('falls apart, lies, and ends upright exactly as the core stands the pile up', () => {
+    const n = bones.frames.rise as number;
+    expect(pileFrame(bones, delay, delay)).toBe(n - 1);
+    expect(pileFrame(bones, delay - PILE_FALL + 0.01, delay)).toBe(0);
+    expect(pileFrame(bones, delay / 2, delay)).toBe(0);
+    expect(pileFrame(bones, PILE_RISE - 0.01, delay)).toBe(0);
+    expect(pileFrame(bones, 0.01, delay)).toBe(n - 1);
+    expect(PILE_FALL + PILE_RISE).toBeLessThan(delay);
+  });
+
+  it('has no pile frame for an enemy without a rise strip', () => {
+    expect(pileFrame(ENEMY_ANIMS['enemy.skeleton'] as EnemyAnim, 1, 3)).toBe(-1);
+  });
+
+  it('lands the blast frame of the Ossada em Brasa when the core bursts it', () => {
+    const a = ENEMY_ANIMS['enemy.emberBones'] as EnemyAnim;
+    const burst = (ENEMIES.emberBones.burst as { delay: number }).delay;
+    // Frame n-2 is the first blast frame: it must start within a tenth of a second of the core's blast.
+    const start = ((a.frames.death as number) - 2) / a.fps.death;
+    expect(Math.abs(start - burst)).toBeLessThan(0.1);
   });
 });

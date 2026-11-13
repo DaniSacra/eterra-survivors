@@ -8,9 +8,10 @@ import { ENEMIES, type EnemyId } from '../data/enemies';
  * What a pixel enemy is doing, for the frames it shows (death is played apart, by the corpse the render leaves).
  * `attack` is the bite or swing of an enemy that has reached the hero (a loop while it stays in reach); `strike` is
  * the blow of a special act (a boss's ability, a leap landing, a throw); `howl` is a boss's frost call (head back,
- * the whole windup of that ability).
+ * the whole windup of that ability); `rise` is a pile of bones standing up (its frame 0 is the pile: the strip plays
+ * forward as it stands and backwards as it falls apart, see `pileFrame`).
  */
-export type EnemyPose = 'walk' | 'windup' | 'strike' | 'death' | 'attack' | 'howl';
+export type EnemyPose = 'walk' | 'windup' | 'strike' | 'death' | 'attack' | 'howl' | 'rise';
 
 /** Frames per pose and speed, for an enemy whose sheets are `<sprite>.<pose>` (PixelLab, one strip per pose). */
 export interface EnemyAnim {
@@ -25,6 +26,10 @@ export interface EnemyAnim {
   bob: number;
   /** Peak height in art px of a lunge's arc (a pounce leaves the ground), 0 or left out: it slides along it. */
   arc?: number;
+  /** True when the death strip is the whole send-off (no dust cloud under it): ghosts and the bursting bones. */
+  solo?: boolean;
+  /** Ms its last death frame stays before fading (default `CORPSE_HOLD` in GameScene); a blast leaves at once. */
+  linger?: number;
 }
 
 /**
@@ -48,9 +53,22 @@ const anim = (
     ...(frames[3] ? { death: frames[3] } : {}),
     ...(frames[4] ? { attack: frames[4] } : {}),
   },
-  fps: { walk: walkFps, windup: 8, strike: 12, death: 8, attack: attackFps, howl: 8 },
+  fps: { walk: walkFps, windup: 8, strike: 12, death: 8, attack: attackFps, howl: 8, rise: 9 },
   bob,
 });
+
+/** Adds poses to an anim (a strip the `anim` tuple has no slot for). */
+function withFrames(a: EnemyAnim, extra: Partial<Record<EnemyPose, number>>): EnemyAnim {
+  return { ...a, frames: { ...a.frames, ...extra } };
+}
+
+/** An anim with its own death speed (and extras). */
+function slowDeath(a: EnemyAnim, death: number, extra: Partial<EnemyAnim>): EnemyAnim {
+  return { ...a, fps: { ...a.fps, death }, ...extra };
+}
+
+/** Frames per second of the Ossada em Brasa's blast strip: 9 frames, the blast at 1 s = `ENEMIES.emberBones.burst.delay`. */
+export const BURST_FPS = 7;
 
 /** Enemies with state animations, by sprite key (bosses and elites first; the crowd follows). */
 export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
@@ -82,13 +100,16 @@ export const ENEMY_ANIMS: Record<string, EnemyAnim> = {
   'enemy.frostBoar': anim(72, 56, [5, 6, 1, 0, 6], 10, 1),
   'enemy.warBanner': anim(48, 80, [6], 5),
   // Cripta crowd (older art, kept at its own scale in SPRITE_SCALE): the walk added in 2026-11.
-  'enemy.bones': anim(44, 61, [5, 0, 0, 0, 6], 8, 1),
-  'enemy.skeleton': anim(68, 76, [6, 0, 0, 0, 6], 8, 1),
-  'enemy.emberBones': anim(35, 63, [6, 0, 0, 0, 6], 9, 1),
-  'enemy.ghost': anim(40, 44, [5, 0, 0, 8, 6], 6),
-  'enemy.ghostDark': anim(40, 44, [5, 0, 0, 0, 6], 10),
-  'enemy.coldSpirit': anim(50, 59, [5, 4, 6, 0, 6], 6),
-  'enemy.slime': anim(56, 48, [5, 0, 0, 0, 6], 6, 2),
+  // Ossada: `rise` is the pile standing up again (the core's `reassemble`), see `pileFrame`.
+  'enemy.bones': withFrames(anim(44, 61, [5, 0, 0, 0, 6], 8, 1), { rise: 9 }),
+  'enemy.skeleton': anim(68, 76, [6, 0, 0, 8, 6], 8, 1),
+  // Ossada em Brasa: its death strip is the swelling and the blast, 9 frames at 7 fps so the blast frame lands as the
+  // core's `burst.delay` (1 s) runs out.
+  'enemy.emberBones': slowDeath(anim(64, 64, [6, 0, 0, 9, 6], 9, 1), BURST_FPS, { solo: true, linger: 120 }),
+  'enemy.ghost': { ...anim(40, 44, [5, 0, 0, 8, 6], 6), solo: true },
+  'enemy.ghostDark': { ...anim(40, 44, [5, 0, 0, 8, 6], 10), solo: true },
+  'enemy.coldSpirit': anim(50, 59, [5, 4, 6, 6, 6], 6),
+  'enemy.slime': anim(56, 48, [5, 0, 0, 8, 6], 6, 2),
   'enemy.vampireBat': anim(40, 40, [4, 0, 0, 0, 4], 10, 0, 10),
 };
 
@@ -106,7 +127,7 @@ export const poseKey = (sprite: string, pose: EnemyPose): string => `${sprite}.$
 
 /** The poses an enemy has strips for: its walk, plus the others only when it declares them. */
 export function declaredPoses(a: EnemyAnim): EnemyPose[] {
-  return (['walk', 'attack', 'windup', 'strike', 'howl', 'death'] as const).filter(
+  return (['walk', 'attack', 'windup', 'strike', 'howl', 'rise', 'death'] as const).filter(
     (p) => a.frames[p] !== undefined,
   );
 }
@@ -169,6 +190,23 @@ export function poseFrame(a: EnemyAnim, pose: EnemyPose, k: number, seconds: num
   if (k >= 0) return Math.min(n - 1, Math.floor(k * n));
   const f = Math.floor(seconds * a.fps[pose]);
   return pose === 'walk' || pose === 'attack' ? f % n : Math.min(n - 1, f);
+}
+
+/** Seconds of the pile's last stretch in which it stands up, and of its first in which it falls apart. */
+export const PILE_RISE = 1;
+export const PILE_FALL = 0.5;
+
+/**
+ * The frame of a bone pile's `rise` strip: it falls apart (the strip backwards) in the first `PILE_FALL` s after the
+ * death, lies as frame 0, and stands up (forwards) in the last `PILE_RISE` s, ending upright as the core stands it
+ * (`pile` runs from `delay` down to 0). -1 when the enemy has no `rise` strip.
+ */
+export function pileFrame(a: EnemyAnim, pile: number, delay: number): number {
+  const n = a.frames.rise;
+  if (!n) return -1;
+  if (pile > delay - PILE_FALL) return Math.max(0, n - 1 - Math.floor(((delay - pile) / PILE_FALL) * n));
+  if (pile < PILE_RISE) return Math.min(n - 1, Math.floor((1 - pile / PILE_RISE) * n));
+  return 0;
 }
 
 /** Longest a pose stays up before the next one (ms): loops play a couple of seconds, the others play once and hold. */

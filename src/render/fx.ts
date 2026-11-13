@@ -5,6 +5,7 @@ import { bladeRadius, isElo, orbitAngle, weaponStats } from '../core/weapons';
 import { config } from '../data/config';
 import { ELEMENT_COLOR, UI } from './ui';
 import { fxSprites } from './fxSprites';
+import { ENEMY_ANIMS } from './enemyAnims';
 import { VFX, vfxKey } from './vfx';
 import { star } from './sparks';
 import { band, disc, ovalRing, ring } from './shapes';
@@ -305,7 +306,7 @@ export function drawFx(
       if (r < ELITE_PUFF) {
         // The common death: a pixel dust cloud with a few gold stars (PF-05). Decoration, so it gives way first
         // when the sprite pool is full, and at most DUST_SHOWN a frame in a mass death.
-        if (dust < DUST_SHOWN) {
+        if (dust < DUST_SHOWN && !ENEMY_ANIMS[f.sprite]?.solo) {
           dust++;
           const d = VFX.dust;
           fxSprites.putFrame(

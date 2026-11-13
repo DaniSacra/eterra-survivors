@@ -223,3 +223,16 @@ Spend: 10 (`create_image_pro` 192x128, 1 candidate, style image: Lobo da Geada a
 | `public/sprites/fx/iceShard.png` (falls on the Uivo da Geada marks) | job e41f3163, 2x |
 
 Frames 2x without smoothing, joined into strips by a script.
+
+## 2026-11-12: missing enemy animations (rise, blast, deaths)
+
+Spend: 18 generations (8 `animate_image` at 1 each, 2 `edit_image_pro_flash` keyframes at 5 each). Keyframes and stills were uploaded at 1x; strips are 2x without smoothing, joined by a script.
+
+| Strip (`public/sprites/enemies/`) | Source |
+| --- | --- |
+| `bones-rise` (9 frames: the Ossada pile standing up; played forwards in the last 1 s of `reassemble.delay`, backwards for the first 0.5 s as it falls apart; frame 0 is the pile) | `animate_image` 44x61, first frame the bone pile padded onto the standing frame, last frame the standing Ossada, job 96564dea |
+| `emberBones-death` (9 frames at 7 fps: swells, glows white-hot, cracks, blast; the blast frame lands at `burst.delay` = 1 s). The Ossada em Brasa still, walk and attack were padded to 64x64 art px to hold the blast | keyframe `edit_image_pro_flash` 64x64 "exploded" (job a19814a7) as last frame; `animate_image` job f1eda3d3 (first try 9224b3de swelled but never blasted, not used) |
+| `ghostDark-death` (8 frames: 3 shriek frames from job 89fa8990, then a dithered dissolve into wisps drawn by script) | `animate_image` 89fa8990 (did not dissolve); `edit_image_pro_flash` wisps keyframe 6037449a; `animate_image` with it as last frame (70bae22f) only held the ghost and popped it on the last frame, so the dissolve was made by script |
+| `skeleton-death` (8 frames, falls forward and collapses) | `animate_image` 14d762ee |
+| `slime-death` (8 frames, splats into a puddle) | `animate_image` fe5fea31 |
+| `coldSpirit-death` (6 frames, dithered dissolve into ice specks) | `animate_image` 1fb3d769 gave no change, so the dissolve was drawn by script from the still (no extra generation) |

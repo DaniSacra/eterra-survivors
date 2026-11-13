@@ -21,7 +21,7 @@ import {
   runKeys,
 } from '../render/assets';
 import { loadingBar } from '../render/loadingBar';
-import { ENEMY_ANIMS, enemyPose, inReach, poseFrame, poseKey } from '../render/enemyAnims';
+import { ENEMY_ANIMS, enemyPose, inReach, pileFrame, poseFrame, poseKey } from '../render/enemyAnims';
 import { describeUpgrade } from '../render/describe';
 import { assistMight, playtest, shopBonuses, stageUnlocked } from '../core/meta';
 import { formatTime } from '../core/format';
@@ -542,19 +542,27 @@ export class GameScene extends Phaser.Scene {
         const w = this.world;
         // A pixel enemy with state animations shows the strip of what it is doing; the rest keep one still.
         const spr = spriteOf(e);
+        // A pile of bones with a `rise` strip plays it (falling apart, lying, standing up); any other pile is a still.
+        const pileAnim = e.pile > 0 ? ENEMY_ANIMS[spr] : undefined;
+        const pileFr = pileAnim
+          ? pileFrame(pileAnim, e.pile, (e.def.reassemble as { delay: number }).delay)
+          : -1;
         const anim = e.pile > 0 ? undefined : ENEMY_ANIMS[spr];
         const posed = anim ? enemyPose(e, anim, inReach(e, w.player.x, w.player.y)) : null;
         const key =
           anim && posed
             ? poseKey(spr, posed.pose)
             : e.pile > 0
-              ? (e.def.reassemble as { sprite: string }).sprite
+              ? pileFr >= 0
+                ? poseKey(spr, 'rise')
+                : (e.def.reassemble as { sprite: string }).sprite
               : spr;
         if (img.texture.key !== key) {
           img.setTexture(key);
           // Bosses over their escort and elites over the crowd, so they always show whole.
           img.setDepth(e.def.boss ? 7 : e.def.elite ? 6 : 5);
         }
+        if (pileFr >= 0) img.setFrame(pileFr);
         // Seconds in the pose (each enemy out of phase): the strip frame and the step's hop both follow it.
         let poseSec = 0;
         if (anim && posed) {
@@ -610,8 +618,13 @@ export class GameScene extends Phaser.Scene {
               ? Math.sin(Math.PI * Math.min(1, Math.max(0, 1 - e.actT / dash.dash))) * anim.arc
               : 0;
         // A pile about to stand up trembles; the one that just stood straightens up with a vertical stretch.
-        const shake = e.pile > 0 && e.pile < PILE_SHAKE ? Math.sin(w.time * 60 + e.uid) * 1.5 : 0;
-        const rise = img.uid === e.uid && img.rose !== undefined ? 1 - (w.time - img.rose) / RISE_SQUASH : 0;
+        // (a pile with its own `rise` strip stands up in frames instead).
+        const shake =
+          e.pile > 0 && e.pile < PILE_SHAKE && pileFr < 0 ? Math.sin(w.time * 60 + e.uid) * 1.5 : 0;
+        const rise =
+          img.uid === e.uid && img.rose !== undefined && !ENEMY_ANIMS[spr]?.frames.rise
+            ? 1 - (w.time - img.rose) / RISE_SQUASH
+            : 0;
         if (rise > 0) {
           sx -= 0.18 * rise;
           sy += 0.3 * rise;
@@ -1175,7 +1188,7 @@ export class GameScene extends Phaser.Scene {
       const a = ENEMY_ANIMS[c.sprite] as (typeof ENEMY_ANIMS)[string];
       const t = (now - c.t0) / 1000;
       c.img.setFrame(poseFrame(a, 'death', -1, t));
-      const over = now - c.t0 - ((a.frames.death ?? 1) / a.fps.death) * 1000 - CORPSE_HOLD;
+      const over = now - c.t0 - ((a.frames.death ?? 1) / a.fps.death) * 1000 - (a.linger ?? CORPSE_HOLD);
       if (over > 0) c.img.setAlpha(Math.max(0, 1 - over / CORPSE_FADE));
       if (over > CORPSE_FADE) c.img.setVisible(false);
     }

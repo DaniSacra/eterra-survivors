@@ -261,6 +261,7 @@ export const t = {
       windup: 'Preparando',
       strike: 'Golpe',
       howl: 'Uivo',
+      rise: 'Levantando',
       death: 'Morrendo',
     },
     /** Kills on a card ("x1.234"). */

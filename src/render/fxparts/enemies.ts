@@ -9,6 +9,7 @@ import { ENEMIES, type EnemyDef, type EnemyId } from '../../data/enemies';
 import type { EnemyShot } from '../../core/enemyShots';
 import { star } from '../sparks';
 import { fxSprites } from '../fxSprites';
+import { ENEMY_ANIMS } from '../enemyAnims';
 import { VFX, vfxKey } from '../vfx';
 import { arcLine, band, disc, oval, ovalRing, ring } from '../shapes';
 import { CLEAVE_STYLE, drawSwing } from './weapons';
@@ -246,7 +247,7 @@ export function drawBursts(
     if (age < 0.3) {
       const k = age / 0.3;
       const hot = Math.min(1, age / 0.08);
-      top.fillStyle(0xfff4d0, 0.8 * (1 - k) * (1 - k));
+      top.fillStyle(0xfff4d0, 0.35 * (1 - k) * (1 - k));
       disc(top, b.x, b.y, b.r * hot);
       top.lineStyle(3 * (1 - k) + 1, 0xffffff, 0.9 * (1 - k));
       ring(top, b.x, b.y, b.r * hot);
@@ -276,6 +277,9 @@ export const PILES_SHOWN = 24;
 
 export const PILE_EMBER = 0xffa040;
 
+/** How far under the enemy's centre a pile with a `rise` strip lies (its feet), in px. */
+const PILE_FEET = 14;
+
 /**
  * The clock of a pile (CF-01): a thin bone ring around it closing in `reassemble.delay` s, turning to ember for the
  * last second while its eyes light up. Never coral: standing up hurts no one.
@@ -284,14 +288,18 @@ export function drawPileClock(g: Phaser.GameObjects.Graphics, e: Enemy, t: numbe
   const re = e.def.reassemble as NonNullable<EnemyDef['reassemble']>;
   const left = e.pile / re.delay; // 1 -> 0
   const last = e.pile < 1;
-  const shake = e.pile < PILE_SHAKE ? Math.sin(t * 60 + e.uid) * 1.5 : 0;
+  // A pile with its own `rise` strip needs no tremble nor ember eyes: the strip stands it up.
+  const strip = !!ENEMY_ANIMS[e.def.sprite]?.frames.rise;
+  const shake = !strip && e.pile < PILE_SHAKE ? Math.sin(t * 60 + e.uid) * 1.5 : 0;
   const x = e.x + shake;
+  // The strip's pile lies at the feet of the standing frame.
+  const y = e.y + (strip ? PILE_FEET : 0);
   const r = e.def.radius + 15;
   g.lineStyle(6, INK, 0.85);
-  ring(g, x, e.y, r);
+  ring(g, x, y, r);
   g.lineStyle(3.5, last ? PILE_EMBER : SUMMON_EDGE, 1);
-  arcLine(g, x, e.y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left);
-  if (last) {
+  arcLine(g, x, y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left);
+  if (last && !strip) {
     const glow = 0.5 + 0.5 * Math.sin(t * 24 + e.uid);
     g.fillStyle(PILE_EMBER, 0.55 + 0.4 * glow);
     disc(g, x - 3, e.y - 3, 1.8);
