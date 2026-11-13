@@ -55,6 +55,10 @@ export interface OwnedWeapon {
   /** Aura de Yah: seconds left of the active window (0 = off) and until its next tick. */
   burst: number;
   burstTick: number;
+  /** A streaming volley (Fogos-Fátuos): shots still to leave, seconds until the next one, and the line they follow. */
+  queue: number;
+  queueTimer: number;
+  queueAim: number;
   /** When the current level (or Elo) started, and `damage` at that moment: the damage per second at this level. */
   levelAt: number;
   levelDamage: number;
@@ -128,6 +132,7 @@ export function updateWeapons(world: World, dt: number): void {
       if ((WEAPONS[w.id] as WeaponDef).burst) runBurst(world, w, dt);
       else w.burst = 0;
     }
+    if (w.queue > 0) runStream(world, w, dt);
     w.timer -= world.haste > 0 ? dt / config.pickups.elixirCooldown : dt;
     if (w.timer > 0) continue;
     const s = weaponStats(w);
@@ -430,26 +435,52 @@ function fireThrown(world: World, s: ThrownLevel, w: OwnedWeapon): boolean {
   // ahead (an even count centred on the facing would leave a blind spot right in front).
   const ring = count * s.spread >= TAU - 1e-6;
   const def = WEAPONS[w.id] as WeaponDef;
-  const crit = def.kind === 'thrown' ? def.crit : undefined;
-  const blast = (s.blast ?? 0) * p.stats.area;
+  // A streaming volley (Fogos-Fátuos) leaves one shot at a time along one line: the first goes now.
+  if (def.kind === 'thrown' && def.stream) {
+    w.queue = count;
+    w.queueTimer = 0;
+    w.queueAim = facing;
+    runStream(world, w, 0);
+    return true;
+  }
   for (let i = 0; i < count; i++) {
     const offset = ring ? (i * TAU) / count : (i - (count - 1) / 2) * s.spread;
-    const shot = launch(world, w, facing + offset);
-    shot.speed = s.speed;
-    shot.damage = dmg(world, s.damage);
-    shot.knockback = s.knockback;
-    shot.radius = s.radius * p.stats.area;
-    shot.pierce = s.pierce;
-    shot.ttl = s.lifetime;
-    shot.blast = blast;
-    shot.bounces = def.kind === 'thrown' ? (def.ricochet?.count ?? 0) : 0;
-    if (def.boomerang) shot.back = s.lifetime / 2;
-    if (crit) {
-      shot.critChance = crit.chance;
-      shot.critMult = crit.mult;
-    }
+    shoot(world, w, s, facing + offset);
   }
   return true;
+}
+
+/** One thrown shot at `angle`, with the weapon's level stats. */
+function shoot(world: World, w: OwnedWeapon, s: ThrownLevel, angle: number): void {
+  const p = world.player;
+  const def = WEAPONS[w.id] as WeaponDef;
+  const shot = launch(world, w, angle);
+  shot.speed = s.speed;
+  shot.damage = dmg(world, s.damage);
+  shot.knockback = s.knockback;
+  shot.radius = s.radius * p.stats.area;
+  shot.pierce = s.pierce;
+  shot.ttl = s.lifetime;
+  shot.blast = (s.blast ?? 0) * p.stats.area;
+  shot.bounces = def.kind === 'thrown' ? (def.ricochet?.count ?? 0) : 0;
+  if (def.boomerang) shot.back = s.lifetime / 2;
+  const crit = def.kind === 'thrown' ? def.crit : undefined;
+  if (crit) {
+    shot.critChance = crit.chance;
+    shot.critMult = crit.mult;
+  }
+}
+
+/** The shots of a streaming volley still waiting: one leaves every `stream.gap` seconds, all on the same line. */
+function runStream(world: World, w: OwnedWeapon, dt: number): void {
+  const gap =
+    ((WEAPONS[w.id] as WeaponDef).kind === 'thrown' && (WEAPONS[w.id] as WeaponDef).stream?.gap) || 0.07;
+  w.queueTimer -= dt;
+  while (w.queue > 0 && w.queueTimer <= 1e-9) {
+    shoot(world, w, weaponStats(w) as ThrownLevel, w.queueAim);
+    w.queue--;
+    w.queueTimer += gap;
+  }
 }
 
 /**

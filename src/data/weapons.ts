@@ -150,6 +150,8 @@ export type WeaponDef = {
      * `ticks` times, evenly spread (each tick is the level's `damage` / `ticks`, so a cycle deals `damage` in all).
      */
     burst?: { window: number; ticks: number };
+    /** Thrown: the volley leaves one shot at a time, `gap` seconds apart, all along the same line (a machine gun). */
+    stream?: { gap: number };
     /** Chama de Yah: every `every`-th pulse is a wave out to x`radius`, x`damage`, pushing everything away. */
     pulse?: { every: number; damage: number; radius: number; knockback: number };
     /**
@@ -364,11 +366,12 @@ export const WEAPONS = {
       { damage: 79, radius: 11 },
     ),
   },
-  /** Fogos-Fátuos: a few green flames shot at once at the nearest enemy on screen, like knives that aim themselves. */
+  /** Fogos-Fátuos: a stream of green flames, one right after the other along the same line at the nearest enemy on screen (a machine gun: good against one target). */
   wisps: {
     kind: 'thrown',
     category: 'auto',
     aim: 'nearest',
+    stream: { gap: 0.07 },
     levels: levels<ThrownLevel>(
       {
         damage: 12.5,
@@ -378,7 +381,7 @@ export const WEAPONS = {
         pierce: 0,
         lifetime: 1.3,
         radius: 6,
-        spread: 0.2,
+        spread: 0,
         knockback: 10,
       },
       { count: 3 },

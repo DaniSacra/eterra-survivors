@@ -891,7 +891,7 @@ export const t = {
       name: 'Martelo do Gaspar',
       desc: 'Martelo pesado que atravessa e empurra longe.',
     },
-    wisps: { name: 'Fogos-Fátuos', desc: 'Luzes que perseguem os inimigos por muito tempo.' },
+    wisps: { name: 'Fogos-Fátuos', desc: 'Chamas verdes em rajada, uma atrás da outra, na mesma direção.' },
     shields: {
       name: 'Escudos de Valmor',
       desc: 'Escudo que voa em curva e volta, acertando tudo.',

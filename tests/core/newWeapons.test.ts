@@ -247,3 +247,20 @@ describe('Escudos de Valmor (a thrown loop)', () => {
     expect(new Set(aims).size).toBe(8);
   });
 });
+
+describe('Fogos-Fátuos (a stream, like a machine gun)', () => {
+  it('shoots one flame at a time along one line at the nearest enemy', () => {
+    const w = prepared('wisps');
+    w.weapons[0]!.level = 5; // four flames
+    const e = spawnEnemy(w, 'blackKnight', 200, 80);
+    e.def = { ...e.def, speed: 0, knockbackResist: 1 };
+    updateWeapons(w, 1 / 60);
+    expect(w.projectiles.active).toHaveLength(1);
+    const gap = WEAPONS.wisps.stream.gap;
+    for (let t = 0; t < gap * 4; t += 1 / 60) updateWeapons(w, 1 / 60);
+    expect(w.projectiles.active).toHaveLength(4);
+    const angles = w.projectiles.active.map((p) => p.angle);
+    for (const a of angles) expect(a).toBeCloseTo(angles[0]!);
+    expect(angles[0]).toBeCloseTo(Math.atan2(80, 200));
+  });
+});
