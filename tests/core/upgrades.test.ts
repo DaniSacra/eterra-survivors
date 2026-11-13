@@ -213,11 +213,11 @@ describe('passive limit', () => {
 
   it('statPreview: a passive shows its stat from now to after the pick', () => {
     const w = quietWorld();
-    applyUpgrade(w, { kind: 'passive', id: 'reach', level: 1 });
-    const p = statPreview(w, { kind: 'passive', id: 'reach', level: 2 });
-    expect(p?.stat).toBe('area');
-    expect(p?.from).toBeCloseTo(w.player.stats.area);
-    expect(p?.to).toBeCloseTo(w.player.stats.area + PASSIVES.reach.perLevel);
+    applyUpgrade(w, { kind: 'passive', id: 'haste', level: 1 });
+    const p = statPreview(w, { kind: 'passive', id: 'haste', level: 2 });
+    expect(p?.stat).toBe('cooldown');
+    expect(p?.from).toBeCloseTo(w.player.stats.cooldown);
+    expect(p?.to).toBeCloseTo(w.player.stats.cooldown + PASSIVES.haste.perLevel);
     expect(statPreview(w, { kind: 'weapon', id: 'frost', level: 1 })).toBeNull();
     expect(statPreview(w, { kind: 'heal' })).toBeNull();
   });

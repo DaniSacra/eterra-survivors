@@ -16,7 +16,6 @@ export const PASSIVES = {
   swiftness: { stat: 'moveSpeed', perLevel: 15, maxLevel: 5 },
   might: { stat: 'might', perLevel: 0.1, maxLevel: 5 },
   haste: { stat: 'cooldown', perLevel: -0.08, maxLevel: 5 },
-  reach: { stat: 'area', perLevel: 0.1, maxLevel: 5 },
   attraction: { stat: 'magnet', perLevel: 30, maxLevel: 5 },
   recovery: { stat: 'regen', perLevel: 0.3, maxLevel: 5 },
   armor: { stat: 'armor', perLevel: 1, maxLevel: 3 },

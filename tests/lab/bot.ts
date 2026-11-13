@@ -16,7 +16,7 @@ import { maxLevel, weaponStats } from '../../src/core/weapons';
  * bosses and elites count more), drifts sideways around the threat, collects gems and items, and every so often
  * steps toward the nearest enemy on the frame a facing weapon (slash, thrown) fires, so it gets to aim.
  */
-const PASSIVE_PRIORITY: PassiveId[] = ['might', 'haste', 'luck', 'amount', 'reach', 'vigor', 'armor'];
+const PASSIVE_PRIORITY: PassiveId[] = ['might', 'haste', 'luck', 'amount', 'vigor', 'armor'];
 const THREAT_RANGE = 200;
 const DT = 1 / 20;
 

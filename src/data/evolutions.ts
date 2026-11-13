@@ -36,7 +36,7 @@ export const EVOLUTIONS: Partial<Record<WeaponId, Evolution>> = {
   yahFlame: { from: 'yahAura', passive: 'vigor', element: 'holy' },
   fan: { from: 'daggers', passive: 'amount', element: 'shadow' },
   vigil: { from: 'paladinSwords', passive: 'armor', element: 'holy' },
-  blizzard: { from: 'frost', passive: 'reach', element: 'ice' },
+  blizzard: { from: 'frost', passive: 'haste', element: 'ice' },
   storm: { from: 'lightning', passive: 'haste', element: 'storm' },
   forgeFury: { from: 'hammer', passive: 'swiftness', element: 'forge' },
   soulProcession: { from: 'wisps', passive: 'growth', element: 'soul' },

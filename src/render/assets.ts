@@ -57,19 +57,7 @@ const PIXEL_ICONS = [
     'storm',
   ],
   ...['forgeFury', 'soulProcession', 'valmorWall', 'jointBreaker', 'fireSword', 'lyraStar', 'vigor'],
-  ...[
-    'swiftness',
-    'might',
-    'haste',
-    'reach',
-    'attraction',
-    'recovery',
-    'armor',
-    'amount',
-    'growth',
-    'luck',
-    'greed',
-  ],
+  ...['swiftness', 'might', 'haste', 'attraction', 'recovery', 'armor', 'amount', 'growth', 'luck', 'greed'],
   ...['reroll', 'skip', 'revive', 'anvil'],
 ];
 

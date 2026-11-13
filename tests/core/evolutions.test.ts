@@ -99,16 +99,16 @@ describe('level-up offers', () => {
     w.weapons[0]!.level = 2;
     expect(movesRecipe(w, { kind: 'weapon', id: 'blade', level: 3 })).toBe(true);
     expect(movesRecipe(w, { kind: 'passive', id: 'might', level: 1 })).toBe(true);
-    expect(movesRecipe(w, { kind: 'passive', id: 'reach', level: 1 })).toBe(false);
+    expect(movesRecipe(w, { kind: 'passive', id: 'swiftness', level: 1 })).toBe(false);
     expect(movesRecipe(w, { kind: 'weapon', id: 'frost', level: 1 })).toBe(false);
     let might = 0;
-    let reach = 0;
+    let other = 0;
     for (let i = 0; i < 2000; i++)
       for (const o of rollUpgrades(w)) {
         if (o.kind === 'passive' && o.id === 'might') might++;
-        if (o.kind === 'passive' && o.id === 'reach') reach++;
+        if (o.kind === 'passive' && o.id === 'swiftness') other++;
       }
-    expect(might / reach).toBeGreaterThan(1.8);
+    expect(might / other).toBeGreaterThan(1.8);
   });
 });
 
@@ -222,9 +222,9 @@ describe('Elo status (pause screen)', () => {
       kind: 'missing',
       weapon: 0,
       weaponMax: maxLevel('frost'),
-      passive: 'reach',
+      passive: 'haste',
       passiveLevel: 0,
-      passiveMax: PASSIVES.reach.maxLevel,
+      passiveMax: PASSIVES.haste.maxLevel,
     });
   });
 });
